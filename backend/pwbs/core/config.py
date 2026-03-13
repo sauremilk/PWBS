@@ -31,38 +31,39 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    #  General 
+    #  General
     environment: Literal["development", "staging", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     cors_origins: list[str] = ["http://localhost:3000"]
+    trusted_hosts: list[str] = ["*"]  # restrict in production via env
 
-    #  PostgreSQL 
+    #  PostgreSQL
     database_url: str = "postgresql+asyncpg://pwbs:pwbs_dev@localhost:5432/pwbs"
     db_pool_min: int = 5
     db_pool_max: int = 20
     weaviate_url: str = "http://localhost:8080"
 
-    #  Neo4j 
+    #  Neo4j
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: SecretStr = SecretStr("dev_password")
 
-    #  Redis 
+    #  Redis
     redis_url: str = "redis://localhost:6379/0"
 
-    #  LLM APIs 
+    #  LLM APIs
     anthropic_api_key: SecretStr = SecretStr("")
     openai_api_key: SecretStr = SecretStr("")
 
-    #  Authentication 
+    #  Authentication
     jwt_secret_key: SecretStr
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
 
-    #  Encryption (Envelope Encryption, AES-256) 
+    #  Encryption (Envelope Encryption, AES-256)
     encryption_master_key: SecretStr
 
-    #  OAuth2 Connector Credentials (all optional) 
+    #  OAuth2 Connector Credentials (all optional)
     google_client_id: str = ""
     google_client_secret: SecretStr = SecretStr("")
     notion_client_id: str = ""
@@ -72,7 +73,7 @@ class Settings(BaseSettings):
     slack_client_id: str = ""
     slack_client_secret: SecretStr = SecretStr("")
 
-    #  Derived / computed properties 
+    #  Derived / computed properties
 
     @property
     def debug(self) -> bool:
@@ -90,7 +91,9 @@ class Settings(BaseSettings):
             if not self.jwt_secret_key.get_secret_value():
                 raise ValueError("JWT_SECRET_KEY must be set in non-development environments")
             if self.jwt_secret_key.get_secret_value() == "changeme-generate-a-secure-random-string":
-                raise ValueError("JWT_SECRET_KEY must be changed from default in non-development environments")
+                raise ValueError(
+                    "JWT_SECRET_KEY must be changed from default in non-development environments"
+                )
             if not self.encryption_master_key.get_secret_value():
                 raise ValueError(
                     "ENCRYPTION_MASTER_KEY must be set in non-development environments"

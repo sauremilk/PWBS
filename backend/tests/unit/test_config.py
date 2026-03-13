@@ -10,7 +10,6 @@ from pydantic import SecretStr, ValidationError
 
 from pwbs.core.config import Settings, get_settings
 
-
 # Minimal kwargs required for Settings to instantiate (field names, not env var names)
 MINIMAL_KWARGS: dict[str, str] = {
     "jwt_secret_key": "test-secret-key-for-unit-tests",
