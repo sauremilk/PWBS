@@ -53,3 +53,7 @@ desktop.ini
 
 # Docker
 docker-compose.override.yml
+
+# PoC
+poc/.venv/
+poc/sample_data/
