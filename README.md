@@ -1,5 +1,7 @@
 # Personal Knowledge Operating System (PWBS)
 
+[![CI](https://github.com/sauremilk/PWBS/actions/workflows/ci.yml/badge.svg)](https://github.com/sauremilk/PWBS/actions/workflows/ci.yml)
+
 A cognitive infrastructure that continuously ingests data from heterogeneous personal sources, builds a semantic knowledge model, and delivers context-aware briefings at the right moment — so knowledge workers spend less time remembering and more time deciding.
 
 ---
