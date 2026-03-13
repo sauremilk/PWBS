@@ -58,11 +58,13 @@ class TestSettingsValidation:
     """Verify validation rules."""
 
     def test_missing_jwt_secret_key_raises(self) -> None:
-        with pytest.raises(ValidationError):
+        env = {k: v for k, v in os.environ.items() if k.upper() != "JWT_SECRET_KEY"}
+        with patch.dict(os.environ, env, clear=True), pytest.raises(ValidationError):
             Settings(encryption_master_key=SecretStr("key"))  # type: ignore[call-arg]
 
     def test_missing_encryption_master_key_raises(self) -> None:
-        with pytest.raises(ValidationError):
+        env = {k: v for k, v in os.environ.items() if k.upper() != "ENCRYPTION_MASTER_KEY"}
+        with patch.dict(os.environ, env, clear=True), pytest.raises(ValidationError):
             Settings(jwt_secret_key=SecretStr("key"))  # type: ignore[call-arg]
 
     def test_invalid_environment_raises(self) -> None:

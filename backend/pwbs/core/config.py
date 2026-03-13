@@ -38,8 +38,8 @@ class Settings(BaseSettings):
 
     #  PostgreSQL 
     database_url: str = "postgresql+asyncpg://pwbs:pwbs_dev@localhost:5432/pwbs"
-
-    #  Weaviate 
+    db_pool_min: int = 5
+    db_pool_max: int = 20
     weaviate_url: str = "http://localhost:8080"
 
     #  Neo4j 
