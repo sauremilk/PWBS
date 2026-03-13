@@ -32,3 +32,13 @@ class EntityType(str, Enum):
     PROJECT = "project"
     TOPIC = "topic"
     DECISION = "decision"
+
+
+class BriefingType(str, Enum):
+    """Types of briefings the system can generate.
+
+    Extensible: PROJECT and WEEKLY added in Phase 3.
+    """
+
+    MORNING = "morning"
+    MEETING_PREP = "meeting_prep"
