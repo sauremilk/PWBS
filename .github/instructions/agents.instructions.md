@@ -21,17 +21,18 @@ BriefingAgent  ←  SearchAgent  ←  [Weaviate, Neo4j, PostgreSQL]
 ```python
 class BaseAgent:
     """Basisklasse für alle PWBS-Agenten."""
-    
+
     async def run(self, context: AgentContext) -> AgentResult:
         """Einstiegspunkt. Gibt immer AgentResult zurück."""
         ...
-    
+
     async def on_error(self, error: PWBSError, context: AgentContext) -> AgentResult:
         """Fehlerbehandlung. Niemals Exception unkontrolliert propagieren."""
         ...
 ```
 
 **Regeln für IngestionAgent:**
+
 - Cursor/Watermark nach jedem erfolgreichen Batch persistieren.
 - Partielle Erfolge sind akzeptabel – nicht den ganzen Batch verwerfen, wenn ein Dokument fehlschlägt.
 - Exponential Backoff bei Rate-Limit-Fehlern (429, 503) der Quell-API.
@@ -42,6 +43,7 @@ class BaseAgent:
 **Zuständigkeit:** Chunking, Embedding-Generierung, NER, Graph-Befüllung.
 
 **Regeln:**
+
 - Chunking vor Embedding – niemals rohe lange Dokumente direkt embedden.
 - Chunk-Strategie: Semantisches Chunking bevorzugen (128–512 Token, bei 32-Token-Überlappung).
 - Embedding-Batching: Max. 64 Chunks pro Batch an Embedding-API.
@@ -60,6 +62,7 @@ class BaseAgent:
 | `ProjectBriefing` | On-Demand | 1200 Wörter | `decisions`, `open_risks`, `next_steps` |
 
 **Regeln:**
+
 - Jede Briefing-Passage enthält `sources: list[SourceRef]` mit Verweis auf Original-Dokumente.
 - Fakten ("Letztes Meeting war am 5.3.") von Interpretationen ("scheinbar wurde entschieden...") trennen.
 - Structured Output für Briefing-Struktur (JSON-Schema), dann Rendering in Template.
@@ -70,12 +73,14 @@ class BaseAgent:
 **Zuständigkeit:** Semantische Suche, Hybrid-Suche, Antworten mit Quellenbelegen.
 
 **Such-Modi:**
+
 1. **Semantic:** Weaviate-Nearest-Neighbor über Embeddings.
 2. **Keyword:** PostgreSQL Full-Text-Search mit `tsvector`.
 3. **Hybrid:** Kombination aus 1+2 mit RRF-Fusion (Reciprocal Rank Fusion).
 4. **Graph-Traversal:** Neo4j-Abfragen über Entitäts-Beziehungen.
 
 **Regeln:**
+
 - Suchergebnisse immer mit `score` und `source_ref` zurückgeben.
 - Ergebnisse NIEMALS ohne `owner_id`-Filter abrufen.
 - Top-K: Default 10, Maximum 50.
@@ -86,6 +91,7 @@ class BaseAgent:
 **Zuständigkeit:** Knowledge-Graph-Abfragen, Beziehungsanalysen, Mustererkennung.
 
 **Graph-Schema (Neo4j):**
+
 ```cypher
 // Kern-Entitäten
 (:Person {id, name, email, owner_id})
@@ -103,6 +109,7 @@ class BaseAgent:
 ```
 
 **Regeln:**
+
 - Alle Node-Creates als `MERGE` (Idempotenz).
 - `owner_id` auf jedem Node als Pflichtproperty.
 - Keine Graph-Queries ohne `WHERE n.owner_id = $owner_id`.
@@ -112,6 +119,7 @@ class BaseAgent:
 **Zuständigkeit:** Zeitgesteuerte Jobs verwalten.
 
 **Job-Definitionen:**
+
 ```python
 SCHEDULED_JOBS = [
     {"id": "morning_briefing", "cron": "30 6 * * *", "agent": "BriefingAgent"},
@@ -121,6 +129,7 @@ SCHEDULED_JOBS = [
 ```
 
 **Regeln:**
+
 - Job-Ausführungen in DB persistieren (Start, Ende, Status, Fehler).
 - Overlapping-Execution verhindern (Distributed Lock via Redis im MVP: einfaches DB-Flag).
 - Fehlgeschlagene Jobs maximal 3× mit Backoff retry.

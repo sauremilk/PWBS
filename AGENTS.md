@@ -19,6 +19,7 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 ## Agenten-Rollen (System-interne KI-Agenten)
 
 ### IngestionAgent
+
 **Primäres Modul:** `pwbs/connectors/`, `pwbs/ingestion/`
 
 ```
@@ -37,6 +38,7 @@ Output:
 ```
 
 ### ProcessingAgent
+
 **Primäres Modul:** `pwbs/processing/`
 
 ```
@@ -56,6 +58,7 @@ Output: list[ProcessedDocument] mit Embeddings + Entities
 ```
 
 ### BriefingAgent
+
 **Primäres Modul:** `pwbs/briefing/`
 
 ```
@@ -79,6 +82,7 @@ Regeln:
 ```
 
 ### SearchAgent
+
 **Primäres Modul:** `pwbs/search/`
 
 ```
@@ -102,6 +106,7 @@ Sicherheit:
 ```
 
 ### GraphAgent
+
 **Primäres Modul:** `pwbs/graph/`
 
 ```
@@ -120,6 +125,7 @@ Pflicht:
 ```
 
 ### SchedulerAgent
+
 **Primäres Modul:** `pwbs/scheduler/`
 
 ```
@@ -169,24 +175,24 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 
 ## Prompt-Files (Wiederverwendbare KI-Workflows)
 
-| Datei | Verwendung |
-|-------|------------|
-| `.github/prompts/new-connector.prompt.md` | Neuen Datenquellen-Konnektor implementieren |
-| `.github/prompts/briefing-feature.prompt.md` | Briefing-Feature entwickeln oder debuggen |
-| `.github/prompts/architecture-review.prompt.md` | Architektur-Review durchführen |
-| `.github/prompts/db-migration.prompt.md` | Alembic-Migration erstellen |
-| `.github/prompts/debug-agent.prompt.md` | Agenten-Fehler diagnostizieren |
+| Datei                                           | Verwendung                                  |
+| ----------------------------------------------- | ------------------------------------------- |
+| `.github/prompts/new-connector.prompt.md`       | Neuen Datenquellen-Konnektor implementieren |
+| `.github/prompts/briefing-feature.prompt.md`    | Briefing-Feature entwickeln oder debuggen   |
+| `.github/prompts/architecture-review.prompt.md` | Architektur-Review durchführen              |
+| `.github/prompts/db-migration.prompt.md`        | Alembic-Migration erstellen                 |
+| `.github/prompts/debug-agent.prompt.md`         | Agenten-Fehler diagnostizieren              |
 
 ---
 
 ## Instruction-Files (Automatisch angewendete Kontextregeln)
 
-| Datei | Gilt für |
-|-------|---------|
-| `.github/instructions/backend.instructions.md` | `**/*.py` |
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}` |
-| `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}` |
-| `.github/instructions/agents.instructions.md` | `pwbs/{connectors,ingestion,...}/**/*.py` |
+| Datei                                           | Gilt für                                  |
+| ----------------------------------------------- | ----------------------------------------- |
+| `.github/instructions/backend.instructions.md`  | `**/*.py`                                 |
+| `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}`                  |
+| `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}`                        |
+| `.github/instructions/agents.instructions.md`   | `pwbs/{connectors,ingestion,...}/**/*.py` |
 
 ---
 
@@ -211,5 +217,5 @@ cd backend && pytest tests/integration/ -v --docker  # benötigt laufende DBs
 
 ## ADR-Verzeichnis
 
-Architekturentscheidungen werden in `docs/adr/` dokumentiert (Vorlage: `docs/adr/000-template.md`).  
+Architekturentscheidungen werden in `docs/adr/` dokumentiert (Vorlage: `docs/adr/000-template.md`).
 Vor jeder bedeutenden Architekturentscheidung ein ADR erstellen.

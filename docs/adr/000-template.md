@@ -1,58 +1,61 @@
 # ADR-000: Vorlage für Architekturentscheidungen
 
-**Status:** Vorlage  
-**Datum:** ${DATUM}  
+**Status:** Vorlage
+**Datum:** ${DATUM}
 **Entscheider:** ${NAMES}
 
 ---
 
 ## Kontext
 
-*Was ist die Situation, das Problem oder die Anforderung, die eine Entscheidung erfordert? Beschreibe den Kontext in 2-5 Sätzen. Was kann nicht getan werden, ohne diese Entscheidung zu treffen?*
+_Was ist die Situation, das Problem oder die Anforderung, die eine Entscheidung erfordert? Beschreibe den Kontext in 2-5 Sätzen. Was kann nicht getan werden, ohne diese Entscheidung zu treffen?_
 
 ---
 
 ## Entscheidung
 
-*Was wurde entschieden? Formuliere klar und präzise: „Wir werden X tun, weil Y."*
+_Was wurde entschieden? Formuliere klar und präzise: „Wir werden X tun, weil Y."_
 
 ---
 
 ## Optionen bewertet
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|--------|---------|-----------|-----------------|
-| Option A | ... | ... | (falls verworfen) |
-| Option B | ... | ... | ... |
-| **Gewählte Option** | ... | ... | – |
+| Option              | Vorteile | Nachteile | Ausschlussgründe  |
+| ------------------- | -------- | --------- | ----------------- |
+| Option A            | ...      | ...       | (falls verworfen) |
+| Option B            | ...      | ...       | ...               |
+| **Gewählte Option** | ...      | ...       | –                 |
 
 ---
 
 ## Konsequenzen
 
 ### Positive Konsequenzen
+
 - ...
 
 ### Negative Konsequenzen / Trade-offs
+
 - ...
 
 ### Offene Fragen
+
 - ...
 
 ---
 
 ## DSGVO-Implikationen
 
-*Falls die Entscheidung Datenverarbeitung betrifft: Welche personenbezogenen Daten sind betroffen? Wie wird Löschbarkeit sichergestellt?*
+_Falls die Entscheidung Datenverarbeitung betrifft: Welche personenbezogenen Daten sind betroffen? Wie wird Löschbarkeit sichergestellt?_
 
 ---
 
 ## Sicherheitsimplikationen
 
-*Welche Sicherheitsrisiken entstehen durch diese Entscheidung? Wie werden sie mitigiert?*
+_Welche Sicherheitsrisiken entstehen durch diese Entscheidung? Wie werden sie mitigiert?_
 
 ---
 
 ## Revisionsdatum
 
-*Wann sollte diese Entscheidung erneut geprüft werden?* ${REVISIONSDATUM}
+_Wann sollte diese Entscheidung erneut geprüft werden?_ ${REVISIONSDATUM}

@@ -24,11 +24,13 @@ pwbs/
 ## Pflichtregeln
 
 ### Typing
+
 - Vollständige Type Annotations in jeder Funktion und Methode. `Any` nur wenn unvermeidbar und dann mit Kommentar begründen.
 - `TypeVar`, `Generic`, `Protocol` für polymorphe Strukturen nutzen.
 - `list[X]` statt `List[X]`, `dict[K,V]` statt `Dict[K,V]` (Python 3.12+).
 
 ### Pydantic v2
+
 - Alle Datenmodelle erben von `pydantic.BaseModel`.
 - `model_config = ConfigDict(...)` statt `class Config`.
 - `@model_validator(mode="after")` statt `@validator`.
@@ -36,12 +38,14 @@ pwbs/
 - Niemals `dict()` auf Pydantic-Objekte aufrufen – `model_dump()` verwenden.
 
 ### FastAPI
+
 - Response-Typ korrekt in Route-Signatur annotieren: `response: Response` NICHT `response: Response | None`.
 - `Response`-Parameter VOR Default-Parameter-Dependencies platzieren (sonst `FastAPIError`).
 - Dependency Injection über `Depends()` für DB-Sessions und Service-Instanzen.
 - `APIRouter` mit `prefix` und `tags` in jedem Modul.
 
 ### Fehlerbehandlung
+
 ```python
 # Eigene Exception-Hierarchie
 class PWBSError(Exception): ...
@@ -56,22 +60,26 @@ raise HTTPException(
 ```
 
 ### Async & Threading
+
 - `async def` für alle I/O-Operationen (DB-Zugriff, HTTP-Calls, File-I/O).
 - Synchroner Blocking-Code (z.B. schwere Berechnungen, sync-Bibliotheken) in `asyncio.to_thread()` auslagern.
 - DB-Sessions niemals über Modul-Grenzen teilen.
 
 ### Idempotenz (KRITISCH)
+
 - Jeder `ingest()`- und `process()`-Aufruf muss bei Wiederholung dasselbe Ergebnis liefern ohne Duplikate.
 - `ON CONFLICT DO UPDATE` (upsert) in PostgreSQL-Writes nutzen.
 - Vor jedem Weaviate-Insert prüfen, ob `source_id` + `owner_id` bereits existiert.
 - Cursor/Watermarks in Connector-Zuständen persistieren.
 
 ### DSGVO-Pflichten
+
 - Jedes `UnifiedDocument` braucht `owner_id` und `expires_at`.
 - Jede DB-Query gegen `UnifiedDocument` oder abgeleitete Tabellen MUSS `WHERE owner_id = :user_id` enthalten.
 - Keine Nutzerdaten in Logs (kein `content`, keine Embeddings, keine `metadata`-Werte).
 
 ### Tests
+
 - Fixtures für alle externen Abhängigkeiten in `conftest.py`.
 - Kein echter Netzwerkzugriff im Unit-Test – `httpx.MockTransport` oder `pytest-mock`.
 - `@pytest.mark.asyncio` für async Tests, `asyncio_mode = "auto"` in `pytest.ini`.
@@ -86,7 +94,7 @@ class MyConnector(BaseConnector):
     async def fetch_since(self, cursor: str | None) -> SyncResult:
         """Cursor-basiertes Abrufen. Gibt neuen Cursor zurück."""
         ...
-    
+
     async def normalize(self, raw: dict) -> UnifiedDocument:
         """Rohdaten → UDF. Muss idempotent sein."""
         ...

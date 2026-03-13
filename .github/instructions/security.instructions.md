@@ -44,16 +44,19 @@ logger.info(f"Processing document: id={doc.id} source={doc.source}")
 ## OWASP Top 10 – Pflichtprüfung
 
 ### A01 – Broken Access Control
+
 - Jeder API-Endpunkt muss authentifizierten Nutzer prüfen.
 - Ressource-Ownership vor jeder Lese-/Schreib-Operation verifizieren.
 - `user_id` immer aus JWT-Token extrahieren, nie aus Request-Body lesen.
 
 ### A02 – Cryptographic Failures
+
 - Passwörter: `argon2` (primär) oder `bcrypt` – niemals MD5/SHA1.
 - Zufallswerte: `secrets.token_urlsafe()` – niemals `random`.
 - API-Keys: Mindestlänge 32 Bytes, urlsafe base64-encodiert.
 
 ### A03 – Injection
+
 ```python
 # SQL-Injection: Immer parametrisierte Queries (asyncpg/SQLAlchemy)
 # FALSCH
@@ -66,26 +69,31 @@ session.run("MATCH (n:Entity {id: $id}) RETURN n", id=entity_id)
 ```
 
 ### A04 – Insecure Design
+
 - Threat-Modelling für neue Features: Im ADR-Dokument Sicherheitsimplikationen dokumentieren.
 - Keine Konstruktoren mit privilegiertem Zustand als öffentliche API exponieren.
 
 ### A05 – Security Misconfiguration
+
 - Alle Secrets über Umgebungsvariablen. `.env.example` mit Platzhaltern committen, `.env` niemals.
 - Debug-Endpoints (`/docs`, `/redoc`) in Produktion deaktivieren (`PWBS_ENV=production`).
 - CORS auf explizite Allowlist beschränken – kein `*` in Produktion.
 - Security-Headers: `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`.
 
 ### A07 – Identification & Authentication Failures
+
 - JWT: `RS256` statt `HS256`. Kurze Access-Token-Laufzeit (15 Min). Lange Refresh-Tokens (30 Tage) mit Rotation.
 - Rate Limiting: Login-Endpunkte max. 5 Versuche pro Minute pro IP.
 - Keine nutzbaren Fehlermeldungen bei Login-Fehlern ("E-Mail oder Passwort falsch", nicht "E-Mail existiert nicht").
 
 ### A09 – Security Logging & Monitoring
+
 - Erfolgreiche und fehlgeschlagene Authentifizierungsversuche loggen.
 - Zugriffe auf andere Nutzerdaten (403-Fehler) als Security-Event loggen.
 - PII niemals in Logs schreiben (siehe oben).
 
 ### A10 – SSRF (Server-Side Request Forgery)
+
 - Webhook-URLs und externe URLs validieren: Kein Zugriff auf `169.254.0.0/16` (AWS Metadata), `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`.
 - HTTP-Timeout für externe Calls: max. 30 Sekunden.
 - Erlaubte Domains für Connector-Oauth-Callbacks in Allowlist verwalten.

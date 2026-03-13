@@ -27,21 +27,25 @@ tools:
 ## Typspezifische Anforderungen
 
 ### morning
+
 - Pflichtfelder: `date`, `agenda_items`, `open_threads`, `context_updates`
 - Suchanfragen: Kalendereinträge des Tages + offene Tasks aus letzter Woche
 - Max. 800 Wörter
 
 ### pre_meeting
+
 - Pflichtfelder: `meeting_title`, `attendees`, `last_status`, `open_questions`, `decisions`
 - Suchanfragen: Alle Dokumente zu Meeting-Teilnehmern + Thema der letzten 30 Tage
 - Max. 400 Wörter
 
 ### project
+
 - Pflichtfelder: `project_name`, `status`, `decisions`, `open_risks`, `next_steps`
 - Suchanfragen: Graph-Traversal über Projekt-Node + semantische Suche nach Projekt-Name
 - Max. 1200 Wörter
 
 ### weekly
+
 - Pflichtfelder: `week_summary`, `completed_items`, `carry_overs`, `next_week_priorities`
 - Suchanfragen: Alle Dokumente der letzten 7 Tage
 - Max. 600 Wörter
@@ -49,6 +53,7 @@ tools:
 ## Prompt-Template erstellen/aktualisieren
 
 Erstelle oder aktualisiere `pwbs/prompts/${input:briefing_type:briefing_type}_briefing.jinja2`:
+
 - Systemrolle klar definieren
 - Output-Format als JSON-Schema vorgeben
 - Quellenreferenzierung in Prompt erzwingen

@@ -4,22 +4,22 @@
 
 Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruktur für Wissensarbeiter. Es ist kein klassisches SaaS-Dashboard, sondern eine aktive Denkebene, die heterogene persönliche Daten zusammenführt, semantisch durchdringt und im richtigen Moment kontextbezogen aufbereitet.
 
-**Aktueller Stand:** Phase 2 – MVP (modularer Monolith)  
+**Aktueller Stand:** Phase 2 – MVP (modularer Monolith)
 **Entwicklungsprinzip:** Progressive Complexity – von klaren Modulen im MVP zum Service-Split in Phase 3
 
 ---
 
 ## Tech-Stack
 
-| Schicht | Technologie |
-|---|---|
-| Backend | Python 3.12+, FastAPI, Pydantic v2 |
-| Datenbanken | PostgreSQL (relational), Weaviate (Vektorsuche), Neo4j (Knowledge Graph) |
-| LLM | Claude API (primär), GPT-4 (Fallback), Ollama (lokal/offline) |
-| Embeddings | Sentence Transformers (lokal), OpenAI Ada (Cloud) |
-| Frontend | Next.js (App Router), React, TypeScript, Tailwind CSS |
-| Infrastruktur | Docker Compose (lokal), Vercel (Frontend), AWS (Backend+DBs) |
-| Aufgabenqueue | Celery + Redis (Phase 3), direkte Verarbeitung im MVP |
+| Schicht       | Technologie                                                              |
+| ------------- | ------------------------------------------------------------------------ |
+| Backend       | Python 3.12+, FastAPI, Pydantic v2                                       |
+| Datenbanken   | PostgreSQL (relational), Weaviate (Vektorsuche), Neo4j (Knowledge Graph) |
+| LLM           | Claude API (primär), GPT-4 (Fallback), Ollama (lokal/offline)            |
+| Embeddings    | Sentence Transformers (lokal), OpenAI Ada (Cloud)                        |
+| Frontend      | Next.js (App Router), React, TypeScript, Tailwind CSS                    |
+| Infrastruktur | Docker Compose (lokal), Vercel (Frontend), AWS (Backend+DBs)             |
+| Aufgabenqueue | Celery + Redis (Phase 3), direkte Verarbeitung im MVP                    |
 
 ---
 
@@ -36,6 +36,7 @@ Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruk
 ## Code-Konventionen
 
 ### Python / Backend
+
 - **Typing:** Immer vollständige Type Annotations verwenden (PEP 484/526). `Any` vermeiden.
 - **Pydantic v2:** Für alle Datenmodelle und Konfigurationen. `model_validator` statt veralteten Patterns.
 - **FastAPI:** Response-Objekte in Route-Signaturen als `Response` annotieren (nicht `Response | None`), vor Default-Parameter-Dependencies platzieren.
@@ -45,6 +46,7 @@ Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruk
 - **Tests:** pytest + pytest-asyncio. Fixtures für alle externen Abhängigkeiten (DBs, LLM). Kein echter Netzwerkzugriff in Unit-Tests.
 
 ### TypeScript / Frontend
+
 - **Strict Mode:** `tsconfig.json` mit `"strict": true`. Keine impliziten `any`.
 - **Komponenten:** Funktionale Komponenten mit expliziten Props-Interfaces. Server/Client-Boundary klar markieren (`"use client"` nur wenn nötig).
 - **State:** Zustand-Server-First (Next.js Server Components). Client-State minimal halten.
@@ -87,14 +89,14 @@ class UnifiedDocument(BaseModel):
 
 Folgende KI-Agenten-Rollen existieren im PWBS. Beim Entwickeln neuer Features prüfen, welche Agenten-Rolle zuständig ist:
 
-| Agent | Verantwortlichkeit | Primäre Module |
-|---|---|---|
-| **IngestionAgent** | Datenquellen anbinden, Rohdaten abrufen, ins UDF normalisieren | `pwbs.connectors`, `pwbs.ingestion` |
-| **ProcessingAgent** | Chunking, Embedding, NER, Graph-Befüllung | `pwbs.processing` |
-| **BriefingAgent** | Kontextbriefings generieren (morgens, pre-meeting, projekt) | `pwbs.briefing` |
-| **SearchAgent** | Semantische Suche, Hybrid-Suche, Antworten mit Quellenbelegen | `pwbs.search` |
-| **GraphAgent** | Knowledge-Graph-Abfragen, Beziehungsanalysen, Mustererkennung | `pwbs.graph` |
-| **SchedulerAgent** | Zeitgesteuerte Jobs (Ingestion-Zyklen, Briefing-Generierung) | `pwbs.scheduler` |
+| Agent               | Verantwortlichkeit                                             | Primäre Module                      |
+| ------------------- | -------------------------------------------------------------- | ----------------------------------- |
+| **IngestionAgent**  | Datenquellen anbinden, Rohdaten abrufen, ins UDF normalisieren | `pwbs.connectors`, `pwbs.ingestion` |
+| **ProcessingAgent** | Chunking, Embedding, NER, Graph-Befüllung                      | `pwbs.processing`                   |
+| **BriefingAgent**   | Kontextbriefings generieren (morgens, pre-meeting, projekt)    | `pwbs.briefing`                     |
+| **SearchAgent**     | Semantische Suche, Hybrid-Suche, Antworten mit Quellenbelegen  | `pwbs.search`                       |
+| **GraphAgent**      | Knowledge-Graph-Abfragen, Beziehungsanalysen, Mustererkennung  | `pwbs.graph`                        |
+| **SchedulerAgent**  | Zeitgesteuerte Jobs (Ingestion-Zyklen, Briefing-Generierung)   | `pwbs.scheduler`                    |
 
 ---
 
