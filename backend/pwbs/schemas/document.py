@@ -53,3 +53,18 @@ class UnifiedDocument(BaseModel):
         default=None,
         description="DSGVO: data expiry date after which the record must be deleted",
     )
+
+
+class Chunk(BaseModel):
+    """Schema for a document chunk produced by the processing pipeline."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    id: UUID
+    document_id: UUID
+    user_id: UUID
+    chunk_index: int = Field(ge=0)
+    token_count: int = Field(ge=1)
+    weaviate_id: UUID | None = None
+    content_preview: str | None = None
+    created_at: datetime

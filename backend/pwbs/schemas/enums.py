@@ -23,3 +23,12 @@ class ContentType(str, Enum):
     PLAINTEXT = "plaintext"
     MARKDOWN = "markdown"
     HTML = "html"
+
+
+class EntityType(str, Enum):
+    """Types of knowledge-graph entities extracted from documents."""
+
+    PERSON = "person"
+    PROJECT = "project"
+    TOPIC = "topic"
+    DECISION = "decision"
