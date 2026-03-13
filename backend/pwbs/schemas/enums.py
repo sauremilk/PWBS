@@ -42,3 +42,12 @@ class BriefingType(str, Enum):
 
     MORNING = "morning"
     MEETING_PREP = "meeting_prep"
+
+
+class ConnectionStatus(str, Enum):
+    """Status of a data-source connection."""
+
+    ACTIVE = "active"
+    PAUSED = "paused"
+    ERROR = "error"
+    REVOKED = "revoked"
