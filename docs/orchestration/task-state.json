@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "./task-state.schema.json",
   "meta": {
     "schema_version": "1.0",
@@ -114,7 +114,7 @@
     "TASK-006": { "stream": "STREAM-FOUNDATION", "title": "Tooling und Template für strukturierte Probleminterviews erstellen", "priority": "P1", "effort": "S", "area": "Docs", "status": "done", "claimed_by": "ORCH-A", "claimed_at": "2026-03-13T21:15:00Z", "completed_at": "2026-03-13T21:35:00Z", "blocked_by": [] },
     "TASK-007": { "stream": "STREAM-FOUNDATION", "title": "Interview-Auswertungssystem einrichten", "priority": "P1", "effort": "S", "area": "Docs", "status": "done", "claimed_by": "ORCH-A", "claimed_at": "2026-03-13T21:40:00Z", "completed_at": "2026-03-13T21:55:00Z", "blocked_by": ["TASK-006"] },
     "TASK-008": { "stream": "STREAM-FOUNDATION", "title": "PoC-Ergebnisse dokumentieren und Entscheidungsvorlage erstellen", "priority": "P0", "effort": "S", "area": "Docs", "status": "done", "claimed_by": "ORCH-A", "claimed_at": "2026-03-13T20:50:00Z", "completed_at": "2026-03-13T21:10:00Z", "blocked_by": ["TASK-002", "TASK-004"] },
-    "TASK-009": { "stream": "STREAM-INFRA", "title": "Monorepo-Struktur mit Backend- und Frontend-Modulen erstellen", "priority": "P0", "effort": "S", "area": "Infra", "status": "open", "claimed_by": null, "claimed_at": null, "completed_at": null, "blocked_by": ["TASK-008"] },
+    "TASK-009": { "stream": "STREAM-INFRA", "title": "Monorepo-Struktur mit Backend- und Frontend-Modulen erstellen", "priority": "P0", "effort": "S", "area": "Infra", "status": "in_progress", "claimed_by": "ORCH-B", "claimed_at": "2026-03-13T22:00:00Z", "completed_at": null, "blocked_by": ["TASK-008"] },
     "TASK-010": { "stream": "STREAM-INFRA", "title": "Docker Compose für lokale Entwicklungsumgebung erstellen", "priority": "P0", "effort": "S", "area": "Infra", "status": "open", "claimed_by": null, "claimed_at": null, "completed_at": null, "blocked_by": ["TASK-009"] },
     "TASK-011": { "stream": "STREAM-INFRA", "title": ".env-Vorlagen und Secrets-Handling einrichten", "priority": "P0", "effort": "XS", "area": "Infra", "status": "open", "claimed_by": null, "claimed_at": null, "completed_at": null, "blocked_by": ["TASK-009"] },
     "TASK-012": { "stream": "STREAM-DB", "title": "Pydantic Settings-Konfigurationsklasse implementieren", "priority": "P0", "effort": "S", "area": "Backend", "status": "open", "claimed_by": null, "claimed_at": null, "completed_at": null, "blocked_by": ["TASK-011"] },
