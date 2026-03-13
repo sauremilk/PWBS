@@ -54,6 +54,17 @@ desktop.ini
 # Docker
 docker-compose.override.yml
 
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!infra/terraform/environments/*.tfvars
+
+# Alembic
+backend/migrations/versions/__pycache__/
+
 # PoC
 poc/.venv/
 poc/sample_data/

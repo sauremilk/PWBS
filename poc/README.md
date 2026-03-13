@@ -124,17 +124,16 @@ poc/
 
 ## Technische Details
 
-| Aspekt          | Wert                                |
-|-----------------|-------------------------------------|
+| Aspekt           | Wert                               |
+| ---------------- | ---------------------------------- |
 | Embedding-Modell | `text-embedding-3-small`           |
-| Dimensionen     | 1536                                |
-| Batch-Größe     | 64                                  |
-| Chunking        | Paragraph-Splitting (PoC-einfach)   |
-| Weaviate        | v1.28.2, Vectorizer: none (extern) |
-| Quellen         | Google Calendar JSON, Obsidian MD   |
+| Dimensionen      | 1536                               |
+| Batch-Größe      | 64                                 |
+| Chunking         | Paragraph-Splitting (PoC-einfach)  |
+| Weaviate         | v1.28.2, Vectorizer: none (extern) |
+| Quellen          | Google Calendar JSON, Obsidian MD  |
 
 ## Nächste Schritte
-
 
 - MVP: Semantisches Chunking (128512 Tokens, 32 Token Overlap)
 - MVP: Sentence Transformers als lokale Alternative

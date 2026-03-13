@@ -10,6 +10,16 @@ tools:
 
 **Zu überprüfendes Modul/Feature:** ${input:module:Modulpfad oder Feature-Name, z.B. "pwbs/connectors/" oder "Briefing-Pipeline"}
 
+## Phase 0: Vorbereitende Tiefenanalyse (Extended Thinking)
+
+Bevor du mit dem Review beginnst, analysiere stil intern:
+
+1. **Transitive Abhängigkeiten:** Welche Module hängen direkt oder transitiv von `${input:module:module}` ab? Gibt es zirkuläre Imports?
+2. **Verborgene DSGVO-Risiken:** Welche Daten fließen durch das Modul, die nicht unmittelbar als PII erkennbar sind (z.B. Kalender-IDs, IP-Adressen in Logs)?
+3. **Lastszenario-Schwachstellen:** Was passiert, wenn 1000 Dokumente gleichzeitig ingested werden? Gibt es Bottlenecks, N+1-Queries oder Memory-Leaks?
+4. **Angriffsflächen:** Welche Inputs können von externen Quellen kontrolliert werden? Sind diese vollständig validiert?
+5. **State-Konsistenz-Szenarien:** Was passiert, wenn der Prozess während Phase 2 von 3 einer Pipeline abstürzt?
+
 ## Review-Checkliste
 
 ### 1. Architekturprinzipien
@@ -75,9 +85,37 @@ Erstelle einen strukturierten Review-Report:
 ```markdown
 ## Architektur-Review: [Modulname]
 
-### Kritische Probleme (Must-Fix)
+### Kritische Probleme (Must-Fix, blockiert Deployment)
+
+| # | Problem | Betroffene Datei | Empfehlung |
+|---|---------|-----------------|------------|
+| 1 | ... | ... | ... |
+
+### Wichtige Probleme (Should-Fix, nächster Sprint)
 
 ...
+
+### Verbesserungsvorschläge (Nice-to-Have)
+
+...
+
+### DSGVO-Bewertung
+
+- Mandanten-Isolation: [OK / RISIKO: ...]
+- Löschbarkeit: [OK / OFFEN: ...]
+- Logging-Hygiene: [OK / BEFUND: ...]
+
+### Idempotenz-Bewertung
+
+- Cursor-Persistenz: [OK / FEHLT: ...]
+- Upsert-Patterns: [OK / FEHLT IN: ...]
+
+### Sicherheitsbewertung (OWASP)
+
+- Injection-Risiken: [Keine / BEFUND: ...]
+- SSRF-Risiken: [Keine / BEFUND: ...]
+- Auth/Autorisierung: [OK / Lücke: ...]
+```
 
 ### Verbesserungsvorschläge (Should-Fix)
 

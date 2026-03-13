@@ -41,9 +41,10 @@
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "github.copilot.chat.scopeSelection": true,
 
-  // ─── Copilot: Bevorzugte Agenten-Modelle ──────────────────────────────────
-  "github.copilot.selectedCompletionModel": "claude-sonnet-4-5",
-  "chat.agent.maxRequests": 30,
+  // ─── Copilot: Bevorzugte Agenten-Modelle (optimiert für Claude Opus 4.6) ───
+  "github.copilot.selectedCompletionModel": "claude-opus-4-6",
+  "github.copilot.chat.agent.thinkingMode": "auto",
+  "chat.agent.maxRequests": 60,
 
   // ─── Dateien ausschließen (Suche & Watch) ─────────────────────────────────
   "files.watcherExclude": {
@@ -63,11 +64,13 @@
     "**/alembic/versions": false
   },
 
-  // ─── Python Analyse ───────────────────────────────────────────────────────
-  "python.analysis.typeCheckingMode": "basic",
+  // ─── Python Analyse (strict für Opus 4.6 Typ-Reasoning) ──────────────────
+  "python.analysis.typeCheckingMode": "standard",
   "python.analysis.autoImportCompletions": true,
   "python.analysis.inlayHints.functionReturnTypes": true,
-  "python.analysis.inlayHints.variableTypes": false,
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.inlayHints.callArgumentNames": "partiallyLiterals",
+  "python.analysis.diagnosticMode": "workspace",
   "pylint.importStrategy": "fromEnvironment",
 
   // ─── Testing ──────────────────────────────────────────────────────────────

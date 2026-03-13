@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PWBS Task State",
+  "description": "Koordinationszustand für parallele Opus-4.6-Orchestratoren",
+  "type": "object",
+  "required": ["meta", "streams", "tasks"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schema_version", "total_tasks", "source"],
+      "properties": {
+        "schema_version": { "type": "string" },
+        "total_tasks": { "type": "integer" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "claiming_protocol": { "type": "string" }
+      }
+    },
+    "streams": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "orchestrator_slot"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "phase": { "type": "integer" },
+          "orchestrator_slot": { "type": "string", "pattern": "^ORCH-[A-Z]$" },
+          "depends_on_streams": { "type": "array", "items": { "type": "string" } },
+          "task_range": { "type": "string" }
+        }
+      }
+    },
+    "tasks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["stream", "title", "priority", "status", "blocked_by"],
+        "properties": {
+          "stream": { "type": "string" },
+          "title": { "type": "string" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "effort": { "type": "string", "enum": ["XS", "S", "M", "L", "XL"] },
+          "area": { "type": "string" },
+          "status": { "type": "string", "enum": ["open", "in_progress", "done", "blocked", "skipped"] },
+          "claimed_by": { "type": ["string", "null"] },
+          "claimed_at": { "type": ["string", "null"], "format": "date-time" },
+          "completed_at": { "type": ["string", "null"], "format": "date-time" },
+          "blocked_by": { "type": "array", "items": { "type": "string", "pattern": "^TASK-\\d{3}$" } },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

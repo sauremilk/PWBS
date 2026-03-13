@@ -64,3 +64,13 @@ Erstelle oder aktualisiere `pwbs/prompts/${input:briefing_type:briefing_type}_br
 - Unit-Test für Briefing-Generierung mit gemockten Such-Ergebnissen
 - Test dass `sources` niemals leer zurückgegeben wird
 - Test für Token-Budget-Einhaltung (mocked LLM-Response > Limit)
+
+## Phase 3: Qualitätsprüfung (Selbst-Review)
+
+Nach der Implementierung, intern prüfen:
+
+- [ ] Wird jede Briefing-Aussage durch mindestens eine `SourceRef` belegt?
+- [ ] Sind Fakten (`laut Kalender am 5.3.`) klar von Interpretationen (`möglicherweise wichtig`) getrennt?
+- [ ] Bleibt der generierte Text innerhalb des Token-Budgets für den Briefing-Typ?
+- [ ] Wird kein LLM-Vorwissen ohne RAG-Quelle in die Antwort eingeflossen sein?
+- [ ] Ist das Prompt-Template in `pwbs/prompts/` versioniert (nicht inline im Code)?

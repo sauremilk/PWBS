@@ -13,6 +13,8 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 3. **DSGVO first.** Jede neue Datenstruktur braucht `owner_id`, `expires_at` und muss löschbar sein.
 4. **Idempotenz erzwingen.** Neue Writes in DB immer als Upsert, nicht blindes INSERT.
 5. **Erklärbarkeit.** Jede LLM-Ausgabe im System braucht `sources: list[SourceRef]`.
+6. **Denken vor Implementieren.** Bei komplexen Aufgaben erst Implikationen und Alternativen durchdenken (Extended Thinking), dann implementieren.
+7. **Vollständigkeit.** Keine Platzhalter-Implementierungen – Methoden sind vollständig oder mit `raise NotImplementedError("...")` explizit markiert.
 
 ---
 
@@ -175,13 +177,14 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 
 ## Prompt-Files (Wiederverwendbare KI-Workflows)
 
-| Datei                                           | Verwendung                                  |
-| ----------------------------------------------- | ------------------------------------------- |
-| `.github/prompts/new-connector.prompt.md`       | Neuen Datenquellen-Konnektor implementieren |
-| `.github/prompts/briefing-feature.prompt.md`    | Briefing-Feature entwickeln oder debuggen   |
-| `.github/prompts/architecture-review.prompt.md` | Architektur-Review durchführen              |
-| `.github/prompts/db-migration.prompt.md`        | Alembic-Migration erstellen                 |
-| `.github/prompts/debug-agent.prompt.md`         | Agenten-Fehler diagnostizieren              |
+| Datei                                           | Verwendung                                              |
+| ----------------------------------------------- | ------------------------------------------------------- |
+| `.github/prompts/new-connector.prompt.md`       | Neuen Datenquellen-Konnektor implementieren             |
+| `.github/prompts/briefing-feature.prompt.md`    | Briefing-Feature entwickeln oder debuggen               |
+| `.github/prompts/architecture-review.prompt.md` | Architektur-Review durchführen                          |
+| `.github/prompts/db-migration.prompt.md`        | Alembic-Migration erstellen                             |
+| `.github/prompts/debug-agent.prompt.md`         | Agenten-Fehler diagnostizieren                          |
+| `.github/prompts/extended-thinking.prompt.md`   | **Opus 4.6:** Tiefenanalyse komplexer Architekturthemen |
 
 ---
 

@@ -100,6 +100,32 @@ class MyConnector(BaseConnector):
         ...
 ```
 
+## Reasoning-Anforderungen (Claude Opus 4.6)
+
+Bei jeder Implementierungsaufgabe den Denkprozess explizit durchlaufen:
+
+### Vor dem Code
+
+1. **Invarianten identifizieren:** Welche Bedingungen müssen vor und nach dem Methodenaufruf gelten?
+2. **Fehlerszenarien durchdenken:** Was passiert bei leerem Input, abgelaufenem Token, Netzwerkausfall, DB-Timeout?
+3. **Abhängigkeiten kartieren:** Welche anderen Module werden durch die Änderung beeinflusst?
+4. **Breaking Changes beurteilen:** Ändert sich ein bestehender Contract (Signatur, Verhalten, Rückgabetyp)?
+
+### Selbst-Review nach dem Code
+
+Vor dem Ausgeben generierten Code intern prüfen:
+- [ ] Alle `owner_id`-Filter vorhanden? Gibt es Queries ohne Mandanten-Isolation?
+- [ ] Alle Writes als Upsert/idempotent implementiert?
+- [ ] Alle I/O-Operationen als `async def`?
+- [ ] Kein PII in Logging-Aufrufen?
+- [ ] Rückgabetypen vollständig und korrekt annotiert?
+
+### Vollständigkeitsgebot
+
+- Keine `pass`-Stubs oder `# TODO: implement` – entweder vollständig implementieren oder explizit `raise NotImplementedError("Begründung")`.
+- Alle Randfälle explizit behandeln: leere Listen, `None`-Werte, leere Strings, Maximalwert-Überschreitungen.
+```
+
 ## LLM-Aufrufe
 
 - Prompts ausschließlich aus `pwbs/prompts/*.jinja2` laden, nie inline hardcoden.

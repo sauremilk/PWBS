@@ -13,7 +13,22 @@ tools:
 
 **Fehlerbeschreibung:** ${input:error:Kurze Beschreibung des Problems oder Fehlermeldung}
 
-## Diagnose-Schritte
+## Phase 0: Hypothesen-Analyse (Extended Thinking)
+
+Vor den Diagnose-Schritten: Alle pläusiblen Ursachen ranken und priorisieren.
+
+| Rang | Hypothese | Wahrscheinlichkeit | Falsifizierbar durch |
+|------|-----------|-------------------|---------------------|
+| 1 | ... | Hoch/Mittel/Niedrig | ... |
+| 2 | ... | ... | ... |
+
+Typische Ursachen-Kategorien:
+- **Zustandsproblem:** Cursor korrupt, abgelaufener OAuth-Token, inkonsistente DB-Daten
+- **Netzwerk/API:** Rate-Limit, Timeout, API-Schema-Änderung beim Quell-System
+- **Normalisierungsfehler:** Unerwartetes Datenformat in Rohdaten vom Connector
+- **Idempotenz-Verletzung:** Duplikat-Insert, fehlender Upsert
+- **Typ-Fehler:** Pydantic-Validierungsfehler durch neues Feld in API-Response
+- **Concurrency:** Doppelter Job-Start, Race Condition beim Cursor-Update
 
 ### 1. Logs analysieren
 
@@ -84,3 +99,17 @@ Nach dem Fix:
 - [ ] Reproduzierenden Unit-Test schreiben
 - [ ] Cursor-Validierung stärken falls nötig
 - [ ] Alerting-Threshold anpassen falls zu sensitiv/insensitiv
+
+### 7. Abschluss-Report
+
+Strukturierten Abschluss-Report erstellen:
+
+```markdown
+## Debug-Report: [Agent] – [Datum]
+
+**Root Cause:** ...
+**Betroffene Dokumente/Nutzer:** ...
+**Fix angewendet:** ...
+**Präventionsmaßnahme:** ...
+**Neuer Test:** tests/.../test_...py
+```

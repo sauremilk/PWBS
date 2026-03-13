@@ -1,5 +1,36 @@
 # GitHub Copilot – Workspace-Instruktionen: PWBS
 
+---
+
+## Modellkonfiguration: Claude Opus 4.6
+
+Dieser Workspace ist für **Claude Opus 4.6** konfiguriert und optimiert. Das Modell verfügt über erweiterte Reasoning-Fähigkeiten, die gezielt eingesetzt werden sollen.
+
+### Extended Thinking aktivieren bei
+
+- Architekturentscheidungen mit Auswirkungen auf mehrere Module
+- Komplexen Algorithmen oder Datenstrukturen (> 50 LOC)
+- Debugging-Szenarien mit mehreren potenziellen Ursachen
+- DSGVO- und Sicherheits-Audits mit Wechselwirkungen
+- Performance-Optimierungen mit Trade-offs zwischen Latenz, Speicher und Konsistenz
+
+### Pflicht-Denkmuster vor jeder Implementierung
+
+1. **Verstehen:** Was ist das genaue Ziel? Welche Constraints gelten (DSGVO, Idempotenz, Typen)?
+2. **Analysieren:** Welche anderen Module sind betroffen? Gibt es Breaking Changes?
+3. **Abwägen:** Mindestens zwei Lösungsansätze skizzieren und begründet wählen.
+4. **Implementieren:** Erst dann Code schreiben – vollständig, korrekt typisiert, ohne Platzhalter.
+5. **Validieren:** Generierten Code intern auf Logikfehler, fehlende `owner_id`-Filter und nicht-idempotente Writes prüfen.
+
+### Qualitätsstandard für Opus 4.6
+
+- Keine `# TODO: implement`-Platzhalter – Methoden sind entweder vollständig oder explizit mit `raise NotImplementedError("...")` markiert.
+- Alle Randfälle explizit behandeln (leere Listen, `None`-Werte, abgelaufene Tokens, DB-Fehler).
+- Bei Unsicherheit: Mögliche Probleme **benennen**, nicht stillschweigend ignorieren.
+- Sicherheitsimplikationen jeder neuen Funktion proaktiv im Code-Kommentar oder ADR erwähnen.
+
+---
+
 ## Projektkontext
 
 Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruktur für Wissensarbeiter. Es ist kein klassisches SaaS-Dashboard, sondern eine aktive Denkebene, die heterogene persönliche Daten zusammenführt, semantisch durchdringt und im richtigen Moment kontextbezogen aufbereitet.

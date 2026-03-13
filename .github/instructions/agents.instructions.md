@@ -134,3 +134,43 @@ SCHEDULED_JOBS = [
 - Overlapping-Execution verhindern (Distributed Lock via Redis im MVP: einfaches DB-Flag).
 - Fehlgeschlagene Jobs maximal 3× mit Backoff retry.
 - Alerting bei 3 aufeinanderfolgenden Fehlern desselben Jobs.
+
+---
+
+## Reasoning-Anforderungen beim Agenten-Design (Claude Opus 4.6)
+
+Bevor ein Agent implementiert oder geändert wird, folgende Analyse durchführen:
+
+### 1. Ausführungspfad-Analyse
+
+Den vollständigen Fluss end-to-end tracing:
+```
+Eingabe → Validierung → Verarbeitung → Nebeneffekte → Ausgabe → Fehlerfall → Cleanup
+```
+Für jeden Schritt: Was kann schiefgehen? Wie wird der Zustand bei Fehler konsistent gehalten?
+
+### 2. Konkurrenz- und Race-Condition-Prüfung
+
+- Kann der Scheduler denselben Job parallel zweimal starten?
+- Greift der Ingestion-Cursor atomar auf den letzten Stand zu?
+- Gibt es Shared-State zwischen Agenten, der Locking erfordert?
+
+### 3. Downstream-Impact-Analyse
+
+- Welche nachgelagerten Agenten konsumieren den Output?
+- Was passiert, wenn der Output-Typ oder -Umfang sich verändert?
+- Sind Consumers gegen `None`-Rückgaben oder Empty-Lists abgesichert?
+
+### 4. DSGVO-Kontrollpfad
+
+Für jede neue Datenstruktur, die ein Agent einführt:
+- `owner_id` vorhanden? Referenziert auf `users.id` mit `CASCADE DELETE`?
+- `expires_at` vorhanden und in der Cleanup-Pipeline berücksichtigt?
+- Keine PII in Agent-Logs oder Fehlermeldungen?
+
+### 5. Idempotenz-Garantie
+
+Explizit nachweisen, dass ein Neustart des Agenten ohne Datenverlust oder Duplikate möglich ist:
+- Cursors persistent und atomar gespeichert?
+- Alle Writes als Upsert (nicht INSERT)?
+- Verarbeitete Dokumente idempotent identifizierbar (via `source_id` + `owner_id`)?

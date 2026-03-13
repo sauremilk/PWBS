@@ -152,31 +152,53 @@ class MyConnector(BaseConnector):
 ```
 PWBS/
 ├── backend/
-│   └── pwbs/
-│       ├── api/            # FastAPI routers, middleware, dependency injection
-│       ├── connectors/     # BaseConnector + source-specific implementations
-│       ├── ingestion/      # Ingestion pipeline, UDF normalization
-│       ├── processing/     # Chunking, embedding generation, NER
-│       ├── storage/        # Repository layer: PostgreSQL, Weaviate, Neo4j
-│       ├── briefing/       # Briefing generation, prompt templates
-│       ├── search/         # Semantic, keyword, and hybrid search
-│       ├── graph/          # Knowledge graph operations (Neo4j)
-│       ├── scheduler/      # Scheduled jobs (ingestion cycles, briefings)
-│       ├── prompts/        # Versioned LLM prompt files
-│       └── core/           # Shared config, exceptions, base classes
-├── frontend/               # Next.js application
-│   └── src/
-│       └── lib/api/        # All backend API calls (never raw fetch in components)
+│   ├── pwbs/                   # Python package (import: pwbs.*)
+│   │   ├── api/                # FastAPI routers, middleware, dependency injection
+│   │   │   ├── v1/             # Versioned API endpoints
+│   │   │   └── middleware/     # Auth, rate limiting, request ID, audit
+│   │   ├── connectors/         # BaseConnector + source-specific implementations
+│   │   ├── ingestion/          # Ingestion pipeline, UDF normalization
+│   │   ├── processing/         # Chunking, embedding generation, NER
+│   │   ├── services/           # Business logic (briefing, search, LLM, encryption)
+│   │   ├── models/             # SQLAlchemy ORM models
+│   │   ├── schemas/            # Pydantic request/response schemas
+│   │   ├── storage/            # Repository layer: PostgreSQL, Weaviate, Neo4j
+│   │   ├── briefing/           # Briefing generation, prompt templates
+│   │   ├── search/             # Semantic, keyword, and hybrid search
+│   │   ├── graph/              # Knowledge graph operations (Neo4j)
+│   │   ├── scheduler/          # Scheduled jobs (ingestion cycles, briefings)
+│   │   ├── prompts/            # Versioned LLM prompt files
+│   │   ├── scripts/            # DB init scripts (Weaviate, Neo4j)
+│   │   └── core/               # Shared config, exceptions, base classes
+│   ├── migrations/             # Alembic database migrations
+│   ├── tests/                  # pytest test suites
+│   └── pyproject.toml          # Python 3.12+ project configuration
+├── frontend/
+│   ├── src/
+│   │   ├── app/                # Next.js App Router pages
+│   │   ├── components/         # React components (briefing, search, layout, ...)
+│   │   ├── lib/api/            # Typed API client (never raw fetch in components)
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── stores/             # Client state (Zustand)
+│   │   └── types/              # TypeScript types from OpenAPI schema
+│   ├── package.json            # Next.js, React, TypeScript, Tailwind CSS
+│   └── tsconfig.json           # Strict TypeScript configuration
+├── infra/
+│   ├── terraform/              # Infrastructure as Code (AWS)
+│   └── docker/                 # Production Docker Compose
 ├── docs/
-│   └── adr/                # Architecture Decision Records
+│   ├── adr/                    # Architecture Decision Records
+│   └── orchestration/          # Multi-agent task coordination
 ├── .github/
 │   ├── copilot-instructions.md
-│   ├── instructions/       # Scoped coding instructions (backend, frontend, security)
-│   └── prompts/            # Reusable development workflow prompts
-├── ARCHITECTURE.md         # Full architecture documentation
-├── AGENTS.md               # AI agent roles and orchestration design
-├── ROADMAP.md              # Phase-by-phase product roadmap
-└── docker-compose.yml      # Local development services
+│   ├── instructions/           # Scoped coding instructions (backend, frontend, security)
+│   ├── prompts/                # Reusable development workflow prompts
+│   └── workflows/              # GitHub Actions CI/CD
+├── .env.example                # Environment variable template (never commit .env)
+├── ARCHITECTURE.md             # Full architecture documentation
+├── AGENTS.md                   # AI agent roles and orchestration design
+├── ROADMAP.md                  # Phase-by-phase product roadmap
+└── docker-compose.yml          # Local development services
 ```
 
 ---

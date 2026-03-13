@@ -15,7 +15,14 @@ Erstelle einen vollständigen, produktionsreifen Konnektor für die folgende Dat
 **Source-ID-Format:** ${input:source_id_format:Format der Quell-IDs, z.B. "uuid", "email_id", "page_id"}
 **Auth-Typ:** ${input:auth_type:Authentifizierungstyp: "oauth2", "api_key", "webhook"}
 
-## Aufgaben
+## Phase 0: Voranalyse (Extended Thinking)
+
+Vor der Implementierung:
+
+1. **API-Charakteristik analysieren:** Pagination-Modell (cursor/offset/token), Rate-Limit-Verhalten, Webhook vs. Poll.
+2. **Normalisierungskomplexität:** Welche Felder der API lassen sich sauber auf UDF-Felder mappen? Welche sind mehrdeutig?
+3. **Idempotenz-Strategie festlegen:** Was ist der stabile, eindeutige Identifier für Dokumente dieser Quelle?
+4. **DSGVO-Check:** Welche API-Felder enthalten PII? Gibt es Felder, die _nicht_ gespeichert werden sollen?
 
 ### 1. Konnektor-Klasse erstellen
 
