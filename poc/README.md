@@ -67,6 +67,20 @@ Output: 30 Kalendereinträge + 21 Markdown-Notizen = 51 Dokumente
 python embedding_poc.py
 ```
 
+### 6. Semantische Suche (TASK-002)
+
+Interaktiver Modus:
+
+```bash
+python search_poc.py
+```
+
+Automatisierter Test (10 vordefinierte Queries):
+
+```bash
+python search_poc.py --test
+```
+
 ### Erwartete Ausgabe
 
 ```
@@ -102,8 +116,7 @@ poc/
  requirements.txt          # Python-Abhängigkeiten
  .env.example              # Vorlage für Umgebungsvariablen
  generate_sample_data.py   # Erzeugt 50 Beispieldokumente
- embedding_poc.py          # Hauptskript: Lesen  Embedden  Speichern
- README.md                 # Diese Datei
+ embedding_poc.py          # Hauptskript: Lesen  Embedden  Speichern├── search_poc.py             # Semantische Suche (CLI + automatisierter Test) README.md                 # Diese Datei
  sample_data/
      calendar/             # Google Calendar Events (JSON)
      notes/                # Obsidian Markdown-Notizen
@@ -122,6 +135,6 @@ poc/
 
 ## Nächste Schritte
 
-- **TASK-002:** Semantische Suche über diese Daten implementieren
+
 - MVP: Semantisches Chunking (128512 Tokens, 32 Token Overlap)
 - MVP: Sentence Transformers als lokale Alternative
