@@ -1,0 +1,101 @@
+{
+  // ─── Editor ───────────────────────────────────────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": null,
+  "editor.rulers": [88, 120],
+  "editor.tabSize": 4,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // ─── Python ───────────────────────────────────────────────────────────────
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.tabSize": 4
+  },
+
+  // ─── TypeScript / JavaScript ──────────────────────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+
+  // ─── GitHub Copilot ───────────────────────────────────────────────────────
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "yaml": true
+  },
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.scopeSelection": true,
+
+  // ─── Copilot: Bevorzugte Agenten-Modelle ──────────────────────────────────
+  "github.copilot.selectedCompletionModel": "claude-sonnet-4-5",
+  "chat.agent.maxRequests": 30,
+
+  // ─── Dateien ausschließen (Suche & Watch) ─────────────────────────────────
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true,
+    "**/__pycache__/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/.venv": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/alembic/versions": false
+  },
+
+  // ─── Python Analyse ───────────────────────────────────────────────────────
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.variableTypes": false,
+  "pylint.importStrategy": "fromEnvironment",
+
+  // ─── Testing ──────────────────────────────────────────────────────────────
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests/unit",
+    "-v",
+    "--tb=short"
+  ],
+  "python.testing.unittestEnabled": false,
+
+  // ─── Terminal ─────────────────────────────────────────────────────────────
+  "terminal.integrated.env.windows": {
+    "PWBS_ENV": "development"
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // ─── Sicherheit: Secrets nicht in Output schreiben ────────────────────────
+  "debug.allowBreakpointsEverywhere": false,
+
+  // ─── Datei-Zuordnungen ────────────────────────────────────────────────────
+  "files.associations": {
+    "*.jinja2": "jinja",
+    "*.jinja": "jinja",
+    "docker-compose*.yml": "dockercompose",
+    ".env.example": "dotenv"
+  },
+
+  // ─── Empfohlene Extensions aktiv halten ───────────────────────────────────
+  "extensions.ignoreRecommendations": false
+}

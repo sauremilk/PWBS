@@ -1,0 +1,33 @@
+{
+  "recommendations": [
+    // ─── Python / Backend ─────────────────────────────────────────────────
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
+
+    // ─── TypeScript / Frontend ────────────────────────────────────────────
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    // ─── Datenbanken ──────────────────────────────────────────────────────
+    "ms-azuretools.vscode-containers",
+
+    // ─── KI & Copilot ─────────────────────────────────────────────────────
+    "github.copilot",
+    "github.copilot-chat",
+
+    // ─── Git & Kollaboration ──────────────────────────────────────────────
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "github.vscode-pull-request-github",
+
+    // ─── Produktivität ────────────────────────────────────────────────────
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "oderwat.indent-rainbow",
+
+    // ─── Templates ────────────────────────────────────────────────────────
+    "samuelcolvin.jinjahtml"
+  ]
+}
