@@ -859,14 +859,15 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-E",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-044",
         "TASK-051"
-      ]
+      ],
+      "assignee": "ORCH-E"
     },
     "TASK-053": {
       "stream": "STREAM-CONNECTORS",
