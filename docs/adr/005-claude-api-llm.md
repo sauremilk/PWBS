@@ -20,12 +20,12 @@ Wir verwenden die **Claude API (Anthropic)** als primären LLM-Provider mit **GP
 
 ## Optionen bewertet
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|--------|----------|-----------|-------------------|
-| **Claude API (primär) + GPT-4 (Fallback)** (gewählt) | Starke strukturierte Output-Fähigkeit (JSON-Schema), 200K-Token-Kontextfenster, gute Compliance-Positionierung (Anthropic). GPT-4 als Fallback verhindert Vendor Lock-in. | Abhängigkeit von US-basiertem Provider. API-Kosten bei hohem Volumen. | – |
-| GPT-4 only | Breitestes Ökosystem, Function Calling, stabile API. | Single-Vendor-Risiko. Kleineres Standard-Kontextfenster als Claude. OpenAI-Datenschutzrichtlinien weniger klar für EU-Kunden. | Single-Vendor-Lock-in |
-| Open-Source only (Llama/Mistral) | Volle Datenkontrolle, keine API-Kosten, On-Premise-fähig. | Deutlich geringere Qualität bei komplexen Briefings und Structured Output. Hoher GPU-Bedarf für Hosting. | Qualität nicht ausreichend für MVP |
-| Multi-Provider ab Start | Maximale Flexibilität, kein Lock-in. | Deutlich höherer Implementierungsaufwand im MVP. Prompt-Engineering für jeden Provider separat. Inkonsistente Ergebnisqualität. | Zu hoher MVP-Aufwand |
+| Option                                               | Vorteile                                                                                                                                                                  | Nachteile                                                                                                                       | Ausschlussgründe                   |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **Claude API (primär) + GPT-4 (Fallback)** (gewählt) | Starke strukturierte Output-Fähigkeit (JSON-Schema), 200K-Token-Kontextfenster, gute Compliance-Positionierung (Anthropic). GPT-4 als Fallback verhindert Vendor Lock-in. | Abhängigkeit von US-basiertem Provider. API-Kosten bei hohem Volumen.                                                           | –                                  |
+| GPT-4 only                                           | Breitestes Ökosystem, Function Calling, stabile API.                                                                                                                      | Single-Vendor-Risiko. Kleineres Standard-Kontextfenster als Claude. OpenAI-Datenschutzrichtlinien weniger klar für EU-Kunden.   | Single-Vendor-Lock-in              |
+| Open-Source only (Llama/Mistral)                     | Volle Datenkontrolle, keine API-Kosten, On-Premise-fähig.                                                                                                                 | Deutlich geringere Qualität bei komplexen Briefings und Structured Output. Hoher GPU-Bedarf für Hosting.                        | Qualität nicht ausreichend für MVP |
+| Multi-Provider ab Start                              | Maximale Flexibilität, kein Lock-in.                                                                                                                                      | Deutlich höherer Implementierungsaufwand im MVP. Prompt-Engineering für jeden Provider separat. Inkonsistente Ergebnisqualität. | Zu hoher MVP-Aufwand               |
 
 ---
 

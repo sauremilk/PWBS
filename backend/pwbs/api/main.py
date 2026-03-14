@@ -11,8 +11,8 @@ Lifecycle:
 from __future__ import annotations
 
 import logging
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,10 +36,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("PWBS API starting (env=%s) …", settings.environment)
 
     # Startup: eagerly create singletons so first request is fast
-    from pwbs.db.postgres import get_engine
-    from pwbs.db.weaviate_client import get_weaviate_client
     from pwbs.db.neo4j_client import get_neo4j_driver
+    from pwbs.db.postgres import get_engine
     from pwbs.db.redis_client import get_redis_client
+    from pwbs.db.weaviate_client import get_weaviate_client
 
     get_engine()
     get_weaviate_client()
@@ -50,10 +50,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield  # ---- app is running ----
 
     # Shutdown: close all connections
-    from pwbs.db.postgres import dispose_engine
-    from pwbs.db.weaviate_client import close_weaviate_client
     from pwbs.db.neo4j_client import close_neo4j_driver
+    from pwbs.db.postgres import dispose_engine
     from pwbs.db.redis_client import close_redis_client
+    from pwbs.db.weaviate_client import close_weaviate_client
 
     await dispose_engine()
     await close_weaviate_client()

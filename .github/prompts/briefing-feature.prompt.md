@@ -4,17 +4,27 @@ description: Generiert oder debuggt ein Kontextbriefing für einen PWBS-Nutzer. 
 tools:
   - codebase
   - editFiles
+  - problems
+  - runCommands
 ---
 
 # Briefing-Feature entwickeln
+
+> **Robustheitsregeln:**
+>
+> - Prüfe vor jedem Dateizugriff, ob die Datei/das Verzeichnis existiert und Inhalt hat.
+> - Falls Module noch leer oder nicht implementiert sind: erstelle die benötigte Grundstruktur.
+> - Verwende plattformgerechte Shell-Befehle.
 
 **Briefing-Typ:** ${input:briefing_type:Typ des Briefings: "morning", "pre_meeting", "project", "weekly"}
 
 ## Kontext lesen
 
-1. Lies zuerst `pwbs/briefing/` – bestehende Templates und BriefingAgent-Implementierung.
-2. Lies `pwbs/prompts/` – bestehende LLM-Prompt-Templates.
-3. Prüfe `pwbs/search/` – welche Suchmethoden für das Briefing relevant sind.
+Prüfe jeweils ob das Verzeichnis existiert und Dateien enthält. Falls leer oder nicht vorhanden: notiere, welche Grundstruktur erstellt werden muss.
+
+1. `pwbs/briefing/` – bestehende Templates und BriefingAgent-Implementierung.
+2. `pwbs/prompts/` – bestehende LLM-Prompt-Templates.
+3. `pwbs/search/` – welche Suchmethoden für das Briefing relevant sind.
 
 ## Anforderungen für alle Briefing-Typen
 
@@ -52,7 +62,7 @@ tools:
 
 ## Prompt-Template erstellen/aktualisieren
 
-Erstelle oder aktualisiere `pwbs/prompts/${input:briefing_type:briefing_type}_briefing.jinja2`:
+Erstelle oder aktualisiere das Prompt-Template unter `pwbs/prompts/` (z.B. `morning_briefing.jinja2`, `pre_meeting_briefing.jinja2`). Falls `pwbs/prompts/` nicht existiert, erstelle das Verzeichnis:
 
 - Systemrolle klar definieren
 - Output-Format als JSON-Schema vorgeben

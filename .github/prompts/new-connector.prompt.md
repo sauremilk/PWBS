@@ -9,6 +9,13 @@ tools:
 
 # Neuen Konnektor erstellen
 
+> **Robustheitsregeln:**
+>
+> - Prüfe vor jedem Dateizugriff, ob die Datei/das Verzeichnis existiert. Erstelle fehlende Verzeichnisse nach Bedarf.
+> - Verwende plattformgerechte Shell-Befehle. Alle Shell-Beispiele sind Pseudo-Code.
+> - Falls `BaseConnector`, `registry.py` oder `types.py` noch nicht existieren: erstelle die benötigte Basisstruktur oder dokumentiere die fehlende Abhängigkeit.
+> - Leite den Konnektor-Verzeichnisnamen aus dem Datenquellen-Namen ab (Kleinbuchstaben, Sonderzeichen durch Unterstriche ersetzen, z.B. "Google Calendar" → `google_calendar`).
+
 Erstelle einen vollständigen, produktionsreifen Konnektor für die folgende Datenquelle:
 
 **Datenquelle:** ${input:source_name:Name der Datenquelle, z.B. "Notion", "Gmail", "Slack"}
@@ -26,7 +33,7 @@ Vor der Implementierung:
 
 ### 1. Konnektor-Klasse erstellen
 
-Erstelle `pwbs/connectors/${input:source_name:source_name|lower}/${input:source_name:source_name|lower}_connector.py`:
+Erstelle `pwbs/connectors/<source_lower>/<source_lower>_connector.py` (wobei `<source_lower>` der Datenquellen-Name in Kleinbuchstaben ist, z.B. `notion`, `gmail`, `google_calendar`):
 
 - Erbt von `BaseConnector`
 - Implementiert `fetch_since(cursor: str | None) -> SyncResult`
@@ -38,30 +45,29 @@ Erstelle `pwbs/connectors/${input:source_name:source_name|lower}/${input:source_
 
 ### 2. Pydantic-Datenmodelle
 
-Erstelle `pwbs/connectors/${input:source_name:source_name|lower}/models.py`:
+Erstelle `pwbs/connectors/<source_lower>/models.py`:
 
-- `${input:source_name:source_name}RawDocument` für API-Rohformat
-- `${input:source_name:source_name}ConnectorConfig` mit Pydantic v2
+- `<SourceName>RawDocument` für API-Rohformat (z.B. `NotionRawDocument`)
+- `<SourceName>ConnectorConfig` mit Pydantic v2 (z.B. `NotionConnectorConfig`)
 - Alle Felder mit Types und Validators
 
 ### 3. Connector registrieren
 
-Aktualisiere `pwbs/connectors/registry.py`:
-
-- Konnektor in `CONNECTOR_MAP` eintragen
-- `SourceType`-Enum in `pwbs/core/types.py` erweitern
+1. **Prüfe ob `pwbs/connectors/registry.py` existiert.** Falls ja: Konnektor in `CONNECTOR_MAP` eintragen. Falls nein: erstelle die Registry-Datei mit dem neuen Konnektor als erstem Eintrag.
+2. **Prüfe ob `pwbs/core/types.py` existiert.** Falls ja: `SourceType`-Enum erweitern. Falls nein: erstelle die Datei mit dem `SourceType`-Enum.
 
 ### 4. Alembic-Migration
 
-Erstelle Migration für Connector-Zustandstabelle:
-
-```
-alembic revision --autogenerate -m "add_${input:source_name:source_name|lower}_connector_state"
-```
+1. **Prüfe ob Alembic konfiguriert ist:** Suche nach `alembic.ini` oder `alembic/` im `backend/`-Verzeichnis. Falls nicht vorhanden: überspringe diesen Schritt und dokumentiere, dass die Migration manuell erstellt werden muss.
+2. Falls vorhanden, erstelle die Migration:
+   ```
+   cd backend
+   alembic revision --autogenerate -m "add_<source_lower>_connector_state"
+   ```
 
 ### 5. Tests schreiben
 
-Erstelle `tests/unit/connectors/test_${input:source_name:source_name|lower}_connector.py`:
+Erstelle `tests/unit/connectors/test_<source_lower>_connector.py` (z.B. `test_notion_connector.py`):
 
 - Test für `fetch_since()` mit gemockten API-Responses
 - Test für `normalize()` mit Beispiel-Rohdaten

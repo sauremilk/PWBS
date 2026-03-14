@@ -10,13 +10,12 @@ Create Date: 2026-03-13 20:11:41.867736
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
-
 # revision identifiers
-revision: str = '0001'
+revision: str = "0001"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,8 +30,18 @@ def upgrade() -> None:
         sa.Column("display_name", sa.Text(), nullable=False),
         sa.Column("password_hash", sa.Text(), nullable=False),
         sa.Column("encryption_key_enc", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )
@@ -48,8 +57,18 @@ def upgrade() -> None:
         sa.Column("credentials_enc", sa.Text(), nullable=False),
         sa.Column("watermark", sa.DateTime(timezone=True), nullable=True),
         sa.Column("config", postgresql.JSONB(), server_default="{}", nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("user_id", "source_type", name="uq_connections_user_source"),
@@ -67,8 +86,18 @@ def upgrade() -> None:
         sa.Column("language", sa.Text(), server_default="de", nullable=False),
         sa.Column("chunk_count", sa.Integer(), server_default="0", nullable=False),
         sa.Column("processing_status", sa.Text(), server_default="pending", nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("user_id", "source_type", "source_id", name="uq_documents_user_source"),
@@ -85,7 +114,12 @@ def upgrade() -> None:
         sa.Column("token_count", sa.Integer(), nullable=False),
         sa.Column("weaviate_id", sa.Uuid(), nullable=True),
         sa.Column("content_preview", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["document_id"], ["documents.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
@@ -107,7 +141,9 @@ def upgrade() -> None:
         sa.Column("neo4j_node_id", sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("user_id", "entity_type", "normalized_name", name="uq_entities_user_type_name"),
+        sa.UniqueConstraint(
+            "user_id", "entity_type", "normalized_name", name="uq_entities_user_type_name"
+        ),
     )
     op.create_index("idx_entities_user_type", "entities", ["user_id", "entity_type"])
 
@@ -134,12 +170,19 @@ def upgrade() -> None:
         sa.Column("source_chunks", postgresql.ARRAY(sa.Uuid()), nullable=False),
         sa.Column("source_entities", postgresql.ARRAY(sa.Uuid()), nullable=True),
         sa.Column("trigger_context", postgresql.JSONB(), nullable=True),
-        sa.Column("generated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "generated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("idx_briefings_user_type", "briefings", ["user_id", "briefing_type", "generated_at"])
+    op.create_index(
+        "idx_briefings_user_type", "briefings", ["user_id", "briefing_type", "generated_at"]
+    )
 
     # --- audit_log ---
     op.create_table(
@@ -151,7 +194,12 @@ def upgrade() -> None:
         sa.Column("resource_id", sa.Uuid(), nullable=True),
         sa.Column("metadata", postgresql.JSONB(), server_default="{}", nullable=False),
         sa.Column("ip_address", postgresql.INET(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -168,7 +216,12 @@ def upgrade() -> None:
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.Column("retry_count", sa.Integer(), server_default="0", nullable=False),
         sa.Column("metadata", postgresql.JSONB(), server_default="{}", nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("idx_job_runs_type_status", "scheduled_job_runs", ["job_type", "status"])

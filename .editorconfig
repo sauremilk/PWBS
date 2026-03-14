@@ -1,0 +1,55 @@
+# EditorConfig – https://editorconfig.org
+# Einheitliche Formatierung über alle Editoren (VS Code, Vim, JetBrains, etc.)
+
+root = true
+
+# Defaults für alle Dateien
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Python
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+# TypeScript / JavaScript / JSON
+[*.{ts,tsx,js,jsx,json}]
+indent_size = 2
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# TOML
+[*.toml]
+indent_size = 4
+
+# Markdown – Trailing Whitespace kann semantisch sein (Line Breaks)
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# Makefiles brauchen Tabs
+[Makefile]
+indent_style = tab
+
+# Terraform
+[*.tf]
+indent_size = 2
+
+# Docker
+[Dockerfile*]
+indent_size = 4
+
+# Shell-Skripte
+[*.sh]
+indent_size = 2
+
+# SQL
+[*.sql]
+indent_size = 2

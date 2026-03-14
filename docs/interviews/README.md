@@ -6,13 +6,13 @@ Dieses Verzeichnis enthält das Auswertungssystem für die strukturierten Proble
 
 ### Dateien
 
-| Datei | Beschreibung |
-|-------|-------------|
-| `interview-guide.md` | Leitfaden mit strukturierten Fragen zu 5 Problemdimensionen |
-| `evaluation-template.md` | Vorlage zum Ausfüllen nach jedem Interview |
-| `results-spreadsheet.csv` | CSV-Template für Import in Google Sheets / Excel |
-| `aggregation-dashboard.md` | Aggregationsansicht mit Erfolgsindikatoren |
-| `results/` | Verzeichnis für ausgefüllte Einzelauswertungen (INT-001.md, INT-002.md, ...) |
+| Datei                      | Beschreibung                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `interview-guide.md`       | Leitfaden mit strukturierten Fragen zu 5 Problemdimensionen                  |
+| `evaluation-template.md`   | Vorlage zum Ausfüllen nach jedem Interview                                   |
+| `results-spreadsheet.csv`  | CSV-Template für Import in Google Sheets / Excel                             |
+| `aggregation-dashboard.md` | Aggregationsansicht mit Erfolgsindikatoren                                   |
+| `results/`                 | Verzeichnis für ausgefüllte Einzelauswertungen (INT-001.md, INT-002.md, ...) |
 
 ### Workflow
 
@@ -23,10 +23,10 @@ Dieses Verzeichnis enthält das Auswertungssystem für die strukturierten Proble
 
 ### Erfolgsindikatoren (Phase 1)
 
-| Indikator | Ziel | Aktuell |
-|-----------|------|---------|
-| Interviews durchgeführt | 15–20 | 0 |
-| Bestätigen Kontextverlust als Top-3 | ≥ 10 | 0 |
-| Bestätigen Fragmentierung als Top-3 | ≥ 10 | 0 |
-| Signalisieren Testerbereitschaft | ≥ 5 | 0 |
-| Zahlungsbereitschaft > 0€ | ≥ 10 | 0 |
+| Indikator                           | Ziel  | Aktuell |
+| ----------------------------------- | ----- | ------- |
+| Interviews durchgeführt             | 15–20 | 0       |
+| Bestätigen Kontextverlust als Top-3 | ≥ 10  | 0       |
+| Bestätigen Fragmentierung als Top-3 | ≥ 10  | 0       |
+| Signalisieren Testerbereitschaft    | ≥ 5   | 0       |
+| Zahlungsbereitschaft > 0€           | ≥ 10  | 0       |

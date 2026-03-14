@@ -13,9 +13,7 @@ from pwbs.models.base import Base, UUIDPrimaryKeyMixin
 
 class ScheduledJobRun(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "scheduled_job_runs"
-    __table_args__ = (
-        Index("idx_job_runs_type_status", "job_type", "status"),
-    )
+    __table_args__ = (Index("idx_job_runs_type_status", "job_type", "status"),)
 
     job_type: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")

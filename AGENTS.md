@@ -177,6 +177,8 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 
 ## Prompt-Files (Wiederverwendbare KI-Workflows)
 
+### Kern-Workflows
+
 | Datei                                           | Verwendung                                              |
 | ----------------------------------------------- | ------------------------------------------------------- |
 | `.github/prompts/new-connector.prompt.md`       | Neuen Datenquellen-Konnektor implementieren             |
@@ -186,16 +188,39 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | `.github/prompts/debug-agent.prompt.md`         | Agenten-Fehler diagnostizieren                          |
 | `.github/prompts/extended-thinking.prompt.md`   | **Opus 4.6:** Tiefenanalyse komplexer Architekturthemen |
 
+### Orchestrierung
+
+| Datei                                         | Verwendung                                                         |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| `.github/prompts/orchestrator-init.prompt.md` | Parallele Orchestrator-Session initialisieren (Claim → Implement)  |
+| `.github/prompts/task-executor.prompt.md`     | Einzelnen Task vollständig durchführen (Implement → Test → Commit) |
+
+### Optimierungs-Suite
+
+| Datei                                               | Verwendung                                          |
+| --------------------------------------------------- | --------------------------------------------------- |
+| `.github/prompts/optimize-all.prompt.md`            | Meta-Orchestrator: Gesamtoptimierung des Workspaces |
+| `.github/prompts/optimize-continuous.prompt.md`     | Kaizen-Zyklus: Priorisierte Optimierungssequenz     |
+| `.github/prompts/optimize-architecture.prompt.md`   | Modul-Grenzen, Abhängigkeiten, Schichtentrennung    |
+| `.github/prompts/optimize-code-quality.prompt.md`   | Typing, Patterns, Konsistenz, Komplexität           |
+| `.github/prompts/optimize-security.prompt.md`       | OWASP Top 10, DSGVO-Compliance, Verschlüsselung     |
+| `.github/prompts/optimize-testing.prompt.md`        | Coverage, Test-Qualität, Edge Cases, Fixtures       |
+| `.github/prompts/optimize-documentation.prompt.md`  | ADRs, README, API-Docs, Inline-Dokumentation        |
+| `.github/prompts/optimize-infrastructure.prompt.md` | Docker, Terraform, CI/CD, DevOps                    |
+| `.github/prompts/optimize-performance.prompt.md`    | Queries, API-Latenz, Embeddings, Frontend-Bundles   |
+| `.github/prompts/optimize-dependencies.prompt.md`   | CVEs, Versionen, Tech Debt, Upgrade-Pfade           |
+| `.github/prompts/optimize-prompts.prompt.md`        | Meta: Prompts & Instructions selbst optimieren      |
+
 ---
 
 ## Instruction-Files (Automatisch angewendete Kontextregeln)
 
-| Datei                                           | Gilt für                                  |
-| ----------------------------------------------- | ----------------------------------------- |
-| `.github/instructions/backend.instructions.md`  | `**/*.py`                                 |
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}`                  |
-| `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}`                        |
-| `.github/instructions/agents.instructions.md`   | `pwbs/{connectors,ingestion,...}/**/*.py` |
+| Datei                                           | Gilt für                                          |
+| ----------------------------------------------- | ------------------------------------------------- |
+| `.github/instructions/backend.instructions.md`  | `**/*.py`                                         |
+| `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}`                          |
+| `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}`                                |
+| `.github/instructions/agents.instructions.md`   | `backend/pwbs/{connectors,ingestion,...}/**/*.py` |
 
 ---
 

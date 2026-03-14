@@ -5,18 +5,24 @@ tools:
   - codebase
   - editFiles
   - runCommands
+  - problems
 ---
 
 # Datenbankm­igration erstellen
 
-**Beschreibung der Änderung:** ${input:change_description:Was wird am Schema geändert? z.B. "Neue Tabelle für Connector-Zustand" oder "Spalte expires_at zu documents hinzufügen"}
+> **Robustheitsregeln:**
+>
+> - Prüfe vor jedem Schritt, ob die benötigten Voraussetzungen erfüllt sind (Alembic konfiguriert, Modell-Verzeichnis vorhanden, DB erreichbar).
+> - Verwende plattformgerechte Shell-Befehle. Alle Shell-Beispiele sind Pseudo-Code.
+> - Falls Alembic noch nicht eingerichtet ist: dokumentiere die notwendigen Setup-Schritte.
+>   **Beschreibung der Änderung:** ${input:change_description:Was wird am Schema geändert? z.B. "Neue Tabelle für Connector-Zustand" oder "Spalte expires_at zu documents hinzufügen"}
 
 ## Vorgehen
 
 ### 1. Bestehende Modelle analysieren
 
-- Lies `pwbs/storage/models/` – bestehende SQLAlchemy-Modelle
-- Prüfe ob ORM-Modell bereits existiert oder neu erstellt werden muss
+- **Prüfe ob `pwbs/storage/models/` oder `pwbs/models/` existiert.** Lies dort die bestehenden SQLAlchemy-Modelle. Falls keins der Verzeichnisse existiert: suche im gesamten `pwbs/`-Verzeichnis nach SQLAlchemy-Modellen (`Base`, `mapped_column`, `DeclarativeBase`).
+- Prüfe ob das ORM-Modell für die geplante Änderung bereits existiert oder neu erstellt werden muss.
 
 ### 2. ORM-Modell aktualisieren/erstellen
 
@@ -32,14 +38,16 @@ updated_at: Mapped[datetime] = mapped_column(onupdate=func.now())
 
 ### 3. Migration generieren
 
-```bash
-cd backend
-alembic revision --autogenerate -m "${input:change_description:change_description|slugify}"
-```
+1. Prüfe ob `backend/alembic.ini` oder ein `alembic/`-Verzeichnis im Backend existiert. Falls nicht: prüfe ob Alembic als Dependency in `pyproject.toml` aufgeführt ist und initialisiere ggf. mit `alembic init alembic`.
+2. Generiere die Migration (leite den Slug aus der Beschreibung ab – Kleinbuchstaben, Leerzeichen durch Unterstriche, Sonderzeichen entfernen):
+   ```
+   cd backend
+   alembic revision --autogenerate -m "<slug-der-beschreibung>"
+   ```
 
 ### 4. Migration prüfen
 
-Prüfe die generierte Migration in `alembic/versions/` auf:
+Prüfe die generierte Migration in `backend/migrations/versions/` (oder `backend/alembic/versions/`, je nach Konfiguration) auf:
 
 - [ ] `CASCADE DELETE` auf alle `owner_id`-Foreign-Keys
 - [ ] Indexes auf häufig gefilterte Spalten (`owner_id`, `source_id`, `expires_at`)
@@ -55,11 +63,16 @@ Prüfe die generierte Migration in `alembic/versions/` auf:
 
 ### 6. Migration testen (lokal)
 
-```bash
+**Voraussetzung:** Eine laufende PostgreSQL-Instanz (z.B. via `docker compose up -d postgres`).
+
+```
+cd backend
 alembic upgrade head
 alembic downgrade -1
 alembic upgrade head
 ```
+
+Falls die Datenbank nicht erreichbar ist: dokumentiere die Migration als ungetestet und notiere die benötigten Setup-Schritte.
 
 Bericht nach abgeschlossener Migration mit:
 

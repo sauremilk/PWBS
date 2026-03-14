@@ -20,12 +20,12 @@ Wir verwenden **Neo4j** als Graph-Datenbank, weil Cypher als ausdrucksstarke Que
 
 ## Optionen bewertet
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|--------|----------|-----------|-------------------|
-| **Neo4j** (gewählt) | Cypher als ausdrucksstarke, gut dokumentierte Query-Sprache. Größte Graph-DB-Community. Ausgereifte Tools (Neo4j Browser, Bloom für Visualisierung). Stabiler Python-Driver. Self-Hosting möglich. | Hoher RAM-Bedarf bei großen Graphen. Community Edition ohne Cluster-Fähigkeit. | – |
-| TigerGraph | Sehr hohe Performance bei Graph-Analytics, native parallele Traversals. | Proprietäre Query-Sprache (GSQL), kleinere Community, höhere Lernkurve. Self-Hosting komplex. | Proprietäre Query-Sprache |
-| Amazon Neptune | Fully managed, unterstützt Gremlin und SPARQL. | Kein Self-Hosting (AWS only), kein Cypher-Support, höhere Kosten, Vendor Lock-in. | Kein Self-Hosting möglich |
-| TerminusDB | Open-Source, Git-like Versionierung von Graph-Daten. | Kleinere Community, weniger ausgereiftes Tooling, Performance bei komplexen Traversals unklar. | Reife und Community-Größe nicht ausreichend |
+| Option              | Vorteile                                                                                                                                                                                           | Nachteile                                                                                      | Ausschlussgründe                            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| **Neo4j** (gewählt) | Cypher als ausdrucksstarke, gut dokumentierte Query-Sprache. Größte Graph-DB-Community. Ausgereifte Tools (Neo4j Browser, Bloom für Visualisierung). Stabiler Python-Driver. Self-Hosting möglich. | Hoher RAM-Bedarf bei großen Graphen. Community Edition ohne Cluster-Fähigkeit.                 | –                                           |
+| TigerGraph          | Sehr hohe Performance bei Graph-Analytics, native parallele Traversals.                                                                                                                            | Proprietäre Query-Sprache (GSQL), kleinere Community, höhere Lernkurve. Self-Hosting komplex.  | Proprietäre Query-Sprache                   |
+| Amazon Neptune      | Fully managed, unterstützt Gremlin und SPARQL.                                                                                                                                                     | Kein Self-Hosting (AWS only), kein Cypher-Support, höhere Kosten, Vendor Lock-in.              | Kein Self-Hosting möglich                   |
+| TerminusDB          | Open-Source, Git-like Versionierung von Graph-Daten.                                                                                                                                               | Kleinere Community, weniger ausgereiftes Tooling, Performance bei komplexen Traversals unklar. | Reife und Community-Größe nicht ausreichend |
 
 ---
 

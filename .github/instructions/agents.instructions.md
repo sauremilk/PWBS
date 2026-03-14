@@ -1,5 +1,5 @@
 ---
-applyTo: "pwbs/{connectors,ingestion,processing,briefing,search,graph,scheduler}/**/*.py"
+applyTo: "backend/pwbs/{connectors,ingestion,processing,briefing,search,graph,scheduler}/**/*.py"
 ---
 
 # Agent-Instruktionen: KI-Agenten-Architektur im PWBS
@@ -144,9 +144,11 @@ Bevor ein Agent implementiert oder geändert wird, folgende Analyse durchführen
 ### 1. Ausführungspfad-Analyse
 
 Den vollständigen Fluss end-to-end tracing:
+
 ```
 Eingabe → Validierung → Verarbeitung → Nebeneffekte → Ausgabe → Fehlerfall → Cleanup
 ```
+
 Für jeden Schritt: Was kann schiefgehen? Wie wird der Zustand bei Fehler konsistent gehalten?
 
 ### 2. Konkurrenz- und Race-Condition-Prüfung
@@ -164,6 +166,7 @@ Für jeden Schritt: Was kann schiefgehen? Wie wird der Zustand bei Fehler konsis
 ### 4. DSGVO-Kontrollpfad
 
 Für jede neue Datenstruktur, die ein Agent einführt:
+
 - `owner_id` vorhanden? Referenziert auf `users.id` mit `CASCADE DELETE`?
 - `expires_at` vorhanden und in der Cleanup-Pipeline berücksichtigt?
 - Keine PII in Agent-Logs oder Fehlermeldungen?
@@ -171,6 +174,7 @@ Für jede neue Datenstruktur, die ein Agent einführt:
 ### 5. Idempotenz-Garantie
 
 Explizit nachweisen, dass ein Neustart des Agenten ohne Datenverlust oder Duplikate möglich ist:
+
 - Cursors persistent und atomar gespeichert?
 - Alle Writes als Upsert (nicht INSERT)?
 - Verarbeitete Dokumente idempotent identifizierbar (via `source_id` + `owner_id`)?

@@ -20,13 +20,13 @@ Wir verwenden **Weaviate** als Vektor-Datenbank, weil es als einzige Open-Source
 
 ## Optionen bewertet
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|--------|----------|-----------|-------------------|
-| **Weaviate** (gewählt) | Open-Source, Self-Hosting möglich, native Hybrid-Suche (Vektor + BM25), physische Multi-Tenancy (Tenant-Isolation), aktive Community, GraphQL- und REST-API. | Höherer Betriebsaufwand als Pinecone (managed). HNSW-Index verbraucht viel RAM. | – |
-| Pinecone | Fully managed, exzellente Skalierung, niedrige Betriebskomplexität. | Kein Self-Hosting (SaaS only), kein nativer BM25, US-basierter Provider (DSGVO-Bedenken), Vendor Lock-in. | Kein Self-Hosting, DSGVO-Risiko |
-| Qdrant | Open-Source, gute Performance, Rust-basiert. | Keine native Hybrid-Suche (BM25 fehlt), Multi-Tenancy weniger ausgereift. | Fehlende native Hybrid-Suche |
-| Milvus | Open-Source, horizontal skalierbar, bewährt bei großen Datenmengen. | Komplexes Deployment (mehrere Komponenten), keine native BM25-Suche, höhere Betriebskomplexität. | Overkill für MVP-Skala |
-| pgvector | Kein separater Service nötig, PostgreSQL-Integration. | Deutlich langsamer bei großen Datenmengen, keine native Hybrid-Suche, kein Multi-Tenancy-Konzept. | Als Fallback behalten, nicht als Primärlösung |
+| Option                 | Vorteile                                                                                                                                                     | Nachteile                                                                                                 | Ausschlussgründe                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Weaviate** (gewählt) | Open-Source, Self-Hosting möglich, native Hybrid-Suche (Vektor + BM25), physische Multi-Tenancy (Tenant-Isolation), aktive Community, GraphQL- und REST-API. | Höherer Betriebsaufwand als Pinecone (managed). HNSW-Index verbraucht viel RAM.                           | –                                             |
+| Pinecone               | Fully managed, exzellente Skalierung, niedrige Betriebskomplexität.                                                                                          | Kein Self-Hosting (SaaS only), kein nativer BM25, US-basierter Provider (DSGVO-Bedenken), Vendor Lock-in. | Kein Self-Hosting, DSGVO-Risiko               |
+| Qdrant                 | Open-Source, gute Performance, Rust-basiert.                                                                                                                 | Keine native Hybrid-Suche (BM25 fehlt), Multi-Tenancy weniger ausgereift.                                 | Fehlende native Hybrid-Suche                  |
+| Milvus                 | Open-Source, horizontal skalierbar, bewährt bei großen Datenmengen.                                                                                          | Komplexes Deployment (mehrere Komponenten), keine native BM25-Suche, höhere Betriebskomplexität.          | Overkill für MVP-Skala                        |
+| pgvector               | Kein separater Service nötig, PostgreSQL-Integration.                                                                                                        | Deutlich langsamer bei großen Datenmengen, keine native Hybrid-Suche, kein Multi-Tenancy-Konzept.         | Als Fallback behalten, nicht als Primärlösung |
 
 ---
 

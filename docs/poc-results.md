@@ -14,16 +14,16 @@ Der technische Proof of Concept hat die Kernhypothese validiert: Heterogene pers
 
 ## 2. PoC-Setup
 
-| Parameter | Wert |
-|-----------|------|
-| **Embedding-Modell** | OpenAI `text-embedding-3-small` |
-| **Dimensionen** | 1536 |
-| **Vektor-DB** | Weaviate 1.28.2 (Docker, lokal) |
-| **Datenquellen** | 2 (Google Calendar JSON, Obsidian Markdown) |
-| **Gesamtdokumente** | 51 (30 Kalendereinträge + 21 Notizen) |
-| **Batch-Größe** | 64 Dokumente pro Embedding-API-Call |
-| **Suchverfahren** | Nearest-Neighbor (Cosine Distance) |
-| **Test-Queries** | 10 semantische Fragen (deutsch) |
+| Parameter            | Wert                                        |
+| -------------------- | ------------------------------------------- |
+| **Embedding-Modell** | OpenAI `text-embedding-3-small`             |
+| **Dimensionen**      | 1536                                        |
+| **Vektor-DB**        | Weaviate 1.28.2 (Docker, lokal)             |
+| **Datenquellen**     | 2 (Google Calendar JSON, Obsidian Markdown) |
+| **Gesamtdokumente**  | 51 (30 Kalendereinträge + 21 Notizen)       |
+| **Batch-Größe**      | 64 Dokumente pro Embedding-API-Call         |
+| **Suchverfahren**    | Nearest-Neighbor (Cosine Distance)          |
+| **Test-Queries**     | 10 semantische Fragen (deutsch)             |
 
 ---
 
@@ -31,41 +31,41 @@ Der technische Proof of Concept hat die Kernhypothese validiert: Heterogene pers
 
 ### 3.1 Embedding-Generierung
 
-| Metrik | Wert |
-|--------|------|
-| **Latenz pro Batch** (64 Dokumente) | ~2-4 Sekunden |
-| **Latenz pro Dokument** (geschätzt) | ~40-60 ms |
-| **Kosten pro 1000 Embeddings** | ~$0.02 (bei ~500 Tokens/Dokument) |
-| **Kosten für PoC-Lauf** (51 Docs) | < $0.01 |
-| **Weaviate-Ingestion** (51 Docs) | < 2 Sekunden |
+| Metrik                              | Wert                              |
+| ----------------------------------- | --------------------------------- |
+| **Latenz pro Batch** (64 Dokumente) | ~2-4 Sekunden                     |
+| **Latenz pro Dokument** (geschätzt) | ~40-60 ms                         |
+| **Kosten pro 1000 Embeddings**      | ~$0.02 (bei ~500 Tokens/Dokument) |
+| **Kosten für PoC-Lauf** (51 Docs)   | < $0.01                           |
+| **Weaviate-Ingestion** (51 Docs)    | < 2 Sekunden                      |
 
 ### 3.2 Suchqualität (manuelle Bewertung)
 
 10 Test-Queries wurden manuell auf Relevanz bewertet (Skala: 0 = irrelevant, 1 = teilrelevant, 2 = sehr relevant). Bewertet wurde das Top-1-Ergebnis jeder Query.
 
-| # | Query | Top-1-Ergebnis relevant? | Quellenübergreifend? |
-|---|-------|--------------------------|----------------------|
-| 1 | „Welche Termine habe ich diese Woche?" | ✅ Sehr relevant (2) | Nein (Kalender) |
-| 2 | „Was sind die nächsten Schritte für das API-Projekt?" | ✅ Sehr relevant (2) | Ja (Notiz + Kalender) |
-| 3 | „Wer ist für das Backend zuständig?" | ✅ Relevant (1) | Ja (Notiz) |
-| 4 | „Welche Entscheidungen wurden zuletzt getroffen?" | ✅ Relevant (1) | Ja (Notiz) |
-| 5 | „Gibt es anstehende Deadlines?" | ✅ Sehr relevant (2) | Ja (Kalender + Notiz) |
-| 6 | „Was wurde in Meetings besprochen?" | ✅ Sehr relevant (2) | Ja (Kalender) |
-| 7 | „Welche Tools werden verwendet?" | ✅ Relevant (1) | Nein (Notiz) |
-| 8 | „Wie ist der Projektfortschritt?" | ✅ Relevant (1) | Ja (Notiz) |
-| 9 | „Welche Risiken gibt es?" | ✅ Relevant (1) | Nein (Notiz) |
-| 10 | „Was ist der Stand bei der Datenmigration?" | ⚠️ Teilrelevant (1) | Nein (Notiz) |
+| #   | Query                                                 | Top-1-Ergebnis relevant? | Quellenübergreifend?  |
+| --- | ----------------------------------------------------- | ------------------------ | --------------------- |
+| 1   | „Welche Termine habe ich diese Woche?"                | ✅ Sehr relevant (2)     | Nein (Kalender)       |
+| 2   | „Was sind die nächsten Schritte für das API-Projekt?" | ✅ Sehr relevant (2)     | Ja (Notiz + Kalender) |
+| 3   | „Wer ist für das Backend zuständig?"                  | ✅ Relevant (1)          | Ja (Notiz)            |
+| 4   | „Welche Entscheidungen wurden zuletzt getroffen?"     | ✅ Relevant (1)          | Ja (Notiz)            |
+| 5   | „Gibt es anstehende Deadlines?"                       | ✅ Sehr relevant (2)     | Ja (Kalender + Notiz) |
+| 6   | „Was wurde in Meetings besprochen?"                   | ✅ Sehr relevant (2)     | Ja (Kalender)         |
+| 7   | „Welche Tools werden verwendet?"                      | ✅ Relevant (1)          | Nein (Notiz)          |
+| 8   | „Wie ist der Projektfortschritt?"                     | ✅ Relevant (1)          | Ja (Notiz)            |
+| 9   | „Welche Risiken gibt es?"                             | ✅ Relevant (1)          | Nein (Notiz)          |
+| 10  | „Was ist der Stand bei der Datenmigration?"           | ⚠️ Teilrelevant (1)      | Nein (Notiz)          |
 
 **Durchschnittliche Relevanz:** 1.4 / 2.0 (70%)
 **Quellenübergreifende Treffer:** 6 von 10 Queries (60%)
 
 ### 3.3 Such-Latenz
 
-| Metrik | Wert |
-|--------|------|
+| Metrik                           | Wert      |
+| -------------------------------- | --------- |
 | **Query-Embedding** (OpenAI API) | ~50-80 ms |
-| **Weaviate Near-Vector-Suche** | < 10 ms |
-| **Gesamtlatenz pro Suche** | ~60-90 ms |
+| **Weaviate Near-Vector-Suche**   | < 10 ms   |
+| **Gesamtlatenz pro Suche**       | ~60-90 ms |
 
 ---
 
@@ -73,15 +73,15 @@ Der technische Proof of Concept hat die Kernhypothese validiert: Heterogene pers
 
 Vergleich der drei Kandidaten basierend auf PoC-Erfahrungen und Architektur-Referenzdaten (D1 Abschnitt 3.2):
 
-| Kriterium | `text-embedding-3-small` (OpenAI) | `text-embedding-3-large` (OpenAI) | `all-MiniLM-L6-v2` (lokal) |
-|-----------|-----------------------------------|------------------------------------|------------------------------|
-| **Dimensionen** | 1536 | 3072 | 384 |
-| **Latenz pro Chunk** | ~50 ms | ~80 ms | ~15 ms (GPU), ~100 ms (CPU) |
-| **Kosten pro 1M Tokens** | ~$0.02 | ~$0.13 | Gratis (Compute-Kosten) |
-| **Qualität** (MTEB Benchmark) | Gut | Sehr gut | Mittel |
-| **Mehrsprachigkeit** | Gut (DE + EN) | Gut (DE + EN) | Eingeschränkt (primär EN) |
-| **Offline-Fähigkeit** | ❌ | ❌ | ✅ |
-| **DSGVO-Strict** | ❌ (US-Provider) | ❌ (US-Provider) | ✅ (lokal) |
+| Kriterium                     | `text-embedding-3-small` (OpenAI)    | `text-embedding-3-large` (OpenAI)   | `all-MiniLM-L6-v2` (lokal)             |
+| ----------------------------- | ------------------------------------ | ----------------------------------- | -------------------------------------- |
+| **Dimensionen**               | 1536                                 | 3072                                | 384                                    |
+| **Latenz pro Chunk**          | ~50 ms                               | ~80 ms                              | ~15 ms (GPU), ~100 ms (CPU)            |
+| **Kosten pro 1M Tokens**      | ~$0.02                               | ~$0.13                              | Gratis (Compute-Kosten)                |
+| **Qualität** (MTEB Benchmark) | Gut                                  | Sehr gut                            | Mittel                                 |
+| **Mehrsprachigkeit**          | Gut (DE + EN)                        | Gut (DE + EN)                       | Eingeschränkt (primär EN)              |
+| **Offline-Fähigkeit**         | ❌                                   | ❌                                  | ✅                                     |
+| **DSGVO-Strict**              | ❌ (US-Provider)                     | ❌ (US-Provider)                    | ✅ (lokal)                             |
 | **Speicherbedarf (Weaviate)** | Mittel (1536 × 4 Byte = 6 KB/Vektor) | Hoch (3072 × 4 Byte = 12 KB/Vektor) | Niedrig (384 × 4 Byte = 1.5 KB/Vektor) |
 
 ### Empfehlung
@@ -98,14 +98,14 @@ Vergleich der drei Kandidaten basierend auf PoC-Erfahrungen und Architektur-Refe
 
 ### 5.1 Cloud vs. On-Premise
 
-| Kriterium | Cloud (AWS eu-central-1) | On-Premise (Docker Compose) |
-|-----------|--------------------------|------------------------------|
-| **Setup-Aufwand** | Mittel (Terraform + RDS + ECS) | Niedrig (docker compose up) |
-| **Betrieb** | Managed (AWS RDS, ECS, ElastiCache) | Manuell (Updates, Backups, Monitoring) |
-| **Skalierung** | Horizontal (Auto-Scaling) | Vertikal (mehr RAM/CPU) |
-| **Kosten** | ~$200-500/Monat (MVP-Skala) | Hardware-Kosten + Strom |
-| **DSGVO** | ✅ EU-Region (Frankfurt) | ✅ Volle Kontrolle |
-| **LLM-Zugang** | Cloud-APIs (Claude, OpenAI) | Ollama (lokal) + ggf. Cloud-API |
+| Kriterium         | Cloud (AWS eu-central-1)            | On-Premise (Docker Compose)            |
+| ----------------- | ----------------------------------- | -------------------------------------- |
+| **Setup-Aufwand** | Mittel (Terraform + RDS + ECS)      | Niedrig (docker compose up)            |
+| **Betrieb**       | Managed (AWS RDS, ECS, ElastiCache) | Manuell (Updates, Backups, Monitoring) |
+| **Skalierung**    | Horizontal (Auto-Scaling)           | Vertikal (mehr RAM/CPU)                |
+| **Kosten**        | ~$200-500/Monat (MVP-Skala)         | Hardware-Kosten + Strom                |
+| **DSGVO**         | ✅ EU-Region (Frankfurt)            | ✅ Volle Kontrolle                     |
+| **LLM-Zugang**    | Cloud-APIs (Claude, OpenAI)         | Ollama (lokal) + ggf. Cloud-API        |
 
 **Empfehlung:** Cloud (AWS eu-central-1) für MVP. On-Premise als Option ab Phase 4 (Tauri Desktop-App).
 
@@ -140,12 +140,12 @@ OpenAI API (text-embedding-3-small) hat im PoC zuverlässig funktioniert. Für L
 
 ### Bekannte Risiken für Phase 2
 
-| Risiko | Schwere | Mitigation |
-|--------|---------|------------|
-| Suchqualität sinkt bei > 10K Dokumenten ohne Tuning | Mittel | Hybrid-Suche (BM25 + Vektor), Alpha-Tuning, Re-Ranking |
-| OpenAI-API-Ausfälle blockieren Embedding-Generierung | Mittel | Lokales Fallback-Modell (all-MiniLM-L6-v2), Retry mit Backoff |
-| Mehrsprachige Inhalte (DE/EN) haben niedrigere Suchqualität | Niedrig | Multilinguales Embedding-Modell evaluieren (OQ-001) |
-| Weaviate-RAM-Bedarf bei > 100K Vektoren | Niedrig | Vertikale Skalierung, Monitoring, ggf. Sharding |
+| Risiko                                                      | Schwere | Mitigation                                                    |
+| ----------------------------------------------------------- | ------- | ------------------------------------------------------------- |
+| Suchqualität sinkt bei > 10K Dokumenten ohne Tuning         | Mittel  | Hybrid-Suche (BM25 + Vektor), Alpha-Tuning, Re-Ranking        |
+| OpenAI-API-Ausfälle blockieren Embedding-Generierung        | Mittel  | Lokales Fallback-Modell (all-MiniLM-L6-v2), Retry mit Backoff |
+| Mehrsprachige Inhalte (DE/EN) haben niedrigere Suchqualität | Niedrig | Multilinguales Embedding-Modell evaluieren (OQ-001)           |
+| Weaviate-RAM-Bedarf bei > 100K Vektoren                     | Niedrig | Vertikale Skalierung, Monitoring, ggf. Sharding               |
 
 ### Nächste Schritte (Phase 2)
 
@@ -159,11 +159,11 @@ OpenAI API (text-embedding-3-small) hat im PoC zuverlässig funktioniert. Für L
 
 ## Anhang: PoC-Dateien
 
-| Datei | Beschreibung |
-|-------|-------------|
-| `poc/embedding_poc.py` | Embedding-Generierung und Weaviate-Speicherung (TASK-001) |
-| `poc/search_poc.py` | Semantische Suche mit CLI und 10 Test-Queries (TASK-002) |
-| `poc/generate_sample_data.py` | Generator für 51 Beispiel-Dokumente |
-| `poc/docker-compose.yml` | Weaviate 1.28.2 Container-Konfiguration |
-| `poc/requirements.txt` | Python-Dependencies (openai, weaviate-client, python-dotenv) |
-| `poc/README.md` | Schritt-für-Schritt-Anleitung |
+| Datei                         | Beschreibung                                                 |
+| ----------------------------- | ------------------------------------------------------------ |
+| `poc/embedding_poc.py`        | Embedding-Generierung und Weaviate-Speicherung (TASK-001)    |
+| `poc/search_poc.py`           | Semantische Suche mit CLI und 10 Test-Queries (TASK-002)     |
+| `poc/generate_sample_data.py` | Generator für 51 Beispiel-Dokumente                          |
+| `poc/docker-compose.yml`      | Weaviate 1.28.2 Container-Konfiguration                      |
+| `poc/requirements.txt`        | Python-Dependencies (openai, weaviate-client, python-dotenv) |
+| `poc/README.md`               | Schritt-für-Schritt-Anleitung                                |

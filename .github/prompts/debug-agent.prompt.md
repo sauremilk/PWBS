@@ -9,6 +9,12 @@ tools:
 
 # Agenten-Debugging
 
+> **Robustheitsregeln:**
+>
+> - Prüfe vor jedem Dateizugriff, ob die Datei existiert. Verwende plattformgerechte Shell-Befehle.
+> - Nicht alle Diagnose-Schritte sind in jedem Workspace-Zustand anwendbar (z.B. fehlende Datenbank, keine Log-Dateien). Überspringe nicht-anwendbare Schritte und dokumentiere warum.
+> - Passe SQL-Abfragen an das tatsächlich vorhandene Datenbankschema an. Prüfe Tabellennamen vor der Abfrage.
+
 **Betroffener Agent/Bereich:** ${input:agent:Welcher Agent oder Bereich ist betroffen? z.B. "IngestionAgent/Notion", "BriefingAgent/morning", "ProcessingAgent/embedding"}
 
 **Fehlerbeschreibung:** ${input:error:Kurze Beschreibung des Problems oder Fehlermeldung}
@@ -17,12 +23,13 @@ tools:
 
 Vor den Diagnose-Schritten: Alle pläusiblen Ursachen ranken und priorisieren.
 
-| Rang | Hypothese | Wahrscheinlichkeit | Falsifizierbar durch |
-|------|-----------|-------------------|---------------------|
-| 1 | ... | Hoch/Mittel/Niedrig | ... |
-| 2 | ... | ... | ... |
+| Rang | Hypothese | Wahrscheinlichkeit  | Falsifizierbar durch |
+| ---- | --------- | ------------------- | -------------------- |
+| 1    | ...       | Hoch/Mittel/Niedrig | ...                  |
+| 2    | ...       | ...                 | ...                  |
 
 Typische Ursachen-Kategorien:
+
 - **Zustandsproblem:** Cursor korrupt, abgelaufener OAuth-Token, inkonsistente DB-Daten
 - **Netzwerk/API:** Rate-Limit, Timeout, API-Schema-Änderung beim Quell-System
 - **Normalisierungsfehler:** Unerwartetes Datenformat in Rohdaten vom Connector
@@ -34,10 +41,9 @@ Typische Ursachen-Kategorien:
 
 Suche nach relevanten Fehlern in den Logs:
 
-```bash
-# Strukturierte Logs nach Agent und Fehlertyp filtern
-grep -r "${input:agent:agent}" logs/ | grep -i "error\|exception\|failed"
-```
+1. **Prüfe ob ein `logs/`-Verzeichnis existiert.** Falls nicht: prüfe ob Logs über `docker compose logs` verfügbar sind oder ob die Anwendung nach stdout/stderr loggt.
+2. Durchsuche die verfügbaren Logs nach dem betroffenen Agenten und Fehlermustern (`error`, `exception`, `failed`, `traceback`).
+3. Falls keine Logs vorhanden sind: prüfe ob die Anwendung überhaupt gestartet wurde und ob Logging konfiguriert ist.
 
 Achte auf:
 
@@ -47,16 +53,18 @@ Achte auf:
 
 ### 2. Datenbankzustand prüfen
 
-Prüfe den Connector-/Job-Zustand:
+**Voraussetzung:** Prüfe zuerst, ob eine Datenbankverbindung verfügbar ist (PostgreSQL via Docker oder lokal). Falls nicht: überspringe diesen Schritt.
+
+Prüfe den Connector-/Job-Zustand (passe Tabellen- und Spaltennamen an das tatsächliche Schema an – prüfe zuerst die SQLAlchemy-Modelle in `pwbs/models/` oder `pwbs/storage/`):
 
 ```sql
--- Letzter bekannter guter Cursor
+-- Letzter bekannter guter Cursor (Tabelle kann anders heißen)
 SELECT connector_type, cursor, last_sync_at, status, error_message
 FROM connector_states
 WHERE owner_id = '[user_id]'
 ORDER BY last_sync_at DESC;
 
--- Fehlgeschlagene Jobs
+-- Fehlgeschlagene Jobs (falls Scheduler-Tabelle existiert)
 SELECT job_id, status, started_at, finished_at, error
 FROM scheduler_job_runs
 WHERE status = 'failed'
@@ -77,11 +85,11 @@ HAVING COUNT(*) > 1;
 
 ### 4. Quellcode analysieren
 
-Lies relevante Implementierungsdateien:
+Lies relevante Implementierungsdateien (prüfe jeweils ob sie existieren):
 
-- Agent-Klasse in `pwbs/{connector_name}/`
-- Fehlerbehandlung in `pwbs/core/exceptions.py`
-- Retry-Logik in `pwbs/core/retry.py`
+- Agent-Klasse: Suche in `pwbs/` nach Dateien, die zum betroffenen Agenten gehören.
+- Fehlerbehandlung: `pwbs/core/exceptions.py` (falls vorhanden)
+- Retry-/Backoff-Logik: Suche nach `retry`, `backoff`, `tenacity` im Codebase.
 
 ### 5. Fix-Strategie
 
@@ -111,5 +119,5 @@ Strukturierten Abschluss-Report erstellen:
 **Betroffene Dokumente/Nutzer:** ...
 **Fix angewendet:** ...
 **Präventionsmaßnahme:** ...
-**Neuer Test:** tests/.../test_...py
+**Neuer Test:** tests/.../test\_...py
 ```

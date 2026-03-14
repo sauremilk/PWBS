@@ -8,6 +8,11 @@ tools:
 
 # Architektur-Review
 
+> **Robustheitsregeln:**
+>
+> - Prüfe, ob das angegebene Modul/Feature im Workspace existiert. Falls nicht: führe den Review auf Basis der Architektur-Dokumentation durch und notiere, dass der Code noch nicht implementiert ist.
+> - Passe die Checkliste an den aktuellen Implementierungsstand an – überspringe Prüfpunkte, die auf noch nicht vorhandene Komponenten verweisen.
+
 **Zu überprüfendes Modul/Feature:** ${input:module:Modulpfad oder Feature-Name, z.B. "pwbs/connectors/" oder "Briefing-Pipeline"}
 
 ## Phase 0: Vorbereitende Tiefenanalyse (Extended Thinking)
@@ -87,9 +92,9 @@ Erstelle einen strukturierten Review-Report:
 
 ### Kritische Probleme (Must-Fix, blockiert Deployment)
 
-| # | Problem | Betroffene Datei | Empfehlung |
-|---|---------|-----------------|------------|
-| 1 | ... | ... | ... |
+| #   | Problem | Betroffene Datei | Empfehlung |
+| --- | ------- | ---------------- | ---------- |
+| 1   | ...     | ...              | ...        |
 
 ### Wichtige Probleme (Should-Fix, nächster Sprint)
 
@@ -128,6 +133,8 @@ Erstelle einen strukturierten Review-Report:
 ### Empfohlene nächste Schritte
 
 ...
+
 ```
 
 Für jedes gefundene Problem: Zeige den problematischen Code, erkläre das Problem und schlage einen konkreten Fix vor.
+```

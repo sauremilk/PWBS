@@ -89,7 +89,7 @@ Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruk
 
 - **Keine Secrets im Code:** API-Keys, DB-Passwörter etc. über Umgebungsvariablen (`.env`, nie committen).
 - **Input-Validierung:** Alle externen Eingaben (Webhook-Payloads, API-Requests) mit Pydantic validieren.
-- **Nutzer-Datentrennung:** Mandanten-Isolation auf Datenbankebene. Jede Query muss `user_id` als Filter enthalten.
+- **Nutzer-Datentrennung:** Mandanten-Isolation auf Datenbankebene. Jede Query muss `owner_id` als Filter enthalten (`user_id` aus JWT → `owner_id` in DB).
 - **OAuth:** Token-Rotation implementieren. Refresh-Tokens verschlüsselt in DB speichern.
 - **Rate Limiting:** Auf allen öffentlichen API-Endpunkten. LLM-Calls absichern gegen Missbrauch.
 

@@ -11,7 +11,7 @@ applyTo: "**/*.{py,ts,tsx}"
 1. **Datensparsamkeit:** Nur Daten erheben, die für den definierten Zweck zwingend nötig sind.
 2. **Zweckbindung:** Daten dürfen nur für den ursprünglich definierten Zweck verarbeitet werden.
 3. **Speicherbegrenzung:** Jedes Datum hat ein `expires_at`. Ablaufprüfung in der Cleanup-Pipeline.
-4. **Löschbarkeit:** `DELETE CASCADE` auf alle `user_id`-gebundenen Daten. GDPR-Delete-Funktion testen.
+4. **Löschbarkeit:** `DELETE CASCADE` auf alle `owner_id`-gebundenen Daten. GDPR-Delete-Funktion testen.
 5. **Keine LLM-Training-Nutzung:** Nutzerdaten dürfen NIEMALS für externes LLM-Training verwendet werden.
 
 ### Mandanten-Isolation
@@ -47,7 +47,7 @@ logger.info(f"Processing document: id={doc.id} source={doc.source}")
 
 - Jeder API-Endpunkt muss authentifizierten Nutzer prüfen.
 - Ressource-Ownership vor jeder Lese-/Schreib-Operation verifizieren.
-- `user_id` immer aus JWT-Token extrahieren, nie aus Request-Body lesen.
+- `user_id` immer aus JWT-Token extrahieren, nie aus Request-Body lesen. In DB-Queries als `owner_id`-Filter verwenden.
 
 ### A02 – Cryptographic Failures
 
