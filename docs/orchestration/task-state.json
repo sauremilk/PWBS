@@ -2295,13 +2295,14 @@
       "priority": "P2",
       "effort": "XL",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2025-07-24T12:10:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-144"
-      ]
+      ],
+      "commit": "39d7a11"
     },
     "TASK-150": {
       "stream": "STREAM-PHASE5",
