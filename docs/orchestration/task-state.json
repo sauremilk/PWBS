@@ -1965,13 +1965,14 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-J",
       "claimed_at": "2026-03-14T16:23:40.347424+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T17:10:14.327412+00:00",
       "blocked_by": [
         "TASK-125"
-      ]
+      ],
+      "commit": "90e5785"
     },
     "TASK-127": {
       "stream": "STREAM-PHASE3",
