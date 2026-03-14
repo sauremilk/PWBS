@@ -7,6 +7,7 @@ import {
   Shield,
   Trash2,
   Download,
+  Bell,
   Loader2,
   Check,
   AlertTriangle,
@@ -21,10 +22,11 @@ import {
 } from "@/hooks/use-settings";
 import { SecurityStatusPanel } from "@/components/settings/security-status-panel";
 
-type TabId = "profile" | "privacy" | "security" | "account";
+type TabId = "profile" | "notifications" | "privacy" | "security" | "account";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profil", icon: <User className="h-4 w-4" /> },
+  { id: "notifications", label: "Erinnerungen", icon: <Bell className="h-4 w-4" /> },
   { id: "privacy", label: "Datenschutz", icon: <Shield className="h-4 w-4" /> },
   { id: "security", label: "Sicherheit", icon: <Shield className="h-4 w-4" /> },
   { id: "account", label: "Account", icon: <Trash2 className="h-4 w-4" /> },
@@ -78,6 +80,7 @@ function SettingsContent() {
       {/* Tab Content */}
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         {activeTab === "profile" && <ProfileTab />}
+        {activeTab === "notifications" && <NotificationsTab />}
         {activeTab === "privacy" && <PrivacyTab />}
         {activeTab === "security" && <SecurityTab />}
         {activeTab === "account" && <AccountTab />}
@@ -174,6 +177,89 @@ function ProfileTab() {
         />
         Briefings automatisch generieren
       </label>
+
+      <button
+        onClick={handleSave}
+        disabled={update.isPending}
+        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+      >
+        {update.isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : update.isSuccess ? (
+          <Check className="h-4 w-4" />
+        ) : null}
+        Speichern
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Notifications Tab (TASK-132)
+// ---------------------------------------------------------------------------
+
+function NotificationsTab() {
+  const { data, isLoading } = useUserSettings();
+  const update = useUpdateSettings();
+  const [frequency, setFrequency] = useState("daily");
+
+  useEffect(() => {
+    if (data) {
+      setFrequency(data.reminder_frequency);
+    }
+  }, [data]);
+
+  function handleSave() {
+    update.mutate({ reminder_frequency: frequency as "daily" | "weekly" | "off" });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-md">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Erinnerungsfrequenz</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Bestimme, wie oft du proaktive Erinnerungen und Follow-up-Benachrichtigungen erhalten möchtest.
+        </p>
+      </div>
+
+      <fieldset className="space-y-3">
+        <legend className="sr-only">Erinnerungsfrequenz</legend>
+        {([
+          { value: "daily", label: "Täglich", desc: "Jeden Tag eine Zusammenfassung offener Erinnerungen" },
+          { value: "weekly", label: "Wöchentlich", desc: "Einmal pro Woche (freitags) eine Übersicht" },
+          { value: "off", label: "Aus", desc: "Keine proaktiven Erinnerungen – nur manuell abrufbar" },
+        ] as const).map((opt) => (
+          <label
+            key={opt.value}
+            className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
+              frequency === opt.value
+                ? "border-blue-600 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <input
+              type="radio"
+              name="reminder-frequency"
+              value={opt.value}
+              checked={frequency === opt.value}
+              onChange={(e) => setFrequency(e.target.value)}
+              className="mt-0.5"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-900">{opt.label}</span>
+              <p className="text-xs text-gray-500">{opt.desc}</p>
+            </div>
+          </label>
+        ))}
+      </fieldset>
 
       <button
         onClick={handleSave}

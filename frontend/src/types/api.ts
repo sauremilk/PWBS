@@ -356,6 +356,38 @@ export interface DocumentDetailResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Reminders (TASK-132)
+// ---------------------------------------------------------------------------
+
+export type ReminderType = "follow_up" | "inactive_topic" | "open_question";
+export type ReminderStatus = "pending" | "acknowledged" | "dismissed" | "snoozed";
+export type ReminderUrgency = "high" | "medium" | "low";
+export type ReminderFrequency = "daily" | "weekly" | "off";
+
+export interface Reminder {
+  id: string;
+  reminder_type: ReminderType;
+  title: string;
+  description: string;
+  status: ReminderStatus;
+  urgency: ReminderUrgency;
+  due_at: string | null;
+  responsible_person: string | null;
+  source_document_id: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
+export interface ReminderListResponse {
+  items: Reminder[];
+  count: number;
+}
+
+export interface UpdateReminderStatusRequest {
+  status: ReminderStatus;
+}
+
+// ---------------------------------------------------------------------------
 // User / Settings
 // ---------------------------------------------------------------------------
 
@@ -366,6 +398,7 @@ export interface UserSettingsResponse {
   timezone: string;
   language: string;
   briefing_auto_generate: boolean;
+  reminder_frequency: ReminderFrequency;
 }
 
 export interface UserSettingsUpdate {
@@ -373,6 +406,7 @@ export interface UserSettingsUpdate {
   language?: string;
   briefing_auto_generate?: boolean;
   display_name?: string;
+  reminder_frequency?: ReminderFrequency;
 }
 
 export interface ExportStartResponse {

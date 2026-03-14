@@ -5,3 +5,4 @@ export * as briefingsApi from "./briefings";
 export * as knowledgeApi from "./knowledge";
 export * as documentsApi from "./documents";
 export * as userApi from "./user";
+export * as remindersApi from "./reminders";

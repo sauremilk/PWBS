@@ -67,6 +67,7 @@ class UserSettingsResponse(BaseModel):
     timezone: str
     language: str
     briefing_auto_generate: bool
+    reminder_frequency: str  # "daily" | "weekly" | "off"
 
 
 class UserSettingsUpdate(BaseModel):
@@ -76,6 +77,7 @@ class UserSettingsUpdate(BaseModel):
     language: str | None = None
     briefing_auto_generate: bool | None = None
     display_name: str | None = None
+    reminder_frequency: str | None = None
 
 
 class ExportStartResponse(BaseModel):
@@ -154,6 +156,7 @@ async def get_settings_endpoint(
         timezone="UTC",
         language="de",
         briefing_auto_generate=True,
+        reminder_frequency="daily",
     )
 
 
@@ -190,6 +193,16 @@ async def update_settings(
                 },
             )
 
+    if update.reminder_frequency is not None:
+        if update.reminder_frequency not in ("daily", "weekly", "off"):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "INVALID_REMINDER_FREQUENCY",
+                    "message": f"Invalid reminder frequency: {update.reminder_frequency}. Must be daily, weekly, or off.",
+                },
+            )
+
     # Update display_name on the User model (only field that exists in DB)
     if update.display_name is not None:
         if len(update.display_name.strip()) == 0:
@@ -215,6 +228,7 @@ async def update_settings(
         briefing_auto_generate=(
             update.briefing_auto_generate if update.briefing_auto_generate is not None else True
         ),
+        reminder_frequency=update.reminder_frequency or "daily",
     )
 
 
