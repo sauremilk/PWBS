@@ -1596,10 +1596,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "Frontend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-H",
+      "claimed_at": "2026-03-14T13:12:57.104835+00:00",
+      "completed_at": "2026-03-14T13:12:57.104835+00:00",
       "blocked_by": [
         "TASK-095",
         "TASK-092"
