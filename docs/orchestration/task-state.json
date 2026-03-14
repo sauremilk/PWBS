@@ -1982,9 +1982,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2026-03-14T12:51:24.804459+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-064"
