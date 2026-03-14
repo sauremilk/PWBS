@@ -2084,10 +2084,10 @@
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": null,
-      "completed_at": null,
+      "completed_at": "2026-03-14T18:59:51.836381+00:00",
       "blocked_by": [
         "TASK-064"
       ],
