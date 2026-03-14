@@ -258,7 +258,7 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test query", limit=10)
             response = MagicMock()
-            result = await search(body=body, response=response, user=user, session=session)
+            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         assert isinstance(result, SearchResponse)
         assert len(result.results) == 1
@@ -289,7 +289,7 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="nothing", limit=10)
             response = MagicMock()
-            result = await search(body=body, response=response, user=user, session=session)
+            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         assert isinstance(result, SearchResponse)
         assert len(result.results) == 0
@@ -317,7 +317,7 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test", limit=5)
             response = MagicMock()
-            await search(body=body, response=response, user=user, session=session)
+            await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         mock_hybrid.search.assert_called_once_with(
             query="test",
@@ -358,7 +358,7 @@ class TestSearchEndpoint:
                 filters=SearchFilters(source_types=[SourceType.NOTION]),
             )
             response = MagicMock()
-            result = await search(body=body, response=response, user=user, session=session)
+            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         assert len(result.results) == 1
         assert result.results[0].source_type == SourceType.NOTION
@@ -384,7 +384,7 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test", limit=25)
             response = MagicMock()
-            await search(body=body, response=response, user=user, session=session)
+            await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         mock_hybrid.search.assert_called_once_with(
             query="test",
@@ -416,7 +416,7 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test")
             response = MagicMock()
-            result = await search(body=body, response=response, user=user, session=session)
+            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
 
         assert len(result.sources) == 1
         assert result.sources[0].chunk_id == cid

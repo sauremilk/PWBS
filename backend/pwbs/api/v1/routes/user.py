@@ -16,12 +16,13 @@ import logging
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
+from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.dsgvo import export_service
@@ -226,6 +227,7 @@ async def update_settings(
 )
 async def start_export(
     background_tasks: BackgroundTasks,
+    request: Request,
     response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
@@ -246,6 +248,17 @@ async def start_export(
         )
 
     export = await export_service.create_export_job(user.id, db)
+
+    await log_event(
+        db,
+        action=AuditAction.DATA_EXPORTED,
+        user_id=user.id,
+        resource_type="data_export",
+        resource_id=export.id,
+        ip_address=get_client_ip(request),
+    )
+    await db.commit()
+
     settings = get_settings()
     background_tasks.add_task(
         export_service.run_export,

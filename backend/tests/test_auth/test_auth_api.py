@@ -109,7 +109,10 @@ class TestRegisterEndpoint:
                 password="SecurePass123",
                 display_name="Test",
             )
-            result = await register(body=body, db=mock_db)
+            mock_request = MagicMock()
+            mock_request.headers = {}
+            mock_request.client.host = "127.0.0.1"
+            result = await register(body=body, request=mock_request, db=mock_db)
 
         assert result.user_id == uid
         assert result.access_token == "access"
@@ -132,8 +135,11 @@ class TestRegisterEndpoint:
                 password="SecurePass123",
                 display_name="Test",
             )
+            mock_request = MagicMock()
+            mock_request.headers = {}
+            mock_request.client.host = "127.0.0.1"
             with pytest.raises(Exception) as exc_info:
-                await register(body=body, db=mock_db)
+                await register(body=body, request=mock_request, db=mock_db)
             assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
@@ -153,8 +159,11 @@ class TestRegisterEndpoint:
                 password="SecurePass123",
                 display_name="Test",
             )
+            mock_request = MagicMock()
+            mock_request.headers = {}
+            mock_request.client.host = "127.0.0.1"
             with pytest.raises(Exception) as exc_info:
-                await register(body=body, db=mock_db)
+                await register(body=body, request=mock_request, db=mock_db)
             assert exc_info.value.status_code == 409
 
 
@@ -184,8 +193,11 @@ class TestLoginEndpoint:
             patch("pwbs.api.v1.routes.auth.verify_password", return_value=True),
             patch("pwbs.api.v1.routes.auth.create_token_pair", new_callable=AsyncMock, return_value=pair),
         ):
+            mock_request = MagicMock()
+            mock_request.headers = {}
+            mock_request.client.host = "127.0.0.1"
             body = LoginRequest(email="test@example.com", password="password")
-            result = await login(body=body, db=mock_db)
+            result = await login(body=body, request=mock_request, db=mock_db)
 
         assert result.access_token == "access"
         assert result.expires_in == 900
@@ -199,9 +211,12 @@ class TestLoginEndpoint:
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute = AsyncMock(return_value=mock_result)
 
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
         body = LoginRequest(email="wrong@example.com", password="password")
         with pytest.raises(Exception) as exc_info:
-            await login(body=body, db=mock_db)
+            await login(body=body, request=mock_request, db=mock_db)
         assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
@@ -216,10 +231,13 @@ class TestLoginEndpoint:
         mock_result.scalar_one_or_none.return_value = mock_user
         mock_db.execute = AsyncMock(return_value=mock_result)
 
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
         with patch("pwbs.api.v1.routes.auth.verify_password", return_value=False):
             body = LoginRequest(email="test@example.com", password="wrongpass")
             with pytest.raises(Exception) as exc_info:
-                await login(body=body, db=mock_db)
+                await login(body=body, request=mock_request, db=mock_db)
             assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
@@ -232,9 +250,12 @@ class TestLoginEndpoint:
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute = AsyncMock(return_value=mock_result)
 
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
         body = LoginRequest(email="nonexistent@example.com", password="pass")
         with pytest.raises(Exception) as exc_info:
-            await login(body=body, db=mock_db)
+            await login(body=body, request=mock_request, db=mock_db)
         assert "INVALID_CREDENTIALS" in str(exc_info.value.detail)
 
 

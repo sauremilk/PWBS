@@ -292,8 +292,12 @@ class TestStartExport:
         ):
             settings_mock.return_value.database_url = "postgresql+asyncpg://test"
             settings_mock.return_value.export_dir = "/tmp/exports"
+            mock_request = MagicMock()
+            mock_request.headers = {}
+            mock_request.client.host = "127.0.0.1"
             resp = await start_export(
                 background_tasks=bg_tasks,
+                request=mock_request,
                 response=MagicMock(),
                 user=user,
                 db=db,
@@ -321,8 +325,12 @@ class TestStartExport:
             return_value=running_export,
         ):
             with pytest.raises(HTTPException) as exc_info:
+                mock_request = MagicMock()
+                mock_request.headers = {}
+                mock_request.client.host = "127.0.0.1"
                 await start_export(
                     background_tasks=bg_tasks,
+                    request=mock_request,
                     response=MagicMock(),
                     user=user,
                     db=db,

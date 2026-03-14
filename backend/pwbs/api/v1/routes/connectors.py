@@ -17,12 +17,13 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
+from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.connectors.oauth import OAuthTokens, encrypt_tokens
 from pwbs.connectors.registry import list_registered_types
 from pwbs.core.config import get_settings
@@ -342,6 +343,7 @@ async def get_auth_url(
 async def oauth_callback(
     type: str,
     body: CallbackRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> CallbackResponse:
@@ -389,6 +391,17 @@ async def oauth_callback(
     db.add(connection)
     await db.commit()
     await db.refresh(connection)
+
+    await log_event(
+        db,
+        action=AuditAction.CONNECTION_CREATED,
+        user_id=current_user.id,
+        resource_type="connection",
+        resource_id=connection.id,
+        ip_address=get_client_ip(request),
+        metadata={"source_type": source_type.value},
+    )
+    await db.commit()
 
     logger.info(
         "OAuth callback processed: user_id=%s source_type=%s connection_id=%s",
@@ -512,6 +525,7 @@ async def _exchange_code_for_tokens(
 async def configure_connector(
     type: str,
     body: ConfigRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> ConfigResponse:
@@ -556,6 +570,17 @@ async def configure_connector(
     await db.commit()
     await db.refresh(connection)
 
+    await log_event(
+        db,
+        action=AuditAction.CONNECTION_CREATED,
+        user_id=current_user.id,
+        resource_type="connection",
+        resource_id=connection.id,
+        ip_address=get_client_ip(request),
+        metadata={"source_type": source_type.value},
+    )
+    await db.commit()
+
     logger.info(
         "Obsidian connector configured: user_id=%s connection_id=%s vault_path=%s",
         current_user.id,
@@ -583,6 +608,7 @@ async def configure_connector(
 )
 async def disconnect(
     type: str,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> DisconnectResponse:
@@ -617,6 +643,9 @@ async def disconnect(
     doc_count_result = await db.execute(doc_count_stmt)
     deleted_doc_count = doc_count_result.scalar() or 0
 
+    # Save connection id before deletion for audit
+    connection_id = connection.id
+
     # Cascade delete: documents (chunks cascade via FK)
     await db.execute(
         delete(Document).where(
@@ -627,6 +656,17 @@ async def disconnect(
 
     # Delete the connection itself
     await db.delete(connection)
+    await db.commit()
+
+    await log_event(
+        db,
+        action=AuditAction.CONNECTION_DELETED,
+        user_id=current_user.id,
+        resource_type="connection",
+        resource_id=connection_id,
+        ip_address=get_client_ip(request),
+        metadata={"source_type": source_type.value, "deleted_doc_count": deleted_doc_count},
+    )
     await db.commit()
 
     logger.info(

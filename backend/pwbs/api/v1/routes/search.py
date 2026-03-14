@@ -8,10 +8,11 @@ from __future__ import annotations
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
+from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.db.weaviate_client import get_weaviate_client
@@ -112,6 +113,7 @@ def _to_search_result(enriched: EnrichedSearchResult) -> SearchResult:
 )
 async def search(
     body: SearchRequest,
+    request: Request,
     response: Response,
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
@@ -143,6 +145,15 @@ async def search(
     # Map to API schema
     results = [_to_search_result(e) for e in enriched]
     sources = [e.source_ref for e in enriched]
+
+    await log_event(
+        session,
+        action=AuditAction.SEARCH_EXECUTED,
+        user_id=user_id,
+        ip_address=get_client_ip(request),
+        metadata={"result_count": len(results)},
+    )
+    await session.commit()
 
     return SearchResponse(
         results=results,

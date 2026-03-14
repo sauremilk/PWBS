@@ -14,12 +14,13 @@ import logging
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
+from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.exceptions import AuthenticationError, ValidationError
 from pwbs.db.postgres import get_db_session
 from pwbs.models.user import User
@@ -95,6 +96,7 @@ class MeResponse(BaseModel):
 )
 async def register(
     body: RegisterRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> RegisterResponse:
     try:
@@ -113,6 +115,17 @@ async def register(
 
     # Extract user_id from the access token (it was just created)
     payload = validate_access_token(pair.access_token)
+
+    ip = get_client_ip(request)
+    await log_event(
+        db,
+        action=AuditAction.USER_REGISTERED,
+        user_id=payload.user_id,
+        resource_type="user",
+        resource_id=payload.user_id,
+        ip_address=ip,
+    )
+    await db.commit()
 
     return RegisterResponse(
         user_id=payload.user_id,
@@ -134,6 +147,7 @@ async def register(
 )
 async def login(
     body: LoginRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db_session),
 ) -> LoginResponse:
     # Constant-time-ish: always verify a hash even if user not found
@@ -141,7 +155,17 @@ async def login(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
+    ip = get_client_ip(request)
+
     if user is None or not verify_password(body.password, user.password_hash):
+        # Log failed attempt as security event (A09) before raising
+        await log_event(
+            db,
+            action=AuditAction.USER_LOGIN_FAILED,
+            ip_address=ip,
+            metadata={"reason": "invalid_credentials"},
+        )
+        await db.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={
@@ -151,6 +175,15 @@ async def login(
         )
 
     pair = await create_token_pair(user.id, db)
+    await log_event(
+        db,
+        action=AuditAction.USER_LOGIN,
+        user_id=user.id,
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=ip,
+    )
+    await db.commit()
     return LoginResponse(
         access_token=pair.access_token,
         refresh_token=pair.refresh_token,

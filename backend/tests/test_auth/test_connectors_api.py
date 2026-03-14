@@ -268,14 +268,15 @@ class TestOAuthCallback:
             result = await oauth_callback(
                 type="google-calendar",
                 body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
                 current_user=user,
                 db=db,
             )
 
         assert result.status == "active"
         assert result.initial_sync_started is False
-        db.add.assert_called_once()
-        db.commit.assert_awaited_once()
+        assert db.add.call_count == 2  # Connection + AuditLog
+        assert db.commit.await_count == 2  # Connection commit + audit commit
 
     @pytest.mark.asyncio
     async def test_duplicate_connection_409(self) -> None:
@@ -297,6 +298,7 @@ class TestOAuthCallback:
             await oauth_callback(
                 type="google-calendar",
                 body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
                 current_user=user,
                 db=db,
             )
@@ -326,12 +328,13 @@ class TestConfigureConnector:
         result = await configure_connector(
             type="obsidian",
             body=body,
+            request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
             current_user=user,
             db=db,
         )
         assert result.status == "active"
         assert result.file_count == 0
-        db.add.assert_called_once()
+        assert db.add.call_count == 2  # Connection + AuditLog
 
     @pytest.mark.asyncio
     async def test_non_obsidian_rejected(self) -> None:
@@ -347,6 +350,7 @@ class TestConfigureConnector:
             await configure_connector(
                 type="notion",
                 body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
                 current_user=user,
                 db=db,
             )
@@ -375,11 +379,11 @@ class TestDisconnect:
         # Third call: delete documents; fourth: nothing (delete connection is via db.delete)
         db.execute.side_effect = [find_result, count_result, MagicMock()]
 
-        result = await disconnect(type="google-calendar", current_user=user, db=db)
+        result = await disconnect(type="google-calendar", request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), current_user=user, db=db)
         assert result.deleted_doc_count == 5
         assert "google_calendar" in result.message
         db.delete.assert_called_once_with(conn)
-        db.commit.assert_awaited_once()
+        assert db.commit.await_count == 2  # Delete commit + audit commit
 
     @pytest.mark.asyncio
     async def test_not_found_404(self) -> None:
@@ -394,7 +398,7 @@ class TestDisconnect:
         db.execute.return_value = find_result
 
         with pytest.raises(HTTPException) as exc_info:
-            await disconnect(type="notion", current_user=user, db=db)
+            await disconnect(type="notion", request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), current_user=user, db=db)
         assert exc_info.value.status_code == 404
 
 
