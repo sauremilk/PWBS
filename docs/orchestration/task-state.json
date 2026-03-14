@@ -2156,13 +2156,14 @@
       "priority": "P2",
       "effort": "L",
       "area": "LLM",
-      "status": "ready",
-      "claimed_by": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-K",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-064"
-      ]
+      ],
+      "claim_ts": "2026-03-14T18:36:15.899207+00:00"
     },
     "TASK-140": {
       "stream": "STREAM-PHASE4",
