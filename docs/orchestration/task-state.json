@@ -1853,9 +1853,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-H",
+      "claimed_at": "2026-03-14T13:24:18.795849+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-096"
@@ -1998,10 +1998,10 @@
       "priority": "P2",
       "effort": "L",
       "area": "Frontend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2025-07-16T12:10:00+00:00",
-      "completed_at": null,
+      "completed_at": "2025-07-16T12:30:00+00:00",
       "blocked_by": [
         "TASK-129"
       ]

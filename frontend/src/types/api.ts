@@ -426,3 +426,65 @@ export interface SecurityStatusResponse {
   data_location: string;
   llm_usage: string;
 }
+
+// ---------------------------------------------------------------------------
+// Decisions (TASK-130)
+// ---------------------------------------------------------------------------
+
+export type DecisionStatus = "pending" | "made" | "revised";
+
+export interface DecisionListItem {
+  id: string;
+  summary: string;
+  status: DecisionStatus;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+}
+
+export interface DecisionListResponse {
+  decisions: DecisionListItem[];
+  total: number;
+}
+
+export interface DecisionDetailResponse {
+  id: string;
+  summary: string;
+  pro_arguments: string[];
+  contra_arguments: string[];
+  assumptions: string[];
+  dependencies: string[];
+  status: DecisionStatus;
+  decided_by: string | null;
+  decided_at: string | null;
+  source_document_id: string | null;
+  neo4j_node_id: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DecisionCreateRequest {
+  summary: string;
+  pro_arguments?: string[];
+  contra_arguments?: string[];
+  assumptions?: string[];
+  dependencies?: string[];
+  status?: DecisionStatus;
+  decided_by?: string | null;
+  decided_at?: string | null;
+  source_document_id?: string | null;
+  expires_at?: string | null;
+}
+
+export interface DecisionUpdateRequest {
+  summary?: string;
+  pro_arguments?: string[];
+  contra_arguments?: string[];
+  assumptions?: string[];
+  dependencies?: string[];
+  status?: DecisionStatus;
+  decided_by?: string | null;
+  decided_at?: string | null;
+  expires_at?: string | null;
+}
