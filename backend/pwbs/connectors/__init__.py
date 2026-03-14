@@ -7,7 +7,7 @@ Public API:
 - ``normalize_document``, ``compute_content_hash`` - document normalisation
 """
 
-from pwbs.connectors.base import BaseConnector, ConnectorConfig, SyncError, SyncResult
+from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncError, SyncResult
 from pwbs.connectors.normalizer import (
     compute_content_hash,
     compute_expiry,
@@ -33,6 +33,7 @@ __all__ = [
     # base
     "BaseConnector",
     "ConnectorConfig",
+    "JsonValue",
     "SyncError",
     "SyncResult",
     # registry

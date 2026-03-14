@@ -59,5 +59,25 @@ class TokenEncryptionError(EncryptionError):
     """Raised when OAuth token encryption/decryption fails."""
 
 
+class RateLimitError(ConnectorError):
+    """Raised when an external API returns 429 or 503 (rate-limited / unavailable).
+
+    Connectors should raise this from ``fetch_since`` so that the base-class
+    retry logic can apply exponential backoff automatically.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: int | None = None,
+        retry_after: float | None = None,
+        code: str | None = None,
+    ) -> None:
+        super().__init__(message, code=code or "RATE_LIMITED")
+        self.status_code = status_code
+        self.retry_after = retry_after
+
+
 class TokenRefreshError(ConnectorError):
     """Raised when OAuth token refresh fails."""

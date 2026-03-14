@@ -5,12 +5,14 @@ from pwbs.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfigurationError,
+    ConnectorError,
     EncryptionError,
     ExternalServiceError,
     IngestionError,
     NotFoundError,
     ProcessingError,
     PWBSError,
+    RateLimitError,
     ValidationError,
 )
 
@@ -20,11 +22,13 @@ __all__ = [
     "AuthenticationError",
     "AuthorizationError",
     "ConfigurationError",
+    "ConnectorError",
     "EncryptionError",
     "ExternalServiceError",
     "IngestionError",
     "NotFoundError",
     "ProcessingError",
     "PWBSError",
+    "RateLimitError",
     "ValidationError",
 ]

@@ -12,18 +12,22 @@ Design decisions:
 - Partial success is acceptable: individual document failures are captured in
   ``SyncResult.errors`` and do not abort the entire batch.
 - Max batch size: 100 documents per fetch (configurable via ``ConnectorConfig``).
+- Rate-limit errors (429 / 503) are retried automatically with exponential
+  backoff: 3 retries at 1 min → 5 min → 25 min.
 """
 
 from __future__ import annotations
 
 import abc
+import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import SourceType  # noqa: TC001 - needed at runtime by Pydantic
 
 if TYPE_CHECKING:
@@ -32,6 +36,10 @@ if TYPE_CHECKING:
     from pwbs.schemas.document import UnifiedDocument
 
 logger = logging.getLogger(__name__)
+
+# Recursive JSON type – avoids bare ``Any`` for connector config and raw data.
+# Uses PEP 695 ``type`` statement so Pydantic can resolve the recursion.
+type JsonValue = str | int | float | bool | None | list[JsonValue] | dict[str, JsonValue]
 
 
 # ---------------------------------------------------------------------------
@@ -47,7 +55,7 @@ class ConnectorConfig(BaseModel):
     source_type: SourceType
     max_batch_size: int = Field(default=100, ge=1, le=500)
     timeout_seconds: int = Field(default=30, ge=5, le=120)
-    extra: dict[str, Any] = Field(default_factory=dict)
+    extra: dict[str, JsonValue] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -105,13 +113,21 @@ class BaseConnector(abc.ABC):
 
     Subclasses must implement ``fetch_since``, ``normalize`` and
     ``health_check``.  The ``run`` entry-point orchestrates a full sync cycle
-    with cursor management, partial-failure handling and logging.
+    with cursor management, partial-failure handling, retry with exponential
+    backoff, and logging.
 
     Parameters:
         owner_id: UUID of the user who owns this connection.
         connection_id: UUID of the ``Connection`` record in PostgreSQL.
         config: Connector-specific configuration.
+
+    Class attributes:
+        RETRY_DELAYS: Seconds to wait between retries on ``RateLimitError``.
+            Default ``(60, 300, 1500)`` means *3 retries* after waits of
+            1 min, 5 min and 25 min.
     """
+
+    RETRY_DELAYS: tuple[float, ...] = (60.0, 300.0, 1500.0)
 
     def __init__(
         self,
@@ -140,7 +156,7 @@ class BaseConnector(abc.ABC):
         """
 
     @abc.abstractmethod
-    async def normalize(self, raw: dict[str, Any]) -> UnifiedDocument:
+    async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
         """Convert a single raw API response into a ``UnifiedDocument``.
 
         Must be a pure function (no side-effects, no network calls).
@@ -155,12 +171,53 @@ class BaseConnector(abc.ABC):
 
     # ---- orchestration -----------------------------------------------------
 
+    async def _execute_with_retry(self, cursor: str | None) -> SyncResult:
+        """Call ``fetch_since`` with exponential backoff on ``RateLimitError``.
+
+        The first attempt runs immediately.  On ``RateLimitError`` up to
+        ``len(RETRY_DELAYS)`` retries are made, sleeping for the durations
+        configured in ``RETRY_DELAYS`` between attempts.
+
+        Any other exception propagates immediately (no retry).
+        """
+        max_attempts = len(self.RETRY_DELAYS) + 1
+        for attempt in range(max_attempts):
+            try:
+                return await self.fetch_since(cursor)
+            except RateLimitError as exc:
+                if attempt >= len(self.RETRY_DELAYS):
+                    self._logger.error(
+                        "Rate limit retries exhausted after %d attempts "
+                        "(connection_id=%s): %s",
+                        max_attempts,
+                        self.connection_id,
+                        exc,
+                    )
+                    raise
+                delay = self.RETRY_DELAYS[attempt]
+                self._logger.warning(
+                    "Rate limited (attempt %d/%d), retrying in %.0fs "
+                    "(connection_id=%s): %s",
+                    attempt + 1,
+                    max_attempts,
+                    delay,
+                    self.connection_id,
+                    exc,
+                )
+                await asyncio.sleep(delay)
+        # Unreachable – the loop always returns or raises.
+        raise ConnectorError(  # pragma: no cover
+            "Retry loop exited unexpectedly",
+            code="RETRY_ERROR",
+        )
+
     async def run(self, cursor: str | None = None) -> SyncResult:
         """Execute a full sync cycle: fetch → normalise, respecting batch limits.
 
         This is the primary entry-point called by ``IngestionAgent`` or the
-        API sync endpoint.  It delegates to ``fetch_since`` and handles
-        logging and error counting.
+        API sync endpoint.  It delegates to ``fetch_since`` (with automatic
+        exponential-backoff retry on ``RateLimitError``) and handles logging
+        and error counting.
 
         Returns the aggregated ``SyncResult`` for the entire run.
         """
@@ -170,7 +227,7 @@ class BaseConnector(abc.ABC):
             cursor[:32] + "…" if cursor and len(cursor) > 32 else cursor,
         )
 
-        result = await self.fetch_since(cursor)
+        result = await self._execute_with_retry(cursor)
 
         self._logger.info(
             "Sync complete: connection_id=%s fetched=%d errors=%d has_more=%s new_cursor=%s",

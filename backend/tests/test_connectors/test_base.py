@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from pydantic import ValidationError
 
-from pwbs.connectors.base import BaseConnector, ConnectorConfig, SyncError, SyncResult
+from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncError, SyncResult
+from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
@@ -43,7 +45,7 @@ class StubConnector(BaseConnector):
             has_more=False,
         )
 
-    async def normalize(self, raw: dict[str, Any]) -> UnifiedDocument:
+    async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
         raise NotImplementedError("Not used in stub")
 
     async def health_check(self) -> bool:
@@ -187,3 +189,128 @@ class TestBaseConnector:
                 connection_id=uuid.uuid4(),
                 config=ConnectorConfig(source_type=SourceType.ZOOM),
             )
+
+
+# ---------------------------------------------------------------------------
+# Retry with exponential backoff tests
+# ---------------------------------------------------------------------------
+
+
+class RateLimitStubConnector(BaseConnector):
+    """Connector that raises RateLimitError N times before succeeding."""
+
+    RETRY_DELAYS: tuple[float, ...] = (0.01, 0.02, 0.03)  # fast for tests
+
+    def __init__(
+        self,
+        *,
+        owner_id: uuid.UUID,
+        connection_id: uuid.UUID,
+        config: ConnectorConfig,
+        fail_count: int = 0,
+    ) -> None:
+        super().__init__(owner_id=owner_id, connection_id=connection_id, config=config)
+        self._fail_count = fail_count
+        self._attempts = 0
+
+    async def fetch_since(self, cursor: str | None) -> SyncResult:
+        self._attempts += 1
+        if self._attempts <= self._fail_count:
+            raise RateLimitError(
+                f"Rate limited (attempt {self._attempts})",
+                status_code=429,
+            )
+        return SyncResult(new_cursor="ok", has_more=False)
+
+    async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
+        raise NotImplementedError
+
+    async def health_check(self) -> bool:
+        return True
+
+
+class TestRetryWithBackoff:
+    """Tests for BaseConnector._execute_with_retry / run() retry behaviour."""
+
+    @pytest.fixture()
+    def _ids(self) -> tuple[uuid.UUID, uuid.UUID]:
+        return uuid.uuid4(), uuid.uuid4()
+
+    @pytest.fixture()
+    def _config(self) -> ConnectorConfig:
+        return ConnectorConfig(source_type=SourceType.NOTION)
+
+    async def test_succeeds_without_retry(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=0
+        )
+        result = await conn.run(cursor=None)
+        assert result.new_cursor == "ok"
+        assert conn._attempts == 1
+
+    async def test_succeeds_after_one_retry(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=1
+        )
+        result = await conn.run(cursor=None)
+        assert result.new_cursor == "ok"
+        assert conn._attempts == 2
+
+    async def test_succeeds_after_max_retries(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=3
+        )
+        result = await conn.run(cursor=None)
+        assert result.new_cursor == "ok"
+        assert conn._attempts == 4  # 1 initial + 3 retries
+
+    async def test_raises_after_retries_exhausted(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=99
+        )
+        with pytest.raises(RateLimitError):
+            await conn.run(cursor=None)
+        assert conn._attempts == 4  # 1 initial + 3 retries, then give up
+
+    async def test_non_rate_limit_error_not_retried(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        """ConnectorError (non-rate-limit) should propagate immediately."""
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=0
+        )
+        conn.fetch_since = AsyncMock(  # type: ignore[method-assign]
+            side_effect=ConnectorError("auth failed", code="AUTH_ERROR")
+        )
+        with pytest.raises(ConnectorError, match="auth failed"):
+            await conn.run(cursor=None)
+        conn.fetch_since.assert_called_once()
+
+    async def test_retry_delays_are_respected(
+        self, _ids: tuple[uuid.UUID, uuid.UUID], _config: ConnectorConfig
+    ) -> None:
+        """Verify asyncio.sleep is called with the configured delays."""
+        conn = RateLimitStubConnector(
+            owner_id=_ids[0], connection_id=_ids[1], config=_config, fail_count=2
+        )
+        with patch("pwbs.connectors.base.asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+            result = await conn.run(cursor=None)
+        assert result.new_cursor == "ok"
+        assert mock_sleep.call_count == 2
+        mock_sleep.assert_any_call(0.01)
+        mock_sleep.assert_any_call(0.02)
+
+    async def test_rate_limit_error_attributes(self) -> None:
+        err = RateLimitError("too many requests", status_code=429, retry_after=60.0)
+        assert err.status_code == 429
+        assert err.retry_after == 60.0
+        assert err.code == "RATE_LIMITED"
+        assert str(err) == "too many requests"
