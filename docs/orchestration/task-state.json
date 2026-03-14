@@ -2189,14 +2189,15 @@
       "priority": "P3",
       "effort": "L",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T19:14:07.079397+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T19:20:44.958798+00:00",
       "blocked_by": [
         "TASK-088",
         "TASK-126"
-      ]
+      ],
+      "commit": "b13fc86"
     },
     "TASK-142": {
       "stream": "STREAM-PHASE4",
