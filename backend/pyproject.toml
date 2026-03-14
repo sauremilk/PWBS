@@ -43,6 +43,7 @@ dev = [
     "testcontainers[postgres,weaviate,neo4j]>=4.0.0",
     "fakeredis[lua]>=2.26.0",
     "respx>=0.22.0",
+    "locust>=2.20.0",
 ]
 llm = [
     "anthropic>=0.40.0",

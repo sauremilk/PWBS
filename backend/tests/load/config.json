@@ -1,0 +1,12 @@
+{
+    "users":  20,
+    "spawn_rate":  5,
+    "duration_seconds":  60,
+    "thresholds":  {
+                       "api_general_p95_ms":  500,
+                       "search_p95_ms":  2000,
+                       "briefing_gen_p95_ms":  10000,
+                       "max_error_rate_percent":  1.0
+                   },
+    "host":  "http://localhost:8000"
+}
