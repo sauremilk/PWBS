@@ -1037,7 +1037,7 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-06-01T12:35:00Z",
       "completed_at": null,
