@@ -33,11 +33,16 @@ from pwbs.models.briefing import Briefing as BriefingORM
 from pwbs.models.chunk import Chunk
 from pwbs.models.document import Document
 from pwbs.models.user import User
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.enums import BriefingType
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/briefings", tags=["briefings"])
+router = APIRouter(
+    prefix="/api/v1/briefings",
+    tags=["briefings"],
+    responses={**AUTH_RESPONSES, **COMMON_RESPONSES},
+)
 
 # Maximum generation requests per user within the cooldown window
 _GENERATE_COOLDOWN_SECONDS = 60

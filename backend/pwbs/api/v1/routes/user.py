@@ -28,10 +28,13 @@ from pwbs.db.postgres import get_db_session
 from pwbs.dsgvo import deletion_service, export_service
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.user import User
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/user", tags=["user"])
+router = APIRouter(
+    prefix="/api/v1/user", tags=["user"], responses={**AUTH_RESPONSES, **COMMON_RESPONSES}
+)
 
 _AUDIT_LOG_MAX = 100
 _VALID_TIMEZONES_PREFIX = (
@@ -387,7 +390,9 @@ async def delete_account(
 
     try:
         deletion_at = await deletion_service.schedule_deletion(
-            db, user, body.password,
+            db,
+            user,
+            body.password,
         )
     except ValueError as exc:
         msg = str(exc)

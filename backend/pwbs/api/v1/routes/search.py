@@ -18,6 +18,7 @@ from pwbs.db.postgres import get_db_session
 from pwbs.db.weaviate_client import get_weaviate_client
 from pwbs.models.user import User
 from pwbs.processing.embedding import EmbeddingService
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.search import SearchFilters, SearchRequest, SearchResponse, SearchResult
 from pwbs.search.enrichment import EnrichedSearchResult, SearchResultEnricher
 from pwbs.search.hybrid import HybridSearchService
@@ -26,7 +27,11 @@ from pwbs.search.service import SemanticSearchService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/search", tags=["search"])
+router = APIRouter(
+    prefix="/api/v1/search",
+    tags=["search"],
+    responses={**AUTH_RESPONSES, **COMMON_RESPONSES},
+)
 
 
 # ---------------------------------------------------------------------------

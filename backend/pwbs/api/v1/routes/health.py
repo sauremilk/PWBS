@@ -25,10 +25,15 @@ from pwbs.db.postgres import check_postgres_health
 from pwbs.db.redis_client import check_redis_health
 from pwbs.db.weaviate_client import check_weaviate_health
 from pwbs.queue.health import check_queue_health
+from pwbs.schemas.common import COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(
+    prefix="/api/v1/admin",
+    tags=["admin"],
+    responses={**COMMON_RESPONSES},
+)
 
 _HEALTH_TIMEOUT = 5.0  # seconds per check
 

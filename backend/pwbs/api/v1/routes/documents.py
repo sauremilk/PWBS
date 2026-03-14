@@ -22,10 +22,15 @@ from pwbs.models.chunk import Chunk as ChunkORM
 from pwbs.models.document import Document as DocumentORM
 from pwbs.models.entity import Entity, EntityMention
 from pwbs.models.user import User
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
+router = APIRouter(
+    prefix="/api/v1/documents",
+    tags=["documents"],
+    responses={**AUTH_RESPONSES, **COMMON_RESPONSES},
+)
 
 
 # ---------------------------------------------------------------------------

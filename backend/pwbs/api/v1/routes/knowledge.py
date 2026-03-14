@@ -23,15 +23,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.db.postgres import get_db_session
+from pwbs.models.decision import Decision as DecisionORM
 from pwbs.models.document import Document as DocumentORM
 from pwbs.models.entity import Entity as EntityORM
 from pwbs.models.entity import EntityMention
-from pwbs.models.decision import Decision as DecisionORM
 from pwbs.models.user import User
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/knowledge", tags=["knowledge"])
+router = APIRouter(
+    prefix="/api/v1/knowledge",
+    tags=["knowledge"],
+    responses={**AUTH_RESPONSES, **COMMON_RESPONSES},
+)
 
 _MAX_GRAPH_NODES = 50
 _MAX_RELATED_DEPTH = 3
@@ -596,7 +601,10 @@ def _check_decision_ownership(decision: DecisionORM, user_id: uuid.UUID) -> None
     if decision.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Zugriff auf fremde Entscheidung nicht erlaubt"},
+            detail={
+                "code": "FORBIDDEN",
+                "message": "Zugriff auf fremde Entscheidung nicht erlaubt",
+            },
         )
 
 
@@ -692,7 +700,10 @@ async def create_decision(
     if body.status not in _VALID_DECISION_STATUSES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"code": "INVALID_STATUS", "message": f"Status muss einer von {_VALID_DECISION_STATUSES} sein"},
+            detail={
+                "code": "INVALID_STATUS",
+                "message": f"Status muss einer von {_VALID_DECISION_STATUSES} sein",
+            },
         )
 
     decision = DecisionORM(
@@ -758,7 +769,10 @@ async def update_decision(
     if "status" in update_data and update_data["status"] not in _VALID_DECISION_STATUSES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"code": "INVALID_STATUS", "message": f"Status muss einer von {_VALID_DECISION_STATUSES} sein"},
+            detail={
+                "code": "INVALID_STATUS",
+                "message": f"Status muss einer von {_VALID_DECISION_STATUSES} sein",
+            },
         )
 
     for field_name, value in update_data.items():
