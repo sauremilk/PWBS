@@ -2114,13 +2114,14 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T19:38:26.205038+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T19:45:50.731864+00:00",
       "blocked_by": [
         "TASK-135"
-      ]
+      ],
+      "commit": "8994aaa"
     },
     "TASK-137": {
       "stream": "STREAM-PHASE4",
