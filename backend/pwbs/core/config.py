@@ -122,6 +122,9 @@ class Settings(BaseSettings):
     stripe_free_connector_limit: int = 1
     stripe_free_search_daily_limit: int = 3
 
+    #  Feature Flags (TASK-174)
+    feature_flags_override: str = ""  # e.g. "flag1:true,flag2:false"
+
     #  Derived / computed properties
 
     @property

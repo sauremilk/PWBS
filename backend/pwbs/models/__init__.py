@@ -11,6 +11,7 @@ from pwbs.models.data_export import DataExport
 from pwbs.models.decision import Decision
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
+from pwbs.models.feature_flag import FeatureFlag
 from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
@@ -33,6 +34,7 @@ __all__ = [
     "Document",
     "Entity",
     "EntityMention",
+    "FeatureFlag",
     "Organization",
     "OrganizationMember",
     "RefreshToken",

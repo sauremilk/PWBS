@@ -200,6 +200,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.briefings import router as briefings_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
     from pwbs.api.v1.routes.documents import router as documents_router
+    from pwbs.api.v1.routes.feature_flags import router as feature_flags_router
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.organizations import (
@@ -210,8 +211,8 @@ def create_app() -> FastAPI:
     )
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
-    from pwbs.api.v1.routes.user import router as user_router
     from pwbs.api.v1.routes.slack import router as slack_router
+    from pwbs.api.v1.routes.user import router as user_router
     from pwbs.api.v1.routes.webhooks import router as webhooks_router
 
     application.include_router(health_router)
@@ -219,6 +220,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_google_router)
     application.include_router(auth_refresh_router)
     application.include_router(admin_router)
+    application.include_router(feature_flags_router)
     application.include_router(briefings_router)
     application.include_router(connectors_router)
     application.include_router(documents_router)
