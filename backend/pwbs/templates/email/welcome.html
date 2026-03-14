@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Willkommen bei PWBS, {{ display_name }}!</h2>
+<p>Ihr Konto wurde erfolgreich erstellt. Das Persoenliche Wissens-Betriebssystem hilft Ihnen,
+Ihre Informationen zu organisieren, kontextbezogene Briefings zu generieren und Wissensluecken zu schliessen.</p>
+<h3>Naechste Schritte</h3>
+<ol>
+  <li>Verbinden Sie Ihre erste Datenquelle (z.B. Google Calendar, Notion)</li>
+  <li>Richten Sie Ihr taegliches Morgenbriefing ein</li>
+  <li>Entdecken Sie die semantische Suche</li>
+</ol>
+<p style="text-align: center; margin: 24px 0;">
+  <a href="{{ dashboard_url }}" class="button">Zum Dashboard</a>
+</p>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Ihr {{ briefing_type }} ist bereit</h2>
+<p>Ein neues Briefing wurde fuer Sie erstellt:</p>
+<div style="background: #f8f9fa; padding: 16px 24px; border-radius: 8px; border-left: 4px solid #2563eb; margin: 16px 0;">
+  <strong>{{ briefing_title }}</strong>
+  {% if briefing_summary %}
+  <p style="margin: 8px 0 0;">{{ briefing_summary }}</p>
+  {% endif %}
+</div>
+<p style="text-align: center; margin: 24px 0;">
+  <a href="{{ briefing_url }}" class="button">Briefing lesen</a>
+</p>
+{% endblock %}
