@@ -131,7 +131,7 @@ function SearchContent() {
           onChange={(e) => handleQueryChange(e.target.value)}
           placeholder="Dokumente, Personen, Projekte durchsuchen…"
           className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          autoFocus
+          aria-label="Suchfeld"
         />
         {isFetching && (
           <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400" />
@@ -163,7 +163,7 @@ function SearchContent() {
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">Quelltyp</label>
+              <span className="mb-2 block text-sm font-medium text-gray-700">Quelltyp</span>
               <div className="space-y-1">
                 {SOURCE_TYPE_OPTIONS.map((opt) => (
                   <label key={opt.value} className="flex items-center gap-2 text-sm">
