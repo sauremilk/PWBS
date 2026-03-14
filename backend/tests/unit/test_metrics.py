@@ -1,4 +1,4 @@
-﻿"""Tests for pwbs.core.metrics -- Prometheus metrics (TASK-116)."""
+﻿"""Tests for pwbs.core.metrics -- Prometheus metrics (TASK-116, TASK-166)."""
 
 from __future__ import annotations
 
@@ -10,12 +10,18 @@ from prometheus_client import REGISTRY
 from pwbs.core.metrics import (
     AUTH_EVENTS,
     BRIEFING_FETCHES,
+    CELERY_QUEUE_DEPTH,
     CONNECTOR_SYNCS,
+    DB_POOL_CHECKED_IN,
+    DB_POOL_CHECKED_OUT,
+    DB_POOL_OVERFLOW,
+    DB_POOL_SIZE,
+    EMBEDDING_BATCH_DURATION,
     HTTP_ERRORS,
+    LLM_CALL_DURATION,
     SEARCH_QUERIES,
     _endpoint_group,
 )
-
 
 # ---------------------------------------------------------------------------
 # _endpoint_group
@@ -64,7 +70,9 @@ class TestCustomCounters:
         assert after == before + 1
 
     def test_connector_syncs_increment(self) -> None:
-        before = CONNECTOR_SYNCS.labels(source_type="google_calendar", status="success")._value.get()
+        before = CONNECTOR_SYNCS.labels(
+            source_type="google_calendar", status="success"
+        )._value.get()
         CONNECTOR_SYNCS.labels(source_type="google_calendar", status="success").inc()
         after = CONNECTOR_SYNCS.labels(source_type="google_calendar", status="success")._value.get()
         assert after == before + 1
@@ -183,9 +191,7 @@ class TestMetricsEndpoint:
         from pwbs.api.main import create_app
 
         app = create_app()
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/metrics")
             assert resp.status_code == 200
             body = resp.text
@@ -199,9 +205,52 @@ class TestMetricsEndpoint:
         from pwbs.api.main import create_app
 
         app = create_app()
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             assert "/metrics" not in paths
+
+
+# ---------------------------------------------------------------------------
+# Infrastructure metrics (TASK-166)
+# ---------------------------------------------------------------------------
+
+
+class TestInfraMetrics:
+    def test_db_pool_gauges_exist(self) -> None:
+        DB_POOL_SIZE.set(20)
+        assert DB_POOL_SIZE._value.get() == 20.0
+        DB_POOL_CHECKED_IN.set(15)
+        assert DB_POOL_CHECKED_IN._value.get() == 15.0
+        DB_POOL_CHECKED_OUT.set(5)
+        assert DB_POOL_CHECKED_OUT._value.get() == 5.0
+        DB_POOL_OVERFLOW.set(0)
+        assert DB_POOL_OVERFLOW._value.get() == 0.0
+
+    def test_llm_call_duration_histogram(self) -> None:
+        LLM_CALL_DURATION.labels(provider="claude", use_case="briefing.morning").observe(1.5)
+        sample = REGISTRY.get_sample_value(
+            "pwbs_llm_call_duration_seconds_count",
+            {"provider": "claude", "use_case": "briefing.morning"},
+        )
+        assert sample is not None and sample >= 1
+
+    def test_embedding_batch_duration_histogram(self) -> None:
+        EMBEDDING_BATCH_DURATION.labels(model="all-MiniLM-L6-v2").observe(0.3)
+        sample = REGISTRY.get_sample_value(
+            "pwbs_embedding_batch_duration_seconds_count",
+            {"model": "all-MiniLM-L6-v2"},
+        )
+        assert sample is not None and sample >= 1
+
+    def test_celery_queue_depth_gauge(self) -> None:
+        CELERY_QUEUE_DEPTH.labels(queue="ingestion.high").set(42)
+        assert CELERY_QUEUE_DEPTH.labels(queue="ingestion.high")._value.get() == 42.0
+
+    def test_no_owner_id_label(self) -> None:
+        """Ensure no metric exposes raw owner_id (DSGVO)."""
+        for metric in REGISTRY.collect():
+            for sample in metric.samples:
+                assert "owner_id" not in sample.labels, (
+                    f"Metric {sample.name} exposes owner_id label"
+                )
