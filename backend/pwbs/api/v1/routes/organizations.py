@@ -23,8 +23,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.db.postgres import get_db_session
 from pwbs.models.user import User
+from pwbs.rbac.checker import log_role_change, require_permission
+from pwbs.rbac.permissions import can_assign_role
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
-from pwbs.schemas.enums import DocumentVisibility, OrgRole
+from pwbs.schemas.enums import DocumentVisibility, OrgRole, Permission
 from pwbs.teams.service import (
     add_member,
     can_access_document,
@@ -172,7 +174,24 @@ async def add_org_member(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> MemberResponse:
-    """Add a member to an organization. Only owners can add members."""
+    """Add a member to an organization. Requires MEMBERS_INVITE permission."""
+    try:
+        acting_role = await require_permission(
+            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_INVITE,
+        )
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": str(exc)},
+        )
+
+    # Acting role must outrank the role being assigned
+    if not can_assign_role(acting_role, body.role):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": "Cannot assign a role equal to or above your own"},
+        )
+
     member = await add_member(
         db,
         org_id=org_id,
@@ -183,8 +202,17 @@ async def add_org_member(
     if member is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Only org owners can add members"},
+            detail={"code": "FORBIDDEN", "message": "Could not add member (already a member, or org not found)"},
         )
+    await log_role_change(
+        db,
+        acting_user_id=user.id,
+        target_user_id=body.user_id,
+        org_id=org_id,
+        old_role=None,
+        new_role=body.role.value,
+        action="member_added",
+    )
     await db.commit()
     return MemberResponse.model_validate(member)
 
@@ -197,7 +225,17 @@ async def remove_org_member(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> None:
-    """Remove a member from an organization. Only owners can remove members."""
+    """Remove a member from an organization. Requires MEMBERS_REMOVE permission."""
+    try:
+        await require_permission(
+            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_REMOVE,
+        )
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": str(exc)},
+        )
+
     removed = await remove_member(
         db,
         org_id=org_id,
@@ -206,9 +244,18 @@ async def remove_org_member(
     )
     if not removed:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Only org owners can remove members"},
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "NOT_FOUND", "message": "Member not found in this organization"},
         )
+    await log_role_change(
+        db,
+        acting_user_id=user.id,
+        target_user_id=member_user_id,
+        org_id=org_id,
+        old_role="member",
+        new_role="removed",
+        action="member_removed",
+    )
     await db.commit()
 
 
@@ -221,7 +268,29 @@ async def change_org_member_role(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> MemberResponse:
-    """Change a member's role. Only owners can change roles."""
+    """Change a member's role. Requires MEMBERS_CHANGE_ROLE permission."""
+    try:
+        acting_role = await require_permission(
+            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_CHANGE_ROLE,
+        )
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": str(exc)},
+        )
+
+    # Acting role must outrank the target new role
+    if not can_assign_role(acting_role, body.role):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": "Cannot assign a role equal to or above your own"},
+        )
+
+    # Capture old role for audit log
+    from pwbs.rbac.checker import get_user_role
+    old_role_enum = await get_user_role(db, org_id=org_id, user_id=member_user_id)
+    old_role_value = old_role_enum.value if old_role_enum else None
+
     member = await change_member_role(
         db,
         org_id=org_id,
@@ -231,9 +300,18 @@ async def change_org_member_role(
     )
     if member is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Only org owners can change roles"},
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "NOT_FOUND", "message": "Member not found in this organization"},
         )
+    await log_role_change(
+        db,
+        acting_user_id=user.id,
+        target_user_id=member_user_id,
+        org_id=org_id,
+        old_role=old_role_value,
+        new_role=body.role.value,
+        action="role_change",
+    )
     await db.commit()
     return MemberResponse.model_validate(member)
 
