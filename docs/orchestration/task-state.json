@@ -1850,9 +1850,9 @@
                                    "priority":  "P2",
                                    "effort":  "S",
                                    "area":  "Docs",
-                                   "status":  "ready",
-                                   "claimed_by":  null,
-                                   "claimed_at":  null,
+                                   "status":  "in-progress",
+                                   "claimed_by":  "ORCH-I",
+                                   "claimed_at":  "2026-03-14T14:50:13.6196196+01:00",
                                    "completed_at":  null,
                                    "blocked_by":  [
                                                       "TASK-086"
