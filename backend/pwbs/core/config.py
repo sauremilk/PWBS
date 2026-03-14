@@ -111,6 +111,11 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "ENCRYPTION_MASTER_KEY must be set in non-development environments"
                 )
+            # CORS: no wildcard in production (TASK-093)
+            if "*" in self.cors_origins:
+                raise ValueError(
+                    "Wildcard CORS_ORIGINS not allowed in non-development environments"
+                )
         return self
 
 

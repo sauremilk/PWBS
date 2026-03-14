@@ -1,7 +1,13 @@
-"""PWBS API – FastAPI application factory and lifecycle (TASK-037).
+"""PWBS API – FastAPI application factory and lifecycle (TASK-037, TASK-093).
 
-Middleware order (applied bottom-up in Starlette):
-  CORS → TrustedHost → RequestID → (RateLimitMiddleware, later) → (AuthMiddleware, later)
+Middleware order (outside → inside, last added = outermost in Starlette):
+  1. CORSMiddleware        – CORS headers
+  2. TrustedHostMiddleware – reject unknown hosts
+  3. SecurityHeaders       – X-Content-Type-Options, X-Frame-Options, HSTS
+  4. RequestIDMiddleware   – unique X-Request-ID per response
+  5. RateLimitMiddleware   – per-user/per-IP rate limiting (Redis)
+  6. AuthMiddleware        – passive JWT extraction → request.state.user_id
+  7. AuditMiddleware       – log mutating operations (innermost)
 
 Lifecycle:
   startup  → initialise DB engines / clients
@@ -14,13 +20,19 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.responses import JSONResponse
 
+from pwbs.api.middleware.audit import AuditMiddleware
+from pwbs.api.middleware.auth import AuthMiddleware
 from pwbs.api.middleware.rate_limit import RateLimitMiddleware
 from pwbs.api.middleware.request_id import RequestIDMiddleware
+from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
+from pwbs.core.exceptions import PWBSError
 
 logger = logging.getLogger(__name__)
 
@@ -75,19 +87,75 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="PWBS API",
         version="0.1.0",
-        description="Persönliches Wissens-Betriebssystem – API",
+        description="Pers\u00f6nliches Wissens-Betriebssystem \u2013 API",
         lifespan=lifespan,
         docs_url="/docs" if settings.debug else None,
         redoc_url="/redoc" if settings.debug else None,
     )
 
+    # -- Exception handlers (TASK-093) --------------------------------------
+
+    @application.exception_handler(PWBSError)
+    async def pwbs_error_handler(request: Request, exc: PWBSError) -> JSONResponse:
+        """Map domain errors to structured JSON responses."""
+        from fastapi import status as http_status
+
+        status_map: dict[str, int] = {
+            "AuthenticationError": http_status.HTTP_401_UNAUTHORIZED,
+            "AuthorizationError": http_status.HTTP_403_FORBIDDEN,
+            "NotFoundError": http_status.HTTP_404_NOT_FOUND,
+            "ValidationError": http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "RateLimitError": http_status.HTTP_429_TOO_MANY_REQUESTS,
+        }
+        status_code = status_map.get(type(exc).__name__, 500)
+        body: dict[str, str | None] = {
+            "code": exc.code or type(exc).__name__,
+            "message": str(exc),
+        }
+        if settings.debug:
+            body["detail"] = type(exc).__name__
+        return JSONResponse(status_code=status_code, content=body)
+
+    @application.exception_handler(RequestValidationError)
+    async def validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "code": "VALIDATION_ERROR",
+                "message": "Request validation failed",
+                "detail": exc.errors() if settings.debug else None,
+            },
+        )
+
+    @application.exception_handler(Exception)
+    async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
+        logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "code": "INTERNAL_ERROR",
+                "message": "An internal error occurred",
+            },
+        )
+
     # -- Middleware (added bottom-up: last added = outermost) ----------------
 
-    # 3. RequestID – must be outermost to tag every response
+    # 7. Audit (innermost)
+    application.add_middleware(AuditMiddleware)
+
+    # 6. Auth -- passive JWT extraction
+    application.add_middleware(AuthMiddleware)
+
+    # 5. RateLimit
+    application.add_middleware(RateLimitMiddleware)
+
+    # 4. RequestID
     application.add_middleware(RequestIDMiddleware)
 
-    # 2½. RateLimit – after RequestID, before TrustedHost (TASK-085)
-    application.add_middleware(RateLimitMiddleware)
+    # 3. SecurityHeaders
+    application.add_middleware(SecurityHeadersMiddleware)
 
     # 2. TrustedHost
     application.add_middleware(
@@ -95,7 +163,7 @@ def create_app() -> FastAPI:
         allowed_hosts=settings.trusted_hosts,
     )
 
-    # 1. CORS
+    # 1. CORS (last added = outermost)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -117,5 +185,5 @@ def create_app() -> FastAPI:
     return application
 
 
-# Module-level singleton used by ``uvicorn pwbs.api.main:app``
+# Module-level singleton used by `uvicorn pwbs.api.main:app`
 app = create_app()
