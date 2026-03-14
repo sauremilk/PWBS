@@ -1508,9 +1508,9 @@
       "priority": "P0",
       "effort": "M",
       "area": "Frontend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-H",
+      "claimed_at": "2026-03-14T12:49:11.280056+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-095"
