@@ -1697,9 +1697,9 @@
       "priority": "P1",
       "effort": "XL",
       "area": "Testing",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-I",
+      "claimed_at": "2026-03-14T13:35:02.862825+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-108"
