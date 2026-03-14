@@ -1122,10 +1122,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "LLM",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "%Y-%m-%dT%H:%M:%SZ",
-      "completed_at": null,
+      "completed_at": "%Y-%m-%dT%H:%M:%SZ",
       "blocked_by": [
         "TASK-066"
       ]
