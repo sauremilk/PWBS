@@ -2204,13 +2204,14 @@
       "priority": "P3",
       "effort": "L",
       "area": "Frontend",
-      "status": "ready",
-      "claimed_by": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-K",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-088"
-      ]
+      ],
+      "claim_ts": "2026-03-14T19:08:08.875619+00:00"
     },
     "TASK-143": {
       "stream": "STREAM-PHASE4",
