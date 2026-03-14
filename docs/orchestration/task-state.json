@@ -5,7 +5,7 @@
     "total_tasks": 155,
     "generated_at": "2026-03-13T00:00:00Z",
     "source": "tasks.md",
-    "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-EintrÃƒÂ¯Ã‚Â¿Ã‚Â½ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
+    "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-Eintr\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
   },
   "streams": {
     "STREAM-FOUNDATION": {
@@ -89,7 +89,7 @@
     },
     "STREAM-DSGVO-QA": {
       "name": "DSGVO, Testing & Monitoring",
-      "description": "Datenexport, kaskadierende LÃƒÂ¯Ã‚Â¿Ã‚Â½schung, Audit-Log, VerschlÃƒÂ¯Ã‚Â¿Ã‚Â½sselungs-UI, pytest-Setup, Unit/Integration/E2E/Load-Tests, Logging, Sentry, Metriken, OpenAPI-Doku",
+      "description": "Datenexport, kaskadierende L\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdschung, Audit-Log, Verschl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdsselungs-UI, pytest-Setup, Unit/Integration/E2E/Load-Tests, Logging, Sentry, Metriken, OpenAPI-Doku",
       "phase": 2,
       "orchestrator_slot": "ORCH-I",
       "depends_on_streams": [
@@ -111,7 +111,7 @@
     },
     "STREAM-PHASE4": {
       "name": "Phase 4: Intelligenz & Desktop",
-      "description": "EntscheidungsunterstÃƒÂ¯Ã‚Â¿Ã‚Â½tzung, aktive Erinnerungen, Projektbriefings, Lernmodell, Desktop-App (Tauri), erweiterte NER, Mustererkennung, Browser-Extension, Slack-Bot, Notion-Sidebar, Weekly Briefings, Pricing/Billing",
+      "description": "Entscheidungsunterst\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdtzung, aktive Erinnerungen, Projektbriefings, Lernmodell, Desktop-App (Tauri), erweiterte NER, Mustererkennung, Browser-Extension, Slack-Bot, Notion-Sidebar, Weekly Briefings, Pricing/Billing",
       "phase": 4,
       "orchestrator_slot": "ORCH-K",
       "depends_on_streams": [
@@ -121,7 +121,7 @@
     },
     "STREAM-PHASE5": {
       "name": "Phase 5: Platform & Skalierung",
-      "description": "Multi-Tenancy, Self-Hosting, horizontale Skalierung, Sicherheitsaudit, Public Beta, B2B-Features, ÃƒÂ¯Ã‚Â¿Ã‚Â½ffentliche API, Marketplace, Mobile Apps, RBAC, Spezialisierungen, Langzeit-Intelligenz",
+      "description": "Multi-Tenancy, Self-Hosting, horizontale Skalierung, Sicherheitsaudit, Public Beta, B2B-Features, \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdffentliche API, Marketplace, Mobile Apps, RBAC, Spezialisierungen, Langzeit-Intelligenz",
       "phase": 5,
       "orchestrator_slot": "ORCH-L",
       "depends_on_streams": [
@@ -133,7 +133,7 @@
   "tasks": {
     "TASK-001": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Technischen PoC fÃƒÂ¯Ã‚Â¿Ã‚Â½r Embedding-Generierung implementieren",
+      "title": "Technischen PoC f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Embedding-Generierung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -145,7 +145,7 @@
     },
     "TASK-002": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Semantische Suche ÃƒÂ¯Ã‚Â¿Ã‚Â½ber PoC-Daten demonstrieren",
+      "title": "Semantische Suche \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdber PoC-Daten demonstrieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -171,7 +171,7 @@
     },
     "TASK-004": {
       "stream": "STREAM-FOUNDATION",
-      "title": "VerschlÃƒÂ¯Ã‚Â¿Ã‚Â½sselungsstrategie definieren",
+      "title": "Verschl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdsselungsstrategie definieren",
       "priority": "P0",
       "effort": "S",
       "area": "Docs",
@@ -197,7 +197,7 @@
     },
     "TASK-006": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Tooling und Template fÃƒÂ¯Ã‚Â¿Ã‚Â½r strukturierte Probleminterviews erstellen",
+      "title": "Tooling und Template f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr strukturierte Probleminterviews erstellen",
       "priority": "P1",
       "effort": "S",
       "area": "Docs",
@@ -252,7 +252,7 @@
     },
     "TASK-010": {
       "stream": "STREAM-INFRA",
-      "title": "Docker Compose fÃƒÂ¯Ã‚Â¿Ã‚Â½r lokale Entwicklungsumgebung erstellen",
+      "title": "Docker Compose f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr lokale Entwicklungsumgebung erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "Infra",
@@ -322,7 +322,7 @@
     },
     "TASK-015": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r users-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr users-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -336,7 +336,7 @@
     },
     "TASK-016": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r connections-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr connections-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -350,7 +350,7 @@
     },
     "TASK-017": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r documents-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr documents-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -378,7 +378,7 @@
     },
     "TASK-019": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r chunks-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr chunks-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -392,7 +392,7 @@
     },
     "TASK-020": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r entities- und entity_mentions-Tabellen erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr entities- und entity_mentions-Tabellen erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -406,7 +406,7 @@
     },
     "TASK-021": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r briefings-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr briefings-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -420,7 +420,7 @@
     },
     "TASK-022": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r audit_log-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr audit_log-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -434,7 +434,7 @@
     },
     "TASK-023": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema fÃƒÂ¯Ã‚Â¿Ã‚Â½r scheduled_job_runs-Tabelle erstellen",
+      "title": "PostgreSQL-Schema f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr scheduled_job_runs-Tabelle erstellen",
       "priority": "P1",
       "effort": "XS",
       "area": "DB",
@@ -626,7 +626,7 @@
     },
     "TASK-036": {
       "stream": "STREAM-MODELS",
-      "title": "SQLAlchemy-ORM-Modelle fÃƒÂ¯Ã‚Â¿Ã‚Â½r alle PostgreSQL-Tabellen erstellen",
+      "title": "SQLAlchemy-ORM-Modelle f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr alle PostgreSQL-Tabellen erstellen",
       "priority": "P0",
       "effort": "M",
       "area": "DB",
@@ -668,7 +668,7 @@
     },
     "TASK-039": {
       "stream": "STREAM-INFRA",
-      "title": "Terraform-Grundstruktur fÃƒÂ¯Ã‚Â¿Ã‚Â½r AWS-Deployment erstellen",
+      "title": "Terraform-Grundstruktur f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr AWS-Deployment erstellen",
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
@@ -682,7 +682,7 @@
     },
     "TASK-040": {
       "stream": "STREAM-INFRA",
-      "title": "Staging-Deployment-Workflow fÃƒÂ¯Ã‚Â¿Ã‚Â½r GitHub Actions erstellen",
+      "title": "Staging-Deployment-Workflow f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr GitHub Actions erstellen",
       "priority": "P2",
       "effort": "M",
       "area": "DevOps",
@@ -725,7 +725,7 @@
     },
     "TASK-043": {
       "stream": "STREAM-CONNECTORS",
-      "title": "OAuth Token Manager mit verschlÃƒÂ¯Ã‚Â¿Ã‚Â½sselter Persistierung implementieren",
+      "title": "OAuth Token Manager mit verschl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdsselter Persistierung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Auth",
@@ -825,7 +825,7 @@
     },
     "TASK-050": {
       "stream": "STREAM-CONNECTORS",
-      "title": "Notion Normalizer (Pages, Databases, BlÃƒÂ¯Ã‚Â¿Ã‚Â½cke ? UnifiedDocument) implementieren",
+      "title": "Notion Normalizer (Pages, Databases, Bl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdcke ? UnifiedDocument) implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -883,7 +883,7 @@
     },
     "TASK-054": {
       "stream": "STREAM-CONNECTORS",
-      "title": "Zoom Webhook-Receiver fÃƒÂ¯Ã‚Â¿Ã‚Â½r Recording-completed-Events implementieren",
+      "title": "Zoom Webhook-Receiver f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Recording-completed-Events implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -955,7 +955,7 @@
     },
     "TASK-059": {
       "stream": "STREAM-PROCESSING",
-      "title": "Weaviate-Upsert fÃƒÂ¯Ã‚Â¿Ã‚Â½r Embeddings mit Idempotenz implementieren",
+      "title": "Weaviate-Upsert f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Embeddings mit Idempotenz implementieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -970,7 +970,7 @@
     },
     "TASK-060": {
       "stream": "STREAM-PROCESSING",
-      "title": "Fehlerbehandlung und Retry-Logik fÃƒÂ¯Ã‚Â¿Ã‚Â½r Embedding-Pipeline implementieren",
+      "title": "Fehlerbehandlung und Retry-Logik f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Embedding-Pipeline implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
@@ -984,7 +984,7 @@
     },
     "TASK-061": {
       "stream": "STREAM-PROCESSING",
-      "title": "Regelbasierte EntitÃƒÂ¯Ã‚Â¿Ã‚Â½tsextraktion implementieren",
+      "title": "Regelbasierte Entit\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdtsextraktion implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -998,7 +998,7 @@
     },
     "TASK-062": {
       "stream": "STREAM-PROCESSING",
-      "title": "LLM-basierte EntitÃƒÂ¯Ã‚Â¿Ã‚Â½tsextraktion mit Structured Output implementieren",
+      "title": "LLM-basierte Entit\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdtsextraktion mit Structured Output implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "LLM",
@@ -1012,7 +1012,7 @@
     },
     "TASK-063": {
       "stream": "STREAM-PROCESSING",
-      "title": "Entity-Deduplizierung ÃƒÂ¯Ã‚Â¿Ã‚Â½ber normalized_name implementieren",
+      "title": "Entity-Deduplizierung \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdber normalized_name implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
@@ -1159,10 +1159,10 @@
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-03-14T11:40:59Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T11:42:24Z",
       "blocked_by": [
         "TASK-035",
         "TASK-027"
@@ -1329,7 +1329,7 @@
     },
     "TASK-085": {
       "stream": "STREAM-AUTH-API",
-      "title": "Rate-Limiting-Middleware auf allen ÃƒÂ¯Ã‚Â¿Ã‚Â½ffentlichen Endpunkten implementieren",
+      "title": "Rate-Limiting-Middleware auf allen \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdffentlichen Endpunkten implementieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -1503,7 +1503,7 @@
     },
     "TASK-097": {
       "stream": "STREAM-FRONTEND",
-      "title": "Dashboard mit Briefing-ÃƒÂ¯Ã‚Â¿Ã‚Â½bersicht implementieren",
+      "title": "Dashboard mit Briefing-\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdbersicht implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Frontend",
@@ -1532,7 +1532,7 @@
     },
     "TASK-099": {
       "stream": "STREAM-FRONTEND",
-      "title": "SuchoberflÃƒÂ¯Ã‚Â¿Ã‚Â½che mit Filtern implementieren",
+      "title": "Suchoberfl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdche mit Filtern implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Frontend",
@@ -1620,7 +1620,7 @@
     },
     "TASK-105": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "Kaskadierte Account-LÃƒÂ¯Ã‚Â¿Ã‚Â½schung implementieren",
+      "title": "Kaskadierte Account-L\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdschung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -1634,7 +1634,7 @@
     },
     "TASK-106": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "UnverÃƒÂ¯Ã‚Â¿Ã‚Â½nderliches Audit-Log implementieren",
+      "title": "Unver\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdnderliches Audit-Log implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -1648,7 +1648,7 @@
     },
     "TASK-107": {
       "stream": "STREAM-FRONTEND",
-      "title": "VerschlÃƒÂ¯Ã‚Â¿Ã‚Â½sselungsstatus-Anzeige im Frontend implementieren",
+      "title": "Verschl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdsselungsstatus-Anzeige im Frontend implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Frontend",
@@ -1705,7 +1705,7 @@
     },
     "TASK-111": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "E2E-Tests fÃƒÂ¯Ã‚Â¿Ã‚Â½r Kernflows implementieren",
+      "title": "E2E-Tests f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Kernflows implementieren",
       "priority": "P2",
       "effort": "L",
       "area": "Testing",
@@ -1720,7 +1720,7 @@
     },
     "TASK-112": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "Load-Tests fÃƒÂ¯Ã‚Â¿Ã‚Â½r 20 gleichzeitige Nutzer implementieren",
+      "title": "Load-Tests f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr 20 gleichzeitige Nutzer implementieren",
       "priority": "P2",
       "effort": "M",
       "area": "Testing",
@@ -1804,7 +1804,7 @@
     },
     "TASK-118": {
       "stream": "STREAM-FRONTEND",
-      "title": "WebSocket-Verbindung fÃƒÂ¯Ã‚Â¿Ã‚Â½r Echtzeit-Updates implementieren",
+      "title": "WebSocket-Verbindung f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Echtzeit-Updates implementieren",
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
@@ -1875,7 +1875,7 @@
     },
     "TASK-123": {
       "stream": "STREAM-PHASE3",
-      "title": "Gmail-Konnektor ÃƒÂ¯Ã‚Â¿Ã‚Â½ OAuth2 und Google Pub/Sub Push Notifications",
+      "title": "Gmail-Konnektor \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd OAuth2 und Google Pub/Sub Push Notifications",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -1890,7 +1890,7 @@
     },
     "TASK-124": {
       "stream": "STREAM-PHASE3",
-      "title": "Gmail-Konnektor ÃƒÂ¯Ã‚Â¿Ã‚Â½ History API, Thread-Resolution und UDF-Normalisierung",
+      "title": "Gmail-Konnektor \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd History API, Thread-Resolution und UDF-Normalisierung",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -1904,7 +1904,7 @@
     },
     "TASK-125": {
       "stream": "STREAM-PHASE3",
-      "title": "Slack-Konnektor ÃƒÂ¯Ã‚Â¿Ã‚Â½ OAuth2 und Events API",
+      "title": "Slack-Konnektor \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd OAuth2 und Events API",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1919,7 +1919,7 @@
     },
     "TASK-126": {
       "stream": "STREAM-PHASE3",
-      "title": "Slack-Konnektor ÃƒÂ¯Ã‚Â¿Ã‚Â½ Cursor-basiertes Backfill und Thread-AuflÃƒÂ¯Ã‚Â¿Ã‚Â½sung",
+      "title": "Slack-Konnektor \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Cursor-basiertes Backfill und Thread-Aufl\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdsung",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1963,7 +1963,7 @@
     },
     "TASK-129": {
       "stream": "STREAM-PHASE4",
-      "title": "EntscheidungsunterstÃƒÂ¯Ã‚Â¿Ã‚Â½tzung ÃƒÂ¯Ã‚Â¿Ã‚Â½ Datenmodell und Graph-Schema erweitern",
+      "title": "Entscheidungsunterst\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdtzung \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Datenmodell und Graph-Schema erweitern",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1977,7 +1977,7 @@
     },
     "TASK-130": {
       "stream": "STREAM-PHASE4",
-      "title": "EntscheidungsunterstÃƒÂ¯Ã‚Â¿Ã‚Â½tzung ÃƒÂ¯Ã‚Â¿Ã‚Â½ Pro/Contra-UI und Nachverfolgung",
+      "title": "Entscheidungsunterst\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdtzung \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Pro/Contra-UI und Nachverfolgung",
       "priority": "P2",
       "effort": "L",
       "area": "Frontend",
@@ -1991,7 +1991,7 @@
     },
     "TASK-131": {
       "stream": "STREAM-PHASE4",
-      "title": "Aktive Erinnerungen ÃƒÂ¯Ã‚Â¿Ã‚Â½ Follow-up-Detection und Trigger-Engine",
+      "title": "Aktive Erinnerungen \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Follow-up-Detection und Trigger-Engine",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2005,7 +2005,7 @@
     },
     "TASK-132": {
       "stream": "STREAM-PHASE4",
-      "title": "Aktive Erinnerungen ÃƒÂ¯Ã‚Â¿Ã‚Â½ Notification-UI und proaktive Fragen",
+      "title": "Aktive Erinnerungen \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Notification-UI und proaktive Fragen",
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
@@ -2019,7 +2019,7 @@
     },
     "TASK-133": {
       "stream": "STREAM-PHASE4",
-      "title": "Projektbriefings ÃƒÂ¯Ã‚Â¿Ã‚Â½ Generierung, API und Frontend",
+      "title": "Projektbriefings \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Generierung, API und Frontend",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2033,7 +2033,7 @@
     },
     "TASK-134": {
       "stream": "STREAM-PHASE4",
-      "title": "PersÃƒÂ¯Ã‚Â¿Ã‚Â½nliches Lernmodell ÃƒÂ¯Ã‚Â¿Ã‚Â½ Arbeitsmuster-Erkennung",
+      "title": "Pers\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdnliches Lernmodell \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Arbeitsmuster-Erkennung",
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
@@ -2047,7 +2047,7 @@
     },
     "TASK-135": {
       "stream": "STREAM-PHASE4",
-      "title": "Desktop-App ÃƒÂ¯Ã‚Â¿Ã‚Â½ Tauri-GrundgerÃƒÂ¯Ã‚Â¿Ã‚Â½st mit WebView und System Tray",
+      "title": "Desktop-App \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Tauri-Grundger\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdst mit WebView und System Tray",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2061,7 +2061,7 @@
     },
     "TASK-136": {
       "stream": "STREAM-PHASE4",
-      "title": "Desktop-App ÃƒÂ¯Ã‚Â¿Ã‚Â½ Offline-Modus mit lokalem Datensync",
+      "title": "Desktop-App \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Offline-Modus mit lokalem Datensync",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2075,7 +2075,7 @@
     },
     "TASK-137": {
       "stream": "STREAM-PHASE4",
-      "title": "Pricing und Billing ÃƒÂ¯Ã‚Â¿Ã‚Â½ Stripe-Integration und Abo-Verwaltung",
+      "title": "Pricing und Billing \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Stripe-Integration und Abo-Verwaltung",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2089,7 +2089,7 @@
     },
     "TASK-138": {
       "stream": "STREAM-PHASE4",
-      "title": "Erweiterte NER ÃƒÂ¯Ã‚Â¿Ã‚Â½ Ziele, Risiken, Hypothesen und offene Fragen extrahieren",
+      "title": "Erweiterte NER \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Ziele, Risiken, Hypothesen und offene Fragen extrahieren",
       "priority": "P2",
       "effort": "L",
       "area": "LLM",
@@ -2103,7 +2103,7 @@
     },
     "TASK-139": {
       "stream": "STREAM-PHASE4",
-      "title": "Mustererkennung ÃƒÂ¯Ã‚Â¿Ã‚Â½ Wiederkehrende Themen und sich ÃƒÂ¯Ã‚Â¿Ã‚Â½ndernde Annahmen",
+      "title": "Mustererkennung \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Wiederkehrende Themen und sich \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdndernde Annahmen",
       "priority": "P2",
       "effort": "L",
       "area": "LLM",
@@ -2117,7 +2117,7 @@
     },
     "TASK-140": {
       "stream": "STREAM-PHASE4",
-      "title": "Browser-Extension-Prototyp fÃƒÂ¯Ã‚Â¿Ã‚Â½r Kontextanzeige",
+      "title": "Browser-Extension-Prototyp f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Kontextanzeige",
       "priority": "P3",
       "effort": "XL",
       "area": "Frontend",
@@ -2131,7 +2131,7 @@
     },
     "TASK-141": {
       "stream": "STREAM-PHASE4",
-      "title": "Slack-Bot-Prototyp fÃƒÂ¯Ã‚Â¿Ã‚Â½r Quick Search und Briefings",
+      "title": "Slack-Bot-Prototyp f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Quick Search und Briefings",
       "priority": "P3",
       "effort": "L",
       "area": "Backend",
@@ -2174,7 +2174,7 @@
     },
     "TASK-144": {
       "stream": "STREAM-PHASE5",
-      "title": "Multi-Tenancy ÃƒÂ¯Ã‚Â¿Ã‚Â½ Team-Features und gemeinsames Wissensmodell",
+      "title": "Multi-Tenancy \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Team-Features und gemeinsames Wissensmodell",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2188,7 +2188,7 @@
     },
     "TASK-145": {
       "stream": "STREAM-PHASE5",
-      "title": "Self-Hosting ÃƒÂ¯Ã‚Â¿Ã‚Â½ Docker-Compose und Helm-Chart fÃƒÂ¯Ã‚Â¿Ã‚Â½r On-Premise-Deployment",
+      "title": "Self-Hosting \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Docker-Compose und Helm-Chart f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr On-Premise-Deployment",
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
@@ -2202,7 +2202,7 @@
     },
     "TASK-146": {
       "stream": "STREAM-PHASE5",
-      "title": "Horizontale Skalierung ÃƒÂ¯Ã‚Â¿Ã‚Â½ Load Balancer, Connection Pooling, Caching und CDN",
+      "title": "Horizontale Skalierung \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Load Balancer, Connection Pooling, Caching und CDN",
       "priority": "P2",
       "effort": "XL",
       "area": "Infra",
@@ -2245,7 +2245,7 @@
     },
     "TASK-149": {
       "stream": "STREAM-PHASE5",
-      "title": "B2B-Pilot Features fÃƒÂ¯Ã‚Â¿Ã‚Â½r BeratungshÃƒÂ¯Ã‚Â¿Ã‚Â½user und Tech-Startups",
+      "title": "B2B-Pilot Features f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Beratungsh\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bduser und Tech-Startups",
       "priority": "P2",
       "effort": "XL",
       "area": "Backend",
@@ -2259,7 +2259,7 @@
     },
     "TASK-150": {
       "stream": "STREAM-PHASE5",
-      "title": "ÃƒÂ¯Ã‚Â¿Ã‚Â½ffentliche API und Developer Portal",
+      "title": "\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdffentliche API und Developer Portal",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2273,7 +2273,7 @@
     },
     "TASK-151": {
       "stream": "STREAM-PHASE5",
-      "title": "Marketplace fÃƒÂ¯Ã‚Â¿Ã‚Â½r Community-Integrationen",
+      "title": "Marketplace f\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdr Community-Integrationen",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2287,7 +2287,7 @@
     },
     "TASK-152": {
       "stream": "STREAM-PHASE5",
-      "title": "Mobile Apps ÃƒÂ¯Ã‚Â¿Ã‚Â½ iOS und Android",
+      "title": "Mobile Apps \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd iOS und Android",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2301,7 +2301,7 @@
     },
     "TASK-153": {
       "stream": "STREAM-PHASE5",
-      "title": "RBAC ÃƒÂ¯Ã‚Â¿Ã‚Â½ Rollenbasierte Zugriffssteuerung auf Organisationsebene",
+      "title": "RBAC \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Rollenbasierte Zugriffssteuerung auf Organisationsebene",
       "priority": "P2",
       "effort": "L",
       "area": "Auth",
@@ -2315,7 +2315,7 @@
     },
     "TASK-154": {
       "stream": "STREAM-PHASE5",
-      "title": "Vertikale Spezialisierungen ÃƒÂ¯Ã‚Â¿Ã‚Â½ Forscher, Berater, Entwickler",
+      "title": "Vertikale Spezialisierungen \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Forscher, Berater, Entwickler",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2329,7 +2329,7 @@
     },
     "TASK-155": {
       "stream": "STREAM-PHASE5",
-      "title": "Langzeit-Intelligenz ÃƒÂ¯Ã‚Â¿Ã‚Â½ Muster ÃƒÂ¯Ã‚Â¿Ã‚Â½ber Monate/Jahre und Annahmen-Tracking",
+      "title": "Langzeit-Intelligenz \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bd Muster \u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00af\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bf\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00bdber Monate/Jahre und Annahmen-Tracking",
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
