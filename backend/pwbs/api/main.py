@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import JSONResponse
 
+from pwbs.api.middleware.access_log import AccessLogMiddleware
 from pwbs.api.middleware.audit import AuditMiddleware
 from pwbs.api.middleware.auth import AuthMiddleware
 from pwbs.api.middleware.rate_limit import RateLimitMiddleware
@@ -33,6 +34,7 @@ from pwbs.api.middleware.request_id import RequestIDMiddleware
 from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
+from pwbs.core.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Build and return the configured FastAPI application."""
     settings = get_settings()
+
+    # Structured JSON logging (TASK-113) -- must be called before any log use
+    setup_logging(settings.log_level)
 
     application = FastAPI(
         title="PWBS API",
@@ -150,6 +155,9 @@ def create_app() -> FastAPI:
 
     # 5. RateLimit
     application.add_middleware(RateLimitMiddleware)
+
+    # 4b. AccessLog -- logs method, path, status, duration_ms (TASK-113)
+    application.add_middleware(AccessLogMiddleware)
 
     # 4. RequestID
     application.add_middleware(RequestIDMiddleware)
