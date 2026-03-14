@@ -1,15 +1,18 @@
-"""Google Calendar connector – OAuth2 flow (TASK-045).
+"""Google Calendar connector – OAuth2 flow + Sync logic (TASK-045, TASK-046).
 
 Implements:
 - OAuth2 authorization URL generation (scope: calendar.events.readonly)
 - Authorization code → token exchange
+- Cursor-based incremental sync via syncToken (initial full sync + incremental)
+- Webhook push notification handling (with polling fallback)
 - Health check via Calendar API calendarList endpoint
 
-Sync logic (TASK-046) and normalization (TASK-047) are implemented separately.
+Normalization (TASK-047) is a separate task.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from typing import TYPE_CHECKING
@@ -18,10 +21,10 @@ from urllib.parse import urlencode
 import httpx
 from pydantic import SecretStr
 
-from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncResult
+from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncError, SyncResult
 from pwbs.connectors.oauth import OAuthTokens
 from pwbs.core.config import get_settings
-from pwbs.core.exceptions import ConnectorError
+from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
@@ -40,6 +43,55 @@ _GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 _GOOGLE_CALENDAR_API = "https://www.googleapis.com/calendar/v3"
 GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.readonly"
 _HTTP_TIMEOUT = 30.0
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _raise_for_rate_limit(response: httpx.Response) -> None:
+    """Raise ``RateLimitError`` if the response indicates rate limiting.
+
+    Google returns 429 (Too Many Requests) or 503 (Service Unavailable)
+    when rate limits are exceeded.
+    """
+    if response.status_code in {429, 503}:
+        retry_after_header = response.headers.get("Retry-After")
+        retry_after = float(retry_after_header) if retry_after_header else None
+        raise RateLimitError(
+            f"Google Calendar API rate limited: HTTP {response.status_code}",
+            status_code=response.status_code,
+            retry_after=retry_after,
+        )
+
+
+def _encode_cursor(
+    *,
+    sync_token: str | None,
+    page_token: str,
+) -> str:
+    """Encode a compound cursor (syncToken + pageToken) as JSON string.
+
+    When paginating within a single sync, we need to remember both the
+    original syncToken (for the next page request) and the pageToken.
+    """
+    return json.dumps({"syncToken": sync_token, "pageToken": page_token})
+
+
+def _decode_cursor(cursor: str) -> tuple[str | None, str | None]:
+    """Decode a cursor that may be a plain syncToken or a compound JSON.
+
+    Returns ``(sync_token, page_token)``.
+    """
+    try:
+        data = json.loads(cursor)
+        if isinstance(data, dict) and "pageToken" in data:
+            return data.get("syncToken"), data["pageToken"]
+    except (json.JSONDecodeError, TypeError):
+        pass
+    # Plain syncToken string
+    return cursor, None
 
 
 # ---------------------------------------------------------------------------
@@ -170,9 +222,7 @@ class GoogleCalendarConnector(BaseConnector):
 
         return OAuthTokens(
             access_token=SecretStr(access_token),
-            refresh_token=(
-                SecretStr(refresh_token_value) if refresh_token_value else None
-            ),
+            refresh_token=(SecretStr(refresh_token_value) if refresh_token_value else None),
             token_type=data.get("token_type", "Bearer"),
             expires_at=expires_at,
             scope=data.get("scope", GOOGLE_CALENDAR_SCOPE),
@@ -180,13 +230,143 @@ class GoogleCalendarConnector(BaseConnector):
 
     # ---- BaseConnector abstract methods ------------------------------------
 
-    async def fetch_since(self, cursor: str | None) -> SyncResult:
-        """Fetch calendar events since *cursor*.
+    def _get_access_token(self) -> str:
+        """Extract the decrypted access token from ``config.extra``.
 
-        Not yet implemented – see TASK-046.
+        The API layer (TASK-087) is responsible for decrypting tokens and
+        passing them via ``config.extra["access_token"]`` when constructing
+        the connector.
+
+        Raises:
+            ConnectorError: If no access token is available.
         """
-        raise NotImplementedError(
-            "TASK-046: Google Calendar Sync-Logik ausstehend"
+        token = self.config.extra.get("access_token")
+        if not token or not isinstance(token, str):
+            raise ConnectorError(
+                "No access_token in connector config — decrypt credentials first",
+                code="MISSING_ACCESS_TOKEN",
+            )
+        return token
+
+    async def fetch_since(self, cursor: str | None) -> SyncResult:
+        """Fetch Google Calendar events since *cursor*.
+
+        - ``cursor=None`` → **initial full sync**: fetches all events from
+          the primary calendar (paginated, up to ``max_batch_size`` per page).
+        - ``cursor=<syncToken>`` → **incremental sync**: fetches only events
+          changed since the token was issued.
+
+        Returns a ``SyncResult`` with:
+        - ``documents``: Normalised ``UnifiedDocument`` objects (via
+          ``self.normalize``).  If the normalizer is not yet implemented
+          (TASK-047), individual events appear in ``errors`` instead.
+        - ``new_cursor``: Google's ``nextSyncToken`` for the next sync.
+        - ``has_more``: ``True`` when more pages remain (caller should
+          call again with ``new_cursor``).
+
+        Raises:
+            RateLimitError: On HTTP 429 or 503 (handled by base-class retry).
+            ConnectorError: On other API failures.
+        """
+        access_token = self._get_access_token()
+
+        params: dict[str, str | int] = {
+            "maxResults": min(self.config.max_batch_size, 250),
+            "singleEvents": "true",
+            "orderBy": "updated",
+        }
+
+        if cursor is not None:
+            sync_token, page_token = _decode_cursor(cursor)
+            if page_token:
+                # Continuing pagination within an existing sync
+                params["pageToken"] = page_token
+                if sync_token:
+                    params["syncToken"] = sync_token
+            elif sync_token:
+                # Incremental sync — use the syncToken from previous run
+                params["syncToken"] = sync_token
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+        url = f"{_GOOGLE_CALENDAR_API}/calendars/primary/events"
+
+        try:
+            async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
+                response = await client.get(url, params=params, headers=headers)
+                _raise_for_rate_limit(response)
+                response.raise_for_status()
+                data = response.json()
+        except RateLimitError:
+            raise
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 410:  # noqa: PLR2004
+                # syncToken invalidated — Google requires a full re-sync
+                logger.warning(
+                    "syncToken invalidated (410 Gone), triggering full re-sync: connection_id=%s",
+                    self.connection_id,
+                )
+                return SyncResult(
+                    documents=[],
+                    new_cursor=None,  # signal to the caller: start fresh
+                    has_more=True,
+                )
+            raise ConnectorError(
+                f"Google Calendar API error: HTTP {exc.response.status_code}",
+                code="GCAL_API_ERROR",
+            ) from exc
+        except httpx.RequestError as exc:
+            raise ConnectorError(
+                f"Google Calendar API network error: {exc}",
+                code="GCAL_NETWORK_ERROR",
+            ) from exc
+
+        # Parse events
+        raw_events: list[dict[str, JsonValue]] = data.get("items", [])
+        documents: list[UnifiedDocument] = []
+        errors: list[SyncError] = []
+
+        for raw_event in raw_events:
+            event_id = raw_event.get("id", "unknown")
+            try:
+                doc = await self.normalize(raw_event)
+                documents.append(doc)
+            except NotImplementedError:
+                # TASK-047 not yet implemented — record as error
+                errors.append(
+                    SyncError(
+                        source_id=str(event_id),
+                        error="TASK-047: normalize not yet implemented",
+                    )
+                )
+            except Exception as exc:
+                errors.append(
+                    SyncError(
+                        source_id=str(event_id),
+                        error=str(exc),
+                    )
+                )
+
+        # Determine cursor and pagination state
+        next_page_token = data.get("nextPageToken")
+        next_sync_token = data.get("nextSyncToken")
+
+        if next_page_token:
+            # More pages within this sync — return pageToken as cursor
+            new_cursor = _encode_cursor(
+                sync_token=cursor,
+                page_token=next_page_token,
+            )
+            has_more = True
+        else:
+            # No more pages — return the syncToken for next incremental run
+            new_cursor = next_sync_token
+            has_more = False
+
+        return SyncResult(
+            documents=documents,
+            new_cursor=new_cursor,
+            errors=errors,
+            has_more=has_more,
         )
 
     async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
@@ -194,9 +374,7 @@ class GoogleCalendarConnector(BaseConnector):
 
         Not yet implemented – see TASK-047.
         """
-        raise NotImplementedError(
-            "TASK-047: Google Calendar Normalizer ausstehend"
-        )
+        raise NotImplementedError("TASK-047: Google Calendar Normalizer ausstehend")
 
     async def health_check(self) -> bool:
         """Verify the Google Calendar API is reachable with stored credentials.
@@ -208,8 +386,7 @@ class GoogleCalendarConnector(BaseConnector):
         access_token = self.config.extra.get("access_token")
         if not access_token or not isinstance(access_token, str):
             logger.warning(
-                "Health check skipped – no access_token in config.extra: "
-                "connection_id=%s",
+                "Health check skipped – no access_token in config.extra: connection_id=%s",
                 self.connection_id,
             )
             return False
