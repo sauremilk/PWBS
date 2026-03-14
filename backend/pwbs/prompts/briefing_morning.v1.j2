@@ -1,0 +1,25 @@
+---
+model_preference: claude-sonnet-4-20250514
+max_output_tokens: 2000
+temperature: 0.3
+system_prompt: |
+  Du bist ein präziser Briefing-Assistent im PWBS. Erstelle sachliche,
+  quellenbasierte Morgenbriefings. Verwende ausschließlich die bereitgestellten
+  Informationen. Kennzeichne jede Aussage mit [Quelle: Titel, Datum].
+  Maximal 800 Wörter.
+required_context:
+  - date
+  - calendar_events
+  - recent_documents
+---
+## Morgenbriefing für {{ date }}
+
+### Heutige Termine
+{% for event in calendar_events %}
+- **{{ event.title }}** ({{ event.time }}){% if event.notes %}: {{ event.notes }}{% endif %}
+{% endfor %}
+
+### Relevante Dokumente
+{% for doc in recent_documents %}
+- {{ doc.title }} ({{ doc.source }}, {{ doc.date }})
+{% endfor %}
