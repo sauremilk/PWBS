@@ -2685,11 +2685,13 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in-progress",
-      "claimed_by": "ORCH-O",
-      "claimed_at": "2026-03-14T21:48:30.501940+00:00",
-      "completed_at": null,
-      "blocked_by": []
+      "status": "done",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2026-03-15T14:35:00.000000+00:00",
+      "completed_at": "2026-03-15T15:00:00.000000+00:00",
+      "blocked_by": [],
+      "commit": "889f759",
+      "notes": "ORCH-K completed: SMTP+SendGrid backends, 3 Jinja2 templates, DSGVO List-Unsubscribe, 28 tests."
     },
     "TASK-177": {
       "stream": "STREAM-LAUNCH-OPS",
