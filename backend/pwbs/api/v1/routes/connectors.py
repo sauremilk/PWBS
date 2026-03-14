@@ -83,6 +83,11 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
         "description": "Nachrichten und Threads aus Slack-Channels",
         "auth_method": "oauth2",
     },
+    SourceType.OUTLOOK_MAIL.value: {
+        "name": "Outlook Mail",
+        "description": "E-Mails und Threads aus Microsoft Outlook",
+        "auth_method": "oauth2",
+    },
 }
 
 # OAuth2 authorization URLs per provider
@@ -93,6 +98,7 @@ _AUTH_URLS: dict[SourceType, str] = {
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
     SourceType.ZOOM: "https://zoom.us/oauth/authorize",
     SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
+    SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
 }
 
 _SCOPES: dict[SourceType, str] = {
@@ -102,6 +108,7 @@ _SCOPES: dict[SourceType, str] = {
     SourceType.NOTION: "",
     SourceType.ZOOM: "recording:read",
     SourceType.SLACK: "channels:history,channels:read,users:read",
+    SourceType.OUTLOOK_MAIL: "https://graph.microsoft.com/Mail.Read offline_access",
 }
 
 
@@ -322,6 +329,7 @@ async def get_auth_url(
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
         SourceType.SLACK: settings.slack_oauth_redirect_uri,
+        SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
     }
     redirect_uri = redirect_uri_map.get(source_type, "")
 
@@ -332,6 +340,7 @@ async def get_auth_url(
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
         SourceType.SLACK: settings.slack_client_id,
+        SourceType.OUTLOOK_MAIL: settings.ms_client_id,
     }
     client_id = client_id_map.get(source_type, "")
     if not client_id:
@@ -467,6 +476,7 @@ async def _exchange_code_for_tokens(
         SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
         SourceType.ZOOM: "https://zoom.us/oauth/token",
         SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
+        SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
     }
 
     endpoint = token_endpoints.get(source_type)
@@ -485,6 +495,7 @@ async def _exchange_code_for_tokens(
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
         SourceType.SLACK: settings.slack_oauth_redirect_uri,
+        SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
     }
 
     client_id_map: dict[SourceType, str] = {
@@ -493,6 +504,7 @@ async def _exchange_code_for_tokens(
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
         SourceType.SLACK: settings.slack_client_id,
+        SourceType.OUTLOOK_MAIL: settings.ms_client_id,
     }
     client_secret_map: dict[SourceType, SecretStr] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_secret,
@@ -500,6 +512,7 @@ async def _exchange_code_for_tokens(
         SourceType.NOTION: settings.notion_client_secret,
         SourceType.ZOOM: settings.zoom_client_secret,
         SourceType.SLACK: settings.slack_client_secret,
+        SourceType.OUTLOOK_MAIL: settings.ms_client_secret,
     }
 
     payload = {

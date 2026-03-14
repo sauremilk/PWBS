@@ -2,7 +2,14 @@
 
 import { Suspense, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search as SearchIcon, Filter, X, FileText, Calendar, Loader2 } from "lucide-react";
+import {
+  Search as SearchIcon,
+  Filter,
+  X,
+  FileText,
+  Calendar,
+  Loader2,
+} from "lucide-react";
 import { useSearch } from "@/hooks/use-search";
 import type { SearchFilters, SourceType, SearchResult } from "@/types/api";
 
@@ -14,6 +21,7 @@ const SOURCE_TYPE_OPTIONS: { value: SourceType; label: string }[] = [
   { value: "obsidian", label: "Obsidian" },
   { value: "zoom_transcript", label: "Zoom" },
   { value: "slack", label: "Slack" },
+  { value: "outlook_mail", label: "Outlook" },
 ];
 
 function ResultCard({ result }: { result: SearchResult }) {
@@ -29,12 +37,17 @@ function ResultCard({ result }: { result: SearchResult }) {
           {Math.round(result.score * 100)}%
         </span>
       </div>
-      <h3 className="mb-1 text-sm font-semibold text-gray-900">{result.doc_title}</h3>
+      <h3 className="mb-1 text-sm font-semibold text-gray-900">
+        {result.doc_title}
+      </h3>
       <p className="text-sm text-gray-600 line-clamp-3">{result.content}</p>
       {result.entities.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {result.entities.map((e) => (
-            <span key={e} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            <span
+              key={e}
+              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+            >
               {e}
             </span>
           ))}
@@ -163,10 +176,15 @@ function SearchContent() {
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <span className="mb-2 block text-sm font-medium text-gray-700">Quelltyp</span>
+              <span className="mb-2 block text-sm font-medium text-gray-700">
+                Quelltyp
+              </span>
               <div className="space-y-1">
                 {SOURCE_TYPE_OPTIONS.map((opt) => (
-                  <label key={opt.value} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       checked={sourceTypes.includes(opt.value)}
@@ -179,7 +197,12 @@ function SearchContent() {
               </div>
             </div>
             <div>
-              <label htmlFor="filter-date-from" className="mb-2 block text-sm font-medium text-gray-700">Von</label>
+              <label
+                htmlFor="filter-date-from"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Von
+              </label>
               <input
                 id="filter-date-from"
                 type="date"
@@ -192,7 +215,12 @@ function SearchContent() {
               />
             </div>
             <div>
-              <label htmlFor="filter-date-to" className="mb-2 block text-sm font-medium text-gray-700">Bis</label>
+              <label
+                htmlFor="filter-date-to"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Bis
+              </label>
               <input
                 id="filter-date-to"
                 type="date"
@@ -211,7 +239,9 @@ function SearchContent() {
       {/* LLM-generated Answer */}
       {data?.answer && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <h2 className="mb-1 text-sm font-semibold text-blue-800">KI-Zusammenfassung</h2>
+          <h2 className="mb-1 text-sm font-semibold text-blue-800">
+            KI-Zusammenfassung
+          </h2>
           <p className="text-sm text-blue-900">{data.answer}</p>
         </div>
       )}
@@ -224,7 +254,8 @@ function SearchContent() {
       ) : data && data.results.length > 0 ? (
         <div className="space-y-3">
           <p className="text-sm text-gray-500">
-            {data.results.length} Ergebnis{data.results.length !== 1 ? "se" : ""}
+            {data.results.length} Ergebnis
+            {data.results.length !== 1 ? "se" : ""}
           </p>
           {data.results.map((result) => (
             <ResultCard key={result.chunk_id} result={result} />
@@ -233,7 +264,9 @@ function SearchContent() {
       ) : query.length > 0 && !isLoading ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
           <SearchIcon className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-          <h3 className="mb-1 text-sm font-semibold text-gray-900">Keine Ergebnisse gefunden</h3>
+          <h3 className="mb-1 text-sm font-semibold text-gray-900">
+            Keine Ergebnisse gefunden
+          </h3>
           <p className="text-sm text-gray-500">
             Versuche andere Suchbegriffe oder entferne Filter.
           </p>

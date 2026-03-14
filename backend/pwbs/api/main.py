@@ -192,6 +192,7 @@ def create_app() -> FastAPI:
 
     # -- Routers -------------------------------------------------------------
 
+    from pwbs.api.v1.routes.admin import router as admin_router
     from pwbs.api.v1.routes.auth import router as auth_router
     from pwbs.api.v1.routes.auth_google import router as auth_google_router
     from pwbs.api.v1.routes.auth_refresh import router as auth_refresh_router
@@ -202,6 +203,8 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.organizations import (
         router as organizations_router,
+    )
+    from pwbs.api.v1.routes.organizations import (
         visibility_router,
     )
     from pwbs.api.v1.routes.reminders import router as reminders_router
@@ -213,6 +216,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(auth_google_router)
     application.include_router(auth_refresh_router)
+    application.include_router(admin_router)
     application.include_router(briefings_router)
     application.include_router(connectors_router)
     application.include_router(documents_router)

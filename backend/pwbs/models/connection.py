@@ -1,4 +1,4 @@
-"""Connection ORM model (TASK-016)."""
+"""Connection ORM model (TASK-016, TASK-149: org-wide connectors)."""
 
 from __future__ import annotations
 
@@ -26,5 +26,13 @@ class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     credentials_enc: Mapped[str] = mapped_column(Text, nullable=False)
     watermark: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     config: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="{}")  # type: ignore[type-arg]
+
+    # Org-wide connector: if set, this connector is shared with all org members
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
 
     user: Mapped["User"] = relationship(back_populates="connections")  # noqa: F821

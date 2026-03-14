@@ -10,6 +10,7 @@ import {
   Scale,
   FolderKanban,
   Cable,
+  Shield,
   Settings,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/knowledge", label: "Knowledge", icon: Network },
   { href: "/decisions", label: "Entscheidungen", icon: Scale },
   { href: "/connectors", label: "Konnektoren", icon: Cable },
+  { href: "/admin", label: "Admin", icon: Shield },
   { href: "/settings", label: "Einstellungen", icon: Settings },
 ] as const;
 
@@ -28,7 +30,10 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white" aria-label="Seitennavigation">
+    <aside
+      className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white"
+      aria-label="Seitennavigation"
+    >
       <div className="flex h-16 items-center border-b border-gray-200 px-6">
         <span className="text-xl font-bold text-gray-900">PWBS</span>
       </div>

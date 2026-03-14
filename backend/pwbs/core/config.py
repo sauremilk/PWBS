@@ -110,6 +110,10 @@ class Settings(BaseSettings):
     slack_client_secret: SecretStr = SecretStr("")
     slack_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/slack/callback"
     slack_signing_secret: str = ""
+    ms_client_id: str = ""
+    ms_client_secret: SecretStr = SecretStr("")
+    ms_tenant_id: str = "common"
+    ms_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/outlook-mail/callback"
 
     #  Derived / computed properties
 

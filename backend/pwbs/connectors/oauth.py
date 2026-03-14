@@ -46,6 +46,7 @@ _REFRESH_ENDPOINTS: dict[SourceType, str] = {
     SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
     SourceType.ZOOM: "https://zoom.us/oauth/token",
     SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
+    SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
 }
 
 # SSRF protection: timeout for all external HTTP calls
@@ -260,6 +261,10 @@ def _get_client_credentials(
         SourceType.SLACK: (
             getattr(settings, "slack_client_id", ""),
             getattr(settings, "slack_client_secret", SecretStr("")).get_secret_value(),
+        ),
+        SourceType.OUTLOOK_MAIL: (
+            getattr(settings, "ms_client_id", ""),
+            getattr(settings, "ms_client_secret", SecretStr("")).get_secret_value(),
         ),
     }
 

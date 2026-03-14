@@ -13,6 +13,7 @@ export type SourceType =
   | "gmail"
   | "notion"
   | "obsidian"
+  | "outlook_mail"
   | "zoom_transcript"
   | "slack"
   | "manual";
@@ -360,7 +361,11 @@ export interface DocumentDetailResponse {
 // ---------------------------------------------------------------------------
 
 export type ReminderType = "follow_up" | "inactive_topic" | "open_question";
-export type ReminderStatus = "pending" | "acknowledged" | "dismissed" | "snoozed";
+export type ReminderStatus =
+  | "pending"
+  | "acknowledged"
+  | "dismissed"
+  | "snoozed";
 export type ReminderUrgency = "high" | "medium" | "low";
 export type ReminderFrequency = "daily" | "weekly" | "off";
 
