@@ -1,9 +1,12 @@
-"""Slack connector - OAuth2 V2 flow + Events API webhook (TASK-125).
+"""Slack connector - OAuth2 V2 flow + Events API webhook (TASK-125, TASK-126).
 
 Implements:
 - OAuth2 V2 authorization URL generation (Bot Token Scopes)
 - Authorization code -> token exchange
 - Cursor-based incremental sync via conversations.history
+- 90-day backfill for initial sync (TASK-126)
+- Thread-Resolution: conversations.replies merging (TASK-126)
+- Reactions as UDF metadata (TASK-126)
 - Channel listing for user channel selection
 - Event signature validation (HMAC-SHA256) for Events API
 - Health check via auth.test endpoint
@@ -49,6 +52,7 @@ _SLACK_API = "https://slack.com/api"
 SLACK_SCOPES = "channels:history,channels:read,users:read"
 _HTTP_TIMEOUT = 30.0
 _MAX_MESSAGES_PER_SYNC = 200  # Slack default limit per page
+_BACKFILL_DAYS = 90  # Initial sync: import messages from the last N days
 
 
 # ---------------------------------------------------------------------------
@@ -104,11 +108,14 @@ def validate_event_signature(
 
     # Compute expected signature
     sig_basestring = f"v0:{timestamp}:{body.decode('utf-8')}"
-    expected = "v0=" + hmac.new(
-        signing_secret.encode("utf-8"),
-        sig_basestring.encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
+    expected = (
+        "v0="
+        + hmac.new(
+            signing_secret.encode("utf-8"),
+            sig_basestring.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+    )
 
     return hmac.compare_digest(expected, signature)
 
@@ -267,16 +274,16 @@ class SlackConnector(BaseConnector):
                     _check_slack_error(data, "conversations.list")
 
                     for ch in data.get("channels", []):
-                        channels.append({
-                            "id": ch.get("id", ""),
-                            "name": ch.get("name", ""),
-                            "num_members": str(ch.get("num_members", 0)),
-                        })
+                        channels.append(
+                            {
+                                "id": ch.get("id", ""),
+                                "name": ch.get("name", ""),
+                                "num_members": str(ch.get("num_members", 0)),
+                            }
+                        )
 
                     # Pagination
-                    next_cursor = (
-                        data.get("response_metadata", {}).get("next_cursor", "")
-                    )
+                    next_cursor = data.get("response_metadata", {}).get("next_cursor", "")
                     if not next_cursor:
                         break
                     cursor = next_cursor
@@ -318,7 +325,9 @@ class SlackConnector(BaseConnector):
     async def fetch_since(self, cursor: str | None) -> SyncResult:
         """Fetch Slack messages since *cursor*.
 
-        - ``cursor=None`` -> initial sync: fetches recent messages from all configured channels.
+        - ``cursor=None`` -> initial sync: fetches messages from the last 90 days
+          from all configured channels. Threaded messages are resolved via
+          ``conversations.replies`` and merged into one UDF per thread (TASK-126).
         - ``cursor=<encoded>`` -> incremental sync using per-channel timestamps.
 
         Returns a SyncResult with normalised documents and the new cursor.
@@ -341,6 +350,14 @@ class SlackConnector(BaseConnector):
         if cursor is not None:
             channel_cursors, _ = _decode_cursor(cursor)
 
+        # Initial sync: 90-day backfill boundary (TASK-126)
+        backfill_oldest: str | None = None
+        if cursor is None:
+            from datetime import UTC, datetime, timedelta
+
+            boundary = datetime.now(tz=UTC) - timedelta(days=_BACKFILL_DAYS)
+            backfill_oldest = f"{boundary.timestamp():.6f}"
+
         documents: list[UnifiedDocument] = []
         errors: list[SyncError] = []
         new_channel_cursors: dict[str, str] = dict(channel_cursors)
@@ -348,8 +365,11 @@ class SlackConnector(BaseConnector):
         headers = {"Authorization": f"Bearer {access_token}"}
 
         for channel_id in channels:
-            oldest = channel_cursors.get(channel_id, "0")
+            oldest = channel_cursors.get(channel_id) or backfill_oldest or "0"
             latest_ts = oldest
+            # Collect thread parents to resolve after fetching messages
+            thread_parents: dict[str, dict[str, object]] = {}
+            standalone_messages: list[dict[str, object]] = []
 
             try:
                 async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
@@ -383,44 +403,78 @@ class SlackConnector(BaseConnector):
                             if msg.get("subtype") and msg.get("subtype") != "thread_broadcast":
                                 continue
 
-                            try:
-                                doc = await self.normalize({
+                            msg_ts = msg.get("ts", "0")
+                            if msg_ts > latest_ts:
+                                latest_ts = msg_ts
+
+                            # Detect thread parents (reply_count > 0) for resolution
+                            reply_count = msg.get("reply_count", 0)
+                            if isinstance(reply_count, int) and reply_count > 0:
+                                thread_parents[str(msg.get("ts", ""))] = {
                                     **msg,
                                     "_channel_id": channel_id,
-                                })
-                                documents.append(doc)
-
-                                # Track latest timestamp
-                                msg_ts = msg.get("ts", "0")
-                                if msg_ts > latest_ts:
-                                    latest_ts = msg_ts
-                            except ConnectorError as exc:
-                                errors.append(SyncError(
-                                    source_id=msg.get("ts", "unknown"),
-                                    error=str(exc),
-                                ))
+                                }
+                            else:
+                                standalone_messages.append({**msg, "_channel_id": channel_id})
 
                         # Pagination
                         has_more = data.get("has_more", False)
-                        next_cursor = (
-                            data.get("response_metadata", {}).get("next_cursor", "")
-                        )
+                        next_cursor = data.get("response_metadata", {}).get("next_cursor", "")
                         if not has_more or not next_cursor:
                             break
                         api_cursor = next_cursor
 
+                # Resolve threads: fetch replies and build merged UDFs (TASK-126)
+                for thread_ts, parent_msg in thread_parents.items():
+                    try:
+                        replies = await self._fetch_thread_replies(
+                            access_token=access_token,
+                            channel_id=channel_id,
+                            thread_ts=thread_ts,
+                        )
+                        doc = self._normalize_thread(
+                            parent_msg=parent_msg,
+                            replies=replies,
+                            channel_id=channel_id,
+                        )
+                        documents.append(doc)
+                    except ConnectorError as exc:
+                        errors.append(
+                            SyncError(
+                                source_id=f"{channel_id}:{thread_ts}",
+                                error=str(exc),
+                            )
+                        )
+
+                # Normalize standalone (non-threaded) messages
+                for msg in standalone_messages:
+                    try:
+                        doc = await self.normalize(msg)
+                        documents.append(doc)
+                    except ConnectorError as exc:
+                        errors.append(
+                            SyncError(
+                                source_id=msg.get("ts", "unknown"),
+                                error=str(exc),
+                            )
+                        )
+
             except RateLimitError:
                 raise
             except httpx.HTTPStatusError as exc:
-                errors.append(SyncError(
-                    source_id=channel_id,
-                    error=f"HTTP {exc.response.status_code} for channel {channel_id}",
-                ))
+                errors.append(
+                    SyncError(
+                        source_id=channel_id,
+                        error=f"HTTP {exc.response.status_code} for channel {channel_id}",
+                    )
+                )
             except httpx.RequestError as exc:
-                errors.append(SyncError(
-                    source_id=channel_id,
-                    error=f"Network error for channel {channel_id}: {exc}",
-                ))
+                errors.append(
+                    SyncError(
+                        source_id=channel_id,
+                        error=f"Network error for channel {channel_id}: {exc}",
+                    )
+                )
 
             new_channel_cursors[channel_id] = latest_ts
 
@@ -430,6 +484,144 @@ class SlackConnector(BaseConnector):
             documents=documents,
             new_cursor=new_cursor,
             errors=errors,
+        )
+
+    async def _fetch_thread_replies(
+        self,
+        *,
+        access_token: str,
+        channel_id: str,
+        thread_ts: str,
+    ) -> list[dict[str, object]]:
+        """Fetch all replies for a Slack thread via conversations.replies.
+
+        Returns the list of reply messages (excluding the parent, which is
+        always the first element returned by Slack).
+        """
+        replies: list[dict[str, object]] = []
+        api_cursor: str | None = None
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
+            while True:
+                params: dict[str, str | int] = {
+                    "channel": channel_id,
+                    "ts": thread_ts,
+                    "limit": _MAX_MESSAGES_PER_SYNC,
+                }
+                if api_cursor:
+                    params["cursor"] = api_cursor
+
+                response = await client.get(
+                    f"{_SLACK_API}/conversations.replies",
+                    params=params,
+                    headers=headers,
+                )
+                _raise_for_rate_limit(response)
+                response.raise_for_status()
+                data = response.json()
+                _check_slack_error(data, "conversations.replies")
+
+                messages = data.get("messages", [])
+                for msg in messages:
+                    if not isinstance(msg, dict):
+                        continue
+                    # Skip the parent (ts == thread_ts); we already have it
+                    if msg.get("ts") == thread_ts:
+                        continue
+                    replies.append(msg)
+
+                next_cursor = data.get("response_metadata", {}).get("next_cursor", "")
+                if not next_cursor:
+                    break
+                api_cursor = next_cursor
+
+        return replies
+
+    def _normalize_thread(
+        self,
+        *,
+        parent_msg: dict[str, object],
+        replies: list[dict[str, object]],
+        channel_id: str,
+    ) -> UnifiedDocument:
+        """Merge a Slack thread (parent + replies) into a single UDF document.
+
+        The resulting document has:
+        - source_id: ``{channel_id}:thread:{thread_ts}``
+        - content: concatenated messages in chronological order
+        - metadata: reactions, participant list, reply_count
+        """
+        from datetime import UTC, datetime
+
+        thread_ts = str(parent_msg.get("ts", ""))
+        all_messages = [parent_msg, *replies]
+        # Sort by timestamp
+        all_messages.sort(key=lambda m: float(str(m.get("ts", "0"))))
+
+        participants: list[str] = []
+        seen_users: set[str] = set()
+        content_parts: list[str] = []
+        all_reactions: list[dict[str, object]] = []
+
+        for msg in all_messages:
+            user_id = str(msg.get("user", ""))
+            text = msg.get("text", "")
+            if not isinstance(text, str):
+                text = str(text) if text else ""
+            ts = str(msg.get("ts", ""))
+
+            # Collect unique participants
+            if user_id and user_id not in seen_users:
+                seen_users.add(user_id)
+                participants.append(user_id)
+
+            # Build per-message content block
+            msg_parts: list[str] = []
+            if user_id:
+                msg_parts.append(f"[{user_id}]")
+            if text:
+                msg_parts.append(text)
+            if msg_parts:
+                content_parts.append(" ".join(msg_parts))
+
+            # Collect reactions (TASK-126)
+            reactions = msg.get("reactions")
+            if isinstance(reactions, list):
+                for reaction in reactions:
+                    if isinstance(reaction, dict):
+                        all_reactions.append(
+                            {
+                                "name": reaction.get("name", ""),
+                                "count": reaction.get("count", 0),
+                                "users": reaction.get("users", []),
+                            }
+                        )
+
+        separator = "\n---\n"
+        merged_content = separator.join(content_parts) if content_parts else "(leer)"
+
+        # Use parent timestamp for created_at
+        try:
+            created_at = datetime.fromtimestamp(float(thread_ts), tz=UTC)
+        except (ValueError, TypeError, OSError):
+            created_at = None
+
+        return normalize_document(
+            owner_id=self.owner_id,
+            source_type=SourceType.SLACK,
+            source_id=f"{channel_id}:thread:{thread_ts}",
+            title=f"Slack-Thread #{channel_id}",
+            content=merged_content,
+            created_at=created_at,
+            participants=participants,
+            metadata={
+                "channel_id": str(channel_id),
+                "thread_ts": thread_ts,
+                "reply_count": len(replies),
+                "message_count": len(all_messages),
+                "reactions": all_reactions,
+            },
         )
 
     async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
@@ -453,6 +645,7 @@ class SlackConnector(BaseConnector):
         try:
             msg_time = float(str(ts))
             from datetime import UTC, datetime
+
             created_at = datetime.fromtimestamp(msg_time, tz=UTC)
         except (ValueError, TypeError, OSError):
             created_at = None
@@ -461,6 +654,20 @@ class SlackConnector(BaseConnector):
         if text:
             content_parts.append(text)
         content = "\n".join(content_parts) if content_parts else "(leer)"
+
+        # Extract reactions as metadata (TASK-126)
+        reactions_raw = raw.get("reactions")
+        reactions_meta: list[dict[str, object]] = []
+        if isinstance(reactions_raw, list):
+            for r in reactions_raw:
+                if isinstance(r, dict):
+                    reactions_meta.append(
+                        {
+                            "name": r.get("name", ""),
+                            "count": r.get("count", 0),
+                            "users": r.get("users", []),
+                        }
+                    )
 
         return normalize_document(
             owner_id=self.owner_id,
@@ -474,6 +681,7 @@ class SlackConnector(BaseConnector):
                 "user_id": str(user_id),
                 "ts": str(ts),
                 "thread_ts": str(thread_ts) if thread_ts else None,
+                "reactions": reactions_meta,
             },
         )
 
