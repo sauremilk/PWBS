@@ -1,7 +1,8 @@
-"""Briefing queue tasks (TASK-122).
+"""Briefing queue tasks (TASK-122, TASK-177).
 
 Celery tasks for generating briefings for all users.
 Triggered by Celery Beat schedule (morning, weekly) or on-demand.
+Includes email delivery for users with email_briefing_enabled=True.
 """
 
 from __future__ import annotations
@@ -49,6 +50,8 @@ def generate_morning_briefings(self: object) -> dict[str, object]:
             result["users_processed"],
             duration_ms,
         )
+        # Chain email delivery (TASK-177)
+        send_briefing_emails.delay("morning")
         return result
     except Exception as exc:
         logger.error("generate_morning_briefings failed: %s", exc)
@@ -75,6 +78,8 @@ def generate_weekly_briefings(self: object) -> dict[str, object]:
             result["users_processed"],
             duration_ms,
         )
+        # Chain email delivery (TASK-177)
+        send_briefing_emails.delay("weekly")
         return result
     except Exception as exc:
         logger.error("generate_weekly_briefings failed: %s", exc)
@@ -194,6 +199,144 @@ async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
     return {
         "users_processed": processed,
         "failed": failed,
+        "briefing_type": briefing_type,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Email delivery task (TASK-177)
+# ---------------------------------------------------------------------------
+
+
+@app.task(
+    name="pwbs.queue.tasks.briefing.send_briefing_emails",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+    soft_time_limit=120,
+    queue="briefing.generate",
+    acks_late=True,
+)
+def send_briefing_emails(self: object, briefing_type: str = "morning") -> dict[str, object]:
+    """Send briefing emails to users that have email delivery enabled.
+
+    Called automatically after generate_morning_briefings / generate_weekly_briefings.
+    Only sends to users where email_briefing_enabled=True.
+    """
+    start = time.monotonic()
+    try:
+        result = _run_async(_send_briefing_emails_async(briefing_type))
+        duration_ms = (time.monotonic() - start) * 1000
+        logger.info(
+            "send_briefing_emails completed: sent=%d failed=%d duration=%.0fms",
+            result["emails_sent"],
+            result["emails_failed"],
+            duration_ms,
+        )
+        return result
+    except Exception as exc:
+        logger.error("send_briefing_emails failed: %s", exc)
+        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+
+
+async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
+    """Send briefing emails to users with email_briefing_enabled=True.
+
+    Loads the most recent briefing of the given type for each user and
+    dispatches it via EmailService.send_briefing_email().
+    """
+    from sqlalchemy import select
+
+    from pwbs.db.postgres import get_session_factory
+    from pwbs.models.briefing import Briefing
+    from pwbs.models.user import User
+    from pwbs.schemas.enums import BriefingType
+    from pwbs.services.email import create_email_service
+
+    bt_map: dict[str, BriefingType] = {
+        "morning": BriefingType.MORNING,
+        "weekly": BriefingType.WEEKLY,
+    }
+    schema_bt = bt_map.get(briefing_type)
+    if schema_bt is None:
+        logger.error("Unknown briefing_type for email: %s", briefing_type)
+        return {"emails_sent": 0, "emails_failed": 0, "briefing_type": briefing_type}
+
+    factory = get_session_factory()
+    sent = 0
+    failed = 0
+
+    # Fetch users who opted in to email briefings
+    async with factory() as db:
+        stmt = select(User).where(User.email_briefing_enabled.is_(True))
+        result = await db.execute(stmt)
+        users = result.scalars().all()
+
+    if not users:
+        logger.info("No users with email_briefing_enabled for %s", briefing_type)
+        return {"emails_sent": 0, "emails_failed": 0, "briefing_type": briefing_type}
+
+    email_service = create_email_service()
+
+    for user in users:
+        try:
+            # Fetch latest briefing of this type for the user
+            async with factory() as db:
+                stmt = (
+                    select(Briefing)
+                    .where(
+                        Briefing.user_id == user.id,
+                        Briefing.briefing_type == schema_bt,
+                    )
+                    .order_by(Briefing.generated_at.desc())
+                    .limit(1)
+                )
+                res = await db.execute(stmt)
+                briefing = res.scalar_one_or_none()
+
+            if briefing is None:
+                logger.warning(
+                    "No %s briefing found for user_id=%s – skipping email",
+                    briefing_type,
+                    user.id,
+                )
+                continue
+
+            briefing_url = f"/briefings/{briefing.id}"
+            email_result = await email_service.send_briefing_email(
+                to=user.email,
+                briefing_type=briefing_type.replace("_", " ").title(),
+                briefing_title=briefing.title,
+                briefing_content=briefing.content,
+                briefing_url=briefing_url,
+                sources=[],
+            )
+
+            if email_result.success:
+                sent += 1
+                logger.info(
+                    "Briefing email sent: user_id=%s type=%s",
+                    user.id,
+                    briefing_type,
+                )
+            else:
+                failed += 1
+                logger.error(
+                    "Briefing email failed: user_id=%s error=%s",
+                    user.id,
+                    email_result.error,
+                )
+        except Exception:
+            failed += 1
+            logger.exception(
+                "Failed to send %s briefing email for user_id=%s",
+                briefing_type,
+                user.id,
+            )
+
+    return {
+        "emails_sent": sent,
+        "emails_failed": failed,
         "briefing_type": briefing_type,
     }
 

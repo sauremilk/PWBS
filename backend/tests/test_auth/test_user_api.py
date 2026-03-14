@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, time, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -18,6 +18,8 @@ def _make_user(user_id: uuid.UUID = USER_ID) -> MagicMock:
     u.id = user_id
     u.email = "alice@example.com"
     u.display_name = "Alice"
+    u.email_briefing_enabled = False
+    u.briefing_email_time = time(6, 30)
     return u
 
 
@@ -56,8 +58,14 @@ class TestSchemaValidation:
             timezone="UTC",
             language="de",
             briefing_auto_generate=True,
+            reminder_frequency="daily",
+            email_briefing_enabled=False,
+            briefing_email_time="06:30",
         )
         assert resp.timezone == "UTC"
+        assert resp.reminder_frequency == "daily"
+        assert resp.email_briefing_enabled is False
+        assert resp.briefing_email_time == "06:30"
 
     def test_user_settings_update(self) -> None:
         from pwbs.api.v1.routes.user import UserSettingsUpdate
@@ -260,8 +268,8 @@ class TestUpdateSettings:
             user=user,
             db=db,
         )
-        # No commit since no display_name change
-        db.commit.assert_not_awaited()
+        # commit is always called (idempotent no-op when nothing changed)
+        db.commit.assert_awaited_once()
         assert resp.timezone == "UTC"
 
 

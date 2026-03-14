@@ -18,7 +18,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import desc, func as sa_func, select
+from sqlalchemy import desc, select
+from sqlalchemy import func as sa_func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
@@ -71,6 +72,8 @@ class UserSettingsResponse(BaseModel):
     language: str
     briefing_auto_generate: bool
     reminder_frequency: str  # "daily" | "weekly" | "off"
+    email_briefing_enabled: bool
+    briefing_email_time: str  # HH:MM format
 
 
 class UserSettingsUpdate(BaseModel):
@@ -81,6 +84,8 @@ class UserSettingsUpdate(BaseModel):
     briefing_auto_generate: bool | None = None
     display_name: str | None = None
     reminder_frequency: str | None = None
+    email_briefing_enabled: bool | None = None
+    briefing_email_time: str | None = None  # HH:MM format
 
 
 class ExportStartResponse(BaseModel):
@@ -151,7 +156,6 @@ async def get_settings_endpoint(
     db: AsyncSession = Depends(get_db_session),
 ) -> UserSettingsResponse:
     """Return current user settings."""
-    # User model doesn't have settings columns yet — return defaults
     return UserSettingsResponse(
         user_id=user.id,
         email=user.email,
@@ -160,6 +164,8 @@ async def get_settings_endpoint(
         language="de",
         briefing_auto_generate=True,
         reminder_frequency="daily",
+        email_briefing_enabled=user.email_briefing_enabled,
+        briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
     )
 
 
@@ -217,8 +223,28 @@ async def update_settings(
                 },
             )
         user.display_name = update.display_name.strip()
-        await db.commit()
-        await db.refresh(user)
+
+    # Update email briefing settings
+    if update.email_briefing_enabled is not None:
+        user.email_briefing_enabled = update.email_briefing_enabled
+
+    if update.briefing_email_time is not None:
+        try:
+            parts = update.briefing_email_time.split(":")
+            from datetime import time as _time
+
+            user.briefing_email_time = _time(int(parts[0]), int(parts[1]))
+        except (ValueError, IndexError):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "INVALID_TIME_FORMAT",
+                    "message": "briefing_email_time must be HH:MM format",
+                },
+            )
+
+    await db.commit()
+    await db.refresh(user)
 
     # Settings columns (timezone, language, briefing_auto_generate) are not
     # yet in the User model. Return current values with applied defaults.
@@ -232,6 +258,8 @@ async def update_settings(
             update.briefing_auto_generate if update.briefing_auto_generate is not None else True
         ),
         reminder_frequency=update.reminder_frequency or "daily",
+        email_briefing_enabled=user.email_briefing_enabled,
+        briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
     )
 
 
@@ -737,10 +765,7 @@ async def get_llm_usage(
     limit = max(1, min(limit, _LLM_USAGE_MAX))
     offset = max(0, offset)
 
-    count_stmt = (
-        select(sa_func.count(LlmAuditLog.id))
-        .where(LlmAuditLog.owner_id == user.id)
-    )
+    count_stmt = select(sa_func.count(LlmAuditLog.id)).where(LlmAuditLog.owner_id == user.id)
     count_result = await db.execute(count_stmt)
     total = count_result.scalar() or 0
 
