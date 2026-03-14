@@ -1682,13 +1682,14 @@
       "priority": "P0",
       "effort": "M",
       "area": "Testing",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-I",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-027"
-      ]
+      ],
+      "result": "pytest-Setup: conftest.py mit Mock-Fixtures (User, DB, Request, LLM, Weaviate, Neo4j, Redis), fakeredis, testcontainers, Marker unit/integration/e2e, 13 Verifikationstests"
     },
     "TASK-109": {
       "stream": "STREAM-DSGVO-QA",
