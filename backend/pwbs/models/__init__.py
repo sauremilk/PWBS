@@ -13,6 +13,7 @@ from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
+from pwbs.models.slack_user_mapping import SlackUserMapping
 from pwbs.models.subscription import Subscription
 from pwbs.models.user import User
 from pwbs.models.user_profile import UserProfile
@@ -33,6 +34,7 @@ __all__ = [
     "RefreshToken",
     "Reminder",
     "ScheduledJobRun",
+    "SlackUserMapping",
     "Subscription",
     "User",
     "UserProfile",

@@ -211,6 +211,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
     from pwbs.api.v1.routes.user import router as user_router
+    from pwbs.api.v1.routes.slack import router as slack_router
     from pwbs.api.v1.routes.webhooks import router as webhooks_router
 
     application.include_router(health_router)
@@ -227,6 +228,7 @@ def create_app() -> FastAPI:
     application.include_router(reminders_router)
     application.include_router(search_router)
     application.include_router(user_router)
+    application.include_router(slack_router)
     application.include_router(webhooks_router)
     application.include_router(billing_router)
 
