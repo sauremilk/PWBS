@@ -1,8 +1,11 @@
-"""Tests for Zoom connector — OAuth2 flow (TASK-053)."""
+"""Tests for Zoom connector — OAuth2 flow + Webhook-Receiver (TASK-053..054)."""
 
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
+import json
 import time
 import uuid
 
@@ -14,9 +17,17 @@ from pwbs.connectors.oauth import OAuthTokens
 from pwbs.connectors.zoom import (
     ZOOM_SCOPES,
     ZoomConnector,
+    ZoomRecordingFile,
+    ZoomRecordingObject,
+    ZoomWebhookEvent,
+    ZoomWebhookPayload,
     _ZOOM_AUTH_URL,
     _ZOOM_TOKEN_URL,
+    _decode_recordings_cursor,
+    _encode_recordings_cursor,
     _raise_for_rate_limit,
+    compute_url_validation_response,
+    validate_zoom_webhook_signature,
 )
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import ConnectorError, RateLimitError
@@ -384,10 +395,26 @@ class TestBaseConnectorIntegration:
         assert connector.source_type == SourceType.ZOOM
 
     @pytest.mark.asyncio
-    async def test_fetch_since_not_implemented(self) -> None:
+    async def test_fetch_since_returns_sync_result(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """fetch_since is now implemented — returns SyncResult (errors until TASK-055)."""
         connector = _make_connector()
-        with pytest.raises(NotImplementedError, match="TASK-054"):
-            await connector.fetch_since(None)
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json={"meetings": [], "next_page_token": ""},
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        assert result.success_count == 0
+        assert result.error_count == 0
+        assert result.has_more is False
 
     def test_normalize_not_implemented(self) -> None:
         connector = _make_connector()
@@ -409,6 +436,10 @@ class TestBaseConnectorIntegration:
         )
         with pytest.raises(ConnectorError, match="Missing access_token"):
             connector._get_access_token()
+
+    def test_processed_recording_ids_initialized(self) -> None:
+        connector = _make_connector()
+        assert connector._processed_recording_ids == set()
 
 
 # ---------------------------------------------------------------------------
@@ -436,3 +467,655 @@ class TestRaiseForRateLimit:
         with pytest.raises(RateLimitError) as exc_info:
             _raise_for_rate_limit(response)
         assert exc_info.value.retry_after == 60
+
+
+# ===========================================================================
+# TASK-054: Webhook signature, models, fetch_since, process_recording
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# Webhook signature validation
+# ---------------------------------------------------------------------------
+
+
+class TestValidateZoomWebhookSignature:
+    def test_valid_signature(self) -> None:
+        secret = "test-webhook-secret"
+        body = b'{"event":"recording.completed"}'
+        timestamp = "1704067200"
+        message = f"v0:{timestamp}:{body.decode()}"
+        expected_sig = "v0=" + hmac.new(
+            secret.encode(), message.encode(), hashlib.sha256,
+        ).hexdigest()
+
+        assert validate_zoom_webhook_signature(
+            request_body=body,
+            timestamp=timestamp,
+            signature=expected_sig,
+            secret=secret,
+        ) is True
+
+    def test_invalid_signature(self) -> None:
+        assert validate_zoom_webhook_signature(
+            request_body=b'{"event":"test"}',
+            timestamp="123",
+            signature="v0=invalid",
+            secret="secret",
+        ) is False
+
+    def test_tampered_body(self) -> None:
+        secret = "secret"
+        body = b'{"event":"original"}'
+        timestamp = "123"
+        message = f"v0:{timestamp}:{body.decode()}"
+        valid_sig = "v0=" + hmac.new(
+            secret.encode(), message.encode(), hashlib.sha256,
+        ).hexdigest()
+
+        # Tamper with body
+        assert validate_zoom_webhook_signature(
+            request_body=b'{"event":"tampered"}',
+            timestamp=timestamp,
+            signature=valid_sig,
+            secret=secret,
+        ) is False
+
+
+class TestComputeUrlValidationResponse:
+    def test_response_format(self) -> None:
+        result = compute_url_validation_response("abc123", "my-secret")
+        assert result["plainToken"] == "abc123"
+        assert result["encryptedToken"] == hmac.new(
+            b"my-secret", b"abc123", hashlib.sha256,
+        ).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Cursor encoding/decoding
+# ---------------------------------------------------------------------------
+
+
+class TestRecordingsCursor:
+    def test_encode_watermark_only(self) -> None:
+        cursor = _encode_recordings_cursor(watermark="2026-01-01")
+        assert cursor == "2026-01-01"
+
+    def test_encode_with_page_token(self) -> None:
+        cursor = _encode_recordings_cursor(
+            watermark="2026-01-01",
+            next_page_token="page-2",
+        )
+        data = json.loads(cursor)
+        assert data["watermark"] == "2026-01-01"
+        assert data["next_page_token"] == "page-2"
+
+    def test_decode_empty(self) -> None:
+        assert _decode_recordings_cursor("") == (None, None)
+
+    def test_decode_watermark_only(self) -> None:
+        assert _decode_recordings_cursor("2026-01-01") == ("2026-01-01", None)
+
+    def test_decode_with_page_token(self) -> None:
+        cursor = json.dumps({"watermark": "2026-01-01", "next_page_token": "p2"})
+        assert _decode_recordings_cursor(cursor) == ("2026-01-01", "p2")
+
+    def test_decode_invalid_json(self) -> None:
+        assert _decode_recordings_cursor("{bad") == ("{bad", None)
+
+
+# ---------------------------------------------------------------------------
+# Webhook Pydantic models
+# ---------------------------------------------------------------------------
+
+
+class TestWebhookModels:
+    def test_recording_file_model(self) -> None:
+        rf = ZoomRecordingFile(
+            id="file-1",
+            recording_type="audio_transcript",
+            file_type="TRANSCRIPT",
+            download_url="https://zoom.us/rec/download/abc",
+            status="completed",
+        )
+        assert rf.file_type == "TRANSCRIPT"
+        assert rf.download_url == "https://zoom.us/rec/download/abc"
+
+    def test_recording_object_model(self) -> None:
+        obj = ZoomRecordingObject(
+            uuid="meeting-uuid-123",
+            id=12345,
+            topic="Weekly Standup",
+            start_time="2026-01-15T10:00:00Z",
+            duration=30,
+            recording_files=[
+                ZoomRecordingFile(
+                    id="f1",
+                    recording_type="audio_transcript",
+                    file_type="TRANSCRIPT",
+                ),
+            ],
+        )
+        assert obj.uuid == "meeting-uuid-123"
+        assert len(obj.recording_files) == 1
+
+    def test_webhook_event_model(self) -> None:
+        event = ZoomWebhookEvent(
+            event="recording.completed",
+            payload=ZoomWebhookPayload(
+                account_id="acc-123",
+                object=ZoomRecordingObject(
+                    uuid="m-uuid",
+                    id=1,
+                    topic="Test",
+                ),
+            ),
+            event_ts=1704067200000,
+        )
+        assert event.event == "recording.completed"
+        assert event.payload is not None
+        assert event.payload.object.uuid == "m-uuid"
+
+    def test_webhook_event_from_json(self) -> None:
+        raw = {
+            "event": "recording.completed",
+            "payload": {
+                "account_id": "acc-1",
+                "object": {
+                    "uuid": "uuid-1",
+                    "id": 100,
+                    "topic": "Demo",
+                    "start_time": "2026-03-14T09:00:00Z",
+                    "duration": 45,
+                    "recording_files": [
+                        {
+                            "id": "rf-1",
+                            "recording_type": "audio_transcript",
+                            "file_type": "TRANSCRIPT",
+                            "download_url": "https://zoom.us/download/rf-1",
+                            "status": "completed",
+                            "file_size": 5000,
+                        },
+                    ],
+                },
+            },
+            "event_ts": 1710406800000,
+        }
+        event = ZoomWebhookEvent(**raw)
+        assert event.payload is not None
+        assert event.payload.object.recording_files[0].file_type == "TRANSCRIPT"
+
+
+# ---------------------------------------------------------------------------
+# fetch_transcript
+# ---------------------------------------------------------------------------
+
+
+def _make_recordings_response(
+    meetings: list[dict[str, object]] | None = None,
+    next_page_token: str = "",
+) -> dict[str, object]:
+    """Build a mock Zoom recordings API response."""
+    return {
+        "meetings": meetings or [],
+        "next_page_token": next_page_token,
+        "page_count": 1,
+        "page_size": 30,
+        "total_records": len(meetings or []),
+    }
+
+
+def _make_meeting(
+    meeting_uuid: str = "meeting-uuid-1",
+    meeting_id: int = 12345,
+    topic: str = "Test Meeting",
+    has_transcript: bool = True,
+) -> dict[str, object]:
+    """Build a minimal Zoom meeting dict with recording files."""
+    files: list[dict[str, str]] = []
+    if has_transcript:
+        files.append({
+            "id": f"file-{meeting_uuid}",
+            "recording_type": "audio_transcript",
+            "file_type": "TRANSCRIPT",
+            "download_url": f"https://zoom.us/rec/download/{meeting_uuid}",
+            "status": "completed",
+        })
+    return {
+        "uuid": meeting_uuid,
+        "id": meeting_id,
+        "topic": topic,
+        "start_time": "2026-03-14T10:00:00Z",
+        "duration": 30,
+        "recording_files": files,
+    }
+
+
+class TestFetchTranscript:
+    @pytest.mark.asyncio
+    async def test_successful_download(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            assert "download" in url
+            return httpx.Response(
+                status_code=200,
+                text="WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nHello world",
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        content = await connector.fetch_transcript(
+            "https://zoom.us/rec/download/abc",
+        )
+        assert "WEBVTT" in content
+        assert "Hello world" in content
+
+    @pytest.mark.asyncio
+    async def test_download_401(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(status_code=401, text="Unauthorized")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        with pytest.raises(ConnectorError, match="download failed"):
+            await connector.fetch_transcript("https://zoom.us/rec/download/abc")
+
+    @pytest.mark.asyncio
+    async def test_download_network_error(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            raise httpx.ConnectError("Timeout")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        with pytest.raises(ConnectorError, match="network error"):
+            await connector.fetch_transcript("https://zoom.us/rec/download/abc")
+
+    @pytest.mark.asyncio
+    async def test_download_rate_limited(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=429,
+                headers={"Retry-After": "10"},
+                text="Rate limited",
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        with pytest.raises(RateLimitError):
+            await connector.fetch_transcript("https://zoom.us/rec/download/abc")
+
+
+# ---------------------------------------------------------------------------
+# fetch_since (polling)
+# ---------------------------------------------------------------------------
+
+
+class TestFetchSince:
+    @pytest.mark.asyncio
+    async def test_initial_sync_no_recordings(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json=_make_recordings_response(),
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        assert result.success_count == 0
+        assert result.error_count == 0
+        assert result.has_more is False
+
+    @pytest.mark.asyncio
+    async def test_fetch_with_transcript_produces_errors_until_normalizer(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Until TASK-055 (normalizer), recordings appear as errors."""
+        connector = _make_connector()
+        call_count = 0
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            nonlocal call_count
+            call_count += 1
+            if "recordings" in url:
+                return httpx.Response(
+                    status_code=200,
+                    json=_make_recordings_response(
+                        meetings=[_make_meeting()],
+                    ),
+                )
+            # Transcript download
+            return httpx.Response(
+                status_code=200,
+                text="WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nTest",
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        # normalize() raises NotImplementedError → goes to errors
+        assert result.error_count == 1
+        assert "TASK-055" in result.errors[0].error
+        assert result.errors[0].source_id == "meeting-uuid-1"
+        assert call_count == 2  # 1 recordings + 1 transcript
+
+    @pytest.mark.asyncio
+    async def test_incremental_sync_with_cursor(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+        captured_params: dict[str, object] = {}
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            if "recordings" in url:
+                captured_params.update(kwargs.get("params", {}))  # type: ignore[union-attr]
+                return httpx.Response(
+                    status_code=200,
+                    json=_make_recordings_response(),
+                )
+            return httpx.Response(status_code=200, text="transcript")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        await connector.fetch_since("2026-03-01")
+        assert captured_params.get("from") == "2026-03-01"
+
+    @pytest.mark.asyncio
+    async def test_pagination(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+        page = 0
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            nonlocal page
+            if "recordings" in url:
+                page += 1
+                if page == 1:
+                    return httpx.Response(
+                        status_code=200,
+                        json=_make_recordings_response(
+                            meetings=[_make_meeting(meeting_uuid="m1")],
+                            next_page_token="page-2",
+                        ),
+                    )
+                return httpx.Response(
+                    status_code=200,
+                    json=_make_recordings_response(
+                        meetings=[_make_meeting(meeting_uuid="m2")],
+                    ),
+                )
+            return httpx.Response(status_code=200, text="transcript")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        # First page
+        result1 = await connector.fetch_since(None)
+        assert result1.has_more is True
+
+        # Second page
+        result2 = await connector.fetch_since(result1.new_cursor)
+        assert result2.has_more is False
+
+    @pytest.mark.asyncio
+    async def test_skips_meetings_without_transcript(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json=_make_recordings_response(
+                    meetings=[_make_meeting(has_transcript=False)],
+                ),
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        assert result.success_count == 0
+        assert result.error_count == 0
+
+    @pytest.mark.asyncio
+    async def test_idempotency_skips_duplicate(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+        connector._processed_recording_ids.add("meeting-uuid-1")
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                json=_make_recordings_response(
+                    meetings=[_make_meeting()],
+                ),
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        assert result.success_count == 0
+        assert result.error_count == 0
+
+    @pytest.mark.asyncio
+    async def test_transcript_download_error_captured(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            if "recordings" in url:
+                return httpx.Response(
+                    status_code=200,
+                    json=_make_recordings_response(
+                        meetings=[_make_meeting()],
+                    ),
+                )
+            # Transcript download fails
+            return httpx.Response(status_code=500, text="Server Error")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        result = await connector.fetch_since(None)
+        assert result.error_count == 1
+        assert "download failed" in result.errors[0].error.lower()
+
+    @pytest.mark.asyncio
+    async def test_recordings_api_error(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(status_code=500, text="Internal Server Error")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        with pytest.raises(ConnectorError, match="Zoom recordings API error"):
+            await connector.fetch_since(None)
+
+    @pytest.mark.asyncio
+    async def test_recordings_api_rate_limit(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=429,
+                headers={"Retry-After": "30"},
+                text="Rate limited",
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        with pytest.raises(RateLimitError):
+            await connector.fetch_since(None)
+
+    @pytest.mark.asyncio
+    async def test_missing_access_token(self) -> None:
+        connector = ZoomConnector(
+            owner_id=uuid.uuid4(),
+            connection_id=uuid.uuid4(),
+            config=ConnectorConfig(
+                source_type=SourceType.ZOOM,
+                extra={},
+            ),
+        )
+        with pytest.raises(ConnectorError, match="Missing access_token"):
+            await connector.fetch_since(None)
+
+
+# ---------------------------------------------------------------------------
+# process_recording_completed (webhook handler)
+# ---------------------------------------------------------------------------
+
+
+def _make_webhook_event(
+    meeting_uuid: str = "webhook-meeting-1",
+    topic: str = "Webhook Meeting",
+    has_transcript: bool = True,
+) -> ZoomWebhookEvent:
+    """Build a recording.completed webhook event."""
+    files: list[ZoomRecordingFile] = []
+    if has_transcript:
+        files.append(ZoomRecordingFile(
+            id="wh-file-1",
+            recording_type="audio_transcript",
+            file_type="TRANSCRIPT",
+            download_url=f"https://zoom.us/rec/download/{meeting_uuid}",
+        ))
+    return ZoomWebhookEvent(
+        event="recording.completed",
+        payload=ZoomWebhookPayload(
+            account_id="acc-1",
+            object=ZoomRecordingObject(
+                uuid=meeting_uuid,
+                id=99999,
+                topic=topic,
+                start_time="2026-03-14T10:00:00Z",
+                duration=45,
+                recording_files=files,
+            ),
+        ),
+        event_ts=1710406800000,
+    )
+
+
+class TestProcessRecordingCompleted:
+    @pytest.mark.asyncio
+    async def test_processes_event_with_transcript(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(
+                status_code=200,
+                text="WEBVTT\n\nTranscript content here",
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        event = _make_webhook_event()
+        result = await connector.process_recording_completed(event)
+
+        # normalize() raises NotImplementedError → error
+        assert result.error_count == 1
+        assert "TASK-055" in result.errors[0].error
+
+    @pytest.mark.asyncio
+    async def test_skips_event_without_transcript(self) -> None:
+        connector = _make_connector()
+        event = _make_webhook_event(has_transcript=False)
+
+        result = await connector.process_recording_completed(event)
+        assert result.success_count == 0
+        assert result.error_count == 0
+
+    @pytest.mark.asyncio
+    async def test_idempotency_skips_duplicate(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+        connector._processed_recording_ids.add("webhook-meeting-1")
+
+        result = await connector.process_recording_completed(
+            _make_webhook_event(),
+        )
+        assert result.success_count == 0
+        assert result.error_count == 0
+
+    @pytest.mark.asyncio
+    async def test_transcript_download_error(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        connector = _make_connector()
+
+        async def mock_get(
+            self: httpx.AsyncClient, url: str, **kwargs: object
+        ) -> httpx.Response:
+            return httpx.Response(status_code=500, text="Error")
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        event = _make_webhook_event()
+        result = await connector.process_recording_completed(event)
+        assert result.error_count == 1
+        assert "download failed" in result.errors[0].error.lower()
+
+    @pytest.mark.asyncio
+    async def test_none_payload_returns_empty(self) -> None:
+        connector = _make_connector()
+        event = ZoomWebhookEvent(event="recording.completed", payload=None)
+        result = await connector.process_recording_completed(event)
+        assert result.success_count == 0
+        assert result.error_count == 0

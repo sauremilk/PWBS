@@ -1264,9 +1264,9 @@
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "2026-03-14T%H:%M:%SZ",
       "completed_at": null,
       "blocked_by": [
         "TASK-079",
@@ -1308,10 +1308,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "Auth",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-G",
       "claimed_at": "2026-03-14T13:35:00Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T14:00:00Z",
       "blocked_by": [
         "TASK-082"
       ]
