@@ -166,7 +166,9 @@ async def get_org(
     return OrgResponse.model_validate(org)
 
 
-@router.post("/{org_id}/members", response_model=MemberResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{org_id}/members", response_model=MemberResponse, status_code=status.HTTP_201_CREATED
+)
 async def add_org_member(
     org_id: uuid.UUID,
     body: AddMemberRequest,
@@ -177,7 +179,10 @@ async def add_org_member(
     """Add a member to an organization. Requires MEMBERS_INVITE permission."""
     try:
         acting_role = await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_INVITE,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.MEMBERS_INVITE,
         )
     except PermissionError as exc:
         raise HTTPException(
@@ -189,7 +194,10 @@ async def add_org_member(
     if not can_assign_role(acting_role, body.role):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Cannot assign a role equal to or above your own"},
+            detail={
+                "code": "FORBIDDEN",
+                "message": "Cannot assign a role equal to or above your own",
+            },
         )
 
     member = await add_member(
@@ -202,7 +210,10 @@ async def add_org_member(
     if member is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Could not add member (already a member, or org not found)"},
+            detail={
+                "code": "FORBIDDEN",
+                "message": "Could not add member (already a member, or org not found)",
+            },
         )
     await log_role_change(
         db,
@@ -228,7 +239,10 @@ async def remove_org_member(
     """Remove a member from an organization. Requires MEMBERS_REMOVE permission."""
     try:
         await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_REMOVE,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.MEMBERS_REMOVE,
         )
     except PermissionError as exc:
         raise HTTPException(
@@ -271,7 +285,10 @@ async def change_org_member_role(
     """Change a member's role. Requires MEMBERS_CHANGE_ROLE permission."""
     try:
         acting_role = await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_CHANGE_ROLE,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.MEMBERS_CHANGE_ROLE,
         )
     except PermissionError as exc:
         raise HTTPException(
@@ -283,11 +300,15 @@ async def change_org_member_role(
     if not can_assign_role(acting_role, body.role):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "FORBIDDEN", "message": "Cannot assign a role equal to or above your own"},
+            detail={
+                "code": "FORBIDDEN",
+                "message": "Cannot assign a role equal to or above your own",
+            },
         )
 
     # Capture old role for audit log
     from pwbs.rbac.checker import get_user_role
+
     old_role_enum = await get_user_role(db, org_id=org_id, user_id=member_user_id)
     old_role_value = old_role_enum.value if old_role_enum else None
 

@@ -28,15 +28,9 @@ def upgrade() -> None:
         sa.Column("reminder_type", sa.Text(), nullable=False),
         sa.Column("title", sa.Text(), nullable=False),
         sa.Column("description", sa.Text(), nullable=False, server_default=""),
-        sa.Column(
-            "status", sa.Text(), nullable=False, server_default="pending"
-        ),
-        sa.Column(
-            "urgency", sa.Text(), nullable=False, server_default="medium"
-        ),
-        sa.Column(
-            "due_at", sa.DateTime(timezone=True), nullable=True
-        ),
+        sa.Column("status", sa.Text(), nullable=False, server_default="pending"),
+        sa.Column("urgency", sa.Text(), nullable=False, server_default="medium"),
+        sa.Column("due_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("responsible_person", sa.Text(), nullable=True),
         sa.Column(
             "metadata",
@@ -45,12 +39,8 @@ def upgrade() -> None:
             server_default="{}",
         ),
         sa.Column("source_document_id", sa.Uuid(), nullable=True),
-        sa.Column(
-            "resolved_at", sa.DateTime(timezone=True), nullable=True
-        ),
-        sa.Column(
-            "expires_at", sa.DateTime(timezone=True), nullable=True
-        ),
+        sa.Column("resolved_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -75,15 +65,9 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "idx_reminders_user_status", "reminders", ["user_id", "status"]
-    )
-    op.create_index(
-        "idx_reminders_user_due", "reminders", ["user_id", "due_at"]
-    )
-    op.create_index(
-        "idx_reminders_source_doc", "reminders", ["source_document_id"]
-    )
+    op.create_index("idx_reminders_user_status", "reminders", ["user_id", "status"])
+    op.create_index("idx_reminders_user_due", "reminders", ["user_id", "due_at"])
+    op.create_index("idx_reminders_source_doc", "reminders", ["source_document_id"])
 
 
 def downgrade() -> None:

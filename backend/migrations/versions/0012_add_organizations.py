@@ -71,13 +71,9 @@ def upgrade() -> None:
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "organization_id", "user_id", name="uq_org_member"
-        ),
+        sa.UniqueConstraint("organization_id", "user_id", name="uq_org_member"),
     )
-    op.create_index(
-        "idx_org_members_user", "organization_members", ["user_id"]
-    )
+    op.create_index("idx_org_members_user", "organization_members", ["user_id"])
     op.create_index(
         "idx_org_members_org_role",
         "organization_members",
