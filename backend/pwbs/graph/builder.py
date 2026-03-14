@@ -67,6 +67,10 @@ class NodeLabel(str, Enum):
     DECISION = "Decision"
     MEETING = "Meeting"
     DOCUMENT = "Document"
+    GOAL = "Goal"
+    RISK = "Risk"
+    HYPOTHESIS = "Hypothesis"
+    OPEN_QUESTION = "OpenQuestion"
 
 
 class EdgeType(str, Enum):
@@ -185,6 +189,30 @@ _MERGE_NODE_TEMPLATE: dict[NodeLabel, str] = {
         "MERGE (n:Document {{id: $nodeId, userId: $userId}}) "
         "ON CREATE SET n.title = $name, n.createdAt = $now{extra_set} "
         "ON MATCH SET n.title = $name{extra_set} "
+        "RETURN n.id AS nodeId"
+    ),
+    NodeLabel.GOAL: (
+        "MERGE (n:Goal {{id: $nodeId, userId: $userId}}) "
+        "ON CREATE SET n.description = $name, n.firstSeen = $now{extra_set} "
+        "ON MATCH SET n.lastSeen = $now{extra_set} "
+        "RETURN n.id AS nodeId"
+    ),
+    NodeLabel.RISK: (
+        "MERGE (n:Risk {{id: $nodeId, userId: $userId}}) "
+        "ON CREATE SET n.description = $name, n.firstSeen = $now{extra_set} "
+        "ON MATCH SET n.lastSeen = $now{extra_set} "
+        "RETURN n.id AS nodeId"
+    ),
+    NodeLabel.HYPOTHESIS: (
+        "MERGE (n:Hypothesis {{id: $nodeId, userId: $userId}}) "
+        "ON CREATE SET n.statement = $name, n.firstSeen = $now{extra_set} "
+        "ON MATCH SET n.lastSeen = $now{extra_set} "
+        "RETURN n.id AS nodeId"
+    ),
+    NodeLabel.OPEN_QUESTION: (
+        "MERGE (n:OpenQuestion {{id: $nodeId, userId: $userId}}) "
+        "ON CREATE SET n.text = $name, n.firstSeen = $now{extra_set} "
+        "ON MATCH SET n.lastSeen = $now{extra_set} "
         "RETURN n.id AS nodeId"
     ),
 }

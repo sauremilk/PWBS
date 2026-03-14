@@ -105,9 +105,9 @@ class TestGraphBuilderConfig:
 
 
 class TestNodeLabels:
-    def test_all_six_labels(self) -> None:
+    def test_all_labels(self) -> None:
         labels = {nl.value for nl in NodeLabel}
-        assert labels == {"Person", "Project", "Topic", "Decision", "Meeting", "Document"}
+        assert labels == {"Person", "Project", "Topic", "Decision", "Meeting", "Document", "Goal", "Risk", "Hypothesis", "OpenQuestion"}
 
 
 # ===================================================================
@@ -283,7 +283,7 @@ class TestMergeNodes:
         builder = _builder(session=session)
         nodes = [_node(label=label, name=f"Test {label.value}") for label in NodeLabel]
         result = await builder.merge_nodes(nodes)
-        assert result.nodes_created == 6
+        assert result.nodes_created == len(NodeLabel)
 
     @pytest.mark.asyncio
     async def test_extra_properties_passed(self) -> None:

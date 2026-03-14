@@ -12,6 +12,11 @@ import {
   ChevronRight,
   Network,
   List,
+  Gavel,
+  Target,
+  AlertTriangle,
+  Lightbulb,
+  HelpCircle,
 } from "lucide-react";
 import { useEntities, useGraph } from "@/hooks/use-knowledge";
 import { ForceGraph, GraphLegend } from "@/components/knowledge/force-graph";
@@ -25,6 +30,11 @@ const ENTITY_TYPES = [
   { value: "Person", label: "Personen", icon: Users },
   { value: "Project", label: "Projekte", icon: FolderKanban },
   { value: "Topic", label: "Themen", icon: Hash },
+  { value: "Decision", label: "Entscheidungen", icon: Gavel },
+  { value: "Goal", label: "Ziele", icon: Target },
+  { value: "Risk", label: "Risiken", icon: AlertTriangle },
+  { value: "Hypothesis", label: "Hypothesen", icon: Lightbulb },
+  { value: "OpenQuestion", label: "Offene Fragen", icon: HelpCircle },
 ] as const;
 
 const PAGE_SIZE = 20;

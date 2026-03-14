@@ -36,6 +36,10 @@ class EntityType(str, Enum):
     PROJECT = "project"
     TOPIC = "topic"
     DECISION = "decision"
+    GOAL = "goal"
+    RISK = "risk"
+    HYPOTHESIS = "hypothesis"
+    OPEN_QUESTION = "open_question"
 
 
 class BriefingType(str, Enum):

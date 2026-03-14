@@ -42,6 +42,9 @@ __all__ = [
     "LLMExtractionConfig",
     "LLMExtractionResult",
     "ExtractionResponse",
+    "GoalEntity",
+    "HypothesisEntity",
+    "RiskEntity",
 ]
 
 # ------------------------------------------------------------------
@@ -117,6 +120,31 @@ class DateReference(BaseModel):
     confidence: float = Field(default=0.8, ge=0.0, le=1.0)
 
 
+class GoalEntity(BaseModel):
+    """A goal/objective extracted by the LLM (TASK-138)."""
+
+    description: str
+    status: str = ""
+    confidence: float = Field(default=0.8, ge=0.0, le=1.0)
+
+
+class RiskEntity(BaseModel):
+    """A risk extracted by the LLM (TASK-138)."""
+
+    description: str
+    severity: str = ""
+    mitigation: str = ""
+    confidence: float = Field(default=0.8, ge=0.0, le=1.0)
+
+
+class HypothesisEntity(BaseModel):
+    """A hypothesis/assumption extracted by the LLM (TASK-138)."""
+
+    statement: str
+    status: str = ""
+    confidence: float = Field(default=0.8, ge=0.0, le=1.0)
+
+
 class ExtractionResponse(BaseModel):
     """Root schema for the LLM entity extraction response.
 
@@ -129,6 +157,9 @@ class ExtractionResponse(BaseModel):
     decisions: list[DecisionEntity] = Field(default_factory=list)
     open_questions: list[OpenQuestion] = Field(default_factory=list)
     dates: list[DateReference] = Field(default_factory=list)
+    goals: list[GoalEntity] = Field(default_factory=list)
+    risks: list[RiskEntity] = Field(default_factory=list)
+    hypotheses: list[HypothesisEntity] = Field(default_factory=list)
 
 
 # ------------------------------------------------------------------
@@ -170,7 +201,10 @@ _USER_PROMPT_TEMPLATE = (
     "3. THEMEN: Schlüsselthemen und -konzepte\n"
     "4. ENTSCHEIDUNGEN: Was wurde entschieden, von wem, wann\n"
     "5. OFFENE FRAGEN: Unbeantwortete Fragen oder ausstehende Klärungen\n"
-    "6. TERMINE: Referenzierte Daten oder Deadlines\n\n"
+    "6. TERMINE: Referenzierte Daten oder Deadlines\n"
+    "7. ZIELE: Formulierte Ziele oder Objectives, Status (falls erkennbar)\n"
+    "8. RISIKEN: Identifizierte Risiken, Schweregrad (falls erkennbar), Gegenmaßnahmen (falls erkennbar)\n"
+    "9. HYPOTHESEN: Annahmen oder Hypothesen, die getestet oder validiert werden sollen, Status (falls erkennbar)\n\n"
     "TEXT:\n{chunk_text}"
 )
 
@@ -429,20 +463,20 @@ class LLMEntityExtractor:
                 ),
             )
 
-        # Open questions -> Topic entities (no dedicated type)
+        # Open questions -> OPEN_QUESTION entities (TASK-138)
         for q in response.open_questions:
             text = q.text.strip()
             if not text:
                 continue
             entities.append(
                 ExtractedEntity(
-                    entity_type=EntityType.TOPIC,
+                    entity_type=EntityType.OPEN_QUESTION,
                     name=text,
                     normalized_name=_normalize(text),
                     mentions=[
                         ExtractedMention(
                             entity_name=text,
-                            entity_type=EntityType.TOPIC,
+                            entity_type=EntityType.OPEN_QUESTION,
                             normalized_name=_normalize(text),
                             confidence=q.confidence,
                             extraction_method="llm",
@@ -474,6 +508,89 @@ class LLMEntityExtractor:
                             confidence=d.confidence,
                             extraction_method="llm",
                             source_pattern="llm_date_reference",
+                        ),
+                    ],
+                    metadata=metadata,
+                ),
+            )
+
+        # Goals (TASK-138)
+        for g in response.goals:
+            desc = g.description.strip()
+            if not desc:
+                continue
+            metadata = {}
+            if g.status:
+                metadata["status"] = g.status
+            entities.append(
+                ExtractedEntity(
+                    entity_type=EntityType.GOAL,
+                    name=desc,
+                    normalized_name=_normalize(desc),
+                    mentions=[
+                        ExtractedMention(
+                            entity_name=desc,
+                            entity_type=EntityType.GOAL,
+                            normalized_name=_normalize(desc),
+                            confidence=g.confidence,
+                            extraction_method="llm",
+                            source_pattern="llm_extraction",
+                        ),
+                    ],
+                    metadata=metadata,
+                ),
+            )
+
+        # Risks (TASK-138)
+        for r in response.risks:
+            desc = r.description.strip()
+            if not desc:
+                continue
+            metadata = {}
+            if r.severity:
+                metadata["severity"] = r.severity
+            if r.mitigation:
+                metadata["mitigation"] = r.mitigation
+            entities.append(
+                ExtractedEntity(
+                    entity_type=EntityType.RISK,
+                    name=desc,
+                    normalized_name=_normalize(desc),
+                    mentions=[
+                        ExtractedMention(
+                            entity_name=desc,
+                            entity_type=EntityType.RISK,
+                            normalized_name=_normalize(desc),
+                            confidence=r.confidence,
+                            extraction_method="llm",
+                            source_pattern="llm_extraction",
+                        ),
+                    ],
+                    metadata=metadata,
+                ),
+            )
+
+        # Hypotheses (TASK-138)
+        for h in response.hypotheses:
+            stmt = h.statement.strip()
+            if not stmt:
+                continue
+            metadata = {}
+            if h.status:
+                metadata["status"] = h.status
+            entities.append(
+                ExtractedEntity(
+                    entity_type=EntityType.HYPOTHESIS,
+                    name=stmt,
+                    normalized_name=_normalize(stmt),
+                    mentions=[
+                        ExtractedMention(
+                            entity_name=stmt,
+                            entity_type=EntityType.HYPOTHESIS,
+                            normalized_name=_normalize(stmt),
+                            confidence=h.confidence,
+                            extraction_method="llm",
+                            source_pattern="llm_extraction",
                         ),
                     ],
                     metadata=metadata,

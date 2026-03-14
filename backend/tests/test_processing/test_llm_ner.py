@@ -17,12 +17,15 @@ from pwbs.processing.llm_ner import (
     DateReference,
     DecisionEntity,
     ExtractionResponse,
+    GoalEntity,
+    HypothesisEntity,
     LLMEntityExtractor,
     LLMExtractionConfig,
     LLMExtractionResult,
     OpenQuestion,
     PersonEntity,
     ProjectEntity,
+    RiskEntity,
     TopicEntry,
     _normalize,
 )
@@ -59,6 +62,9 @@ def _extraction_response(
     decisions: list[DecisionEntity] | None = None,
     open_questions: list[OpenQuestion] | None = None,
     dates: list[DateReference] | None = None,
+    goals: list[GoalEntity] | None = None,
+    risks: list[RiskEntity] | None = None,
+    hypotheses: list[HypothesisEntity] | None = None,
 ) -> ExtractionResponse:
     return ExtractionResponse(
         persons=persons or [],
@@ -67,6 +73,9 @@ def _extraction_response(
         decisions=decisions or [],
         open_questions=open_questions or [],
         dates=dates or [],
+        goals=goals or [],
+        risks=risks or [],
+        hypotheses=hypotheses or [],
     )
 
 
@@ -261,14 +270,14 @@ class TestDecisionExtraction:
 
 class TestOpenQuestions:
     @pytest.mark.asyncio
-    async def test_open_question_becomes_topic(self) -> None:
+    async def test_open_question_becomes_open_question_entity(self) -> None:
         resp = _extraction_response(
             open_questions=[OpenQuestion(text="How to handle auth?", confidence=0.8)],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("How to handle auth?", USER_ID)
         e = result.entities[0]
-        assert e.entity_type == EntityType.TOPIC
+        assert e.entity_type == EntityType.OPEN_QUESTION
         assert e.metadata["kind"] == "open_question"
         assert e.mentions[0].source_pattern == "llm_open_question"
 
@@ -290,6 +299,101 @@ class TestDateReferences:
         assert e.entity_type == EntityType.TOPIC
         assert e.metadata["date"] == "2026-03-01"
         assert e.mentions[0].source_pattern == "llm_date_reference"
+
+
+# ===================================================================
+# Goal Extraction (TASK-138)
+# ===================================================================
+
+
+class TestGoalExtraction:
+    @pytest.mark.asyncio
+    async def test_goal_with_status(self) -> None:
+        resp = _extraction_response(
+            goals=[GoalEntity(description="Increase test coverage to 90%", status="in progress", confidence=0.85)],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Goal: Increase test coverage to 90%", USER_ID)
+        e = result.entities[0]
+        assert e.entity_type == EntityType.GOAL
+        assert e.name == "Increase test coverage to 90%"
+        assert e.metadata["status"] == "in progress"
+        assert e.mentions[0].confidence == 0.85
+
+    @pytest.mark.asyncio
+    async def test_goal_empty_description_skipped(self) -> None:
+        resp = _extraction_response(
+            goals=[GoalEntity(description="  ", confidence=0.8)],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Some text.", USER_ID)
+        assert result.entities == []
+
+
+# ===================================================================
+# Risk Extraction (TASK-138)
+# ===================================================================
+
+
+class TestRiskExtraction:
+    @pytest.mark.asyncio
+    async def test_risk_with_severity_and_mitigation(self) -> None:
+        resp = _extraction_response(
+            risks=[RiskEntity(
+                description="Data loss during migration",
+                severity="high",
+                mitigation="Backup before migration",
+                confidence=0.9,
+            )],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Risk: Data loss during migration", USER_ID)
+        e = result.entities[0]
+        assert e.entity_type == EntityType.RISK
+        assert e.name == "Data loss during migration"
+        assert e.metadata["severity"] == "high"
+        assert e.metadata["mitigation"] == "Backup before migration"
+
+    @pytest.mark.asyncio
+    async def test_risk_empty_description_skipped(self) -> None:
+        resp = _extraction_response(
+            risks=[RiskEntity(description="", confidence=0.8)],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Some text.", USER_ID)
+        assert result.entities == []
+
+
+# ===================================================================
+# Hypothesis Extraction (TASK-138)
+# ===================================================================
+
+
+class TestHypothesisExtraction:
+    @pytest.mark.asyncio
+    async def test_hypothesis_with_status(self) -> None:
+        resp = _extraction_response(
+            hypotheses=[HypothesisEntity(
+                statement="Users prefer daily briefings over weekly",
+                status="unvalidated",
+                confidence=0.8,
+            )],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Hypothesis: Users prefer daily briefings.", USER_ID)
+        e = result.entities[0]
+        assert e.entity_type == EntityType.HYPOTHESIS
+        assert e.name == "Users prefer daily briefings over weekly"
+        assert e.metadata["status"] == "unvalidated"
+
+    @pytest.mark.asyncio
+    async def test_hypothesis_empty_statement_skipped(self) -> None:
+        resp = _extraction_response(
+            hypotheses=[HypothesisEntity(statement="  ", confidence=0.8)],
+        )
+        ext = _make_extractor(response=resp)
+        result = await ext.extract("Some text.", USER_ID)
+        assert result.entities == []
 
 
 # ===================================================================
@@ -427,6 +531,10 @@ class TestMixedExtraction:
             projects=[ProjectEntity(name="Phoenix", confidence=0.85)],
             topics=[TopicEntry(name="Microservices", confidence=0.8)],
             decisions=[DecisionEntity(what="Use K8s", confidence=0.8)],
+            goals=[GoalEntity(description="Ship MVP", confidence=0.85)],
+            risks=[RiskEntity(description="Vendor lock-in", confidence=0.8)],
+            hypotheses=[HypothesisEntity(statement="GraphQL is faster", confidence=0.8)],
+            open_questions=[OpenQuestion(text="How to scale?", confidence=0.8)],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Big meeting.", USER_ID)
@@ -435,6 +543,10 @@ class TestMixedExtraction:
         assert EntityType.PROJECT in types
         assert EntityType.TOPIC in types
         assert EntityType.DECISION in types
+        assert EntityType.GOAL in types
+        assert EntityType.RISK in types
+        assert EntityType.HYPOTHESIS in types
+        assert EntityType.OPEN_QUESTION in types
 
     @pytest.mark.asyncio
     async def test_empty_response(self) -> None:
