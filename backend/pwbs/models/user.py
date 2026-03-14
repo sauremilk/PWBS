@@ -39,6 +39,11 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    decisions: Mapped[list["Decision"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
     briefings: Mapped[list["Briefing"]] = relationship(  # noqa: F821
         back_populates="user",
         cascade="all, delete-orphan",

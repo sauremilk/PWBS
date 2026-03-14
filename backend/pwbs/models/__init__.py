@@ -6,6 +6,7 @@ from pwbs.models.briefing import Briefing
 from pwbs.models.chunk import Chunk
 from pwbs.models.connection import Connection
 from pwbs.models.data_export import DataExport
+from pwbs.models.decision import Decision
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
 from pwbs.models.refresh_token import RefreshToken
@@ -19,6 +20,7 @@ __all__ = [
     "Chunk",
     "DataExport",
     "Connection",
+    "Decision",
     "Document",
     "Entity",
     "EntityMention",
