@@ -1,10 +1,11 @@
-"""Briefings API endpoints (TASK-089).
+"""Briefings API endpoints (TASK-089, TASK-171).
 
 GET    /api/v1/briefings/                -- Paginated list (filterable by type)
 GET    /api/v1/briefings/latest          -- Latest briefing per type
 GET    /api/v1/briefings/{id}            -- Single briefing with resolved sources
 POST   /api/v1/briefings/generate        -- Trigger async briefing generation
-POST   /api/v1/briefings/{id}/feedback   -- Submit rating + optional comment
+POST   /api/v1/briefings/{id}/feedback   -- Submit rating + optional comment (upsert)
+GET    /api/v1/briefings/feedback/stats   -- Aggregated feedback stats per briefing type
 DELETE /api/v1/briefings/{id}            -- Delete a briefing (owner only)
 """
 
@@ -25,11 +26,13 @@ from fastapi import (
 )
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.db.postgres import get_db_session
 from pwbs.models.briefing import Briefing as BriefingORM
+from pwbs.models.briefing_feedback import BriefingFeedback
 from pwbs.models.chunk import Chunk
 from pwbs.models.document import Document
 from pwbs.models.user import User
@@ -119,6 +122,19 @@ class FeedbackResponse(BaseModel):
     briefing_id: uuid.UUID
     rating: str
     message: str = "Feedback recorded"
+
+
+class FeedbackStatsItem(BaseModel):
+    """Aggregated feedback counts for a single briefing type."""
+
+    briefing_type: str
+    positive: int
+    negative: int
+    total: int
+
+
+class FeedbackStatsResponse(BaseModel):
+    stats: list[FeedbackStatsItem]
 
 
 # ---------------------------------------------------------------------------
@@ -284,6 +300,47 @@ async def latest_briefings(
 
 
 # ---------------------------------------------------------------------------
+# GET /api/v1/briefings/feedback/stats — aggregated feedback stats
+# ---------------------------------------------------------------------------
+
+
+@router.get("/feedback/stats", response_model=FeedbackStatsResponse)
+async def feedback_stats(
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> FeedbackStatsResponse:
+    """Return aggregated positive/negative feedback counts per briefing type.
+
+    Only returns stats for the authenticated user's own briefings.
+    """
+    stmt = (
+        select(
+            BriefingORM.briefing_type,
+            func.count().filter(BriefingFeedback.rating == "positive").label("positive"),
+            func.count().filter(BriefingFeedback.rating == "negative").label("negative"),
+            func.count().label("total"),
+        )
+        .join(BriefingFeedback, BriefingFeedback.briefing_id == BriefingORM.id)
+        .where(BriefingFeedback.owner_id == user.id)
+        .group_by(BriefingORM.briefing_type)
+    )
+    result = await db.execute(stmt)
+    rows = result.all()
+
+    items = [
+        FeedbackStatsItem(
+            briefing_type=row.briefing_type,
+            positive=row.positive,
+            negative=row.negative,
+            total=row.total,
+        )
+        for row in rows
+    ]
+    return FeedbackStatsResponse(stats=items)
+
+
+# ---------------------------------------------------------------------------
 # GET /api/v1/briefings/{briefing_id} — single briefing with sources
 # ---------------------------------------------------------------------------
 
@@ -355,7 +412,8 @@ async def _run_briefing_generation(
 
                 project_name = (trigger_context or {}).get("project_name", "")
                 project_entity_id = (trigger_context or {}).get(
-                    "project_entity_id", None,
+                    "project_entity_id",
+                    None,
                 )
                 if not project_name:
                     logger.warning(
@@ -509,7 +567,11 @@ async def submit_feedback(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> FeedbackResponse:
-    """Submit feedback (positive/negative + optional comment) for a briefing."""
+    """Submit feedback (positive/negative + optional comment) for a briefing.
+
+    Upsert: one feedback per user per briefing. Re-submitting overwrites.
+    Comment is only accepted when rating is negative.
+    """
     stmt = select(BriefingORM).where(BriefingORM.id == briefing_id)
     result = await db.execute(stmt)
     row = result.scalar_one_or_none()
@@ -522,14 +584,24 @@ async def submit_feedback(
 
     _check_ownership(row, user.id)
 
-    # Store feedback in trigger_context JSONB (MVP approach)
-    ctx = dict(row.trigger_context) if row.trigger_context else {}
-    ctx["feedback"] = {
-        "rating": body.rating,
-        "comment": body.comment,
-        "submitted_at": datetime.now(timezone.utc).isoformat(),
-    }
-    row.trigger_context = ctx
+    # Comment only allowed for negative feedback
+    comment = body.comment if body.rating == "negative" else None
+
+    # Upsert: insert or update on (briefing_id, owner_id) conflict
+    insert_stmt = pg_insert(BriefingFeedback).values(
+        briefing_id=briefing_id,
+        owner_id=user.id,
+        rating=body.rating,
+        comment=comment,
+    )
+    upsert_stmt = insert_stmt.on_conflict_do_update(
+        constraint="uq_feedback_briefing_owner",
+        set_={
+            "rating": insert_stmt.excluded.rating,
+            "comment": insert_stmt.excluded.comment,
+        },
+    )
+    await db.execute(upsert_stmt)
     await db.flush()
 
     return FeedbackResponse(

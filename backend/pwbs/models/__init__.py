@@ -3,6 +3,7 @@
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.base import Base
 from pwbs.models.briefing import Briefing
+from pwbs.models.briefing_feedback import BriefingFeedback
 from pwbs.models.chunk import Chunk
 from pwbs.models.connection import Connection
 from pwbs.models.connector_consent import ConnectorConsent
@@ -23,6 +24,7 @@ __all__ = [
     "AuditLog",
     "Base",
     "Briefing",
+    "BriefingFeedback",
     "Chunk",
     "ConnectorConsent",
     "DataExport",
