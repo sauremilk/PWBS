@@ -1581,10 +1581,10 @@
       "priority": "P1",
       "effort": "L",
       "area": "Frontend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-H",
       "claimed_at": "2026-03-14T13:19:01.802018+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T13:21:31.830024+00:00",
       "blocked_by": [
         "TASK-095",
         "TASK-090"
