@@ -1639,13 +1639,14 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-I",
       "claimed_at": "2026-03-14T13:01:23Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-104"
-      ]
+      ],
+      "result": "Account-Loeschung implementiert: deletion_service.py mit schedule/cancel/cleanup, User-Modell erweitert, Migration 0004, 18+6 Tests"
     },
     "TASK-106": {
       "stream": "STREAM-DSGVO-QA",

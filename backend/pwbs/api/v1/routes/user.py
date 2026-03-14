@@ -25,7 +25,7 @@ from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
-from pwbs.dsgvo import export_service
+from pwbs.dsgvo import deletion_service, export_service
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.user import User
 
@@ -367,6 +367,7 @@ async def download_export(
 @router.delete("/account", response_model=AccountDeletionResponse)
 async def delete_account(
     body: AccountDeletionRequest,
+    request: Request,
     response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
@@ -374,7 +375,6 @@ async def delete_account(
     """Initiate account deletion with 30-day grace period (Art. 17).
 
     Requires password confirmation and literal 'DELETE' string.
-    Delegates to the account deletion service (TASK-105).
     """
     if body.confirmation != "DELETE":
         raise HTTPException(
@@ -385,9 +385,43 @@ async def delete_account(
             },
         )
 
-    raise NotImplementedError(
-        "Cascaded account deletion not yet implemented (TASK-105). "
-        "Endpoint structure is ready for integration."
+    try:
+        deletion_at = await deletion_service.schedule_deletion(
+            db, user, body.password,
+        )
+    except ValueError as exc:
+        msg = str(exc)
+        if msg == "Invalid password":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={
+                    "code": "INVALID_PASSWORD",
+                    "message": "Passwort ist falsch",
+                },
+            )
+        # Already scheduled
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "DELETION_ALREADY_SCHEDULED",
+                "message": "Account deletion already scheduled",
+            },
+        )
+
+    ip = get_client_ip(request)
+    await log_event(
+        db,
+        action=AuditAction.USER_DELETED,
+        user_id=user.id,
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=ip,
+        metadata={"deletion_scheduled_at": deletion_at.isoformat()},
+    )
+    await db.commit()
+    return AccountDeletionResponse(
+        message="Account deletion scheduled",
+        deletion_scheduled_at=deletion_at,
     )
 
 
@@ -398,18 +432,35 @@ async def delete_account(
 
 @router.post("/account/cancel-deletion", response_model=CancelDeletionResponse)
 async def cancel_deletion(
+    request: Request,
     response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> CancelDeletionResponse:
-    """Cancel a pending account deletion within 30-day grace period.
+    """Cancel a pending account deletion within 30-day grace period."""
+    try:
+        await deletion_service.cancel_deletion(db, user)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "NO_DELETION_SCHEDULED",
+                "message": "No account deletion is currently scheduled",
+            },
+        )
 
-    Delegates to the account deletion service (TASK-105).
-    """
-    raise NotImplementedError(
-        "Cascaded account deletion not yet implemented (TASK-105). "
-        "Endpoint structure is ready for integration."
+    ip = get_client_ip(request)
+    await log_event(
+        db,
+        action=AuditAction.USER_DELETED,
+        user_id=user.id,
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=ip,
+        metadata={"action": "deletion_cancelled"},
     )
+    await db.commit()
+    return CancelDeletionResponse(message="Account deletion cancelled")
 
 
 # ---------------------------------------------------------------------------

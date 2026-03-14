@@ -453,15 +453,118 @@ class TestDeleteAccount:
         user = _make_user()
         db = AsyncMock()
 
-        body = AccountDeletionRequest(password="mypassword123", confirmation="DELETE")
-        # Even with valid confirmation, raises NotImplementedError (TASK-105)
-        with pytest.raises(NotImplementedError, match="TASK-105"):
+        body = AccountDeletionRequest(password="SecurePass123", confirmation="DELETE")
+        # Override confirmation in the body object for the test
+        body_bad = AccountDeletionRequest(password="SecurePass123", confirmation="DELETE")
+        object.__setattr__(body_bad, "confirmation", "NOPE")
+
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        with pytest.raises(Exception) as exc_info:
             await delete_account(
-                body=body,
+                body=body_bad,
+                request=mock_request,
                 response=MagicMock(),
                 user=user,
                 db=db,
             )
+        assert exc_info.value.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_wrong_password_raises_401(self) -> None:
+        from pwbs.api.v1.routes.user import AccountDeletionRequest, delete_account
+
+        user = _make_user()
+        db = AsyncMock()
+
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        body = AccountDeletionRequest(password="WrongPassword1", confirmation="DELETE")
+
+        with patch(
+            "pwbs.dsgvo.deletion_service.verify_password",
+            return_value=False,
+        ):
+            with pytest.raises(Exception) as exc_info:
+                await delete_account(
+                    body=body,
+                    request=mock_request,
+                    response=MagicMock(),
+                    user=user,
+                    db=db,
+                )
+            assert exc_info.value.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_successful_deletion_scheduling(self) -> None:
+        from pwbs.api.v1.routes.user import AccountDeletionRequest, delete_account
+
+        user = _make_user()
+        user.password_hash = "hashed"
+        user.deletion_scheduled_at = None
+        db = AsyncMock()
+
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        body = AccountDeletionRequest(password="SecurePass123", confirmation="DELETE")
+
+        with (
+            patch(
+                "pwbs.dsgvo.deletion_service.verify_password",
+                return_value=True,
+            ),
+            patch(
+                "pwbs.api.v1.routes.user.log_event",
+                new_callable=AsyncMock,
+            ) as mock_audit,
+        ):
+            result = await delete_account(
+                body=body,
+                request=mock_request,
+                response=MagicMock(),
+                user=user,
+                db=db,
+            )
+
+        assert result.message == "Account deletion scheduled"
+        assert result.deletion_scheduled_at is not None
+        mock_audit.assert_awaited_once()
+        db.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_already_scheduled_raises_409(self) -> None:
+        from pwbs.api.v1.routes.user import AccountDeletionRequest, delete_account
+
+        user = _make_user()
+        user.password_hash = "hashed"
+        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=timezone.utc)
+        db = AsyncMock()
+
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        body = AccountDeletionRequest(password="SecurePass123", confirmation="DELETE")
+
+        with patch(
+            "pwbs.dsgvo.deletion_service.verify_password",
+            return_value=True,
+        ):
+            with pytest.raises(Exception) as exc_info:
+                await delete_account(
+                    body=body,
+                    request=mock_request,
+                    response=MagicMock(),
+                    user=user,
+                    db=db,
+                )
+            assert exc_info.value.status_code == 409
 
 
 # ── POST /account/cancel-deletion ───────────────────────────────────────────
@@ -471,18 +574,53 @@ class TestCancelDeletion:
     """Test POST /api/v1/user/account/cancel-deletion."""
 
     @pytest.mark.asyncio
-    async def test_raises_not_implemented(self) -> None:
+    async def test_cancel_when_no_deletion_raises_409(self) -> None:
         from pwbs.api.v1.routes.user import cancel_deletion
 
         user = _make_user()
+        user.deletion_scheduled_at = None
         db = AsyncMock()
 
-        with pytest.raises(NotImplementedError, match="TASK-105"):
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        with pytest.raises(Exception) as exc_info:
             await cancel_deletion(
+                request=mock_request,
                 response=MagicMock(),
                 user=user,
                 db=db,
             )
+        assert exc_info.value.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_successful_cancellation(self) -> None:
+        from pwbs.api.v1.routes.user import cancel_deletion
+
+        user = _make_user()
+        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=timezone.utc)
+        db = AsyncMock()
+
+        mock_request = MagicMock()
+        mock_request.headers = {}
+        mock_request.client.host = "127.0.0.1"
+
+        with patch(
+            "pwbs.api.v1.routes.user.log_event",
+            new_callable=AsyncMock,
+        ) as mock_audit:
+            result = await cancel_deletion(
+                request=mock_request,
+                response=MagicMock(),
+                user=user,
+                db=db,
+            )
+
+        assert result.message == "Account deletion cancelled"
+        assert user.deletion_scheduled_at is None
+        mock_audit.assert_awaited_once()
+        db.commit.assert_awaited_once()
 
 
 # ── GET /audit-log ───────────────────────────────────────────────────────────
