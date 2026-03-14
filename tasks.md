@@ -4080,6 +4080,260 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
+## Phase 6: Autonome KI-Agenten & Plugin-Ökosystem (Monate 37–48)
+
+---
+
+#### TASK-156: Plugin-SDK: Konnektor-Plugin-Interface und Paketformat definieren
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P1 (Grundlage für das gesamte Plugin-Ökosystem)         |
+| **Bereich**      | Backend                                                 |
+| **Aufwand**      | M (2–3 Tage)                                            |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Marketplace für Community-Integrationen", ARCHITECTURE.md BaseConnector-Interface |
+| **Abhängig von** | TASK-150                                                |
+| **Blockiert**    | TASK-157, TASK-165                                      |
+
+**Beschreibung:** Das Plugin-SDK definiert die öffentliche Schnittstelle, über die Drittanbieter eigene Konnektoren, Briefing-Templates und Processing-Schritte als Plugins bereitstellen können. Dazu gehören ein `manifest.json`-Schema (Name, Version, Permissions, Entry Points), ein `BaseConnectorPlugin`-Interface (erweitert `BaseConnector`) und ein CLI-Tool für Scaffold, Validate und Package. Das SDK ist Voraussetzung für den Marketplace (TASK-165) und die Plugin-Sandbox (TASK-157).
+
+**Acceptance Criteria:**
+
+- [ ] `BaseConnectorPlugin`-Interface ist definiert mit Lifecycle-Hooks (`install`, `activate`, `deactivate`, `uninstall`) und vollständiger Type-Annotation
+- [ ] `manifest.json`-Schema validierbar mit JSON-Schema; enthält Pflichtfelder `name`, `version`, `permissions`, `entry_point`, `min_pwbs_version`
+- [ ] CLI-Befehl `pwbs plugin scaffold <name>` generiert ein lauffähiges Plugin-Skeleton mit Beispiel-Konnektor
+- [ ] Mindestens 1 existierender Konnektor (z.B. Notion) als Referenz-Plugin portiert und validiert
+
+**Technische Hinweise:** Das bestehende `BaseConnector`-Interface in `pwbs/connectors/base.py` wird um Plugin-spezifische Hooks erweitert (Lifecycle, Permission-Deklaration). Das Paketformat sollte ein Zip-Archiv mit `manifest.json` + Python-Paket sein. Versionierung nach SemVer. Das CLI-Tool nutzt `click` oder `typer`.
+
+---
+
+#### TASK-157: Plugin-Sandbox: Isolierte Ausführungsumgebung für Drittanbieter-Code
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P1 (Sicherheitskritisch für Plugin-Ökosystem)           |
+| **Bereich**      | Infra / Backend                                         |
+| **Aufwand**      | L (1 Woche)                                             |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Plugins laufen sandboxed", ARCHITECTURE.md Sicherheitsprinzipien |
+| **Abhängig von** | TASK-156                                                |
+| **Blockiert**    | TASK-165                                                |
+
+**Beschreibung:** Drittanbieter-Plugins dürfen nicht mit vollem System-Zugriff laufen. Diese Task implementiert eine Container-basierte Sandbox-Umgebung (Docker/gVisor) mit deklarativem Permission-Modell: Plugins deklarieren benötigte Berechtigungen in `manifest.json`, der Administrator genehmigt sie bei Installation. Resource-Limits (CPU, RAM, Netzwerk, Laufzeit) verhindern Denial-of-Service. Die Sandbox stellt eine klar definierte API-Oberfläche bereit, über die Plugins mit dem PWBS-Kern kommunizieren.
+
+**Acceptance Criteria:**
+
+- [ ] Plugins laufen in isoliertem Container mit konfigurierbaren Resource-Limits (CPU: max 0.5 Core, RAM: max 256 MB, Timeout: 30s pro Operation)
+- [ ] Permission-Modell: Plugin kann nur auf Ressourcen zugreifen, die in `manifest.json` deklariert und vom Admin genehmigt sind
+- [ ] Netzwerkzugriff ist standardmäßig blockiert; nur explizit freigegebene Domains erlaubt
+- [ ] Integrations-Test: Plugin-Crash hat keine Auswirkung auf Host-Prozess oder andere Plugins
+
+**Technische Hinweise:** Evaluiere Docker-in-Docker vs. gVisor vs. Firecracker für Container-Isolation. Die Plugin-API-Oberfläche sollte als gRPC oder REST-Proxy implementiert werden, der zwischen Sandbox und PWBS-Kern vermittelt. Permission-Enforcement auf Proxy-Ebene.
+
+---
+
+#### TASK-158: Agent-Autonomie: Proaktiver Insight-Generator mit Opt-in-Steuerung
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P1 (Kernmerkmal der kognitiven Infrastruktur)           |
+| **Bereich**      | Backend / LLM                                           |
+| **Aufwand**      | L (1 Woche)                                             |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Proaktive Hinweise auf strategische Veränderungen", vision-wissens-os.md |
+| **Abhängig von** | TASK-139, TASK-155                                      |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Bisher reagiert das PWBS nur auf explizite Nutzeranfragen (Suche, Briefing-Abruf). Diese Task implementiert einen proaktiven Insight-Generator, der im Hintergrund Muster erkennt und dem Nutzer unaufgefordert relevante Erkenntnisse liefert: widersprüchliche Annahmen, vergessene Themen mit neuer Relevanz, strategische Verschiebungen. Opt-in-Steuerung: Nutzer konfiguriert Frequenz und Kategorien. Jede Empfehlung enthält Quellenreferenzen und einen Feedback-Mechanismus (hilfreich/nicht hilfreich).
+
+**Acceptance Criteria:**
+
+- [ ] Scheduled Job generiert proaktive Insights (max. 3 pro Tag) basierend auf Knowledge-Graph-Analyse und Embedding-Cluster-Veränderungen
+- [ ] Nutzer kann Insight-Kategorien (Widersprüche, vergessene Themen, Trends) und Frequenz (täglich/wöchentlich/aus) in Einstellungen konfigurieren
+- [ ] Jeder Insight enthält `sources: list[SourceRef]` mit mindestens einer Quellenreferenz
+- [ ] Feedback-Loop: Nutzer-Bewertung (hilfreich/nicht hilfreich) beeinflusst zukünftige Insight-Generierung
+
+**Technische Hinweise:** Der Insight-Generator läuft als Celery-Periodic-Task. Er nutzt den GraphAgent für Beziehungsanalyse und den SearchAgent für Embedding-Cluster-Drift-Erkennung. LLM-Temperatur 0.3 für sachliche Formulierung. Insights werden in einer eigenen DB-Tabelle `proactive_insights` persistiert.
+
+---
+
+#### TASK-159: Multi-Modale Ingestion: Bild-OCR und Audio-Transkription Pipeline
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P2 (Erweitert Datenquellen signifikant)                 |
+| **Bereich**      | Backend / LLM                                           |
+| **Aufwand**      | L (1 Woche)                                             |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Vertikale Spezialisierungen", PRD-SPEC.md F-006 (Obsidian inkl. Bilder) |
+| **Abhängig von** | –                                                       |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Die bisherige Ingestion verarbeitet nur Text. Diese Task erweitert die Processing-Pipeline um Bild-OCR (Tesseract/Vision-API) und Audio-Transkription (Whisper/Deepgram). Unterstützte Formate: JPEG, PNG, PDF (mit Bild-Seiten) für OCR; MP3, WAV, M4A, WebM für Audio. Die extrahierten Texte werden ins UDF normalisiert und durchlaufen die reguläre Embedding-/NER-Pipeline. Batch-Verarbeitung mit Fortschrittsanzeige.
+
+**Acceptance Criteria:**
+
+- [ ] OCR-Pipeline extrahiert Text aus JPEG/PNG/PDF-Bildern mit ≥ 90% Genauigkeit (gemessen an 20 Test-Dokumenten mit bekanntem Inhalt)
+- [ ] Audio-Transkription verarbeitet MP3/WAV/M4A mit Whisper (lokal) oder Deepgram (Cloud) und liefert timestamped Transkripte
+- [ ] Extrahierte Texte werden als `UnifiedDocument` mit `source_type: "ocr"` bzw. `"audio_transcript"` gespeichert und sind suchbar
+- [ ] Verarbeitung erfolgt asynchron via Queue; Fortschritt über WebSocket oder Polling abrufbar
+
+**Technische Hinweise:** Nutze `pytesseract` für lokale OCR und `openai-whisper` für lokale Transkription. Cloud-Fallback über Vision API (Claude/GPT-4V) und Deepgram API. Die Pipeline wird als neuer ProcessingStep in `pwbs/processing/` implementiert und in die bestehende Queue-Infrastruktur (TASK-121/122) eingehängt.
+
+---
+
+#### TASK-160: Workflow-Automatisierung: Trigger-Action-Engine für benutzerdefinierte Regeln
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P2 (Erhöht Nutzerbindung durch Personalisierung)        |
+| **Bereich**      | Backend                                                 |
+| **Aufwand**      | M (2–3 Tage)                                            |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 3 „Aktive Erinnerung", PRD-SPEC.md NF-024 Time-to-Value |
+| **Abhängig von** | –                                                       |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Nutzer können benutzerdefinierte Automatisierungsregeln erstellen: Trigger (Neues Dokument mit Keyword, Meeting-Briefing generiert, Follow-up überfällig) + Action (E-Mail-Benachrichtigung, Slack-Nachricht, Briefing generieren, Reminder erstellen). Die Engine evaluiert Regeln bei jedem relevanten Event und führt die verketteten Actions aus. Regeln werden als JSON in der DB persistiert und über die API verwaltet.
+
+**Acceptance Criteria:**
+
+- [ ] CRUD-API für Workflow-Regeln: `POST/GET/PATCH/DELETE /api/v1/workflows` mit JSON-Schema-Validierung der Trigger-Action-Definitionen
+- [ ] Mindestens 3 Trigger-Typen (neues Dokument, Keyword-Match, Zeitplan) und 3 Action-Typen (E-Mail, Reminder erstellen, Briefing generieren) implementiert
+- [ ] Regeln werden bei Events innerhalb von 60 Sekunden evaluiert und ausgeführt
+- [ ] Ausführungslog pro Regel mit Timestamp, Trigger-Event und Action-Ergebnis einsehbar über API
+
+**Technische Hinweise:** Die Engine baut auf dem bestehenden Trigger-System in `pwbs/reminders/` (TASK-131) auf. Events werden über ein internes Event-Bus-Pattern (Python `asyncio.Queue` im MVP, Celery-Events in Phase 3+) propagiert. Workflow-Definitionen als Pydantic-Modelle mit Union-Typen für verschiedene Trigger/Action-Kombinationen.
+
+---
+
+#### TASK-161: Enterprise SSO: SAML 2.0 und OpenID Connect für Unternehmenskunden
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P1 (Voraussetzung für B2B-Kunden)                       |
+| **Bereich**      | Auth / Backend                                          |
+| **Aufwand**      | M (2–3 Tage)                                            |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 4 „Enterprise-Kunden", PRD-SPEC.md NF-021 Mandanten-Isolation |
+| **Abhängig von** | TASK-153                                                |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Enterprise-Kunden authentifizieren ihre Mitarbeiter über unternehmenseigene Identity Provider (IdP). Diese Task implementiert SAML 2.0 und OpenID Connect (OIDC) als zusätzliche Authentifizierungsoptionen. Konfiguration pro Organisation: IdP-Metadata-URL, Attribut-Mapping (E-Mail, Name, Gruppen → PWBS-Rollen), JIT-Provisioning (automatische Account-Erstellung beim ersten Login). SSO-Konfiguration über Admin-Panel der Organisation.
+
+**Acceptance Criteria:**
+
+- [ ] SAML 2.0 SP-initiated SSO funktioniert mit mindestens einem IdP (Okta oder Azure AD) inklusive Attribut-Mapping und JIT-Provisioning
+- [ ] OIDC-Integration funktioniert mit Standard-kompatiblen Providern (Google Workspace, Azure AD, Keycloak) inklusive PKCE-Flow
+- [ ] SSO-Konfiguration pro Organisation über Admin-API: `POST /api/v1/organizations/{id}/sso` mit IdP-Metadata und Attribut-Mapping
+- [ ] Fallback auf E-Mail/Passwort-Login wenn SSO-Provider nicht erreichbar; Fehlermeldung mit Retry-Option
+
+**Technische Hinweise:** Nutze `python3-saml` für SAML und `authlib` für OIDC. SSO-Konfiguration als verschlüsselter JSON-Blob in der `organizations`-Tabelle. JIT-Provisioning erstellt User mit `owner_id` der Organisation. Session-Management: SSO-Token-Lifetime an IdP-Session koppeln.
+
+---
+
+#### TASK-162: Wissens-Snapshots: Zeitpunktbezogene Knowledge-Graph-Momentaufnahmen
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P2 (Einzigartige Differenzierung)                       |
+| **Bereich**      | Backend / DB                                            |
+| **Aufwand**      | M (2–3 Tage)                                            |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Nachverfolgung, welche Annahmen sich als falsch herausgestellt haben" |
+| **Abhängig von** | TASK-155                                                |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Nutzer können zu beliebigen Zeitpunkten einen Snapshot ihres Wissensmodells erstellen (manuell oder automatisch wöchentlich). Snapshots erfassen den Zustand des Knowledge Graphs (Entitäten, Beziehungen, Gewichtungen) und ermöglichen Diff-Ansichten: „Was hat sich seit letzter Woche verändert?" Neue Entitäten, verschwundene Themen, veränderte Beziehungsstärken. Grundlage für die Langzeit-Intelligenz.
+
+**Acceptance Criteria:**
+
+- [ ] API-Endpunkt `POST /api/v1/snapshots` erstellt einen Knowledge-Graph-Snapshot mit Entitäten, Beziehungen und Metadaten (Zeitstempel, Statistiken)
+- [ ] `GET /api/v1/snapshots/{id1}/diff/{id2}` liefert strukturierten Diff: neue/entfernte Entitäten, veränderte Beziehungen, Top-5-Themenverschiebungen
+- [ ] Automatischer wöchentlicher Snapshot via Celery-Beat-Job (konfigurierbar pro Nutzer)
+- [ ] Snapshot-Speicher effizient: Delta-Kompression, max. 52 Snapshots pro Nutzer (1 Jahr Rolling Window)
+
+**Technische Hinweise:** Snapshots als Neo4j-Subgraph-Export (JSON-LD) komprimiert in PostgreSQL-Blob gespeichert. Diff-Algorithmus vergleicht Entitäts-Sets und Beziehungs-Gewichtungen. `owner_id`-Filter auf allen Queries. Snapshot-Cleanup als Teil des bestehenden `cleanup_expired` Celery-Jobs.
+
+---
+
+#### TASK-163: Kollaborative Briefings: Team-Briefings mit Kommentar- und Annotationsfunktion
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P2 (Stärkt Team-Features und B2B-Value)                 |
+| **Bereich**      | Backend / Frontend                                      |
+| **Aufwand**      | M (2–3 Tage)                                            |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 4 „Gemeinsames Wissensmodell für Teams", PRD-SPEC.md Epic 3 Kontextbriefings |
+| **Abhängig von** | TASK-144, TASK-133                                      |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Team-Mitglieder können Briefings teilen, kommentieren und annotieren. Ein geteiltes Briefing wird für alle Teammitglieder sichtbar (mit Lesebestätigung). Inline-Kommentare ermöglichen Diskussion zu einzelnen Briefing-Abschnitten. Annotations (Highlights, Korrekturen, Ergänzungen) werden mit dem Autor verknüpft. Benachrichtigungen bei neuen Kommentaren oder Annotationen.
+
+**Acceptance Criteria:**
+
+- [ ] `POST /api/v1/briefings/{id}/share` teilt ein Briefing mit Team oder einzelnen Nutzern; geteilte Briefings erscheinen im Team-Dashboard
+- [ ] Inline-Kommentare: `POST /api/v1/briefings/{id}/comments` mit `section_ref` (Abschnitts-Anker) und `content`; Kommentare sind paginiert abrufbar
+- [ ] Lesebestätigung: System trackt welche Teammitglieder ein geteiltes Briefing geöffnet haben
+- [ ] Nur Briefing-Ersteller und Team-Admins können Briefings teilen; `owner_id`-Isolation bleibt gewahrt
+
+**Technische Hinweise:** Briefing-Sharing als M2M-Tabelle `briefing_shares` (briefing_id, user_id, shared_at, read_at). Kommentare als eigene Tabelle mit `briefing_id` + `section_ref` (XPath-ähnlicher Selektor). WebSocket-Notifications für Echtzeit-Updates. DSGVO: Kommentare werden bei Account-Löschung anonymisiert, nicht gelöscht (Team-Kontext bleibt erhalten).
+
+---
+
+#### TASK-164: Erweiterte Exportformate: PDF, Confluence und Jira-Export
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P3 (Nice-to-have, verbessert Integration)               |
+| **Bereich**      | Backend                                                 |
+| **Aufwand**      | S (0.5–1 Tag)                                           |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | PRD-SPEC.md F-021 Briefing-Abruf, ROADMAP.md Phase 4 „Integrationen in bestehende Tools" |
+| **Abhängig von** | TASK-150                                                |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Briefings, Suchergebnisse und Knowledge-Graph-Auszüge können in verschiedene Formate exportiert werden: PDF (druckoptimiert mit Quellenverzeichnis), Markdown, Confluence-Wiki-Markup und Jira-Ticket (automatisch erstelltes Ticket aus Action Items). Der Export respektiert die Quellenreferenzen und formatiert sie im Zielformat korrekt.
+
+**Acceptance Criteria:**
+
+- [ ] `GET /api/v1/briefings/{id}/export?format=pdf` liefert ein korrekt formatiertes PDF mit Quellenverzeichnis am Ende
+- [ ] `GET /api/v1/briefings/{id}/export?format=markdown` liefert valides Markdown mit Quellenreferenzen als Links
+- [ ] Confluence-Export: `POST /api/v1/export/confluence` erstellt eine Seite im konfigurierten Confluence-Space via REST-API
+- [ ] Export enthält immer Metadaten: Generierungszeitpunkt, PWBS-Version, Quellenreferenzen
+
+**Technische Hinweise:** PDF-Generierung via `weasyprint` oder `reportlab`. Confluence-API via `atlassian-python-api`. Jira-Integration über REST-API v3. Export-Formate als Strategy-Pattern in `pwbs/export/` implementiert. Alle Exporte asynchron, da PDF-Generierung CPU-intensiv.
+
+---
+
+#### TASK-165: KI-Agenten-Marktplatz: Discovery-UI, Bewertungen und Installations-Flow
+
+| Feld             | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| **Priorität**    | P2 (Ökosystem-Wachstum)                                |
+| **Bereich**      | Frontend / Backend                                      |
+| **Aufwand**      | L (1 Woche)                                             |
+| **Status**       | 🔴 Offen                                                |
+| **Quelle**       | ROADMAP.md Phase 5 „Marketplace für Community-Integrationen", ARCHITECTURE.md Modularitätsprinzip |
+| **Abhängig von** | TASK-151, TASK-157                                      |
+| **Blockiert**    | –                                                       |
+
+**Beschreibung:** Der KI-Agenten-Marktplatz ist die Endnutzer-Oberfläche für das Plugin-Ökosystem. Nutzer können Community-Plugins durchsuchen (Kategorien: Konnektoren, Briefing-Templates, Processing-Schritte, Agenten), Detail-Seiten mit Screenshots und Beschreibung ansehen, Bewertungen und Reviews abgeben, Plugins mit einem Klick installieren/deinstallieren. Backend: Plugin-Registry mit Versionierung, automatische Sicherheitsprüfung bei Upload, Download-Statistiken.
+
+**Acceptance Criteria:**
+
+- [ ] Marketplace-UI: Kategorie-Filter, Suchfeld, sortierbar nach Beliebtheit/Datum/Bewertung; responsive für Desktop und Tablet
+- [ ] Plugin-Detail-Seite: Beschreibung, Screenshots, Changelogs, Permissions-Übersicht, Bewertungen (1–5 Sterne + Freitext)
+- [ ] Installations-Flow: 1-Click-Install mit Permission-Review-Dialog; Deinstallation löscht Plugin-Daten kaskadierend
+- [ ] Backend-Registry: CRUD-API für Plugins mit Versionierung (SemVer), automatischer `manifest.json`-Validierung und Malware-Scan (ClamAV)
+
+**Technische Hinweise:** Frontend als Next.js-Seite unter `/marketplace`. Backend-Registry als eigener Service-Endpunkt unter `/api/v1/marketplace`. Plugin-Pakete in S3/MinIO gespeichert. Bewertungen in PostgreSQL mit `owner_id`-Verknüpfung. Download-Counter als Redis-Atomic-Increment. Automatischer Scan bei Upload via ClamAV-Container.
+
+---
+
 ## Offene Klärungspunkte
 
 | ID    | Frage                                                                                                                                                                                                                                                             | Betroffene Tasks             | Quelle                                 | Priorität |

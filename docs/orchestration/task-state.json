@@ -2,8 +2,8 @@
   "$schema": "./task-state.schema.json",
   "meta": {
     "schema_version": "1.0",
-    "total_tasks": 155,
-    "generated_at": "2026-03-13T00:00:00Z",
+    "total_tasks": 165,
+    "generated_at": "2026-03-14T15:42:34.927380+00:00",
     "source": "tasks.md",
     "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-EintrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
   },
@@ -128,6 +128,12 @@
         "STREAM-PHASE4"
       ],
       "task_range": "144-155"
+    },
+    "STREAM-PHASE6": {
+      "name": "Phase 6: Autonome KI-Agenten & Plugin-Oekosystem",
+      "description": "Plugin-SDK, Sandbox, proaktive KI-Agenten, Multi-Modale Ingestion, Workflow-Automatisierung, Enterprise SSO, Wissens-Snapshots, Team-Briefings, Exportformate, KI-Marktplatz.",
+      "phase": 6,
+      "orchestrator_slot": "ORCH-M"
     }
   },
   "tasks": {
@@ -1932,9 +1938,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-J",
+      "claimed_at": "2026-03-14T15:17:51.251762+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-041",
@@ -2189,9 +2195,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2026-03-14T15:17:51.251762+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-078"
@@ -2245,9 +2251,9 @@
       "priority": "P0",
       "effort": "XL",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-L",
+      "claimed_at": "2026-03-14T15:17:51.251762+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-105",
@@ -2364,6 +2370,145 @@
       "completed_at": null,
       "blocked_by": [
         "TASK-139"
+      ]
+    },
+    "TASK-156": {
+      "stream": "STREAM-PHASE6",
+      "title": "Plugin-SDK: Konnektor-Plugin-Interface und Paketformat definieren",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-150"
+      ]
+    },
+    "TASK-157": {
+      "stream": "STREAM-PHASE6",
+      "title": "Plugin-Sandbox: Isolierte Ausfuehrungsumgebung fuer Drittanbieter-Code",
+      "priority": "P1",
+      "effort": "L",
+      "area": "Infra",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-156"
+      ]
+    },
+    "TASK-158": {
+      "stream": "STREAM-PHASE6",
+      "title": "Agent-Autonomie: Proaktiver Insight-Generator mit Opt-in-Steuerung",
+      "priority": "P1",
+      "effort": "L",
+      "area": "LLM",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-139",
+        "TASK-155"
+      ]
+    },
+    "TASK-159": {
+      "stream": "STREAM-PHASE6",
+      "title": "Multi-Modale Ingestion: Bild-OCR und Audio-Transkription Pipeline",
+      "priority": "P2",
+      "effort": "L",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-160": {
+      "stream": "STREAM-PHASE6",
+      "title": "Workflow-Automatisierung: Trigger-Action-Engine fuer benutzerdefinierte Regeln",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-161": {
+      "stream": "STREAM-PHASE6",
+      "title": "Enterprise SSO: SAML 2.0 und OpenID Connect fuer Unternehmenskunden",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Auth",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-153"
+      ]
+    },
+    "TASK-162": {
+      "stream": "STREAM-PHASE6",
+      "title": "Wissens-Snapshots: Zeitpunktbezogene Knowledge-Graph-Momentaufnahmen",
+      "priority": "P2",
+      "effort": "M",
+      "area": "DB",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-155"
+      ]
+    },
+    "TASK-163": {
+      "stream": "STREAM-PHASE6",
+      "title": "Kollaborative Briefings: Team-Briefings mit Kommentar- und Annotationsfunktion",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-144",
+        "TASK-133"
+      ]
+    },
+    "TASK-164": {
+      "stream": "STREAM-PHASE6",
+      "title": "Erweiterte Exportformate: PDF, Confluence und Jira-Export",
+      "priority": "P3",
+      "effort": "S",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-150"
+      ]
+    },
+    "TASK-165": {
+      "stream": "STREAM-PHASE6",
+      "title": "KI-Agenten-Marktplatz: Discovery-UI, Bewertungen und Installations-Flow",
+      "priority": "P2",
+      "effort": "L",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-151",
+        "TASK-157"
       ]
     }
   }
