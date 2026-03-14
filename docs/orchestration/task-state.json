@@ -873,10 +873,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-E",
       "claimed_at": null,
-      "completed_at": null,
+      "completed_at": "2026-03-14T17:30:00Z",
       "blocked_by": [
         "TASK-043"
       ],
@@ -1205,10 +1205,10 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-03-14T11:50:48Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T11:53:03Z",
       "blocked_by": [
         "TASK-075"
       ]
