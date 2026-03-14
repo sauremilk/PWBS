@@ -13,8 +13,9 @@ variable "node_type" {
 }
 
 variable "num_cache_clusters" {
-  type    = number
-  default = 1
+  description = "Number of cache clusters (2+ for HA with automatic failover)"
+  type        = number
+  default     = 2
 }
 
 variable "subnet_group_name" {

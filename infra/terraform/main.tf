@@ -43,13 +43,16 @@ module "networking" {
 
 #  RDS (PostgreSQL) 
 module "rds" {
-  source            = "./modules/rds"
-  environment       = var.environment
-  vpc_id            = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
-  db_password       = var.db_password
-}
-
+  source              = "./modules/rds"
+  environment         = var.environment
+  vpc_id              = module.networking.vpc_id
+  private_subnet_ids  = module.networking.private_subnet_ids
+  db_password         = var.db_password
+  kms_key_arn         = module.kms.key_arn
+  app_security_group_ids  = [module.ecs.api_security_group_id]
+  enable_read_replica     = var.environment == "production"
+  rds_proxy_role_arn      = var.rds_proxy_role_arn
+  db_credentials_secret_arn = var.db_credentials_secret_arn
 #  ECS (Fargate  Backend API) 
 module "ecs" {
   source             = "./modules/ecs"
@@ -62,18 +65,10 @@ module "ecs" {
   neo4j_uri          = "bolt://${module.ec2_neo4j.private_ip}:7687"
   redis_url          = module.elasticache.connection_url
   kms_key_arn        = module.kms.key_arn
-}
-
-#  EC2 (Weaviate) 
-module "ec2_weaviate" {
-  source            = "./modules/ec2_weaviate"
-  environment       = var.environment
-  vpc_id            = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
-}
-
-#  EC2 (Neo4j) 
-module "ec2_neo4j" {
+  acm_certificate_arn = var.acm_certificate_arn
+  execution_role_arn  = var.ecs_execution_role_arn
+  task_role_arn       = var.ecs_task_role_arn
+  api_desired_count   = var.environment == "production" ? 3 : 1
   source            = "./modules/ec2_neo4j"
   environment       = var.environment
   vpc_id            = module.networking.vpc_id
@@ -82,10 +77,23 @@ module "ec2_neo4j" {
 
 #  ElastiCache (Redis) 
 module "elasticache" {
-  source            = "./modules/elasticache"
-  environment       = var.environment
-  vpc_id            = module.networking.vpc_id
+  source             = "./modules/elasticache"
+  environment        = var.environment
+  vpc_id             = module.networking.vpc_id
   private_subnet_ids = module.networking.private_subnet_ids
+  subnet_group_name  = module.networking.vpc_id  # wird durch Networking-Output ersetzt
+  security_group_ids = [module.ecs.api_security_group_id]
+  auth_token         = var.redis_auth_token
+  num_cache_clusters = var.environment == "production" ? 2 : 1
+}
+
+#  CloudFront (CDN)
+module "cloudfront" {
+  source              = "./modules/cloudfront"
+  environment         = var.environment
+  api_alb_dns_name    = module.ecs.alb_dns_name
+  acm_certificate_arn = var.cloudfront_certificate_arn
+  domain_aliases      = var.domain_aliases
 }
 
 #  KMS (Envelope Encryption) 
