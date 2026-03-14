@@ -31,6 +31,30 @@ variable "api_desired_count" {
   default     = 3
 }
 
+variable "api_min_count" {
+  type        = number
+  description = "Minimum API instances for auto-scaling"
+  default     = 2
+}
+
+variable "api_max_count" {
+  type        = number
+  description = "Maximum API instances for auto-scaling (Public Beta: 1000+ users)"
+  default     = 10
+}
+
+variable "api_cpu_target" {
+  type        = number
+  description = "CPU utilization target (%) for auto-scaling"
+  default     = 60
+}
+
+variable "api_requests_per_target" {
+  type        = number
+  description = "ALB requests per target for auto-scaling"
+  default     = 500
+}
+
 variable "api_environment" {
   type        = list(map(string))
   description = "Environment variables for API containers"
