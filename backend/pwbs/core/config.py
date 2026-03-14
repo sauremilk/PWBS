@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     #  OAuth2 Connector Credentials (all optional)
     google_client_id: str = ""
     google_client_secret: SecretStr = SecretStr("")
+    google_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/google-calendar/callback"
     notion_client_id: str = ""
     notion_client_secret: SecretStr = SecretStr("")
     zoom_client_id: str = ""
