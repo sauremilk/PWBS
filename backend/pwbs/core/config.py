@@ -115,6 +115,13 @@ class Settings(BaseSettings):
     ms_tenant_id: str = "common"
     ms_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/outlook-mail/callback"
 
+    #  Stripe (TASK-137)
+    stripe_secret_key: SecretStr = SecretStr("")
+    stripe_webhook_secret: SecretStr = SecretStr("")
+    stripe_price_id_pro: str = ""  # Stripe Price ID for the Pro plan
+    stripe_free_connector_limit: int = 1
+    stripe_free_search_daily_limit: int = 3
+
     #  Derived / computed properties
 
     @property

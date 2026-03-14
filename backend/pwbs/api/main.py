@@ -196,6 +196,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.auth import router as auth_router
     from pwbs.api.v1.routes.auth_google import router as auth_google_router
     from pwbs.api.v1.routes.auth_refresh import router as auth_refresh_router
+    from pwbs.api.v1.routes.billing import router as billing_router
     from pwbs.api.v1.routes.briefings import router as briefings_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
     from pwbs.api.v1.routes.documents import router as documents_router
@@ -227,6 +228,7 @@ def create_app() -> FastAPI:
     application.include_router(search_router)
     application.include_router(user_router)
     application.include_router(webhooks_router)
+    application.include_router(billing_router)
 
     # Prometheus metrics (TASK-116) -- must be after all routers are mounted
     setup_metrics(application)

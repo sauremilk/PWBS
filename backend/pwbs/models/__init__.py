@@ -13,6 +13,7 @@ from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
+from pwbs.models.subscription import Subscription
 from pwbs.models.user import User
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "RefreshToken",
     "Reminder",
     "ScheduledJobRun",
+    "Subscription",
     "User",
 ]

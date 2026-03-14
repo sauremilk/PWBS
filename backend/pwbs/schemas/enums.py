@@ -97,3 +97,20 @@ class DocumentVisibility(str, Enum):
 
     PRIVATE = "private"
     TEAM = "team"
+
+
+class SubscriptionPlan(str, Enum):
+    """Available subscription plans."""
+
+    FREE = "free"
+    PRO = "pro"
+
+
+class SubscriptionStatus(str, Enum):
+    """Stripe-derived subscription status (cached locally)."""
+
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    PAST_DUE = "past_due"
+    TRIALING = "trialing"
+    INCOMPLETE = "incomplete"
