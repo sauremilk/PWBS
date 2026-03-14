@@ -2587,10 +2587,11 @@
       "effort": "M",
       "area": "Frontend",
       "status": "in_progress",
-      "claimed_by": "ORCH-K",
-      "claimed_at": "2026-03-15T00:20:00.000000+00:00",
+      "claimed_by": "ORCH-L",
+      "claimed_at": "2026-03-15T12:00:00.000000+00:00",
       "completed_at": null,
-      "blocked_by": []
+      "blocked_by": [],
+      "notes": "ORCH-L: Reclaimed from ORCH-K (abandoned). Full WCAG 2.1 AA audit + fixes."
     },
     "TASK-170": {
       "stream": "STREAM-BETA-PREP",
