@@ -1430,13 +1430,14 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-G",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-086"
-      ]
+      ],
+      "started_at": "2026-03-14T14:35:00Z"
     },
     "TASK-092": {
       "stream": "STREAM-AUTH-API",
