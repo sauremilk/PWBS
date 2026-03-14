@@ -2099,13 +2099,14 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T19:21:38.327332+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T19:37:46.342037+00:00",
       "blocked_by": [
         "TASK-086"
-      ]
+      ],
+      "commit": "b6d6275"
     },
     "TASK-136": {
       "stream": "STREAM-PHASE4",
