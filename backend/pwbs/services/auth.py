@@ -1,16 +1,15 @@
-﻿"""JWT authentication service (TASK-081).
+﻿"""JWT authentication service (TASK-081, TASK-084).
 
 Provides access-token generation (RS256-signed) and opaque refresh-token
-management backed by the `refresh_tokens` table.
+management backed by the ``refresh_tokens`` table.
 
 Security notes:
 - Access tokens are signed with RS256 (asymmetric).  The private key is
-  loaded from the `JWT_PRIVATE_KEY` environment variable; the public key
-  from `JWT_PUBLIC_KEY`.  Neither is ever logged.
-- Refresh tokens are opaque (`secrets.token_urlsafe`), stored in the DB
+  loaded from the ``JWT_PRIVATE_KEY`` environment variable; the public key
+  from ``JWT_PUBLIC_KEY``.  Neither is ever logged.
+- Refresh tokens are opaque (``secrets.token_urlsafe``), stored in the DB
   as SHA-256 hashes so a database leak does not compromise active sessions.
-- Token rotation and replay-detection are handled at the service layer
-  (TASK-084 builds the endpoint on top).
+- Token rotation and replay-detection are handled at the service layer.
 """
 
 from __future__ import annotations
@@ -309,3 +308,44 @@ async def create_token_pair(
         refresh_token=refresh,
         expires_in=settings.jwt_access_token_expire_minutes * 60,
     )
+
+# ---------------------------------------------------------------------------
+# Token rotation (TASK-084)
+# ---------------------------------------------------------------------------
+
+
+async def rotate_refresh_token(
+    old_token: str,
+    db: AsyncSession,
+) -> TokenPair:
+    """Rotate a refresh token: validate → revoke old → issue new pair.
+
+    Implements the full Token Rotation flow:
+    1. Validate the presented refresh token (signature, expiry, revocation).
+    2. If the token is already revoked → replay-detection triggers and
+       **all** tokens in the rotation family are revoked.
+    3. Revoke the old token immediately.
+    4. Issue a new access + refresh token pair in the same family.
+
+    Raises ``AuthenticationError`` (HTTP 401) when the token is invalid,
+    expired, or has been revoked.
+    """
+    # Step 1: validate (replay-detection fires inside if revoked)
+    db_token = await validate_refresh_token(old_token, db)
+
+    # Step 2: revoke the consumed token
+    now = datetime.now(timezone.utc)
+    db_token.revoked_at = now
+    await db.flush()
+
+    # Step 3: issue new pair in the same family
+    pair = await create_token_pair(
+        db_token.user_id, db, family_id=db_token.family_id,
+    )
+
+    logger.info(
+        "Refresh token rotated: user_id=%s family_id=%s",
+        db_token.user_id,
+        db_token.family_id,
+    )
+    return pair
