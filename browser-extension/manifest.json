@@ -22,7 +22,13 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.notion.so/*",
+        "https://www.notion.so/*"
+      ],
+      "js": ["src/notion-extractor.js", "src/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "https://docs.google.com/*"
       ],
       "js": ["src/content.js"],

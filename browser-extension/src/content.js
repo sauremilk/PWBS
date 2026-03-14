@@ -49,12 +49,16 @@ function extractGoogleDocsTitle() {
 
 /**
  * Detect which supported site we are on and extract context.
- * @returns {{ site: string, title: string } | null}
+ * @returns {{ site: string, title: string, headings?: string[], breadcrumb?: string[] } | null}
  */
 function extractPageContext() {
   const url = window.location.href;
 
   if (url.includes("notion.so")) {
+    // Use enhanced Notion extractor if available (TASK-142)
+    if (window.__pwbs_notion && window.__pwbs_notion.extractNotionContext) {
+      return window.__pwbs_notion.extractNotionContext();
+    }
     const title = extractNotionTitle();
     return title ? { site: "notion", title } : null;
   }

@@ -56,8 +56,18 @@ function updateContext(ctx) {
   ctxSite.textContent = ctx.site === "notion" ? "Notion" : "Google Docs";
   ctxTitle.textContent = ctx.title;
   contextBar.style.display = "block";
+
+  // Show Notion-specific context (TASK-142)
+  renderNotionContext(ctx);
+
+  // Build search query from title + headings for richer results
+  const queryParts = [ctx.title];
+  if (ctx.headings && ctx.headings.length > 0) {
+    queryParts.push(...ctx.headings.slice(0, 3));
+  }
+  const searchQuery = queryParts.join(" ");
   searchInput.value = ctx.title;
-  loadContextData(ctx.title);
+  loadContextData(searchQuery);
 }
 
 // ----------------------------------------------------------------
@@ -171,6 +181,52 @@ chrome.runtime.onMessage.addListener((message) => {
     updateContext(message.payload);
   }
 });
+
+// ----------------------------------------------------------------
+// Notion-specific context rendering (TASK-142)
+// ----------------------------------------------------------------
+
+const notionContextEl = document.getElementById("notion-context");
+const notionBreadcrumbEl = document.getElementById("notion-breadcrumb");
+const notionHeadingsEl = document.getElementById("notion-headings");
+
+function renderNotionContext(ctx) {
+  if (ctx.site !== "notion") {
+    notionContextEl.style.display = "none";
+    return;
+  }
+
+  let hasContent = false;
+
+  // Breadcrumb
+  if (ctx.breadcrumb && ctx.breadcrumb.length > 0) {
+    notionBreadcrumbEl.innerHTML =
+      '<div style="font-size:11px;color:#666;margin-bottom:6px;">' +
+      ctx.breadcrumb.map(escapeHtml).join(' <span style="color:#bbb;">&rsaquo;</span> ') +
+      '</div>';
+    notionBreadcrumbEl.style.display = "block";
+    hasContent = true;
+  } else {
+    notionBreadcrumbEl.style.display = "none";
+  }
+
+  // Headings
+  if (ctx.headings && ctx.headings.length > 0) {
+    notionHeadingsEl.innerHTML =
+      '<div style="font-size:12px;color:#444;">' +
+      ctx.headings.slice(0, 8).map((h) =>
+        '<div style="padding:2px 0;border-left:2px solid #0f3460;padding-left:8px;margin-bottom:3px;">' +
+        escapeHtml(h) + '</div>'
+      ).join("") +
+      '</div>';
+    notionHeadingsEl.style.display = "block";
+    hasContent = true;
+  } else {
+    notionHeadingsEl.style.display = "none";
+  }
+
+  notionContextEl.style.display = hasContent ? "block" : "none";
+}
 
 // ----------------------------------------------------------------
 // Utilities
