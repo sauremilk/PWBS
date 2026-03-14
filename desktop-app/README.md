@@ -90,3 +90,40 @@ await invoke('send_notification', {
 - IPC-Command `check_for_updates` fuer manuelle Pruefung
 - Konfiguration in `tauri.conf.json` unter `plugins.updater`
 - Signierte Updates ueber konfigurierbaren Endpoint
+
+### Offline-Modus (TASK-136)
+
+Lokaler SQLite-Vault (`offline_vault.db` im App-Data-Verzeichnis) fuer Offline-Zugriff:
+
+- **Briefings**: Letzte 7 Tage werden automatisch gecacht
+- **Entitaeten**: Top-50 nach Mention-Count werden lokal gespeichert
+- **Embeddings**: Vektoren im SQLite als BLOB fuer lokale Cosine-Similarity-Suche
+- **Obsidian-Vault-Watcher**: Filesystem-Events werden gepuffert und bei Reconnect synchronisiert
+- **Sync**: Last-Write-Wins-Strategie, periodische Konnektivitaetspruefung alle 5 Minuten
+
+```typescript
+import { invoke } from '@tauri-apps/api/core';
+
+// Sync-Status abfragen
+const status = await invoke('get_sync_status');
+// => { "online": { "last_sync": "2024-01-15T08:30:00Z" } }
+// => { "offline": { "last_sync": "2024-01-15T08:30:00Z" } }
+// => { "syncing": { "progress": 0.66 } }
+
+// Manuellen Sync ausloesen
+await invoke('trigger_sync', { token: 'jwt...', ownerId: 'uuid...' });
+
+// Offline-Briefings abrufen
+const briefings = await invoke('get_offline_briefings', { ownerId: 'uuid...' });
+
+// Offline-Suche (mit vorberechnetem Query-Embedding)
+const results = await invoke('offline_search', {
+  ownerId: 'uuid...',
+  queryEmbedding: [0.1, 0.2, ...],
+  topK: 5
+});
+```
+
+Umgebungsvariablen:
+- `PWBS_API_URL`: Backend-URL (Standard: `http://localhost:8000`)
+- `PWBS_OBSIDIAN_VAULT`: Pfad zum Obsidian-Vault-Verzeichnis (optional)
