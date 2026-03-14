@@ -1249,13 +1249,14 @@
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-03-14T11:55:53Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T12:00:30Z",
       "blocked_by": [
         "TASK-078"
-      ]
+      ],
+      "progress": 100
     },
     "TASK-080": {
       "stream": "STREAM-PROCESSING",
