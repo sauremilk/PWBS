@@ -2634,10 +2634,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "Frontend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T20:02:56.581345+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T21:45:00.000000+00:00",
       "blocked_by": []
     },
     "TASK-174": {
