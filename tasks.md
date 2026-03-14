@@ -1,4 +1,4 @@
-﻿# PWBS  Entwicklungs-Backlog
+﻿# PWBS Entwicklungs-Backlog
 
 **Generiert:** 13. März 2026
 **Basis-Dokumente:** ARCHITECTURE.md v0.1.0 | ROADMAP.md | PRD-SPEC.md v0.1.0 | vision-wissens-os.md
@@ -7,18 +7,16 @@
 
 ## Legende
 
-| Feld | Mögliche Werte |
-|------|---------------|
-| **Priorität** | P0 (kritisch) / P1 (Must-Have MVP) / P2 (Should-Have) / P3 (Could-Have) |
-| **Aufwand** | XS (<2h) / S (0.51 Tag) / M (23 Tage) / L (1 Woche) / XL (>1 Woche) |
-| **Bereich** | Backend / Frontend / Infra / Auth / DB / LLM / Testing / Docs / DevOps / Mobile |
-| **Status** |  Offen /  In Arbeit /  Fertig /  Blockiert |
+| Feld          | Mögliche Werte                                                                  |
+| ------------- | ------------------------------------------------------------------------------- |
+| **Priorität** | P0 (kritisch) / P1 (Must-Have MVP) / P2 (Should-Have) / P3 (Could-Have)         |
+| **Aufwand**   | XS (<2h) / S (0.51 Tag) / M (23 Tage) / L (1 Woche) / XL (>1 Woche)             |
+| **Bereich**   | Backend / Frontend / Infra / Auth / DB / LLM / Testing / Docs / DevOps / Mobile |
+| **Status**    | Offen / In Arbeit / Fertig / Blockiert                                          |
 
 ---
 
-
 ---
-
 
 ---
 
@@ -1053,7 +1051,6 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 <!-- AGENT_1_LAST: TASK-040 -->
 
 ---
-
 
 ---
 
@@ -2128,7 +2125,6 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-
 ---
 
 ## Authentifizierung & User Management
@@ -3202,7 +3198,6 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-
 ---
 
 ## Phase 3 – Private Beta & Produktreife (Monate 10–15)
@@ -4086,15 +4081,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-156: Plugin-SDK: Konnektor-Plugin-Interface und Paketformat definieren
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P1 (Grundlage für das gesamte Plugin-Ökosystem)         |
-| **Bereich**      | Backend                                                 |
-| **Aufwand**      | M (2–3 Tage)                                            |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Grundlage für das gesamte Plugin-Ökosystem)                                                       |
+| **Bereich**      | Backend                                                                                               |
+| **Aufwand**      | M (2–3 Tage)                                                                                          |
+| **Status**       | 🔴 Offen                                                                                              |
 | **Quelle**       | ROADMAP.md Phase 5 „Marketplace für Community-Integrationen", ARCHITECTURE.md BaseConnector-Interface |
-| **Abhängig von** | TASK-150                                                |
-| **Blockiert**    | TASK-157, TASK-165                                      |
+| **Abhängig von** | TASK-150                                                                                              |
+| **Blockiert**    | TASK-157, TASK-165                                                                                    |
 
 **Beschreibung:** Das Plugin-SDK definiert die öffentliche Schnittstelle, über die Drittanbieter eigene Konnektoren, Briefing-Templates und Processing-Schritte als Plugins bereitstellen können. Dazu gehören ein `manifest.json`-Schema (Name, Version, Permissions, Entry Points), ein `BaseConnectorPlugin`-Interface (erweitert `BaseConnector`) und ein CLI-Tool für Scaffold, Validate und Package. Das SDK ist Voraussetzung für den Marketplace (TASK-165) und die Plugin-Sandbox (TASK-157).
 
@@ -4111,15 +4106,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-157: Plugin-Sandbox: Isolierte Ausführungsumgebung für Drittanbieter-Code
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P1 (Sicherheitskritisch für Plugin-Ökosystem)           |
-| **Bereich**      | Infra / Backend                                         |
-| **Aufwand**      | L (1 Woche)                                             |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| **Priorität**    | P1 (Sicherheitskritisch für Plugin-Ökosystem)                                        |
+| **Bereich**      | Infra / Backend                                                                      |
+| **Aufwand**      | L (1 Woche)                                                                          |
+| **Status**       | 🔴 Offen                                                                             |
 | **Quelle**       | ROADMAP.md Phase 5 „Plugins laufen sandboxed", ARCHITECTURE.md Sicherheitsprinzipien |
-| **Abhängig von** | TASK-156                                                |
-| **Blockiert**    | TASK-165                                                |
+| **Abhängig von** | TASK-156                                                                             |
+| **Blockiert**    | TASK-165                                                                             |
 
 **Beschreibung:** Drittanbieter-Plugins dürfen nicht mit vollem System-Zugriff laufen. Diese Task implementiert eine Container-basierte Sandbox-Umgebung (Docker/gVisor) mit deklarativem Permission-Modell: Plugins deklarieren benötigte Berechtigungen in `manifest.json`, der Administrator genehmigt sie bei Installation. Resource-Limits (CPU, RAM, Netzwerk, Laufzeit) verhindern Denial-of-Service. Die Sandbox stellt eine klar definierte API-Oberfläche bereit, über die Plugins mit dem PWBS-Kern kommunizieren.
 
@@ -4136,15 +4131,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-158: Agent-Autonomie: Proaktiver Insight-Generator mit Opt-in-Steuerung
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P1 (Kernmerkmal der kognitiven Infrastruktur)           |
-| **Bereich**      | Backend / LLM                                           |
-| **Aufwand**      | L (1 Woche)                                             |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Kernmerkmal der kognitiven Infrastruktur)                                                |
+| **Bereich**      | Backend / LLM                                                                                |
+| **Aufwand**      | L (1 Woche)                                                                                  |
+| **Status**       | 🔴 Offen                                                                                     |
 | **Quelle**       | ROADMAP.md Phase 5 „Proaktive Hinweise auf strategische Veränderungen", vision-wissens-os.md |
-| **Abhängig von** | TASK-139, TASK-155                                      |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-139, TASK-155                                                                           |
+| **Blockiert**    | –                                                                                            |
 
 **Beschreibung:** Bisher reagiert das PWBS nur auf explizite Nutzeranfragen (Suche, Briefing-Abruf). Diese Task implementiert einen proaktiven Insight-Generator, der im Hintergrund Muster erkennt und dem Nutzer unaufgefordert relevante Erkenntnisse liefert: widersprüchliche Annahmen, vergessene Themen mit neuer Relevanz, strategische Verschiebungen. Opt-in-Steuerung: Nutzer konfiguriert Frequenz und Kategorien. Jede Empfehlung enthält Quellenreferenzen und einen Feedback-Mechanismus (hilfreich/nicht hilfreich).
 
@@ -4161,15 +4156,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-159: Multi-Modale Ingestion: Bild-OCR und Audio-Transkription Pipeline
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P2 (Erweitert Datenquellen signifikant)                 |
-| **Bereich**      | Backend / LLM                                           |
-| **Aufwand**      | L (1 Woche)                                             |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Erweitert Datenquellen signifikant)                                                     |
+| **Bereich**      | Backend / LLM                                                                               |
+| **Aufwand**      | L (1 Woche)                                                                                 |
+| **Status**       | 🔴 Offen                                                                                    |
 | **Quelle**       | ROADMAP.md Phase 5 „Vertikale Spezialisierungen", PRD-SPEC.md F-006 (Obsidian inkl. Bilder) |
-| **Abhängig von** | –                                                       |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | –                                                                                           |
+| **Blockiert**    | –                                                                                           |
 
 **Beschreibung:** Die bisherige Ingestion verarbeitet nur Text. Diese Task erweitert die Processing-Pipeline um Bild-OCR (Tesseract/Vision-API) und Audio-Transkription (Whisper/Deepgram). Unterstützte Formate: JPEG, PNG, PDF (mit Bild-Seiten) für OCR; MP3, WAV, M4A, WebM für Audio. Die extrahierten Texte werden ins UDF normalisiert und durchlaufen die reguläre Embedding-/NER-Pipeline. Batch-Verarbeitung mit Fortschrittsanzeige.
 
@@ -4186,15 +4181,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-160: Workflow-Automatisierung: Trigger-Action-Engine für benutzerdefinierte Regeln
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P2 (Erhöht Nutzerbindung durch Personalisierung)        |
-| **Bereich**      | Backend                                                 |
-| **Aufwand**      | M (2–3 Tage)                                            |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                     |
+| ---------------- | ------------------------------------------------------------------------ |
+| **Priorität**    | P2 (Erhöht Nutzerbindung durch Personalisierung)                         |
+| **Bereich**      | Backend                                                                  |
+| **Aufwand**      | M (2–3 Tage)                                                             |
+| **Status**       | 🔴 Offen                                                                 |
 | **Quelle**       | ROADMAP.md Phase 3 „Aktive Erinnerung", PRD-SPEC.md NF-024 Time-to-Value |
-| **Abhängig von** | –                                                       |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | –                                                                        |
+| **Blockiert**    | –                                                                        |
 
 **Beschreibung:** Nutzer können benutzerdefinierte Automatisierungsregeln erstellen: Trigger (Neues Dokument mit Keyword, Meeting-Briefing generiert, Follow-up überfällig) + Action (E-Mail-Benachrichtigung, Slack-Nachricht, Briefing generieren, Reminder erstellen). Die Engine evaluiert Regeln bei jedem relevanten Event und führt die verketteten Actions aus. Regeln werden als JSON in der DB persistiert und über die API verwaltet.
 
@@ -4211,15 +4206,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-161: Enterprise SSO: SAML 2.0 und OpenID Connect für Unternehmenskunden
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P1 (Voraussetzung für B2B-Kunden)                       |
-| **Bereich**      | Auth / Backend                                          |
-| **Aufwand**      | M (2–3 Tage)                                            |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                           |
+| ---------------- | ------------------------------------------------------------------------------ |
+| **Priorität**    | P1 (Voraussetzung für B2B-Kunden)                                              |
+| **Bereich**      | Auth / Backend                                                                 |
+| **Aufwand**      | M (2–3 Tage)                                                                   |
+| **Status**       | 🔴 Offen                                                                       |
 | **Quelle**       | ROADMAP.md Phase 4 „Enterprise-Kunden", PRD-SPEC.md NF-021 Mandanten-Isolation |
-| **Abhängig von** | TASK-153                                                |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-153                                                                       |
+| **Blockiert**    | –                                                                              |
 
 **Beschreibung:** Enterprise-Kunden authentifizieren ihre Mitarbeiter über unternehmenseigene Identity Provider (IdP). Diese Task implementiert SAML 2.0 und OpenID Connect (OIDC) als zusätzliche Authentifizierungsoptionen. Konfiguration pro Organisation: IdP-Metadata-URL, Attribut-Mapping (E-Mail, Name, Gruppen → PWBS-Rollen), JIT-Provisioning (automatische Account-Erstellung beim ersten Login). SSO-Konfiguration über Admin-Panel der Organisation.
 
@@ -4236,15 +4231,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-162: Wissens-Snapshots: Zeitpunktbezogene Knowledge-Graph-Momentaufnahmen
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P2 (Einzigartige Differenzierung)                       |
-| **Bereich**      | Backend / DB                                            |
-| **Aufwand**      | M (2–3 Tage)                                            |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Einzigartige Differenzierung)                                                         |
+| **Bereich**      | Backend / DB                                                                              |
+| **Aufwand**      | M (2–3 Tage)                                                                              |
+| **Status**       | 🔴 Offen                                                                                  |
 | **Quelle**       | ROADMAP.md Phase 5 „Nachverfolgung, welche Annahmen sich als falsch herausgestellt haben" |
-| **Abhängig von** | TASK-155                                                |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-155                                                                                  |
+| **Blockiert**    | –                                                                                         |
 
 **Beschreibung:** Nutzer können zu beliebigen Zeitpunkten einen Snapshot ihres Wissensmodells erstellen (manuell oder automatisch wöchentlich). Snapshots erfassen den Zustand des Knowledge Graphs (Entitäten, Beziehungen, Gewichtungen) und ermöglichen Diff-Ansichten: „Was hat sich seit letzter Woche verändert?" Neue Entitäten, verschwundene Themen, veränderte Beziehungsstärken. Grundlage für die Langzeit-Intelligenz.
 
@@ -4261,15 +4256,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-163: Kollaborative Briefings: Team-Briefings mit Kommentar- und Annotationsfunktion
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P2 (Stärkt Team-Features und B2B-Value)                 |
-| **Bereich**      | Backend / Frontend                                      |
-| **Aufwand**      | M (2–3 Tage)                                            |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Stärkt Team-Features und B2B-Value)                                                       |
+| **Bereich**      | Backend / Frontend                                                                            |
+| **Aufwand**      | M (2–3 Tage)                                                                                  |
+| **Status**       | 🔴 Offen                                                                                      |
 | **Quelle**       | ROADMAP.md Phase 4 „Gemeinsames Wissensmodell für Teams", PRD-SPEC.md Epic 3 Kontextbriefings |
-| **Abhängig von** | TASK-144, TASK-133                                      |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-144, TASK-133                                                                            |
+| **Blockiert**    | –                                                                                             |
 
 **Beschreibung:** Team-Mitglieder können Briefings teilen, kommentieren und annotieren. Ein geteiltes Briefing wird für alle Teammitglieder sichtbar (mit Lesebestätigung). Inline-Kommentare ermöglichen Diskussion zu einzelnen Briefing-Abschnitten. Annotations (Highlights, Korrekturen, Ergänzungen) werden mit dem Autor verknüpft. Benachrichtigungen bei neuen Kommentaren oder Annotationen.
 
@@ -4286,15 +4281,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-164: Erweiterte Exportformate: PDF, Confluence und Jira-Export
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P3 (Nice-to-have, verbessert Integration)               |
-| **Bereich**      | Backend                                                 |
-| **Aufwand**      | S (0.5–1 Tag)                                           |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| **Priorität**    | P3 (Nice-to-have, verbessert Integration)                                                |
+| **Bereich**      | Backend                                                                                  |
+| **Aufwand**      | S (0.5–1 Tag)                                                                            |
+| **Status**       | 🔴 Offen                                                                                 |
 | **Quelle**       | PRD-SPEC.md F-021 Briefing-Abruf, ROADMAP.md Phase 4 „Integrationen in bestehende Tools" |
-| **Abhängig von** | TASK-150                                                |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-150                                                                                 |
+| **Blockiert**    | –                                                                                        |
 
 **Beschreibung:** Briefings, Suchergebnisse und Knowledge-Graph-Auszüge können in verschiedene Formate exportiert werden: PDF (druckoptimiert mit Quellenverzeichnis), Markdown, Confluence-Wiki-Markup und Jira-Ticket (automatisch erstelltes Ticket aus Action Items). Der Export respektiert die Quellenreferenzen und formatiert sie im Zielformat korrekt.
 
@@ -4311,15 +4306,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-165: KI-Agenten-Marktplatz: Discovery-UI, Bewertungen und Installations-Flow
 
-| Feld             | Wert                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Priorität**    | P2 (Ökosystem-Wachstum)                                |
-| **Bereich**      | Frontend / Backend                                      |
-| **Aufwand**      | L (1 Woche)                                             |
-| **Status**       | 🔴 Offen                                                |
+| Feld             | Wert                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Ökosystem-Wachstum)                                                                           |
+| **Bereich**      | Frontend / Backend                                                                                |
+| **Aufwand**      | L (1 Woche)                                                                                       |
+| **Status**       | 🔴 Offen                                                                                          |
 | **Quelle**       | ROADMAP.md Phase 5 „Marketplace für Community-Integrationen", ARCHITECTURE.md Modularitätsprinzip |
-| **Abhängig von** | TASK-151, TASK-157                                      |
-| **Blockiert**    | –                                                       |
+| **Abhängig von** | TASK-151, TASK-157                                                                                |
+| **Blockiert**    | –                                                                                                 |
 
 **Beschreibung:** Der KI-Agenten-Marktplatz ist die Endnutzer-Oberfläche für das Plugin-Ökosystem. Nutzer können Community-Plugins durchsuchen (Kategorien: Konnektoren, Briefing-Templates, Processing-Schritte, Agenten), Detail-Seiten mit Screenshots und Beschreibung ansehen, Bewertungen und Reviews abgeben, Plugins mit einem Klick installieren/deinstallieren. Backend: Plugin-Registry mit Versionierung, automatische Sicherheitsprüfung bei Upload, Download-Statistiken.
 
@@ -4331,6 +4326,261 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 - [ ] Backend-Registry: CRUD-API für Plugins mit Versionierung (SemVer), automatischer `manifest.json`-Validierung und Malware-Scan (ClamAV)
 
 **Technische Hinweise:** Frontend als Next.js-Seite unter `/marketplace`. Backend-Registry als eigener Service-Endpunkt unter `/api/v1/marketplace`. Plugin-Pakete in S3/MinIO gespeichert. Bewertungen in PostgreSQL mit `owner_id`-Verknüpfung. Download-Counter als Redis-Atomic-Increment. Automatischer Scan bei Upload via ClamAV-Container.
+
+---
+
+## Beta-Vorbereitung & Produktionsreife (Querschnitt Phase 3–4)
+
+---
+
+#### TASK-166: Prometheus Metrics Exporter und Grafana-Dashboard-Templates
+
+| Feld             | Wert                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| **Priorität**    | P1 (Ohne Monitoring kein belastbarer Beta-Betrieb)                                                     |
+| **Bereich**      | Infra                                                                                                  |
+| **Aufwand**      | M (2–3 Tage)                                                                                           |
+| **Status**       | 🔴 Offen                                                                                               |
+| **Quelle**       | PRD-SPEC NF-001 bis NF-010, ROADMAP Phase 3 „Produktreife"                                             |
+| **Abhängig von** | –                                                                                                      |
+| **Blockiert**    | TASK-170                                                                                               |
+
+**Beschreibung:** Prometheus-kompatible Metriken aus der FastAPI-Anwendung exportieren und vorkonfigurierte Grafana-Dashboards bereitstellen. Metriken umfassen: Request-Latenz (p50/p95/p99), DB-Connection-Pool-Auslastung, Queue-Tiefe (Celery), LLM-Call-Dauer und Embedding-Batch-Zeiten. Dashboards für die NFs NF-001 (Suche < 2s), NF-002 (Briefing < 10s), NF-003 (API < 500ms).
+
+**Acceptance Criteria:**
+
+- [ ] `/metrics`-Endpunkt liefert Prometheus-kompatible Metriken (Histogramme für Request-Dauer, Counter für HTTP-Status-Codes)
+- [ ] Grafana-Dashboard-JSON in `infra/grafana/` exportiert mit Panels für API-Latenz, DB-Pool, LLM-Calls und Queue-Depth
+- [ ] Metriken enthalten `owner_id`-Label NICHT (Datenschutz) – nur aggregierte Werte
+- [ ] Docker-Compose-Profil `monitoring` startet Prometheus + Grafana mit Auto-Provisioning
+
+**Technische Hinweise:** `prometheus-fastapi-instrumentator` oder `starlette-exporter` für FastAPI-Metriken. Custom Metrics über `prometheus_client` für LLM-Calls und Queue. Grafana-Provisioning über JSON-Dateien in `infra/grafana/provisioning/`. Kein Nutzer-PII in Labels (DSGVO).
+
+---
+
+#### TASK-167: Database Backup-Strategie und automatisiertes Recovery-Testing
+
+| Feld             | Wert                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Voraussetzung für Beta mit echten Nutzerdaten)                                      |
+| **Bereich**      | Infra                                                                                   |
+| **Aufwand**      | M (2–3 Tage)                                                                            |
+| **Status**       | 🔴 Offen                                                                                |
+| **Quelle**       | PRD-SPEC NF-006 (99.5% Verfügbarkeit), KP-09 (Backup/DR für Weaviate/Neo4j)            |
+| **Abhängig von** | –                                                                                       |
+| **Blockiert**    | –                                                                                       |
+
+**Beschreibung:** Backup-Strategie für alle drei Datenbanken (PostgreSQL, Weaviate, Neo4j) definieren und automatisieren. RPO: 1 Stunde, RTO: 4 Stunden. PostgreSQL: WAL-Archivierung + täglicher pg_dump. Weaviate: Backup-API + S3-Storage. Neo4j: `neo4j-admin dump` + S3-Upload. Automatisierter Recovery-Test als wöchentlicher CI-Job, der Restore in einen temporären Container validiert.
+
+**Acceptance Criteria:**
+
+- [ ] Backup-Skripte in `infra/backup/` für PostgreSQL (WAL + pg_dump), Weaviate (Backup-API) und Neo4j (dump)
+- [ ] Backups werden in S3-kompatiblen Storage (MinIO lokal, S3 prod) mit Retention von 30 Tagen gespeichert
+- [ ] Recovery-Runbook in `docs/runbooks/disaster-recovery.md` mit Schritt-für-Schritt-Anleitung
+- [ ] CI-Job `backup-restore-test` stellt wöchentlich alle drei DBs aus Backup in Testcontainern wieder her und validiert Datenintegrität
+
+**Technische Hinweise:** PostgreSQL Continuous Archiving (WAL) für Point-in-Time Recovery. Weaviate Backup-API (`POST /v1/backups/{backend}`). Neo4j Community Edition: `neo4j-admin database dump`. S3-Upload via `boto3` oder `aws s3 cp`. Recovery-Test als GitHub Actions Workflow mit Testcontainers.
+
+---
+
+#### TASK-168: API Rate Limiting auf allen öffentlichen Endpunkten
+
+| Feld             | Wert                                                          |
+| ---------------- | ------------------------------------------------------------- |
+| **Priorität**    | P1 (Sicherheitskritisch für Beta)                             |
+| **Bereich**      | Backend                                                       |
+| **Aufwand**      | S (0.5–1 Tag)                                                 |
+| **Status**       | 🔴 Offen                                                      |
+| **Quelle**       | PRD-SPEC NF-015 (100 req/min allgemein, 5/min Login)          |
+| **Abhängig von** | –                                                             |
+| **Blockiert**    | –                                                             |
+
+**Beschreibung:** Redis-basiertes Rate Limiting als FastAPI-Middleware implementieren. Zwei Tiers: 100 Requests/Minute pro authentifiziertem Nutzer auf allgemeine Endpunkte, 5 Requests/Minute auf Login/Register-Endpunkte (Brute-Force-Schutz). Bei Überschreitung HTTP 429 mit `Retry-After`-Header. Rate-Limit-Status in Response-Headern (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
+
+**Acceptance Criteria:**
+
+- [ ] Middleware gibt HTTP 429 mit `Retry-After`-Header zurück wenn Limit erreicht
+- [ ] Login/Register-Endpunkte: max. 5 Requests/Minute pro IP-Adresse
+- [ ] Authentifizierte Endpunkte: max. 100 Requests/Minute pro `user_id`
+- [ ] Response-Header enthalten `X-RateLimit-Limit`, `X-RateLimit-Remaining` und `X-RateLimit-Reset`
+- [ ] Rate-Limit-Konfiguration über Umgebungsvariablen anpassbar (nicht hardcodiert)
+
+**Technische Hinweise:** Sliding-Window-Counter in Redis (`INCR` + `EXPIRE`). TASK-070 implementiert bereits LLM-spezifisches Rate Limiting – dieses Task erweitert es auf alle öffentlichen Endpunkte. FastAPI-Middleware in `pwbs/api/middleware/rate_limit.py`. IP-basiert für unauthentifizierte Endpoints, `user_id`-basiert für authentifizierte.
+
+---
+
+#### TASK-169: Barrierefreiheits-Audit und WCAG 2.1 AA Compliance
+
+| Feld             | Wert                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Beta-Pflicht, aber nicht Launch-Blocker)                                |
+| **Bereich**      | Frontend                                                                    |
+| **Aufwand**      | M (2–3 Tage)                                                                |
+| **Status**       | 🔴 Offen                                                                    |
+| **Quelle**       | PRD-SPEC NF-026 (WCAG 2.1 Level AA für Kernfunktionen)                      |
+| **Abhängig von** | –                                                                           |
+| **Blockiert**    | –                                                                           |
+
+**Beschreibung:** Alle Kernseiten (Dashboard, Suche, Briefings, Einstellungen, Konnektoren) mit Axe und Lighthouse auf WCAG 2.1 AA prüfen. Gefundene Verstöße beheben: fehlende aria-Labels, unzureichende Farbkontraste, Keyboard-Navigation. CI-Integration mit Lighthouse-Accessibility-Score ≥ 90.
+
+**Acceptance Criteria:**
+
+- [ ] Lighthouse Accessibility Score ≥ 90 auf allen Kernseiten (Dashboard, Suche, Briefings, Einstellungen)
+- [ ] Alle interaktiven Elemente per Tastatur erreichbar (Tab-Reihenfolge logisch, Focus-Indicator sichtbar)
+- [ ] Alle Bilder und Icons haben `alt`-Text oder `aria-label`; dekorative Bilder sind mit `aria-hidden="true"` markiert
+- [ ] Farbkontrast-Verhältnis ≥ 4.5:1 für normalen Text und ≥ 3:1 für großen Text (AA-Standard)
+
+**Technische Hinweise:** `@axe-core/playwright` in E2E-Tests integrieren. `eslint-plugin-jsx-a11y` als ESLint-Plugin für statische Analyse. Lighthouse CI über `@lhci/cli` in GitHub Actions. Tailwind-Farben auf Kontrast prüfen mit `tailwindcss-contrast` Plugin.
+
+---
+
+#### TASK-170: Performance-Regression-Test-Suite mit CI-Integration
+
+| Feld             | Wert                                                                      |
+| ---------------- | ------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Verhindert schleichende Performance-Degradierung)                     |
+| **Bereich**      | Testing                                                                   |
+| **Aufwand**      | M (2–3 Tage)                                                              |
+| **Status**       | 🔴 Offen                                                                  |
+| **Quelle**       | PRD-SPEC NF-001 bis NF-005, TASK-112 (Load-Tests als Basis)               |
+| **Abhängig von** | TASK-166                                                                  |
+| **Blockiert**    | –                                                                         |
+
+**Beschreibung:** Automatisierte Performance-Benchmarks, die bei jedem PR gegen definierte Schwellenwerte prüfen. Messung von: Semantische Suche (< 2s p95), Briefing-Generierung (< 10s p95), API-Endpunkte allgemein (< 500ms p95). Bei Überschreitung: PR-Check schlägt fehl. Benchmarks nutzen synthetische Daten (100 Dokumente, 1000 Chunks) in Testcontainern.
+
+**Acceptance Criteria:**
+
+- [ ] GitHub Actions Workflow `perf-regression` läuft bei PR gegen `main` mit synthetischen Daten in Testcontainern
+- [ ] Schwellenwerte: Suche < 2s (p95), Briefing < 10s (p95), CRUD-API < 500ms (p95) – konfigurierbar in `tests/performance/thresholds.yaml`
+- [ ] Test-Report als PR-Kommentar mit Vergleich zum Baseline (vorheriger Main-Branch)
+- [ ] Baseline wird bei Merge auf `main` automatisch aktualisiert
+
+**Technische Hinweise:** Baut auf TASK-112 (Locust Load Tests) auf. Für CI: `locust --headless` mit JSON-Output. Schwellenwerte in YAML. GitHub Actions Job mit Testcontainers (PostgreSQL + Weaviate). Alternativ: `pytest-benchmark` für Micro-Benchmarks auf Unit-Ebene.
+
+---
+
+#### TASK-171: Briefing-Feedback-Mechanismus: Bewertung und Freitext
+
+| Feld             | Wert                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Feedback für LLM-Tuning und Briefing-Qualität)                                    |
+| **Bereich**      | Backend                                                                                |
+| **Aufwand**      | S (0.5–1 Tag)                                                                          |
+| **Status**       | 🔴 Offen                                                                               |
+| **Quelle**       | PRD-SPEC F-020 (Briefing-Feedback-Mechanismus)                                         |
+| **Abhängig von** | –                                                                                      |
+| **Blockiert**    | –                                                                                      |
+
+**Beschreibung:** Nutzer können Briefings mit Daumen-hoch/Daumen-runter bewerten und bei negativem Feedback optionalen Freitext angeben. Feedback wird mit `briefing_id`, `owner_id` und Timestamp gespeichert. API-Endpunkt für Feedback-Abgabe und Abruf aggregierter Statistiken (für zukünftiges LLM-Prompt-Tuning).
+
+**Acceptance Criteria:**
+
+- [ ] `POST /api/v1/briefings/{id}/feedback` akzeptiert `{ "rating": "positive" | "negative", "comment": "..." }` – Comment nur bei `negative` erlaubt
+- [ ] Feedback-Tabelle in PostgreSQL mit `briefing_id`, `owner_id`, `rating`, `comment`, `created_at` – Owner-ID-Filter auf alle Queries
+- [ ] Duplikat-Schutz: Ein Nutzer kann pro Briefing nur einmal Feedback geben (Upsert)
+- [ ] `GET /api/v1/briefings/feedback/stats` liefert aggregierte Positive/Negative-Counts pro Briefing-Typ (nur eigene Daten)
+
+**Technische Hinweise:** Pydantic-Schema `BriefingFeedbackCreate` und `BriefingFeedbackStats`. SQLAlchemy-Model `BriefingFeedback` mit UniqueConstraint auf `(briefing_id, owner_id)`. Kein LLM-Call – rein CRUD. Aggregation als SQL-Query mit `GROUP BY briefing_type`.
+
+---
+
+#### TASK-172: DSGVO-Transparenzbericht und Datennutzungs-Dashboard
+
+| Feld             | Wert                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (DSGVO-Compliance und Nutzervertrauen)                                          |
+| **Bereich**      | Backend                                                                            |
+| **Aufwand**      | M (2–3 Tage)                                                                       |
+| **Status**       | 🔴 Offen                                                                           |
+| **Quelle**       | ROADMAP Phase 4 „Transparenzbericht zur Datennutzung", PRD-SPEC NF-017             |
+| **Abhängig von** | –                                                                                  |
+| **Blockiert**    | –                                                                                  |
+
+**Beschreibung:** Nutzer erhalten eine Übersichtsseite mit allen gespeicherten Daten: Anzahl Dokumente pro Quelle, letzter Sync-Zeitpunkt, Ablaufdaten, LLM-Verarbeitungshistorie (wann wurde welches Dokument an welchen LLM-Provider gesendet). Exportierbar als JSON/PDF. Transparenz darüber, welche Daten an externe Dienste (LLM-Provider) übermittelt wurden.
+
+**Acceptance Criteria:**
+
+- [ ] `GET /api/v1/users/me/data-report` liefert JSON mit: Dokument-Anzahl pro Quelle, letzter Sync, ältestes/neuestes Dokument, LLM-Provider-Nutzung
+- [ ] Transparenz-Dashboard im Frontend unter `/settings/data` zeigt alle Quellen mit Datenvolumen und Ablaufdaten
+- [ ] LLM-Audit-Log: Jeder LLM-Call wird mit Timestamp, Provider, Token-Count (keine Inhalte!) protokolliert – abrufbar unter `/api/v1/users/me/llm-usage`
+- [ ] Export als JSON über bestehenden DSGVO-Export-Endpunkt integriert
+
+**Technische Hinweise:** LLM-Audit-Log als eigene Tabelle `llm_audit_log` mit `owner_id`, `provider`, `model`, `input_tokens`, `output_tokens`, `created_at`. Aggregation über SQL. Frontend nutzt bestehende Einstellungsseite. Keine Inhalte im Audit-Log (DSGVO: Datensparsamkeit).
+
+---
+
+#### TASK-173: Consent-Management-UI pro Datenquelle mit Widerruf
+
+| Feld             | Wert                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| **Priorität**    | P1 (DSGVO Art. 7 – Einwilligung muss nachweisbar und widerrufbar sein)      |
+| **Bereich**      | Frontend                                                                    |
+| **Aufwand**      | M (2–3 Tage)                                                                |
+| **Status**       | 🔴 Offen                                                                    |
+| **Quelle**       | PRD-SPEC F-031 (Consent-Management pro Quelle)                              |
+| **Abhängig von** | –                                                                           |
+| **Blockiert**    | –                                                                           |
+
+**Beschreibung:** Jede Datenquelle erfordert explizite, granulare Einwilligung. Beim Verbinden eines Konnektors wird ein Consent-Dialog angezeigt: welche Daten werden importiert, wie werden sie verarbeitet, an welche LLM-Provider übermittelt. Einwilligung jederzeit widerrufbar (= Quelle trennen + alle Daten dieser Quelle löschen). Consent-Zeitstempel in der Datenbank für Audit-Zwecke.
+
+**Acceptance Criteria:**
+
+- [ ] Konnektor-Setup zeigt vor OAuth-Redirect einen Consent-Dialog mit: Datentypen, Verarbeitungszweck, LLM-Provider-Info
+- [ ] Consent wird in `connector_consents`-Tabelle mit `owner_id`, `connector_type`, `consented_at`, `consent_version` persistiert
+- [ ] Widerruf über `/settings/connectors/{id}` mit „Trennen & Daten löschen"-Button – kaskadierte Löschung aller Dokumente dieser Quelle
+- [ ] API: `GET /api/v1/connectors/{id}/consent` liefert aktuellen Consent-Status; `DELETE /api/v1/connectors/{id}/consent` widerruft Einwilligung
+
+**Technische Hinweise:** Consent-Versioning für zukünftige Änderungen der Datenschutzerklärung (Re-Consent-Flow). `connector_consents`-Tabelle mit Alembic-Migration. Kaskadierte Löschung nutzt bestehende DSGVO-Lösch-Logik aus `pwbs/dsgvo/`. Frontend: `ConsentDialog`-Komponente als Modal im Konnektor-Setup-Flow.
+
+---
+
+#### TASK-174: Feature-Flag-System für kontrollierte Beta-Rollouts
+
+| Feld             | Wert                                                                          |
+| ---------------- | ----------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Ermöglicht sichere inkrementelle Rollouts in der Beta)                    |
+| **Bereich**      | Backend                                                                       |
+| **Aufwand**      | S (0.5–1 Tag)                                                                 |
+| **Status**       | 🔴 Offen                                                                      |
+| **Quelle**       | ROADMAP Phase 4 „Public Beta", ARCHITECTURE.md Modularitätsprinzip            |
+| **Abhängig von** | –                                                                             |
+| **Blockiert**    | –                                                                             |
+
+**Beschreibung:** Einfaches Feature-Flag-System für kontrolliertes Aktivieren neuer Features pro Nutzer oder Nutzergruppe. Konfigurationsbasiert (DB + Environment-Override). Admin-Endpunkt zum Setzen von Flags. In der Beta: neue Konnektoren, Briefing-Typen und UI-Features gezielt an Testgruppen ausrollen, bevor sie für alle freigeschaltet werden.
+
+**Acceptance Criteria:**
+
+- [ ] `FeatureFlag`-Modell in PostgreSQL mit `flag_name`, `enabled_globally`, `enabled_for_users` (UUID-Array), `created_at`
+- [ ] Service-Methode `is_feature_enabled(flag_name: str, user_id: UUID) -> bool` prüft Global-Flag → User-spezifisch → Environment-Override
+- [ ] Admin-API `POST /api/v1/admin/feature-flags` zum Erstellen/Aktualisieren von Flags (nur Admin-Rolle)
+- [ ] Environment-Variable `FEATURE_FLAGS_OVERRIDE=flag1:true,flag2:false` für lokale Entwicklung
+
+**Technische Hinweise:** Kein externer Dienst (LaunchDarkly etc.) im MVP – eigene Implementierung in `pwbs/feature_flags/`. DB-basiert mit Redis-Cache (TTL 60s) für Performance. Admin-Rolle prüfen über `current_user.is_admin`-Check. Dependency `get_feature_flag("my_flag")` als FastAPI-Dependency nutzbar.
+
+---
+
+#### TASK-175: Automatisierte Alembic-Migrations-Validierung in CI
+
+| Feld             | Wert                                                                              |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Verhindert kaputte Migrationen in Produktion)                                 |
+| **Bereich**      | DevOps                                                                            |
+| **Aufwand**      | S (0.5–1 Tag)                                                                     |
+| **Status**       | 🔴 Offen                                                                          |
+| **Quelle**       | copilot-instructions.md „Alembic-Migration erstellen. Niemals Schema direkt mutieren" |
+| **Abhängig von** | –                                                                                 |
+| **Blockiert**    | –                                                                                 |
+
+**Beschreibung:** CI-Schritt, der bei jedem PR automatisch alle Alembic-Migrationen auf einer leeren PostgreSQL-Testdatenbank ausführt (upgrade head), dann downgrade bis base, und erneut upgrade. Verhindert, dass fehlerhafte Migrationen in den Main-Branch gelangen. Prüft zusätzlich, ob `alembic check` keine ausstehenden Änderungen findet (Model-Schema-Drift).
+
+**Acceptance Criteria:**
+
+- [ ] GitHub Actions Step `migration-check` führt `alembic upgrade head` → `alembic downgrade base` → `alembic upgrade head` gegen Testcontainer-PostgreSQL aus
+- [ ] `alembic check` (Schema-Drift-Erkennung) schlägt fehl, wenn Model-Änderungen ohne Migration vorhanden sind
+- [ ] Bei Fehler: PR-Check blockiert Merge mit verständlicher Fehlermeldung
+- [ ] Job läuft in < 60 Sekunden (leere DB, keine Seed-Daten)
+
+**Technische Hinweise:** GitHub Actions Job nutzt `testcontainers` oder `services: postgres` für isolierte DB. Alembic `check`-Befehl seit Alembic 1.9+. Downgrade-Test fängt fehlende `downgrade()`-Implementierungen ab. Job in bestehendem CI-Workflow `.github/workflows/ci.yml` einhängen.
 
 ---
 

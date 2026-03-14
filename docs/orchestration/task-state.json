@@ -2,8 +2,8 @@
   "$schema": "./task-state.schema.json",
   "meta": {
     "schema_version": "1.0",
-    "total_tasks": 165,
-    "generated_at": "2026-03-14T15:42:34.927380+00:00",
+    "total_tasks": 175,
+    "generated_at": "2026-03-14T15:52:25.300302+00:00",
     "source": "tasks.md",
     "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-EintrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
   },
@@ -134,6 +134,17 @@
       "description": "Plugin-SDK, Sandbox, proaktive KI-Agenten, Multi-Modale Ingestion, Workflow-Automatisierung, Enterprise SSO, Wissens-Snapshots, Team-Briefings, Exportformate, KI-Marktplatz.",
       "phase": 6,
       "orchestrator_slot": "ORCH-M"
+    },
+    "STREAM-BETA-PREP": {
+      "name": "Beta-Vorbereitung und Produktionsreife",
+      "description": "Monitoring, Backup, Rate Limiting, DSGVO-Transparenz, Barrierefreiheit und CI-Hardening fuer den Beta-Betrieb",
+      "phase": 3,
+      "orchestrator_slot": "ORCH-N",
+      "depends_on_streams": [
+        "STREAM-DSGVO-QA",
+        "STREAM-INFRA"
+      ],
+      "task_range": "166-175"
     }
   },
   "tasks": {
@@ -1938,14 +1949,15 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-J",
       "claimed_at": "2026-03-14T15:17:51.251762+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-041",
         "TASK-043"
-      ]
+      ],
+      "assignee": "ORCH-J"
     },
     "TASK-126": {
       "stream": "STREAM-PHASE3",
@@ -2510,6 +2522,128 @@
         "TASK-151",
         "TASK-157"
       ]
+    },
+    "TASK-166": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Prometheus Metrics Exporter und Grafana-Dashboard-Templates",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Infra",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-167": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Database Backup-Strategie und automatisiertes Recovery-Testing",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Infra",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-168": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "API Rate Limiting auf allen oeffentlichen Endpunkten",
+      "priority": "P1",
+      "effort": "S",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-169": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Barrierefreiheits-Audit und WCAG 2.1 AA Compliance",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-170": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Performance-Regression-Test-Suite mit CI-Integration",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Testing",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-166"
+      ]
+    },
+    "TASK-171": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Briefing-Feedback-Mechanismus: Bewertung und Freitext",
+      "priority": "P2",
+      "effort": "S",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-172": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "DSGVO-Transparenzbericht und Datennutzungs-Dashboard",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-173": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Consent-Management-UI pro Datenquelle mit Widerruf",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-174": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Feature-Flag-System fuer kontrollierte Beta-Rollouts",
+      "priority": "P2",
+      "effort": "S",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-175": {
+      "stream": "STREAM-BETA-PREP",
+      "title": "Automatisierte Alembic-Migrations-Validierung in CI",
+      "priority": "P2",
+      "effort": "S",
+      "area": "DevOps",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
     }
   }
 }
