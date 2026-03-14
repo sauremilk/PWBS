@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { login } from "@/lib/api/auth";
-import { ApiClientError, parseApiError } from "@/lib/api-client";
+import { Suspense } from "react";
+import { useAuth } from "@/lib/providers";
+import { ApiClientError } from "@/lib/api-client";
 
 const GOOGLE_AUTH_URL =
   process.env.NEXT_PUBLIC_API_URL
@@ -12,7 +13,18 @@ const GOOGLE_AUTH_URL =
     : "http://localhost:8000/api/v1/auth/google";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useAuth();
+  const expired = searchParams.get("expired") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +56,12 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Anmelden</h1>
+
+      {expired && (
+        <div className="mb-4 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
+          Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
