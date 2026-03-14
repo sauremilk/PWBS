@@ -1935,10 +1935,10 @@
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-J",
+      "claimed_at": "2025-07-24T11:00:00Z",
+      "completed_at": "2025-07-24T11:00:00Z",
       "blocked_by": [
         "TASK-123"
       ]
@@ -1965,9 +1965,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-J",
+      "claimed_at": "2026-03-14T16:23:40.347424+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-125"
@@ -2052,9 +2052,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2025-07-24T11:00:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-131"
@@ -2207,10 +2207,10 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T15:17:51.251762+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T16:45:00.000000+00:00",
       "blocked_by": [
         "TASK-078"
       ]
@@ -2263,10 +2263,10 @@
       "priority": "P0",
       "effort": "XL",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-14T15:17:51.251762+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T16:05:00.000000+00:00",
       "blocked_by": [
         "TASK-105",
         "TASK-106"
@@ -2278,9 +2278,9 @@
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-L",
+      "claimed_at": "2025-07-24T11:00:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-147"
