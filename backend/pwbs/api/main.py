@@ -106,10 +106,12 @@ def create_app() -> FastAPI:
 
     # -- Routers -------------------------------------------------------------
 
-    from pwbs.api.v1.routes.health import router as health_router
+    from pwbs.api.v1.routes.auth import router as auth_router
     from pwbs.api.v1.routes.auth_refresh import router as auth_refresh_router
+    from pwbs.api.v1.routes.health import router as health_router
 
     application.include_router(health_router)
+    application.include_router(auth_router)
     application.include_router(auth_refresh_router)
 
     return application
