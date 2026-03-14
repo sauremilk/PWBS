@@ -5,7 +5,7 @@
     "total_tasks": 155,
     "generated_at": "2026-03-13T00:00:00Z",
     "source": "tasks.md",
-    "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-Eintr�ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
+    "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-Eintrï¿½ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
   },
   "streams": {
     "STREAM-FOUNDATION": {
@@ -89,7 +89,7 @@
     },
     "STREAM-DSGVO-QA": {
       "name": "DSGVO, Testing & Monitoring",
-      "description": "Datenexport, kaskadierende L�schung, Audit-Log, Verschl�sselungs-UI, pytest-Setup, Unit/Integration/E2E/Load-Tests, Logging, Sentry, Metriken, OpenAPI-Doku",
+      "description": "Datenexport, kaskadierende Lï¿½schung, Audit-Log, Verschlï¿½sselungs-UI, pytest-Setup, Unit/Integration/E2E/Load-Tests, Logging, Sentry, Metriken, OpenAPI-Doku",
       "phase": 2,
       "orchestrator_slot": "ORCH-I",
       "depends_on_streams": [
@@ -111,7 +111,7 @@
     },
     "STREAM-PHASE4": {
       "name": "Phase 4: Intelligenz & Desktop",
-      "description": "Entscheidungsunterst�tzung, aktive Erinnerungen, Projektbriefings, Lernmodell, Desktop-App (Tauri), erweiterte NER, Mustererkennung, Browser-Extension, Slack-Bot, Notion-Sidebar, Weekly Briefings, Pricing/Billing",
+      "description": "Entscheidungsunterstï¿½tzung, aktive Erinnerungen, Projektbriefings, Lernmodell, Desktop-App (Tauri), erweiterte NER, Mustererkennung, Browser-Extension, Slack-Bot, Notion-Sidebar, Weekly Briefings, Pricing/Billing",
       "phase": 4,
       "orchestrator_slot": "ORCH-K",
       "depends_on_streams": [
@@ -121,7 +121,7 @@
     },
     "STREAM-PHASE5": {
       "name": "Phase 5: Platform & Skalierung",
-      "description": "Multi-Tenancy, Self-Hosting, horizontale Skalierung, Sicherheitsaudit, Public Beta, B2B-Features, �ffentliche API, Marketplace, Mobile Apps, RBAC, Spezialisierungen, Langzeit-Intelligenz",
+      "description": "Multi-Tenancy, Self-Hosting, horizontale Skalierung, Sicherheitsaudit, Public Beta, B2B-Features, ï¿½ffentliche API, Marketplace, Mobile Apps, RBAC, Spezialisierungen, Langzeit-Intelligenz",
       "phase": 5,
       "orchestrator_slot": "ORCH-L",
       "depends_on_streams": [
@@ -133,7 +133,7 @@
   "tasks": {
     "TASK-001": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Technischen PoC f�r Embedding-Generierung implementieren",
+      "title": "Technischen PoC fï¿½r Embedding-Generierung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -145,7 +145,7 @@
     },
     "TASK-002": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Semantische Suche �ber PoC-Daten demonstrieren",
+      "title": "Semantische Suche ï¿½ber PoC-Daten demonstrieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -171,7 +171,7 @@
     },
     "TASK-004": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Verschl�sselungsstrategie definieren",
+      "title": "Verschlï¿½sselungsstrategie definieren",
       "priority": "P0",
       "effort": "S",
       "area": "Docs",
@@ -197,7 +197,7 @@
     },
     "TASK-006": {
       "stream": "STREAM-FOUNDATION",
-      "title": "Tooling und Template f�r strukturierte Probleminterviews erstellen",
+      "title": "Tooling und Template fï¿½r strukturierte Probleminterviews erstellen",
       "priority": "P1",
       "effort": "S",
       "area": "Docs",
@@ -252,7 +252,7 @@
     },
     "TASK-010": {
       "stream": "STREAM-INFRA",
-      "title": "Docker Compose f�r lokale Entwicklungsumgebung erstellen",
+      "title": "Docker Compose fï¿½r lokale Entwicklungsumgebung erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "Infra",
@@ -322,7 +322,7 @@
     },
     "TASK-015": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r users-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r users-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -336,7 +336,7 @@
     },
     "TASK-016": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r connections-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r connections-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -350,7 +350,7 @@
     },
     "TASK-017": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r documents-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r documents-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -378,7 +378,7 @@
     },
     "TASK-019": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r chunks-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r chunks-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -392,7 +392,7 @@
     },
     "TASK-020": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r entities- und entity_mentions-Tabellen erstellen",
+      "title": "PostgreSQL-Schema fï¿½r entities- und entity_mentions-Tabellen erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -406,7 +406,7 @@
     },
     "TASK-021": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r briefings-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r briefings-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -420,7 +420,7 @@
     },
     "TASK-022": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r audit_log-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r audit_log-Tabelle erstellen",
       "priority": "P0",
       "effort": "S",
       "area": "DB",
@@ -434,7 +434,7 @@
     },
     "TASK-023": {
       "stream": "STREAM-DB",
-      "title": "PostgreSQL-Schema f�r scheduled_job_runs-Tabelle erstellen",
+      "title": "PostgreSQL-Schema fï¿½r scheduled_job_runs-Tabelle erstellen",
       "priority": "P1",
       "effort": "XS",
       "area": "DB",
@@ -626,7 +626,7 @@
     },
     "TASK-036": {
       "stream": "STREAM-MODELS",
-      "title": "SQLAlchemy-ORM-Modelle f�r alle PostgreSQL-Tabellen erstellen",
+      "title": "SQLAlchemy-ORM-Modelle fï¿½r alle PostgreSQL-Tabellen erstellen",
       "priority": "P0",
       "effort": "M",
       "area": "DB",
@@ -668,7 +668,7 @@
     },
     "TASK-039": {
       "stream": "STREAM-INFRA",
-      "title": "Terraform-Grundstruktur f�r AWS-Deployment erstellen",
+      "title": "Terraform-Grundstruktur fï¿½r AWS-Deployment erstellen",
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
@@ -682,7 +682,7 @@
     },
     "TASK-040": {
       "stream": "STREAM-INFRA",
-      "title": "Staging-Deployment-Workflow f�r GitHub Actions erstellen",
+      "title": "Staging-Deployment-Workflow fï¿½r GitHub Actions erstellen",
       "priority": "P2",
       "effort": "M",
       "area": "DevOps",
@@ -725,7 +725,7 @@
     },
     "TASK-043": {
       "stream": "STREAM-CONNECTORS",
-      "title": "OAuth Token Manager mit verschl�sselter Persistierung implementieren",
+      "title": "OAuth Token Manager mit verschlï¿½sselter Persistierung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Auth",
@@ -825,7 +825,7 @@
     },
     "TASK-050": {
       "stream": "STREAM-CONNECTORS",
-      "title": "Notion Normalizer (Pages, Databases, Bl�cke ? UnifiedDocument) implementieren",
+      "title": "Notion Normalizer (Pages, Databases, Blï¿½cke ? UnifiedDocument) implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -883,7 +883,7 @@
     },
     "TASK-054": {
       "stream": "STREAM-CONNECTORS",
-      "title": "Zoom Webhook-Receiver f�r Recording-completed-Events implementieren",
+      "title": "Zoom Webhook-Receiver fï¿½r Recording-completed-Events implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -916,13 +916,14 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-03-14T08:00:00Z",
-      "completed_at": null,
+      "completed_at": "2025-07-14T10:00:00Z",
       "blocked_by": [
         "TASK-033"
-      ]
+      ],
+      "completed_by": "ORCH-F"
     },
     "TASK-057": {
       "stream": "STREAM-PROCESSING",
@@ -954,7 +955,7 @@
     },
     "TASK-059": {
       "stream": "STREAM-PROCESSING",
-      "title": "Weaviate-Upsert f�r Embeddings mit Idempotenz implementieren",
+      "title": "Weaviate-Upsert fï¿½r Embeddings mit Idempotenz implementieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -969,7 +970,7 @@
     },
     "TASK-060": {
       "stream": "STREAM-PROCESSING",
-      "title": "Fehlerbehandlung und Retry-Logik f�r Embedding-Pipeline implementieren",
+      "title": "Fehlerbehandlung und Retry-Logik fï¿½r Embedding-Pipeline implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
@@ -983,7 +984,7 @@
     },
     "TASK-061": {
       "stream": "STREAM-PROCESSING",
-      "title": "Regelbasierte Entit�tsextraktion implementieren",
+      "title": "Regelbasierte Entitï¿½tsextraktion implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
@@ -997,7 +998,7 @@
     },
     "TASK-062": {
       "stream": "STREAM-PROCESSING",
-      "title": "LLM-basierte Entit�tsextraktion mit Structured Output implementieren",
+      "title": "LLM-basierte Entitï¿½tsextraktion mit Structured Output implementieren",
       "priority": "P1",
       "effort": "M",
       "area": "LLM",
@@ -1011,7 +1012,7 @@
     },
     "TASK-063": {
       "stream": "STREAM-PROCESSING",
-      "title": "Entity-Deduplizierung �ber normalized_name implementieren",
+      "title": "Entity-Deduplizierung ï¿½ber normalized_name implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
@@ -1072,9 +1073,9 @@
       "priority": "P1",
       "effort": "S",
       "area": "LLM",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "2026-03-14T11:31:17Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-066"
@@ -1328,7 +1329,7 @@
     },
     "TASK-085": {
       "stream": "STREAM-AUTH-API",
-      "title": "Rate-Limiting-Middleware auf allen �ffentlichen Endpunkten implementieren",
+      "title": "Rate-Limiting-Middleware auf allen ï¿½ffentlichen Endpunkten implementieren",
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
@@ -1346,9 +1347,9 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-G",
+      "claimed_at": "2026-03-14T11:32:03Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-082",
@@ -1502,7 +1503,7 @@
     },
     "TASK-097": {
       "stream": "STREAM-FRONTEND",
-      "title": "Dashboard mit Briefing-�bersicht implementieren",
+      "title": "Dashboard mit Briefing-ï¿½bersicht implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Frontend",
@@ -1531,7 +1532,7 @@
     },
     "TASK-099": {
       "stream": "STREAM-FRONTEND",
-      "title": "Suchoberfl�che mit Filtern implementieren",
+      "title": "Suchoberflï¿½che mit Filtern implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Frontend",
@@ -1619,7 +1620,7 @@
     },
     "TASK-105": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "Kaskadierte Account-L�schung implementieren",
+      "title": "Kaskadierte Account-Lï¿½schung implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -1633,7 +1634,7 @@
     },
     "TASK-106": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "Unver�nderliches Audit-Log implementieren",
+      "title": "Unverï¿½nderliches Audit-Log implementieren",
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
@@ -1647,7 +1648,7 @@
     },
     "TASK-107": {
       "stream": "STREAM-FRONTEND",
-      "title": "Verschl�sselungsstatus-Anzeige im Frontend implementieren",
+      "title": "Verschlï¿½sselungsstatus-Anzeige im Frontend implementieren",
       "priority": "P1",
       "effort": "S",
       "area": "Frontend",
@@ -1704,7 +1705,7 @@
     },
     "TASK-111": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "E2E-Tests f�r Kernflows implementieren",
+      "title": "E2E-Tests fï¿½r Kernflows implementieren",
       "priority": "P2",
       "effort": "L",
       "area": "Testing",
@@ -1719,7 +1720,7 @@
     },
     "TASK-112": {
       "stream": "STREAM-DSGVO-QA",
-      "title": "Load-Tests f�r 20 gleichzeitige Nutzer implementieren",
+      "title": "Load-Tests fï¿½r 20 gleichzeitige Nutzer implementieren",
       "priority": "P2",
       "effort": "M",
       "area": "Testing",
@@ -1803,7 +1804,7 @@
     },
     "TASK-118": {
       "stream": "STREAM-FRONTEND",
-      "title": "WebSocket-Verbindung f�r Echtzeit-Updates implementieren",
+      "title": "WebSocket-Verbindung fï¿½r Echtzeit-Updates implementieren",
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
@@ -1874,7 +1875,7 @@
     },
     "TASK-123": {
       "stream": "STREAM-PHASE3",
-      "title": "Gmail-Konnektor � OAuth2 und Google Pub/Sub Push Notifications",
+      "title": "Gmail-Konnektor ï¿½ OAuth2 und Google Pub/Sub Push Notifications",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -1889,7 +1890,7 @@
     },
     "TASK-124": {
       "stream": "STREAM-PHASE3",
-      "title": "Gmail-Konnektor � History API, Thread-Resolution und UDF-Normalisierung",
+      "title": "Gmail-Konnektor ï¿½ History API, Thread-Resolution und UDF-Normalisierung",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -1903,7 +1904,7 @@
     },
     "TASK-125": {
       "stream": "STREAM-PHASE3",
-      "title": "Slack-Konnektor � OAuth2 und Events API",
+      "title": "Slack-Konnektor ï¿½ OAuth2 und Events API",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1918,7 +1919,7 @@
     },
     "TASK-126": {
       "stream": "STREAM-PHASE3",
-      "title": "Slack-Konnektor � Cursor-basiertes Backfill und Thread-Aufl�sung",
+      "title": "Slack-Konnektor ï¿½ Cursor-basiertes Backfill und Thread-Auflï¿½sung",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1962,7 +1963,7 @@
     },
     "TASK-129": {
       "stream": "STREAM-PHASE4",
-      "title": "Entscheidungsunterst�tzung � Datenmodell und Graph-Schema erweitern",
+      "title": "Entscheidungsunterstï¿½tzung ï¿½ Datenmodell und Graph-Schema erweitern",
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
@@ -1976,7 +1977,7 @@
     },
     "TASK-130": {
       "stream": "STREAM-PHASE4",
-      "title": "Entscheidungsunterst�tzung � Pro/Contra-UI und Nachverfolgung",
+      "title": "Entscheidungsunterstï¿½tzung ï¿½ Pro/Contra-UI und Nachverfolgung",
       "priority": "P2",
       "effort": "L",
       "area": "Frontend",
@@ -1990,7 +1991,7 @@
     },
     "TASK-131": {
       "stream": "STREAM-PHASE4",
-      "title": "Aktive Erinnerungen � Follow-up-Detection und Trigger-Engine",
+      "title": "Aktive Erinnerungen ï¿½ Follow-up-Detection und Trigger-Engine",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2004,7 +2005,7 @@
     },
     "TASK-132": {
       "stream": "STREAM-PHASE4",
-      "title": "Aktive Erinnerungen � Notification-UI und proaktive Fragen",
+      "title": "Aktive Erinnerungen ï¿½ Notification-UI und proaktive Fragen",
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
@@ -2018,7 +2019,7 @@
     },
     "TASK-133": {
       "stream": "STREAM-PHASE4",
-      "title": "Projektbriefings � Generierung, API und Frontend",
+      "title": "Projektbriefings ï¿½ Generierung, API und Frontend",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2032,7 +2033,7 @@
     },
     "TASK-134": {
       "stream": "STREAM-PHASE4",
-      "title": "Pers�nliches Lernmodell � Arbeitsmuster-Erkennung",
+      "title": "Persï¿½nliches Lernmodell ï¿½ Arbeitsmuster-Erkennung",
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
@@ -2046,7 +2047,7 @@
     },
     "TASK-135": {
       "stream": "STREAM-PHASE4",
-      "title": "Desktop-App � Tauri-Grundger�st mit WebView und System Tray",
+      "title": "Desktop-App ï¿½ Tauri-Grundgerï¿½st mit WebView und System Tray",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2060,7 +2061,7 @@
     },
     "TASK-136": {
       "stream": "STREAM-PHASE4",
-      "title": "Desktop-App � Offline-Modus mit lokalem Datensync",
+      "title": "Desktop-App ï¿½ Offline-Modus mit lokalem Datensync",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2074,7 +2075,7 @@
     },
     "TASK-137": {
       "stream": "STREAM-PHASE4",
-      "title": "Pricing und Billing � Stripe-Integration und Abo-Verwaltung",
+      "title": "Pricing und Billing ï¿½ Stripe-Integration und Abo-Verwaltung",
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
@@ -2088,7 +2089,7 @@
     },
     "TASK-138": {
       "stream": "STREAM-PHASE4",
-      "title": "Erweiterte NER � Ziele, Risiken, Hypothesen und offene Fragen extrahieren",
+      "title": "Erweiterte NER ï¿½ Ziele, Risiken, Hypothesen und offene Fragen extrahieren",
       "priority": "P2",
       "effort": "L",
       "area": "LLM",
@@ -2102,7 +2103,7 @@
     },
     "TASK-139": {
       "stream": "STREAM-PHASE4",
-      "title": "Mustererkennung � Wiederkehrende Themen und sich �ndernde Annahmen",
+      "title": "Mustererkennung ï¿½ Wiederkehrende Themen und sich ï¿½ndernde Annahmen",
       "priority": "P2",
       "effort": "L",
       "area": "LLM",
@@ -2116,7 +2117,7 @@
     },
     "TASK-140": {
       "stream": "STREAM-PHASE4",
-      "title": "Browser-Extension-Prototyp f�r Kontextanzeige",
+      "title": "Browser-Extension-Prototyp fï¿½r Kontextanzeige",
       "priority": "P3",
       "effort": "XL",
       "area": "Frontend",
@@ -2130,7 +2131,7 @@
     },
     "TASK-141": {
       "stream": "STREAM-PHASE4",
-      "title": "Slack-Bot-Prototyp f�r Quick Search und Briefings",
+      "title": "Slack-Bot-Prototyp fï¿½r Quick Search und Briefings",
       "priority": "P3",
       "effort": "L",
       "area": "Backend",
@@ -2173,7 +2174,7 @@
     },
     "TASK-144": {
       "stream": "STREAM-PHASE5",
-      "title": "Multi-Tenancy � Team-Features und gemeinsames Wissensmodell",
+      "title": "Multi-Tenancy ï¿½ Team-Features und gemeinsames Wissensmodell",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2187,7 +2188,7 @@
     },
     "TASK-145": {
       "stream": "STREAM-PHASE5",
-      "title": "Self-Hosting � Docker-Compose und Helm-Chart f�r On-Premise-Deployment",
+      "title": "Self-Hosting ï¿½ Docker-Compose und Helm-Chart fï¿½r On-Premise-Deployment",
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
@@ -2201,7 +2202,7 @@
     },
     "TASK-146": {
       "stream": "STREAM-PHASE5",
-      "title": "Horizontale Skalierung � Load Balancer, Connection Pooling, Caching und CDN",
+      "title": "Horizontale Skalierung ï¿½ Load Balancer, Connection Pooling, Caching und CDN",
       "priority": "P2",
       "effort": "XL",
       "area": "Infra",
@@ -2244,7 +2245,7 @@
     },
     "TASK-149": {
       "stream": "STREAM-PHASE5",
-      "title": "B2B-Pilot Features f�r Beratungsh�user und Tech-Startups",
+      "title": "B2B-Pilot Features fï¿½r Beratungshï¿½user und Tech-Startups",
       "priority": "P2",
       "effort": "XL",
       "area": "Backend",
@@ -2258,7 +2259,7 @@
     },
     "TASK-150": {
       "stream": "STREAM-PHASE5",
-      "title": "�ffentliche API und Developer Portal",
+      "title": "ï¿½ffentliche API und Developer Portal",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2272,7 +2273,7 @@
     },
     "TASK-151": {
       "stream": "STREAM-PHASE5",
-      "title": "Marketplace f�r Community-Integrationen",
+      "title": "Marketplace fï¿½r Community-Integrationen",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2286,7 +2287,7 @@
     },
     "TASK-152": {
       "stream": "STREAM-PHASE5",
-      "title": "Mobile Apps � iOS und Android",
+      "title": "Mobile Apps ï¿½ iOS und Android",
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
@@ -2300,7 +2301,7 @@
     },
     "TASK-153": {
       "stream": "STREAM-PHASE5",
-      "title": "RBAC � Rollenbasierte Zugriffssteuerung auf Organisationsebene",
+      "title": "RBAC ï¿½ Rollenbasierte Zugriffssteuerung auf Organisationsebene",
       "priority": "P2",
       "effort": "L",
       "area": "Auth",
@@ -2314,7 +2315,7 @@
     },
     "TASK-154": {
       "stream": "STREAM-PHASE5",
-      "title": "Vertikale Spezialisierungen � Forscher, Berater, Entwickler",
+      "title": "Vertikale Spezialisierungen ï¿½ Forscher, Berater, Entwickler",
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
@@ -2328,7 +2329,7 @@
     },
     "TASK-155": {
       "stream": "STREAM-PHASE5",
-      "title": "Langzeit-Intelligenz � Muster �ber Monate/Jahre und Annahmen-Tracking",
+      "title": "Langzeit-Intelligenz ï¿½ Muster ï¿½ber Monate/Jahre und Annahmen-Tracking",
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
