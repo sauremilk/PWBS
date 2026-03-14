@@ -2622,10 +2622,10 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T22:55:00.000000+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T23:30:00.000000+00:00",
       "blocked_by": []
     },
     "TASK-173": {
