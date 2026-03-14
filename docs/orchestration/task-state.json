@@ -2365,13 +2365,15 @@
       "priority": "P2",
       "effort": "L",
       "area": "Auth",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-14T20:29:59.062415+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T21:15:26.492330+00:00",
       "blocked_by": [
         "TASK-144"
-      ]
+      ],
+      "commit": "0e78fb0",
+      "result": "RBAC-Erzwingung in Organizations-Endpunkten (MEMBERS_INVITE/REMOVE/CHANGE_ROLE), Audit-Logging via log_role_change, Migrationen 0012 + 0013."
     },
     "TASK-154": {
       "stream": "STREAM-PHASE5",

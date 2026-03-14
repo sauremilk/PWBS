@@ -1,0 +1,35 @@
+# Performance Regression Thresholds (TASK-170)
+#
+# These thresholds are enforced by the perf-regression CI workflow.
+# Exceeding any threshold will fail the PR check.
+#
+# All times in milliseconds (ms).
+
+thresholds:
+  # Semantic search (hybrid/vector)
+  search_p95_ms: 2000
+
+  # Briefing generation (LLM + retrieval + formatting)
+  briefing_gen_p95_ms: 10000
+
+  # General CRUD API endpoints (auth, connectors, user, etc.)
+  api_general_p95_ms: 500
+
+  # Maximum acceptable error rate (percentage)
+  max_error_rate_percent: 1.0
+
+# Synthetic data volumes for benchmark runs
+synthetic_data:
+  documents: 100
+  chunks_per_document: 10 # total: 1000 chunks
+  entities: 50
+  briefings: 20
+
+# Benchmark configuration
+benchmark:
+  # Minimum number of rounds per benchmark
+  min_rounds: 5
+  # Warmup rounds (excluded from stats)
+  warmup_rounds: 1
+  # Maximum time per benchmark (seconds)
+  max_time: 30
