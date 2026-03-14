@@ -122,6 +122,19 @@ class Settings(BaseSettings):
     stripe_free_connector_limit: int = 1
     stripe_free_search_daily_limit: int = 3
 
+    #  Email (TASK-176)
+    email_provider: str = "smtp"  # "smtp" | "sendgrid"
+    smtp_host: str = "localhost"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_use_tls: bool = True
+    sendgrid_api_key: SecretStr = SecretStr("")
+    email_from_address: str = "noreply@pwbs.app"
+    email_from_name: str = "PWBS"
+    email_unsubscribe_url: str = "http://localhost:3000/settings/notifications"
+    email_impressum_url: str = "http://localhost:3000/impressum"
+
     #  Feature Flags (TASK-174)
     feature_flags_override: str = ""  # e.g. "flag1:true,flag2:false"
 

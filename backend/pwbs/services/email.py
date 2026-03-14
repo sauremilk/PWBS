@@ -296,6 +296,35 @@ class EmailService:
             },
         )
 
+    async def send_briefing_email(
+        self,
+        to: str,
+        briefing_type: str,
+        briefing_title: str,
+        briefing_content: str,
+        briefing_url: str,
+        sources: list[dict[str, str]] | None = None,
+    ) -> EmailResult:
+        """Send the full briefing content as an HTML email (TASK-177).
+
+        Parameters
+        ----------
+        sources:
+            List of dicts with keys ``title``, optional ``url``, optional ``source_type``.
+        """
+        return await self._send(
+            to=to,
+            subject=f"PWBS - {briefing_title}",
+            template="briefing_email.html",
+            context={
+                "briefing_type": briefing_type,
+                "briefing_title": briefing_title,
+                "briefing_content": briefing_content,
+                "briefing_url": briefing_url,
+                "sources": sources or [],
+            },
+        )
+
 
 # ---------------------------------------------------------------------------
 # Factory

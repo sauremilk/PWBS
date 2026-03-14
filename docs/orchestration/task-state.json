@@ -2334,13 +2334,15 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-14T21:34:52.310020+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T22:03:27.815238+00:00",
       "blocked_by": [
         "TASK-119"
-      ]
+      ],
+      "commit": "b1c009b",
+      "notes": "ORCH-L: Public API + Developer Portal - API Key model, migration, service, auth dependency, developer routes, public API routes. 31 tests."
     },
     "TASK-151": {
       "stream": "STREAM-PHASE5",

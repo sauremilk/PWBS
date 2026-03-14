@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ briefing_type }}: {{ briefing_title }}</h2>
+<div style="color: #475569; font-size: 14px; line-height: 1.7;">
+  {{ briefing_content }}
+</div>
+{% if sources %}
+<h3 style="margin-top: 24px; font-size: 15px; color: #1e293b;">Quellen</h3>
+<ul style="padding-left: 20px; font-size: 13px; color: #64748b;">
+  {% for source in sources %}
+  <li style="margin-bottom: 4px;">
+    {% if source.url %}
+    <a href="{{ source.url }}" style="color: #2563eb; text-decoration: none;">{{ source.title }}</a>
+    {% else %}
+    {{ source.title }}
+    {% endif %}
+    {% if source.source_type %}<span style="color: #94a3b8;"> ({{ source.source_type }})</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+<p style="text-align: center; margin: 24px 0;">
+  <a href="{{ briefing_url }}" class="button">Im Dashboard ansehen</a>
+</p>
+{% endblock %}
