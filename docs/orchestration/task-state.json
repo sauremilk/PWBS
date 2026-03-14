@@ -1752,13 +1752,14 @@
                                    "priority":  "P2",
                                    "effort":  "M",
                                    "area":  "Testing",
-                                   "status":  "in-progress",
+                                   "status":  "done",
                                    "claimed_by":  "ORCH-I",
                                    "claimed_at":  "2026-03-14T15:04:41.3743122+01:00",
-                                   "completed_at":  null,
+                                   "completed_at":  "2026-03-14T16:30:00+01:00",
                                    "blocked_by":  [
                                                       "TASK-086"
-                                                  ]
+                                                  ],
+                                   "commit":  "2da4e66"
                                },
                   "TASK-113":  {
                                    "stream":  "STREAM-DSGVO-QA",
