@@ -183,6 +183,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.search import router as search_router
+    from pwbs.api.v1.routes.user import router as user_router
 
     application.include_router(health_router)
     application.include_router(auth_router)
@@ -193,6 +194,7 @@ def create_app() -> FastAPI:
     application.include_router(documents_router)
     application.include_router(knowledge_router)
     application.include_router(search_router)
+    application.include_router(user_router)
 
     return application
 
