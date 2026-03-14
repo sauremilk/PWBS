@@ -2559,11 +2559,12 @@
       "priority": "P1",
       "effort": "M",
       "area": "Infra",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T19:54:24.139703+00:00",
-      "completed_at": null,
-      "blocked_by": []
+      "completed_at": "2026-03-14T19:58:47.674821+00:00",
+      "blocked_by": [],
+      "commit": "031b5fe"
     },
     "TASK-168": {
       "stream": "STREAM-BETA-PREP",
