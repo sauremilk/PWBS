@@ -1755,8 +1755,8 @@
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-I",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
