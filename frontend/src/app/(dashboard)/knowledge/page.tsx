@@ -128,27 +128,33 @@ function KnowledgeContent() {
         </div>
 
         {/* View toggle */}
-        <div className="flex items-center gap-1 rounded-lg border border-gray-200 p-1">
+        <div
+          role="group"
+          aria-label="Ansicht"
+          className="flex items-center gap-1 rounded-lg border border-gray-200 p-1"
+        >
           <button
             onClick={() => handleViewChange("list")}
+            aria-pressed={viewMode === "list"}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               viewMode === "list"
                 ? "bg-gray-900 text-white"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            <List className="h-4 w-4" />
+            <List aria-hidden="true" className="h-4 w-4" />
             Liste
           </button>
           <button
             onClick={() => handleViewChange("graph")}
+            aria-pressed={viewMode === "graph"}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               viewMode === "graph"
                 ? "bg-gray-900 text-white"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            <Network className="h-4 w-4" />
+            <Network aria-hidden="true" className="h-4 w-4" />
             Graph
           </button>
         </div>
@@ -169,7 +175,7 @@ function KnowledgeContent() {
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon aria-hidden="true" className="h-4 w-4" />
                 {label}
               </button>
             ))}
@@ -182,8 +188,9 @@ function KnowledgeContent() {
 
           {/* Entity list */}
           {entitiesLoading && (
-            <div className="flex justify-center py-20">
+            <div role="status" className="flex justify-center py-20">
               <Spinner className="h-8 w-8" />
+              <span className="sr-only">Wird geladen</span>
             </div>
           )}
 
@@ -232,7 +239,7 @@ function KnowledgeContent() {
                 disabled={page <= 1}
                 className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft aria-hidden="true" className="h-4 w-4" />
                 Zurück
               </button>
               <span className="text-sm text-gray-500">
@@ -244,7 +251,7 @@ function KnowledgeContent() {
                 className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Weiter
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight aria-hidden="true" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -257,7 +264,10 @@ function KnowledgeContent() {
           {/* Graph controls */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <label htmlFor="graph-depth" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="graph-depth"
+                className="text-sm font-medium text-gray-700"
+              >
                 Tiefe:
               </label>
               <select
@@ -287,8 +297,9 @@ function KnowledgeContent() {
 
           {/* Graph canvas */}
           {graphLoading && (
-            <div className="flex justify-center py-20">
+            <div role="status" className="flex justify-center py-20">
               <Spinner className="h-8 w-8" />
+              <span className="sr-only">Wird geladen</span>
             </div>
           )}
 
@@ -298,7 +309,10 @@ function KnowledgeContent() {
 
           {graphData && graphData.nodes.length === 0 && (
             <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-              <Network className="mx-auto h-12 w-12 text-gray-400" />
+              <Network
+                aria-hidden="true"
+                className="mx-auto h-12 w-12 text-gray-400"
+              />
               <h3 className="mt-2 text-sm font-medium text-gray-900">
                 Keine Graph-Daten
               </h3>
@@ -324,8 +338,8 @@ function KnowledgeContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium text-gray-900">
-                    {graphData.nodes.find((n) => n.id === graphEntityId)?.name ??
-                      "Entität"}
+                    {graphData.nodes.find((n) => n.id === graphEntityId)
+                      ?.name ?? "Entität"}
                   </h3>
                   <p className="text-sm text-gray-500">
                     Typ:{" "}

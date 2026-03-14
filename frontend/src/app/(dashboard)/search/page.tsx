@@ -28,10 +28,10 @@ function ResultCard({ result }: { result: SearchResult }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm">
       <div className="mb-2 flex items-center gap-2 text-xs text-gray-500">
-        <FileText className="h-3.5 w-3.5" />
+        <FileText aria-hidden="true" className="h-3.5 w-3.5" />
         <span className="font-medium">{result.source_type}</span>
         <span>·</span>
-        <Calendar className="h-3.5 w-3.5" />
+        <Calendar aria-hidden="true" className="h-3.5 w-3.5" />
         <span>{new Date(result.date).toLocaleDateString("de-DE")}</span>
         <span className="ml-auto rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">
           {Math.round(result.score * 100)}%
@@ -61,8 +61,9 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div role="status" className="flex items-center justify-center py-12">
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-gray-400" />
+          <span className="sr-only">Wird geladen</span>
         </div>
       }
     >
@@ -137,7 +138,7 @@ function SearchContent() {
 
       {/* Search Input */}
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <SearchIcon aria-hidden="true" className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           value={query}
@@ -147,7 +148,7 @@ function SearchContent() {
           aria-label="Suchfeld"
         />
         {isFetching && (
-          <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400" />
+          <Loader2 aria-hidden="true" className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400" />
         )}
       </div>
 
@@ -155,9 +156,10 @@ function SearchContent() {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowFilters(!showFilters)}
+          aria-expanded={showFilters}
           className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
         >
-          <Filter className="h-4 w-4" />
+          <Filter aria-hidden="true" className="h-4 w-4" />
           Filter
         </button>
         {filters && (
@@ -165,7 +167,7 @@ function SearchContent() {
             onClick={clearFilters}
             className="inline-flex items-center gap-1 rounded-md text-sm text-gray-500 hover:text-gray-700"
           >
-            <X className="h-4 w-4" />
+            <X aria-hidden="true" className="h-4 w-4" />
             Filter entfernen
           </button>
         )}
@@ -176,25 +178,27 @@ function SearchContent() {
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <span className="mb-2 block text-sm font-medium text-gray-700">
-                Quelltyp
-              </span>
-              <div className="space-y-1">
-                {SOURCE_TYPE_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={sourceTypes.includes(opt.value)}
-                      onChange={() => toggleSourceType(opt.value)}
-                      className="rounded border-gray-300"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
+              <fieldset>
+                <legend className="mb-2 text-sm font-medium text-gray-700">
+                  Quelltyp
+                </legend>
+                <div className="space-y-1">
+                  {SOURCE_TYPE_OPTIONS.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={sourceTypes.includes(opt.value)}
+                        onChange={() => toggleSourceType(opt.value)}
+                        className="rounded border-gray-300"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             </div>
             <div>
               <label
@@ -248,8 +252,9 @@ function SearchContent() {
 
       {/* Results */}
       {isLoading && query.length > 0 ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div role="status" className="flex items-center justify-center py-12">
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-gray-400" />
+          <span className="sr-only">Wird geladen</span>
         </div>
       ) : data && data.results.length > 0 ? (
         <div className="space-y-3">
@@ -263,7 +268,7 @@ function SearchContent() {
         </div>
       ) : query.length > 0 && !isLoading ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <SearchIcon className="mx-auto mb-3 h-10 w-10 text-gray-300" />
+          <SearchIcon aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <h3 className="mb-1 text-sm font-semibold text-gray-900">
             Keine Ergebnisse gefunden
           </h3>

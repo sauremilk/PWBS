@@ -18,6 +18,7 @@ function ListEditor({
   placeholder: string;
 }) {
   const [draft, setDraft] = useState("");
+  const inputId = `list-editor-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
   const add = () => {
     const trimmed = draft.trim();
@@ -32,11 +33,15 @@ function ListEditor({
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={inputId}
+        className="mb-1 block text-sm font-medium text-gray-700"
+      >
         {label}
       </label>
       <div className="flex gap-2">
         <input
+          id={inputId}
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -53,8 +58,9 @@ function ListEditor({
           type="button"
           onClick={add}
           className="rounded-lg border border-gray-300 px-2 py-1.5 text-gray-600 hover:bg-gray-50"
+          aria-label="Eintrag hinzufügen"
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
         </button>
       </div>
       {items.length > 0 && (
@@ -69,8 +75,9 @@ function ListEditor({
                 type="button"
                 onClick={() => remove(i)}
                 className="ml-2 text-gray-400 hover:text-red-500"
+                aria-label="Eintrag entfernen"
               >
-                <X className="h-3.5 w-3.5" />
+                <X aria-hidden="true" className="h-3.5 w-3.5" />
               </button>
             </li>
           ))}
@@ -116,12 +123,11 @@ export function DecisionForm() {
           type="button"
           onClick={() => router.push("/decisions")}
           className="rounded p-1 text-gray-400 hover:text-gray-600"
+          aria-label="Zurück zur Übersicht"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft aria-hidden="true" className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">
-          Neue Entscheidung
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900">Neue Entscheidung</h1>
       </div>
 
       {/* Summary */}
@@ -222,7 +228,7 @@ export function DecisionForm() {
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {createMutation.isPending && (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
           )}
           Entscheidung erstellen
         </button>

@@ -11,8 +11,16 @@ interface ReminderCardProps {
 
 const TYPE_CONFIG = {
   follow_up: { icon: Clock, label: "Follow-up", color: "text-blue-600" },
-  inactive_topic: { icon: AlertTriangle, label: "Inaktives Thema", color: "text-amber-600" },
-  open_question: { icon: HelpCircle, label: "Offene Frage", color: "text-purple-600" },
+  inactive_topic: {
+    icon: AlertTriangle,
+    label: "Inaktives Thema",
+    color: "text-amber-600",
+  },
+  open_question: {
+    icon: HelpCircle,
+    label: "Offene Frage",
+    color: "text-purple-600",
+  },
 } as const;
 
 const URGENCY_BADGE = {
@@ -34,7 +42,11 @@ function timeAgo(dateString: string): string {
   return `vor ${Math.floor(diffDays / 30)} Monaten`;
 }
 
-export function ReminderCard({ reminder, onAction, isPending }: ReminderCardProps) {
+export function ReminderCard({
+  reminder,
+  onAction,
+  isPending,
+}: ReminderCardProps) {
   const config = TYPE_CONFIG[reminder.reminder_type];
   const Icon = config.icon;
 
@@ -43,22 +55,33 @@ export function ReminderCard({ reminder, onAction, isPending }: ReminderCardProp
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Icon className={`h-4 w-4 flex-shrink-0 ${config.color}`} />
-          <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${URGENCY_BADGE[reminder.urgency]}`}>
+          <Icon
+            aria-hidden="true"
+            className={`h-4 w-4 flex-shrink-0 ${config.color}`}
+          />
+          <span className={`text-xs font-medium ${config.color}`}>
+            {config.label}
+          </span>
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${URGENCY_BADGE[reminder.urgency]}`}
+          >
             {reminder.urgency}
           </span>
         </div>
-        <span className="text-xs text-gray-400 whitespace-nowrap">
+        <span className="text-xs text-gray-500 whitespace-nowrap">
           {timeAgo(reminder.created_at)}
         </span>
       </div>
 
       {/* Content */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">{reminder.title}</h4>
+        <h4 className="text-sm font-semibold text-gray-900">
+          {reminder.title}
+        </h4>
         {reminder.description && (
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">{reminder.description}</p>
+          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+            {reminder.description}
+          </p>
         )}
       </div>
 
@@ -66,13 +89,13 @@ export function ReminderCard({ reminder, onAction, isPending }: ReminderCardProp
       <div className="flex flex-wrap gap-3 text-xs text-gray-500">
         {reminder.due_at && (
           <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+            <Clock aria-hidden="true" className="h-3 w-3" />
             Fällig: {new Date(reminder.due_at).toLocaleDateString("de-DE")}
           </span>
         )}
         {reminder.source_document_id && (
           <span className="flex items-center gap-1">
-            <FileText className="h-3 w-3" />
+            <FileText aria-hidden="true" className="h-3 w-3" />
             Quellenreferenz
           </span>
         )}

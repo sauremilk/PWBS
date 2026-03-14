@@ -18,11 +18,22 @@ import { Spinner } from "@/components/ui/loading-states";
 import { ErrorCard } from "@/components/ui/error-states";
 import type { RelatedEntityItem, EntityDocumentItem } from "@/types/api";
 
-const TYPE_CONFIG: Record<string, { icon: typeof Users; color: string; label: string }> = {
+const TYPE_CONFIG: Record<
+  string,
+  { icon: typeof Users; color: string; label: string }
+> = {
   Person: { icon: Users, color: "bg-blue-100 text-blue-800", label: "Person" },
-  Project: { icon: FolderKanban, color: "bg-green-100 text-green-800", label: "Projekt" },
+  Project: {
+    icon: FolderKanban,
+    color: "bg-green-100 text-green-800",
+    label: "Projekt",
+  },
   Topic: { icon: Hash, color: "bg-amber-100 text-amber-800", label: "Thema" },
-  Decision: { icon: FileText, color: "bg-red-100 text-red-800", label: "Entscheidung" },
+  Decision: {
+    icon: FileText,
+    color: "bg-red-100 text-red-800",
+    label: "Entscheidung",
+  },
 };
 
 export default function EntityDetailPage({
@@ -49,8 +60,9 @@ export default function EntityDetailPage({
 
   if (entityLoading) {
     return (
-      <div className="flex justify-center py-20">
+      <div role="status" className="flex justify-center py-20">
         <Spinner className="h-8 w-8" />
+        <span className="sr-only">Wird geladen</span>
       </div>
     );
   }
@@ -81,7 +93,7 @@ export default function EntityDetailPage({
           onClick={() => router.back()}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurück
         </button>
 
@@ -89,7 +101,7 @@ export default function EntityDetailPage({
           <div>
             <div className="flex items-center gap-3">
               <div className={`rounded-lg p-2 ${typeConfig.color}`}>
-                <TypeIcon className="h-6 w-6" />
+                <TypeIcon aria-hidden="true" className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
@@ -106,7 +118,7 @@ export default function EntityDetailPage({
             href={`/knowledge?view=graph&entity=${encodeURIComponent(entity.id)}`}
             className="flex items-center gap-1.5 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
           >
-            <Network className="h-4 w-4" />
+            <Network aria-hidden="true" className="h-4 w-4" />
             Im Graph anzeigen
           </Link>
         </div>
@@ -116,7 +128,7 @@ export default function EntityDetailPage({
       {(entity.first_seen || entity.last_seen) && (
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <Calendar className="h-5 w-5" />
+            <Calendar aria-hidden="true" className="h-5 w-5" />
             Zeitleiste
           </h2>
           <div className="flex gap-8">
@@ -173,15 +185,15 @@ export default function EntityDetailPage({
                   className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors"
                 >
                   <div className={`rounded-md p-1.5 ${relConfig.color}`}>
-                    <RelIcon className="h-4 w-4" />
+                    <RelIcon aria-hidden="true" className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-gray-900">
                       {rel.name}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {rel.relation ?? relConfig.label} ·{" "}
-                      {rel.mention_count} Erwähnung
+                      {rel.relation ?? relConfig.label} · {rel.mention_count}{" "}
+                      Erwähnung
                       {rel.mention_count !== 1 ? "en" : ""}
                     </p>
                   </div>
@@ -195,7 +207,7 @@ export default function EntityDetailPage({
       {/* Documents */}
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-          <FileText className="h-5 w-5" />
+          <FileText aria-hidden="true" className="h-5 w-5" />
           Zugehörige Dokumente
           {documentsData && (
             <span className="text-sm font-normal text-gray-500">
@@ -205,8 +217,9 @@ export default function EntityDetailPage({
         </h2>
 
         {docsLoading && (
-          <div className="flex justify-center py-8">
+          <div role="status" className="flex justify-center py-8">
             <Spinner className="h-6 w-6" />
+            <span className="sr-only">Wird geladen</span>
           </div>
         )}
 
@@ -240,7 +253,10 @@ export default function EntityDetailPage({
                     {new Date(doc.created_at).toLocaleDateString("de-DE")}
                   </p>
                 </div>
-                <ExternalLink className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                <ExternalLink
+                  aria-hidden="true"
+                  className="h-4 w-4 flex-shrink-0 text-gray-400"
+                />
               </Link>
             ))}
           </div>

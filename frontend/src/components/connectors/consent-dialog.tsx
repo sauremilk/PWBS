@@ -32,8 +32,12 @@ export function ConsentDialog({
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="rounded-lg bg-white p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div role="status" className="rounded-lg bg-white p-8">
+          <Loader2
+            aria-hidden="true"
+            className="h-8 w-8 animate-spin text-gray-400"
+          />
+          <span className="sr-only">Wird geladen</span>
         </div>
       </div>
     );
@@ -41,12 +45,20 @@ export function ConsentDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="consent-dialog-title"
+        className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
+            <ShieldCheck aria-hidden="true" className="h-5 w-5 text-blue-600" />
+            <h2
+              id="consent-dialog-title"
+              className="text-lg font-semibold text-gray-900"
+            >
               Datenverarbeitung: {connectorName}
             </h2>
           </div>
@@ -55,7 +67,7 @@ export function ConsentDialog({
             className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             aria-label="Schließen"
           >
-            <X className="h-5 w-5" />
+            <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
 
@@ -110,7 +122,10 @@ export function ConsentDialog({
           {/* Info box */}
           <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
             <div className="flex gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+              <AlertTriangle
+                aria-hidden="true"
+                className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600"
+              />
               <p className="text-xs text-amber-800">
                 Du kannst deine Einwilligung jederzeit unter Konnektoren
                 widerrufen. Beim Widerruf werden alle importierten Daten dieser
@@ -149,7 +164,7 @@ export function ConsentDialog({
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {grantMutation.isPending && (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
             )}
             Einwilligung erteilen & Verbinden
           </button>

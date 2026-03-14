@@ -36,10 +36,16 @@ export default function DecisionsPage() {
       <h1 className="text-2xl font-bold text-gray-900">Entscheidungen</h1>
 
       {/* Status Filter Tabs */}
-      <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+      <div
+        role="tablist"
+        aria-label="Status-Filter"
+        className="flex gap-1 rounded-lg bg-gray-100 p-1"
+      >
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
+            role="tab"
+            aria-selected={statusFilter === f.value}
             onClick={() => {
               setStatusFilter(f.value);
               setPage(1);
@@ -57,8 +63,9 @@ export default function DecisionsPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex justify-center py-12">
+        <div role="status" className="flex justify-center py-12">
           <Spinner />
+          <span className="sr-only">Wird geladen</span>
         </div>
       ) : error ? (
         <ErrorCard

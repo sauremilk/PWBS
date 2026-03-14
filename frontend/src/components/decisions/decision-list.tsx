@@ -1,7 +1,14 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { Clock, CheckCircle2, RotateCcw, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Clock,
+  CheckCircle2,
+  RotateCcw,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import type { DecisionListItem, DecisionStatus } from "@/types/api";
 
 const STATUS_CONFIG: Record<
@@ -32,7 +39,7 @@ function StatusBadge({ status }: { status: DecisionStatus }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`}
     >
-      <Icon className="h-3 w-3" />
+      <Icon aria-hidden="true" className="h-3 w-3" />
       {config.label}
     </span>
   );
@@ -50,9 +57,7 @@ function DecisionCard({ decision }: { decision: DecisionListItem }) {
             {decision.summary}
           </h3>
           <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-            {decision.decided_by && (
-              <span>von {decision.decided_by}</span>
-            )}
+            {decision.decided_by && <span>von {decision.decided_by}</span>}
             <span>
               {new Date(decision.created_at).toLocaleDateString("de-DE")}
             </span>
@@ -91,7 +96,7 @@ export function DecisionList({
           href="/decisions/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           Neue Entscheidung
         </Link>
       </div>
@@ -105,7 +110,7 @@ export function DecisionList({
             href="/decisions/new"
             className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
           >
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Erste Entscheidung erstellen
           </Link>
         </div>
@@ -122,9 +127,10 @@ export function DecisionList({
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="rounded p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+            className="rounded p-1 text-gray-500 hover:text-gray-600 disabled:opacity-30"
+            aria-label="Vorherige Seite"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft aria-hidden="true" className="h-5 w-5" />
           </button>
           <span className="text-sm text-gray-600">
             Seite {page} von {totalPages}
@@ -132,9 +138,10 @@ export function DecisionList({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="rounded p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+            className="rounded p-1 text-gray-500 hover:text-gray-600 disabled:opacity-30"
+            aria-label="Nächste Seite"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
       )}

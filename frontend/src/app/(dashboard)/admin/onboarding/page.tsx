@@ -67,10 +67,10 @@ function StepIndicator({ current }: { current: WizardStep }) {
                   ? "bg-blue-100 text-blue-700"
                   : isDone
                     ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-400"
+                    : "bg-gray-100 text-gray-500"
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon aria-hidden="true" className="h-4 w-4" />
               <span className="hidden sm:inline">{step.label}</span>
             </div>
           </div>
@@ -179,6 +179,7 @@ function StepMembers({
               value={inv.role}
               onChange={(e) => onChange(idx, "role", e.target.value)}
               className="rounded-md border border-gray-300 px-2 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              aria-label="Rolle auswählen"
             >
               <option value="member">Mitglied</option>
               <option value="viewer">Betrachter</option>
@@ -187,10 +188,10 @@ function StepMembers({
             <button
               type="button"
               onClick={() => onRemove(idx)}
-              className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+              className="rounded p-1 text-gray-500 hover:bg-red-50 hover:text-red-600"
               aria-label="Eintrag entfernen"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
             </button>
           </div>
         ))}
@@ -202,7 +203,7 @@ function StepMembers({
         disabled={invites.length >= 10}
         className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
       >
-        <Plus className="h-4 w-4" />
+        <Plus aria-hidden="true" className="h-4 w-4" />
         Weiteres Mitglied
       </button>
     </div>
@@ -254,6 +255,7 @@ function StepConnectors({
               key={conn.id}
               type="button"
               onClick={() => onToggle(conn.id)}
+              aria-pressed={isSelected}
               className={`flex flex-col items-start rounded-lg border p-4 text-left transition-colors ${
                 isSelected
                   ? "border-blue-300 bg-blue-50"
@@ -288,19 +290,19 @@ function StepConfirm({
       <h2 className="text-lg font-semibold text-gray-900">Zusammenfassung</h2>
       <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-5">
         <div className="flex items-center gap-3">
-          <Building2 className="h-5 w-5 text-blue-600" />
+          <Building2 aria-hidden="true" className="h-5 w-5 text-blue-600" />
           <span className="text-sm">
             Organisation: <strong>{orgName}</strong>
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Users className="h-5 w-5 text-blue-600" />
+          <Users aria-hidden="true" className="h-5 w-5 text-blue-600" />
           <span className="text-sm">
             {inviteCount} Mitglied{inviteCount !== 1 ? "er" : ""} einladen
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Cable className="h-5 w-5 text-blue-600" />
+          <Cable aria-hidden="true" className="h-5 w-5 text-blue-600" />
           <span className="text-sm">
             {connectorCount} Konnektor{connectorCount !== 1 ? "en" : ""}{" "}
             aktivieren
@@ -479,7 +481,7 @@ export default function OnboardingWizardPage() {
           disabled={currentIdx === 0}
           className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:invisible"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurück
         </button>
 
@@ -491,9 +493,9 @@ export default function OnboardingWizardPage() {
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {finalize.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
             ) : (
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
             )}
             Abschließen
           </button>
@@ -505,7 +507,7 @@ export default function OnboardingWizardPage() {
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             Weiter
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </button>
         )}
       </div>

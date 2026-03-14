@@ -26,23 +26,43 @@ import { SecurityStatusPanel } from "@/components/settings/security-status-panel
 type TabId = "profile" | "notifications" | "privacy" | "security" | "account";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
-  { id: "profile", label: "Profil", icon: <User className="h-4 w-4" /> },
+  {
+    id: "profile",
+    label: "Profil",
+    icon: <User aria-hidden="true" className="h-4 w-4" />,
+  },
   {
     id: "notifications",
     label: "Erinnerungen",
-    icon: <Bell className="h-4 w-4" />,
+    icon: <Bell aria-hidden="true" className="h-4 w-4" />,
   },
-  { id: "privacy", label: "Datenschutz", icon: <Shield className="h-4 w-4" /> },
-  { id: "security", label: "Sicherheit", icon: <Shield className="h-4 w-4" /> },
-  { id: "account", label: "Account", icon: <Trash2 className="h-4 w-4" /> },
+  {
+    id: "privacy",
+    label: "Datenschutz",
+    icon: <Shield aria-hidden="true" className="h-4 w-4" />,
+  },
+  {
+    id: "security",
+    label: "Sicherheit",
+    icon: <Shield aria-hidden="true" className="h-4 w-4" />,
+  },
+  {
+    id: "account",
+    label: "Account",
+    icon: <Trash2 aria-hidden="true" className="h-4 w-4" />,
+  },
 ];
 
 export default function SettingsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div className="flex items-center justify-center py-12" role="status">
+          <Loader2
+            aria-hidden="true"
+            className="h-8 w-8 animate-spin text-gray-400"
+          />
+          <span className="sr-only">Wird geladen</span>
         </div>
       }
     >
@@ -65,11 +85,17 @@ function SettingsContent() {
       <h1 className="text-2xl font-bold text-gray-900">Einstellungen</h1>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 border-b border-gray-200">
+      <div
+        className="flex gap-1 border-b border-gray-200"
+        role="tablist"
+        aria-label="Einstellungen"
+      >
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setTab(tab.id)}
+            role="tab"
+            aria-selected={activeTab === tab.id}
             className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
               activeTab === tab.id
                 ? "border-blue-600 text-blue-600"
@@ -278,6 +304,8 @@ function NotificationsTab() {
         ).map((opt) => (
           <label
             key={opt.value}
+            htmlFor={`reminder-freq-${opt.value}`}
+            aria-label={opt.label}
             className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
               frequency === opt.value
                 ? "border-blue-600 bg-blue-50"
@@ -285,6 +313,7 @@ function NotificationsTab() {
             }`}
           >
             <input
+              id={`reminder-freq-${opt.value}`}
               type="radio"
               name="reminder-frequency"
               value={opt.value}
@@ -336,9 +365,12 @@ function PrivacyTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">Transparenzbericht</h3>
+        <h3 className="text-sm font-semibold text-gray-900">
+          Transparenzbericht
+        </h3>
         <p className="mt-1 text-sm text-gray-500">
-          Detaillierte Übersicht über gespeicherte Daten und KI-Nutzung (DSGVO Art. 15).
+          Detaillierte Übersicht über gespeicherte Daten und KI-Nutzung (DSGVO
+          Art. 15).
         </p>
         <div className="mt-3">
           <a
@@ -465,8 +497,16 @@ function AccountTab() {
       {/* Full-screen delete dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-bold text-red-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+          >
+            <h2
+              id="delete-dialog-title"
+              className="text-lg font-bold text-red-900"
+            >
               Account endg\u00fcltig l\u00f6schen
             </h2>
             <p className="mt-2 text-sm text-gray-600">

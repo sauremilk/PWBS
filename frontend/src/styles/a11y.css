@@ -1,0 +1,27 @@
+/**
+ * Accessibility utility – global focus-visible style and sr-only class.
+ *
+ * Import this in layout.tsx to inject the focus-visible ring globally.
+ * Tailwind already provides `sr-only` but this file documents the pattern.
+ *
+ * WCAG 2.1 AA: Focus indicators must be visible (2.4.7).
+ */
+
+/* Ensure all focusable elements have a visible focus ring */
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Screen-reader only utility (same as Tailwind sr-only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

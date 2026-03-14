@@ -40,8 +40,11 @@ function OrgSelector({
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
+      <div
+        role="status"
+        className="flex items-center gap-2 text-sm text-gray-500"
+      >
+        <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Organisationen laden…
       </div>
     );
@@ -64,6 +67,7 @@ function OrgSelector({
       value={selectedId ?? ""}
       onChange={(e) => onSelect(e.target.value)}
       className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      aria-label="Organisation auswählen"
     >
       <option value="" disabled>
         Organisation wählen…
@@ -94,7 +98,7 @@ function StatCard({
     <div className="rounded-lg border border-gray-200 bg-white p-5">
       <div className="flex items-center gap-3">
         <div className="rounded-md bg-blue-50 p-2">
-          <Icon className="h-5 w-5 text-blue-600" />
+          <Icon aria-hidden="true" className="h-5 w-5 text-blue-600" />
         </div>
         <div>
           <p className="text-sm text-gray-500">{label}</p>
@@ -168,9 +172,9 @@ function InviteForm({ orgId }: { orgId: string }) {
         className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
         {invite.isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         ) : (
-          <UserPlus className="h-4 w-4" />
+          <UserPlus aria-hidden="true" className="h-4 w-4" />
         )}
         Einladen
       </button>
@@ -190,8 +194,11 @@ function MembersTable({ orgId }: { orgId: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
+      <div
+        role="status"
+        className="flex items-center gap-2 py-4 text-sm text-gray-500"
+      >
+        <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Mitglieder laden…
       </div>
     );
@@ -252,8 +259,11 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
+      <div
+        role="status"
+        className="flex items-center gap-2 py-4 text-sm text-gray-500"
+      >
+        <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Konnektoren laden…
       </div>
     );
@@ -298,10 +308,10 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
                 <td className="py-2 pr-4">
                   {isShared ? (
                     <span className="inline-flex items-center gap-1 text-green-600">
-                      <Share2 className="h-3 w-3" /> Ja
+                      <Share2 aria-hidden="true" className="h-3 w-3" /> Ja
                     </span>
                   ) : (
-                    <span className="text-gray-400">Nein</span>
+                    <span className="text-gray-500">Nein</span>
                   )}
                 </td>
                 <td className="py-2">
@@ -311,7 +321,7 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
                       disabled={unshare.isPending}
                       className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
                     >
-                      <Unplug className="h-3 w-3" />
+                      <Unplug aria-hidden="true" className="h-3 w-3" />
                       Freigabe aufheben
                     </button>
                   ) : (
@@ -320,7 +330,7 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
                       disabled={share.isPending}
                       className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
                     >
-                      <Share2 className="h-3 w-3" />
+                      <Share2 aria-hidden="true" className="h-3 w-3" />
                       Teilen
                     </button>
                   )}
@@ -347,7 +357,7 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Shield className="h-7 w-7 text-blue-600" />
+          <Shield aria-hidden="true" className="h-7 w-7 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900">Admin-Dashboard</h1>
         </div>
         <OrgSelector selectedId={orgId} onSelect={setOrgId} />

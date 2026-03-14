@@ -11,8 +11,15 @@ function BriefingCard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+      <div
+        className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8"
+        role="status"
+      >
+        <Loader2
+          aria-hidden="true"
+          className="h-6 w-6 animate-spin text-gray-400"
+        />
+        <span className="sr-only">Wird geladen</span>
       </div>
     );
   }
@@ -21,7 +28,7 @@ function BriefingCard() {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6">
         <div className="flex items-center gap-2 text-red-700">
-          <AlertCircle className="h-5 w-5" />
+          <AlertCircle aria-hidden="true" className="h-5 w-5" />
           <span className="text-sm">Briefing konnte nicht geladen werden.</span>
         </div>
       </div>
@@ -39,7 +46,7 @@ function BriefingCard() {
           disabled={generate.isPending}
           className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           {generate.isPending ? "Generiere…" : "Briefing jetzt generieren"}
         </button>
       </div>
@@ -52,11 +59,11 @@ function BriefingCard() {
       className="block rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
     >
       <div className="mb-2 flex items-center gap-2">
-        <FileText className="h-5 w-5 text-blue-600" />
+        <FileText aria-hidden="true" className="h-5 w-5 text-blue-600" />
         <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
           Morgenbriefing
         </span>
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="ml-auto text-xs text-gray-500">
           {new Date(briefing.generated_at).toLocaleString("de-DE", {
             hour: "2-digit",
             minute: "2-digit",
@@ -74,9 +81,15 @@ function ConnectorStatusWidget() {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <h3 className="mb-3 text-sm font-semibold text-gray-900">Konnektoren</h3>
+        <h3 className="mb-3 text-sm font-semibold text-gray-900">
+          Konnektoren
+        </h3>
         <div className="flex items-center justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+          <Loader2
+            aria-hidden="true"
+            className="h-5 w-5 animate-spin text-gray-400"
+          />
+          <span className="sr-only">Wird geladen</span>
         </div>
       </div>
     );
@@ -88,7 +101,10 @@ function ConnectorStatusWidget() {
     <div className="rounded-lg border border-gray-200 bg-white p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-900">Konnektoren</h3>
-        <Link href="/connectors" className="text-xs text-blue-600 hover:text-blue-800">
+        <Link
+          href="/connectors"
+          className="text-xs text-blue-600 hover:text-blue-800"
+        >
           Verwalten
         </Link>
       </div>
@@ -97,9 +113,12 @@ function ConnectorStatusWidget() {
       ) : (
         <ul className="space-y-2">
           {connections.map((c) => (
-            <li key={c.type} className="flex items-center justify-between text-sm">
+            <li
+              key={c.type}
+              className="flex items-center justify-between text-sm"
+            >
               <div className="flex items-center gap-2">
-                <Cable className="h-4 w-4 text-gray-400" />
+                <Cable aria-hidden="true" className="h-4 w-4 text-gray-500" />
                 <span className="text-gray-700">{c.type}</span>
               </div>
               <span

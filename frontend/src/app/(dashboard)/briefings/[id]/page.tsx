@@ -27,7 +27,10 @@ const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
 function SourceCard({ source }: { source: SourceRefResponse }) {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
-      <FileText className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
+      <FileText
+        aria-hidden="true"
+        className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400"
+      />
       <div className="min-w-0 flex-1">
         <Link
           href={`/documents/${source.chunk_id}`}
@@ -39,7 +42,7 @@ function SourceCard({ source }: { source: SourceRefResponse }) {
           <span className="rounded bg-gray-200 px-1.5 py-0.5 font-medium">
             {source.source_type}
           </span>
-          <Calendar className="h-3 w-3" />
+          <Calendar aria-hidden="true" className="h-3 w-3" />
           <span>{new Date(source.date).toLocaleDateString("de-DE")}</span>
           <span className="ml-auto text-xs font-medium text-blue-700">
             {Math.round(source.relevance * 100)}%
@@ -48,10 +51,10 @@ function SourceCard({ source }: { source: SourceRefResponse }) {
       </div>
       <a
         href={`/documents/${source.chunk_id}`}
-        title="Original \u00f6ffnen"
+        aria-label="Original öffnen"
         className="flex-shrink-0 text-gray-400 hover:text-gray-600"
       >
-        <ExternalLink className="h-4 w-4" />
+        <ExternalLink aria-hidden="true" className="h-4 w-4" />
       </a>
     </div>
   );
@@ -62,7 +65,9 @@ export default function BriefingDetailPage() {
   const router = useRouter();
   const { data: briefing, isLoading } = useBriefingDetail(id);
   const feedback = useBriefingFeedback(id);
-  const [feedbackSent, setFeedbackSent] = useState<"positive" | "negative" | null>(null);
+  const [feedbackSent, setFeedbackSent] = useState<
+    "positive" | "negative" | null
+  >(null);
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState("");
 
@@ -87,8 +92,12 @@ export default function BriefingDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div role="status" className="flex items-center justify-center py-12">
+        <Loader2
+          aria-hidden="true"
+          className="h-8 w-8 animate-spin text-gray-400"
+        />
+        <span className="sr-only">Wird geladen</span>
       </div>
     );
   }
@@ -96,7 +105,9 @@ export default function BriefingDetailPage() {
   if (!briefing) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <h3 className="text-sm font-semibold text-gray-900">Briefing nicht gefunden</h3>
+        <h3 className="text-sm font-semibold text-gray-900">
+          Briefing nicht gefunden
+        </h3>
         <button
           onClick={() => router.push("/briefings")}
           className="mt-3 text-sm text-blue-600 hover:underline"
@@ -115,7 +126,7 @@ export default function BriefingDetailPage() {
           onClick={() => router.push("/briefings")}
           className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zur\u00fcck
         </button>
         <h1 className="text-2xl font-bold text-gray-900">{briefing.title}</h1>
@@ -123,7 +134,7 @@ export default function BriefingDetailPage() {
           <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium">
             {BRIEFING_TYPE_LABELS[briefing.briefing_type]}
           </span>
-          <Calendar className="h-4 w-4" />
+          <Calendar aria-hidden="true" className="h-4 w-4" />
           <span>
             {new Date(briefing.generated_at).toLocaleDateString("de-DE", {
               weekday: "long",
@@ -160,7 +171,9 @@ export default function BriefingDetailPage() {
 
       {/* Feedback */}
       <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="mb-3 text-sm font-medium text-gray-700">War dieses Briefing hilfreich?</p>
+        <p className="mb-3 text-sm font-medium text-gray-700">
+          War dieses Briefing hilfreich?
+        </p>
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleFeedback("positive")}
@@ -171,26 +184,31 @@ export default function BriefingDetailPage() {
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
             } disabled:opacity-50`}
           >
-            <ThumbsUp className="h-4 w-4" />
+            <ThumbsUp aria-hidden="true" className="h-4 w-4" />
             Hilfreich
           </button>
           <button
             onClick={() => handleFeedback("negative")}
-            disabled={feedback.isPending || (feedbackSent !== null && !showComment)}
+            disabled={
+              feedback.isPending || (feedbackSent !== null && !showComment)
+            }
             className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors ${
               feedbackSent === "negative"
                 ? "border-red-300 bg-red-50 text-red-700"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
             } disabled:opacity-50`}
           >
-            <ThumbsDown className="h-4 w-4" />
+            <ThumbsDown aria-hidden="true" className="h-4 w-4" />
             Nicht hilfreich
           </button>
         </div>
         {showComment && (
           <div className="mt-3 space-y-2">
-            <label htmlFor="feedback-comment" className="flex items-center gap-1 text-sm text-gray-600">
-              <MessageSquare className="h-3.5 w-3.5" />
+            <label
+              htmlFor="feedback-comment"
+              className="flex items-center gap-1 text-sm text-gray-600"
+            >
+              <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
               Was k\u00f6nnte verbessert werden?
             </label>
             <textarea
@@ -211,7 +229,9 @@ export default function BriefingDetailPage() {
           </div>
         )}
         {feedback.isSuccess && (
-          <p className="mt-2 text-sm text-green-600">Vielen Dank f\u00fcr dein Feedback!</p>
+          <p className="mt-2 text-sm text-green-600">
+            Vielen Dank f\u00fcr dein Feedback!
+          </p>
         )}
       </div>
 
