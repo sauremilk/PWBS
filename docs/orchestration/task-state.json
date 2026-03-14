@@ -844,13 +844,14 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-E",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-041"
-      ]
+      ],
+      "assignee": "ORCH-E"
     },
     "TASK-052": {
       "stream": "STREAM-CONNECTORS",
@@ -1121,9 +1122,9 @@
       "priority": "P1",
       "effort": "M",
       "area": "LLM",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "%Y-%m-%dT%H:%M:%SZ",
       "completed_at": null,
       "blocked_by": [
         "TASK-066"
