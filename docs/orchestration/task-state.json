@@ -934,13 +934,14 @@
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "%Y-%m-%dT%H:%M:%SZ",
+      "completed_at": "%Y-%m-%dT%H:%M:%SZ",
       "blocked_by": [
         "TASK-056"
-      ]
+      ],
+      "progress": 100
     },
     "TASK-058": {
       "stream": "STREAM-PROCESSING",
