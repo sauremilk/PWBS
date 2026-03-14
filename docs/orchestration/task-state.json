@@ -1996,9 +1996,9 @@
       "priority": "P3",
       "effort": "L",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-J",
+      "claimed_at": "2026-03-14T17:11:31.208252+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-041",
