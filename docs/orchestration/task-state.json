@@ -1707,10 +1707,11 @@
                                    "priority":  "P1",
                                    "effort":  "XL",
                                    "area":  "Testing",
-                                   "status":  "in_progress",
+                                   "status":  "done",
                                    "claimed_by":  "ORCH-I",
                                    "claimed_at":  "2026-03-14T13:35:02.862825+00:00",
-                                   "completed_at":  null,
+                                   "completed_at":  "2026-03-14T14:58:00.000000+01:00",
+                                   "result":  "Coverage 88% (Ziel 80%): test_cache.py (18), test_app_factory.py (10), test_export_service.py (+2), test_registry.py (+4), test_config.py fix. 1596 Tests bestanden.",
                                    "blocked_by":  [
                                                       "TASK-108"
                                                   ]
@@ -1808,7 +1809,7 @@
                                    "priority":  "P2",
                                    "effort":  "M",
                                    "area":  "DevOps",
-                                   "status":  "in-progress",
+                                   "status":  "in_progress",
                                    "claimed_by":  "ORCH-I",
                                    "claimed_at":  "2026-03-14T14:56:49.1875637+01:00",
                                    "completed_at":  null,
