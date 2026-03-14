@@ -57,8 +57,11 @@ class Settings(BaseSettings):
 
     #  Authentication
     jwt_secret_key: SecretStr
-    jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 30
+    jwt_algorithm: str = "RS256"
+    jwt_access_token_expire_minutes: int = 15
+    jwt_refresh_token_expire_days: int = 30
+    jwt_private_key: SecretStr = SecretStr("")
+    jwt_public_key: str = ""
 
     #  Encryption (Envelope Encryption, AES-256)
     encryption_master_key: SecretStr

@@ -20,20 +20,36 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     # Relationships
     connections: Mapped[list["Connection"]] = relationship(  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     documents: Mapped[list["Document"]] = relationship(  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     chunks: Mapped[list["Chunk"]] = relationship(  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     entities: Mapped[list["Entity"]] = relationship(  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     briefings: Mapped[list["Briefing"]] = relationship(  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     audit_logs: Mapped[list["AuditLog"]] = relationship(  # noqa: F821
-        back_populates="user", lazy="selectin",
+        back_populates="user",
+        lazy="selectin",
+    )
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )

@@ -7,6 +7,7 @@ from pwbs.models.chunk import Chunk
 from pwbs.models.connection import Connection
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
+from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.scheduled_job_run import ScheduledJobRun
 from pwbs.models.user import User
 
@@ -19,6 +20,7 @@ __all__ = [
     "Document",
     "Entity",
     "EntityMention",
+    "RefreshToken",
     "ScheduledJobRun",
     "User",
 ]

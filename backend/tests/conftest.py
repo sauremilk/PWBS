@@ -17,6 +17,9 @@ from pwbs.core.config import get_settings
 # ``app = create_app()`` can resolve Settings at import time.
 _TEST_ENV = {
     "JWT_SECRET_KEY": "test-secret-key-for-unit-tests",
+    "JWT_ALGORITHM": "HS256",
+    "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "15",
+    "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "30",
     "ENCRYPTION_MASTER_KEY": "test-master-key-for-unit-tests",
 }
 
