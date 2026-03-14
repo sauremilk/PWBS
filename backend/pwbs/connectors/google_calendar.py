@@ -22,6 +22,7 @@ import httpx
 from pydantic import SecretStr
 
 from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncError, SyncResult
+from pwbs.connectors.normalizer import normalize_document
 from pwbs.connectors.oauth import OAuthTokens
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import ConnectorError, RateLimitError
@@ -370,11 +371,102 @@ class GoogleCalendarConnector(BaseConnector):
         )
 
     async def normalize(self, raw: dict[str, JsonValue]) -> UnifiedDocument:
-        """Normalize a raw Google Calendar event into UnifiedDocument.
+        """Normalize a raw Google Calendar event into UnifiedDocument (TASK-047).
 
-        Not yet implemented – see TASK-047.
+        Extracts title, description, participants, start/end times, location,
+        and recurrence information.  All-day events, recurring events, and
+        events without a description are handled gracefully.
         """
-        raise NotImplementedError("TASK-047: Google Calendar Normalizer ausstehend")
+        event_id = str(raw.get("id", ""))
+        if not event_id:
+            raise ConnectorError(
+                "Google Calendar event missing 'id' field",
+                code="GCAL_MISSING_EVENT_ID",
+            )
+
+        title = str(raw.get("summary", "(Kein Titel)"))
+
+        # Build content from description, location, and attendees
+        description = str(raw.get("description", ""))
+        content_parts: list[str] = []
+        if title:
+            content_parts.append(title)
+        if description:
+            content_parts.append(description)
+        location = str(raw.get("location", ""))
+        if location:
+            content_parts.append(f"Ort: {location}")
+        content = "\n\n".join(content_parts) if content_parts else title
+
+        # Extract participants from attendees
+        attendees: list[dict[str, JsonValue]] = raw.get("attendees", [])  # type: ignore[assignment]
+        participants: list[str] = []
+        for attendee in attendees:
+            if isinstance(attendee, dict):
+                email = attendee.get("email")
+                if isinstance(email, str) and email:
+                    participants.append(email)
+
+        # Parse start/end times — handle both dateTime and date (all-day)
+        start_obj = raw.get("start", {})
+        end_obj = raw.get("end", {})
+        start_time: str | None = None
+        end_time: str | None = None
+        is_all_day = False
+
+        if isinstance(start_obj, dict):
+            start_time = str(start_obj.get("dateTime") or start_obj.get("date") or "")
+            if "date" in start_obj and "dateTime" not in start_obj:
+                is_all_day = True
+        if isinstance(end_obj, dict):
+            end_time = str(end_obj.get("dateTime") or end_obj.get("date") or "")
+
+        # Recurrence
+        recurrence = raw.get("recurrence")
+        is_recurring = isinstance(recurrence, list) and len(recurrence) > 0
+        # Also check recurringEventId for instances of recurring events
+        if not is_recurring and raw.get("recurringEventId"):
+            is_recurring = True
+
+        # Metadata
+        metadata: dict[str, str | int | bool | list[str]] = {
+            "start_time": start_time or "",
+            "end_time": end_time or "",
+            "location": location,
+            "is_recurring": is_recurring,
+            "attendee_count": len(participants),
+            "is_all_day": is_all_day,
+        }
+        if is_recurring and isinstance(recurrence, list):
+            metadata["recurrence"] = [str(r) for r in recurrence]
+
+        # Parse created/updated timestamps from event
+        from datetime import datetime as _datetime
+
+        created_at: _datetime | None = None
+        updated_at: _datetime | None = None
+        if raw_created := raw.get("created"):
+            try:
+                created_at = _datetime.fromisoformat(str(raw_created))
+            except ValueError:
+                pass
+        if raw_updated := raw.get("updated"):
+            try:
+                updated_at = _datetime.fromisoformat(str(raw_updated))
+            except ValueError:
+                pass
+
+        return normalize_document(
+            owner_id=self.owner_id,
+            source_type=SourceType.GOOGLE_CALENDAR,
+            source_id=event_id,
+            title=title,
+            content=content,
+            participants=participants,
+            metadata=metadata,  # type: ignore[arg-type]
+            created_at=created_at,
+            updated_at=updated_at,
+        )
 
     async def health_check(self) -> bool:
         """Verify the Google Calendar API is reachable with stored credentials.

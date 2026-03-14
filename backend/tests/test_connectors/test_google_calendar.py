@@ -286,14 +286,14 @@ class TestBaseConnectorIntegration:
         with pytest.raises(ConnectorError, match="access_token"):
             await conn.fetch_since(None)
 
-    async def test_normalize_not_implemented(self) -> None:
+    async def test_normalize_requires_event_id(self) -> None:
         conn = GoogleCalendarConnector(
             owner_id=uuid.uuid4(),
             connection_id=uuid.uuid4(),
             config=ConnectorConfig(source_type=SourceType.GOOGLE_CALENDAR),
         )
-        with pytest.raises(NotImplementedError, match="TASK-047"):
-            await conn.normalize({})
+        with pytest.raises(ConnectorError, match="missing 'id'"):
+            await conn.normalize({})  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -319,10 +319,10 @@ def _make_connector(
 class TestFetchSinceInitialSync:
     """Initial full sync (cursor=None)."""
 
-    async def test_initial_sync_returns_events_as_errors_until_normalizer(
+    async def test_initial_sync_returns_documents(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Until TASK-047, events appear in errors since normalize raises NotImplementedError."""
+        """TASK-047 normalizer is implemented — events become documents."""
 
         async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
             return httpx.Response(
@@ -330,8 +330,12 @@ class TestFetchSinceInitialSync:
                 json={
                     "kind": "calendar#events",
                     "items": [
-                        {"id": "evt1", "summary": "Meeting 1"},
-                        {"id": "evt2", "summary": "Meeting 2"},
+                        {"id": "evt1", "summary": "Meeting 1",
+                         "start": {"dateTime": "2026-03-14T09:00:00Z"},
+                         "end": {"dateTime": "2026-03-14T10:00:00Z"}},
+                        {"id": "evt2", "summary": "Meeting 2",
+                         "start": {"dateTime": "2026-03-14T11:00:00Z"},
+                         "end": {"dateTime": "2026-03-14T12:00:00Z"}},
                     ],
                     "nextSyncToken": "sync-token-abc",
                 },
@@ -345,12 +349,10 @@ class TestFetchSinceInitialSync:
 
         assert result.new_cursor == "sync-token-abc"
         assert result.has_more is False
-        # No documents yet (normalize not implemented)
-        assert result.success_count == 0
-        # Events appear as errors because normalize raises NotImplementedError
-        assert result.error_count == 2
-        assert result.errors[0].source_id == "evt1"
-        assert result.errors[1].source_id == "evt2"
+        assert result.success_count == 2
+        assert result.error_count == 0
+        assert result.documents[0].source_id == "evt1"
+        assert result.documents[1].source_id == "evt2"
 
 
 class TestFetchSinceIncrementalSync:
@@ -544,6 +546,206 @@ class TestCursorEncoding:
 
 
 # ---------------------------------------------------------------------------
+# TASK-047: Normalize tests
+# ---------------------------------------------------------------------------
+
+
+class TestNormalizeBasic:
+    """Basic normalisation of Google Calendar events."""
+
+    async def test_full_event(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-123",
+            "summary": "Team Standup",
+            "description": "Daily standup meeting",
+            "location": "Room 42",
+            "start": {"dateTime": "2026-03-14T09:00:00+01:00"},
+            "end": {"dateTime": "2026-03-14T09:30:00+01:00"},
+            "attendees": [
+                {"email": "alice@example.com"},
+                {"email": "bob@example.com"},
+            ],
+            "created": "2026-03-01T10:00:00Z",
+            "updated": "2026-03-10T12:00:00Z",
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.source_type == SourceType.GOOGLE_CALENDAR
+        assert doc.source_id == "evt-123"
+        assert doc.title == "Team Standup"
+        assert "Daily standup meeting" in doc.content
+        assert "Ort: Room 42" in doc.content
+        assert doc.participants == ["alice@example.com", "bob@example.com"]
+        assert doc.metadata["start_time"] == "2026-03-14T09:00:00+01:00"
+        assert doc.metadata["end_time"] == "2026-03-14T09:30:00+01:00"
+        assert doc.metadata["location"] == "Room 42"
+        assert doc.metadata["attendee_count"] == 2
+        assert doc.metadata["is_recurring"] is False
+        assert doc.metadata["is_all_day"] is False
+        assert doc.user_id == conn.owner_id
+        assert len(doc.raw_hash) == 64
+
+    async def test_minimal_event(self) -> None:
+        """Event with only id and no optional fields."""
+        conn = _make_connector()
+        raw: dict[str, object] = {"id": "evt-min"}
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.source_id == "evt-min"
+        assert doc.title == "(Kein Titel)"
+        assert doc.participants == []
+        assert doc.metadata["attendee_count"] == 0
+        assert doc.metadata["is_recurring"] is False
+
+    async def test_missing_id_raises(self) -> None:
+        conn = _make_connector()
+        with pytest.raises(ConnectorError, match="missing 'id'"):
+            await conn.normalize({})  # type: ignore[arg-type]
+
+
+class TestNormalizeAllDayEvents:
+    """All-day events use date instead of dateTime."""
+
+    async def test_all_day_event(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-allday",
+            "summary": "Holiday",
+            "start": {"date": "2026-03-14"},
+            "end": {"date": "2026-03-15"},
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.metadata["is_all_day"] is True
+        assert doc.metadata["start_time"] == "2026-03-14"
+        assert doc.metadata["end_time"] == "2026-03-15"
+
+
+class TestNormalizeRecurringEvents:
+    """Recurring events and instances of recurring events."""
+
+    async def test_recurring_with_rrule(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-rec",
+            "summary": "Weekly Sync",
+            "start": {"dateTime": "2026-03-14T10:00:00Z"},
+            "end": {"dateTime": "2026-03-14T11:00:00Z"},
+            "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO"],
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.metadata["is_recurring"] is True
+        assert doc.metadata["recurrence"] == ["RRULE:FREQ=WEEKLY;BYDAY=MO"]
+
+    async def test_recurring_instance(self) -> None:
+        """An instance of a recurring event has recurringEventId."""
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-rec_20260314T100000Z",
+            "summary": "Weekly Sync",
+            "start": {"dateTime": "2026-03-14T10:00:00Z"},
+            "end": {"dateTime": "2026-03-14T11:00:00Z"},
+            "recurringEventId": "evt-rec",
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.metadata["is_recurring"] is True
+
+
+class TestNormalizeParticipants:
+    """Participant extraction edge cases."""
+
+    async def test_attendee_without_email(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-nomail",
+            "summary": "Lunch",
+            "attendees": [
+                {"displayName": "Charlie"},
+                {"email": "dave@example.com"},
+            ],
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        # Only dave has an email
+        assert doc.participants == ["dave@example.com"]
+        assert doc.metadata["attendee_count"] == 1
+
+    async def test_no_attendees(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-solo",
+            "summary": "Focus Time",
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.participants == []
+        assert doc.metadata["attendee_count"] == 0
+
+
+class TestNormalizeContentBuilding:
+    """Content is built from title + description + location."""
+
+    async def test_content_without_description(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-nodesc",
+            "summary": "Quick Chat",
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert doc.content == "Quick Chat"
+
+    async def test_content_with_all_parts(self) -> None:
+        conn = _make_connector()
+        raw: dict[str, object] = {
+            "id": "evt-full",
+            "summary": "Planning",
+            "description": "Sprint planning session",
+            "location": "Office",
+        }
+        doc = await conn.normalize(raw)  # type: ignore[arg-type]
+
+        assert "Planning" in doc.content
+        assert "Sprint planning session" in doc.content
+        assert "Ort: Office" in doc.content
+
+
+class TestNormalizeFetchSinceIntegration:
+    """After TASK-047, fetch_since should produce documents instead of errors."""
+
+    async def test_fetch_since_produces_documents(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
+            return httpx.Response(
+                200,
+                json={
+                    "kind": "calendar#events",
+                    "items": [
+                        {
+                            "id": "evt1",
+                            "summary": "Meeting 1",
+                            "start": {"dateTime": "2026-03-14T09:00:00Z"},
+                            "end": {"dateTime": "2026-03-14T10:00:00Z"},
+                        },
+                    ],
+                    "nextSyncToken": "sync-after",
+                },
+                request=httpx.Request("GET", url),
+            )
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        conn = _make_connector()
+        result = await conn.fetch_since(None)
+
+        assert result.success_count == 1
+        assert result.error_count == 0
+        assert result.documents[0].source_id == "evt1"
+        assert result.documents[0].title == "Meeting 1"
 # Helpers
 # ---------------------------------------------------------------------------
 

@@ -786,10 +786,10 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-E",
       "claimed_at": "2026-03-14T13:35:00Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T14:00:00Z",
       "blocked_by": [
         "TASK-044",
         "TASK-046"
