@@ -1101,10 +1101,10 @@
       "priority": "P0",
       "effort": "S",
       "area": "LLM",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "2026-03-14T11:37:31Z",
+      "completed_at": "2026-03-14T11:39:34Z",
       "blocked_by": [
         "TASK-068",
         "TASK-034"
