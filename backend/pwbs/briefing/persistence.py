@@ -38,6 +38,7 @@ __all__ = [
 _EXPIRY_DURATIONS: dict[BriefingType, timedelta] = {
     BriefingType.MORNING: timedelta(hours=24),
     BriefingType.MEETING_PREP: timedelta(hours=48),
+    BriefingType.WEEKLY: timedelta(days=7),
 }
 
 
@@ -52,6 +53,7 @@ class PersistenceConfig:
 
     morning_expiry_hours: int = 24
     meeting_expiry_hours: int = 48
+    weekly_expiry_hours: int = 168  # 7 days
 
 
 @dataclass(frozen=True, slots=True)
@@ -331,6 +333,8 @@ class BriefingPersistenceService:
             return now + timedelta(hours=self._config.morning_expiry_hours)
         elif briefing_type == BriefingType.MEETING_PREP:
             return now + timedelta(hours=self._config.meeting_expiry_hours)
+        elif briefing_type == BriefingType.WEEKLY:
+            return now + timedelta(hours=self._config.weekly_expiry_hours)
         # Fallback: 24h for unknown types
         return now + timedelta(hours=24)
 

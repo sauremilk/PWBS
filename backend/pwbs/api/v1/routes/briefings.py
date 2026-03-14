@@ -346,6 +346,29 @@ async def _run_briefing_generation(
             # For morning briefings, assemble context
             if briefing_type == BriefingType.MORNING:
                 context: dict[str, Any] = trigger_context or {}
+            elif briefing_type == BriefingType.WEEKLY:
+                from pwbs.briefing.weekly_context import (
+                    NullWeeklyGraphService,
+                    WeeklyContextAssembler,
+                )
+                from pwbs.search.service import SemanticSearchService
+
+                search_svc = SemanticSearchService(session)
+                assembler = WeeklyContextAssembler(
+                    session=session,
+                    search_service=search_svc,
+                    graph_service=NullWeeklyGraphService(),
+                )
+                weekly_ctx = await assembler.assemble(user_id=user_id)
+                context = {
+                    "week_start": weekly_ctx.week_start,
+                    "week_end": weekly_ctx.week_end,
+                    "top_topics": weekly_ctx.top_topics,
+                    "decisions": weekly_ctx.decisions,
+                    "project_progress": weekly_ctx.project_progress,
+                    "open_items": weekly_ctx.open_items,
+                    "recent_documents": weekly_ctx.recent_documents,
+                }
             else:
                 context = trigger_context or {}
 

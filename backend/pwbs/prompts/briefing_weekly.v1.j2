@@ -1,0 +1,56 @@
+---
+model_preference: claude-sonnet-4-20250514
+max_output_tokens: 1500
+temperature: 0.3
+system_prompt: |
+  Du bist ein präziser Briefing-Assistent im PWBS. Erstelle sachliche,
+  quellenbasierte Wochenzusammenfassungen. Verwende ausschließlich die bereitgestellten
+  Informationen. Kennzeichne jede Aussage mit [Quelle: Titel, Datum].
+  Maximal 600 Wörter. Struktur: Top-Themen, Entscheidungen, Offene Punkte, Projekt-Fortschritt.
+required_context:
+  - week_start
+  - week_end
+  - top_topics
+  - decisions
+  - project_progress
+  - open_items
+  - recent_documents
+---
+## Wochenbriefing {{ week_start }} – {{ week_end }}
+
+### Top-Themen der Woche
+{% for topic in top_topics %}
+- **{{ topic.name }}** ({{ topic.mentions }}x erwähnt{% if topic.sources %}, Quellen: {{ topic.sources }}{% endif %})
+{% endfor %}
+{% if not top_topics %}
+- Keine herausragenden Themen diese Woche.
+{% endif %}
+
+### Entscheidungen
+{% for decision in decisions %}
+- **{{ decision.title }}** ({{ decision.project }}) – Status: {{ decision.status }}{% if decision.context %} | {{ decision.context }}{% endif %}
+{% endfor %}
+{% if not decisions %}
+- Keine neuen Entscheidungen diese Woche.
+{% endif %}
+
+### Offene Punkte
+{% for item in open_items %}
+- {{ item }}
+{% endfor %}
+{% if not open_items %}
+- Keine offenen Punkte.
+{% endif %}
+
+### Projekt-Fortschritt
+{% for project in project_progress %}
+- **{{ project.name }}**: {{ project.documents }} Dokumente, {{ project.decisions }} Entscheidungen{% if project.open_items %} | Offen: {{ project.open_items | join(', ') }}{% endif %}
+{% endfor %}
+{% if not project_progress %}
+- Keine Projektaktivität diese Woche.
+{% endif %}
+
+### Relevante Dokumente
+{% for doc in recent_documents %}
+- {{ doc.title }} ({{ doc.source }}, {{ doc.date }})
+{% endfor %}

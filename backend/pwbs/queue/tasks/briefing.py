@@ -82,14 +82,41 @@ def generate_weekly_briefings(self: object) -> dict[str, object]:
 
 
 async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
-    """Generate briefings for all active users."""
+    """Generate briefings for all active users.
+
+    Wires through to BriefingGenerator + BriefingPersistenceService for
+    actual LLM-based generation with source references.
+    """
     from sqlalchemy import select
 
+    from pwbs.briefing.generator import BriefingGenerator
+    from pwbs.briefing.generator import BriefingType as GenBriefingType
+    from pwbs.briefing.persistence import BriefingPersistenceService
+    from pwbs.core.llm_gateway import LLMGateway
     from pwbs.db.postgres import get_session_factory
     from pwbs.models.user import User
+    from pwbs.prompts.registry import PromptRegistry
+    from pwbs.schemas.enums import BriefingType
 
     factory = get_session_factory()
     processed = 0
+    failed = 0
+
+    # Map string type to enum
+    bt_map: dict[str, BriefingType] = {
+        "morning": BriefingType.MORNING,
+        "weekly": BriefingType.WEEKLY,
+    }
+    gen_bt_map: dict[str, GenBriefingType] = {
+        "morning": GenBriefingType.MORNING,
+        "weekly": GenBriefingType.WEEKLY,
+    }
+
+    schema_bt = bt_map.get(briefing_type)
+    gen_bt = gen_bt_map.get(briefing_type)
+    if schema_bt is None or gen_bt is None:
+        logger.error("Unknown briefing_type: %s", briefing_type)
+        return {"users_processed": 0, "briefing_type": briefing_type}
 
     async with factory() as db:
         stmt = select(User)
@@ -103,21 +130,72 @@ async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
                 briefing_type,
                 user.id,
             )
-            # TODO: Wire to BriefingAgent when available
-            # The BriefingAgent.generate() method will:
-            # 1. Call SearchAgent for relevant documents
-            # 2. Call GraphAgent for relationships
-            # 3. Call LLMGateway for generation
-            # 4. Persist briefing with source references
+
+            async with factory() as db:
+                # Build context depending on briefing type
+                context: dict[str, object] = {}
+
+                if briefing_type == "weekly":
+                    from pwbs.briefing.weekly_context import (
+                        NullWeeklyGraphService,
+                        WeeklyContextAssembler,
+                    )
+                    from pwbs.search.service import SemanticSearchService
+
+                    search_svc = SemanticSearchService(db)
+                    assembler = WeeklyContextAssembler(
+                        session=db,
+                        search_service=search_svc,
+                        graph_service=NullWeeklyGraphService(),
+                    )
+                    weekly_ctx = await assembler.assemble(user_id=user.id)
+                    context = {
+                        "week_start": weekly_ctx.week_start,
+                        "week_end": weekly_ctx.week_end,
+                        "top_topics": weekly_ctx.top_topics,
+                        "decisions": weekly_ctx.decisions,
+                        "project_progress": weekly_ctx.project_progress,
+                        "open_items": weekly_ctx.open_items,
+                        "recent_documents": weekly_ctx.recent_documents,
+                    }
+
+                # Generate via LLM
+                llm = LLMGateway()
+                registry = PromptRegistry()
+                generator = BriefingGenerator(llm, registry)
+
+                llm_result = await generator.generate(
+                    briefing_type=gen_bt,
+                    context=context,
+                    user_id=user.id,
+                )
+
+                # Persist
+                persistence = BriefingPersistenceService(db)
+                await persistence.save(
+                    user_id=user.id,
+                    briefing_type=schema_bt,
+                    title=f"{briefing_type.replace('_', ' ').title()} Briefing",
+                    content=llm_result.content,
+                    source_chunks=[],
+                    trigger_context={"scheduled": True, "type": briefing_type},
+                )
+                await db.commit()
+
             processed += 1
         except Exception:
+            failed += 1
             logger.exception(
                 "Failed to generate %s briefing for user_id=%s",
                 briefing_type,
                 user.id,
             )
 
-    return {"users_processed": processed, "briefing_type": briefing_type}
+    return {
+        "users_processed": processed,
+        "failed": failed,
+        "briefing_type": briefing_type,
+    }
 
 
 @app.task(

@@ -138,7 +138,7 @@ class TestBriefingInvalid:
 
     def test_invalid_briefing_type(self) -> None:
         with pytest.raises(ValidationError):
-            Briefing(**_make_briefing(briefing_type="weekly"))
+            Briefing(**_make_briefing(briefing_type="nonexistent_type"))
 
 
 # ---------------------------------------------------------------------------
@@ -200,7 +200,7 @@ class TestBriefingResponse:
 
 class TestBriefingTypeEnum:
     def test_values(self) -> None:
-        expected = {"morning", "meeting_prep"}
+        expected = {"morning", "meeting_prep", "weekly"}
         actual = {bt.value for bt in BriefingType}
         assert actual == expected
 

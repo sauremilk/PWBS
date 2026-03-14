@@ -44,6 +44,7 @@ class BriefingType(str, Enum):
 
     MORNING = "morning"
     MEETING_PREP = "meeting_prep"
+    WEEKLY = "weekly"
 
 
 class ConnectionStatus(str, Enum):
