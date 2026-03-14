@@ -1,0 +1,198 @@
+﻿# PWBS Helm Chart  Default Values
+
+# -- API Server --------------------------------------------------------
+api:
+  replicas: 2
+  image:
+    repository: ghcr.io/sauremilk/pwbs-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: "1"
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    ENVIRONMENT: production
+    LOG_LEVEL: INFO
+
+# -- Celery Workers ----------------------------------------------------
+workers:
+  ingestion:
+    replicas: 1
+    queues: "ingestion.high,ingestion.bulk"
+    concurrency: 4
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+  processing:
+    replicas: 1
+    queues: "processing.embed,processing.extract"
+    concurrency: 2
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: "2"
+  briefing:
+    replicas: 1
+    queues: "briefing.generate"
+    concurrency: 2
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# -- Celery Beat -------------------------------------------------------
+beat:
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+# -- LLM Configuration ------------------------------------------------
+llm:
+  provider: claude  # claude | gpt4 | ollama
+  anthropicApiKey: ""
+  openaiApiKey: ""
+  ollamaModel: llama3.1
+
+# -- Ollama (optional) ------------------------------------------------
+ollama:
+  enabled: false
+  image:
+    repository: ollama/ollama
+    tag: latest
+  resources:
+    requests:
+      memory: 4Gi
+      cpu: "2"
+    limits:
+      memory: 8Gi
+      cpu: "4"
+  persistence:
+    size: 50Gi
+    storageClass: ""
+
+# -- PostgreSQL --------------------------------------------------------
+postgres:
+  image:
+    repository: postgres
+    tag: 16-alpine
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: "1"
+
+# -- Weaviate ----------------------------------------------------------
+weaviate:
+  image:
+    repository: semitechnologies/weaviate
+    tag: 1.28.2
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: "1"
+
+# -- Neo4j -------------------------------------------------------------
+neo4j:
+  image:
+    repository: neo4j
+    tag: 5.26-community
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: "1"
+
+# -- Redis -------------------------------------------------------------
+redis:
+  image:
+    repository: redis
+    tag: 7-alpine
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# -- Frontend ----------------------------------------------------------
+frontend:
+  replicas: 2
+  image:
+    repository: ghcr.io/sauremilk/pwbs-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  service:
+    type: ClusterIP
+    port: 3000
+
+# -- Ingress -----------------------------------------------------------
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: pwbs.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: frontend
+  tls: []
+
+# -- Persistence -------------------------------------------------------
+persistence:
+  postgres:
+    size: 20Gi
+    storageClass: ""
+  weaviate:
+    size: 50Gi
+    storageClass: ""
+  neo4j:
+    size: 20Gi
+    storageClass: ""
+  redis:
+    size: 5Gi
+    storageClass: ""
+
+# -- Secrets (referenced from external Secret) -------------------------
+# Create secret named "pwbs-secrets" with these keys:
+#   JWT_SECRET_KEY, ENCRYPTION_MASTER_KEY, POSTGRES_PASSWORD, NEO4J_PASSWORD
+secretName: pwbs-secrets

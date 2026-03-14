@@ -1,0 +1,229 @@
+﻿---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pwbs.fullname" . }}-postgres
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  serviceName: {{ include "pwbs.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgres
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: pwbs
+            - name: POSTGRES_USER
+              value: pwbs
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "pwbs", "-d", "pwbs"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.persistence.postgres.storageClass }}
+        storageClassName: {{ .Values.persistence.postgres.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.postgres.size }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pwbs.fullname" . }}-weaviate
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: weaviate
+spec:
+  serviceName: {{ include "pwbs.fullname" . }}-weaviate
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: weaviate
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: weaviate
+    spec:
+      containers:
+        - name: weaviate
+          image: "{{ .Values.weaviate.image.repository }}:{{ .Values.weaviate.image.tag }}"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QUERY_DEFAULTS_LIMIT
+              value: "25"
+            - name: AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED
+              value: "false"
+            - name: PERSISTENCE_DATA_PATH
+              value: "/var/lib/weaviate"
+            - name: DEFAULT_VECTORIZER_MODULE
+              value: "none"
+            - name: CLUSTER_HOSTNAME
+              value: "node1"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/weaviate
+          livenessProbe:
+            httpGet:
+              path: /v1/.well-known/ready
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.weaviate.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.persistence.weaviate.storageClass }}
+        storageClassName: {{ .Values.persistence.weaviate.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.weaviate.size }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pwbs.fullname" . }}-neo4j
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  serviceName: {{ include "pwbs.fullname" . }}-neo4j
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: neo4j
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: neo4j
+    spec:
+      containers:
+        - name: neo4j
+          image: "{{ .Values.neo4j.image.repository }}:{{ .Values.neo4j.image.tag }}"
+          ports:
+            - containerPort: 7474
+            - containerPort: 7687
+          env:
+            - name: NEO4J_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: NEO4J_PASSWORD
+            - name: NEO4J_AUTH
+              value: "neo4j/$(NEO4J_PASSWORD)"
+            - name: NEO4J_PLUGINS
+              value: '["apoc"]'
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command: ["neo4j", "status"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.neo4j.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.persistence.neo4j.storageClass }}
+        storageClassName: {{ .Values.persistence.neo4j.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.neo4j.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pwbs.fullname" . }}-redis
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: redis
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          ports:
+            - containerPort: 6379
+          command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "pwbs.fullname" . }}-redis
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pwbs.fullname" . }}-redis
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  {{- if .Values.persistence.redis.storageClass }}
+  storageClassName: {{ .Values.persistence.redis.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.redis.size }}

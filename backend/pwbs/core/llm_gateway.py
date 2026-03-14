@@ -42,6 +42,7 @@ class LLMProvider(str, Enum):
 
     CLAUDE = "claude"
     GPT4 = "gpt4"
+    OLLAMA = "ollama"
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,8 +51,10 @@ class LLMConfig:
 
     claude_api_key: str = ""
     openai_api_key: str = ""
+    ollama_base_url: str = ""
     claude_model: str = "claude-sonnet-4-20250514"
     gpt4_model: str = "gpt-4-turbo"
+    ollama_model: str = "llama3.1"
     default_provider: LLMProvider = LLMProvider.CLAUDE
     max_retries: int = 3
     base_retry_delay: float = 1.0
@@ -216,6 +219,63 @@ class GPT4Provider(BaseLLMProvider):
 
 
 # ------------------------------------------------------------------
+# Ollama provider (local / self-hosting, TASK-145)
+# ------------------------------------------------------------------
+
+
+class OllamaProvider(BaseLLMProvider):
+    """Ollama local LLM provider for self-hosting / on-premise.
+
+    Uses the OpenAI-compatible /v1/chat/completions endpoint that Ollama
+    exposes since v0.1.14+.
+    """
+
+    def __init__(self, base_url: str, model: str) -> None:
+        from httpx import AsyncClient
+
+        # Ollama exposes an OpenAI-compatible API at /v1
+        self._base_url = base_url.rstrip("/")
+        self._client = AsyncClient(base_url=self._base_url, timeout=120.0)
+        self._model = model
+
+    @property
+    def provider_type(self) -> LLMProvider:
+        return LLMProvider.OLLAMA
+
+    async def generate(
+        self,
+        request: LLMRequest,
+        model: str,
+        max_tokens: int,
+        temperature: float,
+    ) -> tuple[str, int, int]:
+        payload: dict[str, Any] = {
+            "model": model or self._model,
+            "messages": [
+                {"role": "system", "content": request.system_prompt},
+                {"role": "user", "content": request.user_prompt},
+            ],
+            "options": {
+                "temperature": temperature,
+                "num_predict": max_tokens,
+            },
+            "stream": False,
+        }
+        if request.json_mode:
+            payload["format"] = "json"
+
+        response = await self._client.post("/api/chat", json=payload)
+        response.raise_for_status()
+        data = response.json()
+
+        content = data.get("message", {}).get("content", "")
+        # Ollama returns token counts in eval_count / prompt_eval_count
+        input_tokens = data.get("prompt_eval_count", 0)
+        output_tokens = data.get("eval_count", 0)
+        return content, input_tokens, output_tokens
+
+
+# ------------------------------------------------------------------
 # Cost estimation
 # ------------------------------------------------------------------
 
@@ -226,6 +286,7 @@ _COST_PER_1M: dict[str, tuple[float, float]] = {
     "claude-3-5-sonnet-20241022": (3.0, 15.0),
     "gpt-4-turbo": (10.0, 30.0),
     "gpt-4o": (2.5, 10.0),
+    # Ollama / local models: no API cost
 }
 
 
@@ -272,6 +333,11 @@ class LLMGateway:
                     api_key=config.openai_api_key,
                     model=config.gpt4_model,
                 )
+            if config.ollama_base_url:
+                self._providers[LLMProvider.OLLAMA] = OllamaProvider(
+                    base_url=config.ollama_base_url,
+                    model=config.ollama_model,
+                )
 
     @property
     def config(self) -> LLMConfig:
@@ -317,6 +383,8 @@ class LLMGateway:
                 self._config.claude_model
                 if provider_type == LLMProvider.CLAUDE
                 else self._config.gpt4_model
+                if provider_type == LLMProvider.GPT4
+                else self._config.ollama_model
             )
 
             try:
@@ -373,7 +441,7 @@ class LLMGateway:
         If *preference* is set: preference → other providers.
         Default: Claude → GPT-4.
         """
-        default_order = [LLMProvider.CLAUDE, LLMProvider.GPT4]
+        default_order = [LLMProvider.CLAUDE, LLMProvider.GPT4, LLMProvider.OLLAMA]
 
         if preference is not None:
             rest = [p for p in default_order if p != preference]

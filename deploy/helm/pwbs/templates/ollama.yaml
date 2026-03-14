@@ -1,0 +1,49 @@
+﻿{{- if .Values.ollama.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pwbs.fullname" . }}-ollama
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama
+spec:
+  serviceName: {{ include "pwbs.fullname" . }}-ollama
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ollama
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+          ports:
+            - containerPort: 11434
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.ollama.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: models
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.ollama.persistence.storageClass }}
+        storageClassName: {{ .Values.ollama.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.ollama.persistence.size }}
+{{- end }}

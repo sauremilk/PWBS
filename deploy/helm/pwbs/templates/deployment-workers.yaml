@@ -1,0 +1,103 @@
+﻿{{- range $name, $worker := .Values.workers }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pwbs.fullname" $ }}-worker-{{ $name }}
+  labels:
+    {{- include "pwbs.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: worker-{{ $name }}
+spec:
+  replicas: {{ $worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: worker-{{ $name }}
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: worker-{{ $name }}
+    spec:
+      containers:
+        - name: worker
+          image: "{{ $.Values.api.image.repository }}:{{ $.Values.api.image.tag }}"
+          imagePullPolicy: {{ $.Values.api.image.pullPolicy }}
+          command:
+            - celery
+            - -A
+            - pwbs.queue.celery_app
+            - worker
+            - -Q
+            - {{ $worker.queues }}
+            - -c
+            - {{ $worker.concurrency | quote }}
+            - --loglevel=info
+          envFrom:
+            - configMapRef:
+                name: {{ include "pwbs.fullname" $ }}-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretName }}
+                  key: POSTGRES_PASSWORD
+            - name: NEO4J_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretName }}
+                  key: NEO4J_PASSWORD
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretName }}
+                  key: JWT_SECRET_KEY
+            - name: ENCRYPTION_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.secretName }}
+                  key: ENCRYPTION_MASTER_KEY
+          resources:
+            {{- toYaml $worker.resources | nindent 12 }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pwbs.fullname" . }}-beat
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pwbs.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: beat
+  template:
+    metadata:
+      labels:
+        {{- include "pwbs.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: beat
+    spec:
+      containers:
+        - name: beat
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          command:
+            - celery
+            - -A
+            - pwbs.queue.celery_app
+            - beat
+            - --loglevel=info
+          envFrom:
+            - configMapRef:
+                name: {{ include "pwbs.fullname" . }}-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: POSTGRES_PASSWORD
+          resources:
+            {{- toYaml .Values.beat.resources | nindent 12 }}

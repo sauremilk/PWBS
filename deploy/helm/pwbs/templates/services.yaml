@@ -1,0 +1,117 @@
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-api
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  type: {{ .Values.api.service.type }}
+  ports:
+    - port: {{ .Values.api.service.port }}
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-frontend
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-postgres
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-weaviate
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: weaviate
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: weaviate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-neo4j
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7687
+      targetPort: 7687
+    - port: 7474
+      targetPort: 7474
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-redis
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+{{- if .Values.ollama.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pwbs.fullname" . }}-ollama
+  labels:
+    {{- include "pwbs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama
+spec:
+  type: ClusterIP
+  ports:
+    - port: 11434
+      targetPort: 11434
+  selector:
+    {{- include "pwbs.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama
+{{- end }}

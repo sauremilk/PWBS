@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     #  LLM APIs
     anthropic_api_key: SecretStr = SecretStr("")
     openai_api_key: SecretStr = SecretStr("")
+    ollama_base_url: str = ""  # e.g. http://ollama:11434 for self-hosting
+    ollama_model: str = "llama3.1"
+    llm_provider: str = "claude"  # claude | gpt4 | ollama
 
     #  Authentication
     jwt_secret_key: SecretStr
