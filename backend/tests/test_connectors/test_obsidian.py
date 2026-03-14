@@ -1,4 +1,4 @@
-"""Tests for Obsidian Vault connector — File-System-Watcher (TASK-051)."""
+"""Tests for Obsidian Vault connector — File-System-Watcher + Markdown-Parser (TASK-051..052)."""
 
 from __future__ import annotations
 
@@ -16,8 +16,11 @@ from pwbs.connectors.obsidian import (
     ObsidianFileHandler,
     ObsidianWatcher,
     _EXCLUDE_DIRS,
+    _extract_tags,
+    _extract_wikilinks,
     _file_to_raw,
     _is_excluded,
+    _parse_frontmatter,
     scan_vault_files,
     validate_vault_path,
 )
@@ -450,16 +453,14 @@ class TestObsidianConnectorBasics:
 
 class TestFetchSince:
     @pytest.mark.asyncio
-    async def test_full_scan_returns_errors_until_normalizer(self, tmp_path: Path) -> None:
-        """Until TASK-052, files appear as errors."""
+    async def test_full_scan_produces_documents(self, tmp_path: Path) -> None:
+        """After TASK-052, files produce documents."""
         vault = _create_vault(tmp_path)
         connector = _make_connector(vault_path=str(vault))
 
         result = await connector.fetch_since(None)
-        # 3 files in vault → 3 errors (normalizer not implemented)
-        assert result.error_count == 3
-        assert result.success_count == 0
-        assert all("TASK-052" in e.error for e in result.errors)
+        assert result.success_count == 3
+        assert result.error_count == 0
 
     @pytest.mark.asyncio
     async def test_full_scan_source_ids(self, tmp_path: Path) -> None:
@@ -467,7 +468,7 @@ class TestFetchSince:
         connector = _make_connector(vault_path=str(vault))
 
         result = await connector.fetch_since(None)
-        source_ids = {e.source_id for e in result.errors}
+        source_ids = {d.source_id for d in result.documents}
         assert "note1.md" in source_ids
         assert "note2.md" in source_ids
         assert "subfolder/deep.md" in source_ids
@@ -489,7 +490,7 @@ class TestFetchSince:
 
         # Use a cursor in the past → all files should match
         result = await connector.fetch_since("2020-01-01T00:00:00+00:00")
-        assert result.error_count == 3
+        assert result.success_count == 3
 
     @pytest.mark.asyncio
     async def test_invalid_vault_path_raises(self) -> None:
@@ -509,10 +510,9 @@ class TestFetchSince:
         vault = _create_vault(tmp_path)
         connector = _make_connector(vault_path=str(vault))
         result = await connector.fetch_since(None)
-        # Even with errors, cursor should be None (no docs)
-        # because normalize raises NotImplementedError before mtime tracking
-        # Once TASK-052 is done, this will return a timestamp cursor
-        assert result.new_cursor is None
+        # After TASK-052, cursor should be set to latest mtime
+        assert result.new_cursor is not None
+        assert "T" in result.new_cursor  # ISO format
 
     @pytest.mark.asyncio
     async def test_invalid_cursor_falls_back_to_full_scan(self, tmp_path: Path) -> None:
@@ -520,7 +520,7 @@ class TestFetchSince:
         connector = _make_connector(vault_path=str(vault))
         # Invalid cursor → treated as None (full scan)
         result = await connector.fetch_since("not-a-date")
-        assert result.error_count == 3
+        assert result.success_count == 3
 
     @pytest.mark.asyncio
     async def test_deleted_paths_included_in_sync(self, tmp_path: Path) -> None:
@@ -532,8 +532,9 @@ class TestFetchSince:
 
         result = await connector.fetch_since("2099-01-01T00:00:00+00:00")
         # Future cursor → no regular files, but 1 deleted file
-        error_ids = {e.source_id for e in result.errors}
-        assert "old_note.md" in error_ids
+        doc_ids = {d.source_id for d in result.documents}
+        assert "old_note.md" in doc_ids
+        assert result.documents[0].metadata.get("deleted") is True
 
     @pytest.mark.asyncio
     async def test_deleted_paths_cleared_after_sync(self, tmp_path: Path) -> None:
@@ -581,10 +582,172 @@ class TestHealthCheck:
 
 
 class TestNormalize:
-    def test_raises_not_implemented(self) -> None:
+    def test_basic_normalize(self, tmp_path: Path) -> None:
+        vault = _create_vault(tmp_path, {"hello.md": "# Hello\nWorld"})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "hello.md", vault)
+        doc = connector.normalize(raw)
+        assert doc.source_id == "hello.md"
+        assert "# Hello" in doc.content
+        assert doc.title == "hello"  # filename stem when no frontmatter title
+
+    def test_with_frontmatter_title(self, tmp_path: Path) -> None:
+        content = "---\ntitle: My Note\ntags: [python, code]\n---\n# Content here"
+        vault = _create_vault(tmp_path, {"note.md": content})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "note.md", vault)
+        doc = connector.normalize(raw)
+        assert doc.title == "My Note"
+        assert "python" in doc.metadata["tags"]
+        assert "# Content here" in doc.content
+        # Frontmatter should NOT be in the content
+        assert "---" not in doc.content
+
+    def test_wikilinks_in_metadata(self, tmp_path: Path) -> None:
+        content = "See [[Project Alpha]] and [[Meeting Notes|Notes]]."
+        vault = _create_vault(tmp_path, {"links.md": content})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "links.md", vault)
+        doc = connector.normalize(raw)
+        wikilinks = doc.metadata.get("wikilinks", [])
+        targets = {link["target"] for link in wikilinks}
+        assert "Project Alpha" in targets
+        assert "Meeting Notes" in targets
+
+    def test_tags_extracted(self, tmp_path: Path) -> None:
+        content = "Some text #python and #tools/build here"
+        vault = _create_vault(tmp_path, {"tags.md": content})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "tags.md", vault)
+        doc = connector.normalize(raw)
+        tags = doc.metadata.get("tags", [])
+        assert "python" in tags
+        assert "tools/build" in tags
+
+    def test_source_type_obsidian(self, tmp_path: Path) -> None:
+        vault = _create_vault(tmp_path, {"test.md": "content"})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "test.md", vault)
+        doc = connector.normalize(raw)
+        assert doc.source_type == SourceType.OBSIDIAN
+
+    def test_missing_path_raises(self) -> None:
         connector = _make_connector()
-        with pytest.raises(NotImplementedError, match="TASK-052"):
-            connector.normalize({"relative_path": "test.md"})
+        with pytest.raises(ConnectorError, match="missing 'relative_path'"):
+            connector.normalize({"content": "text"})
+
+    def test_deleted_file(self, tmp_path: Path) -> None:
+        connector = _make_connector(vault_path=str(tmp_path))
+        raw: dict[str, object] = {
+            "relative_path": "gone.md",
+            "content": "",
+            "filename": "gone",
+            "deleted": True,
+        }
+        doc = connector.normalize(raw)
+        assert doc.source_id == "gone.md"
+        assert doc.content == ""
+        assert doc.metadata.get("deleted") is True
+
+    def test_frontmatter_not_in_content(self, tmp_path: Path) -> None:
+        content = "---\ntitle: Test\ndate: 2026-01-15\n---\n\nActual content"
+        vault = _create_vault(tmp_path, {"fm.md": content})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "fm.md", vault)
+        doc = connector.normalize(raw)
+        assert "title: Test" not in doc.content
+        assert "Actual content" in doc.content
+
+    def test_aliases_preserved(self, tmp_path: Path) -> None:
+        content = "---\ntitle: Main\naliases: [Alias1, Alias2]\n---\nBody"
+        vault = _create_vault(tmp_path, {"alias.md": content})
+        connector = _make_connector(vault_path=str(vault))
+        raw = _file_to_raw(vault / "alias.md", vault)
+        doc = connector.normalize(raw)
+        assert doc.metadata.get("aliases") == ["Alias1", "Alias2"]
+
+
+# ---------------------------------------------------------------------------
+# Markdown parsing helpers (TASK-052)
+# ---------------------------------------------------------------------------
+
+
+class TestParseFrontmatter:
+    def test_basic_frontmatter(self) -> None:
+        content = "---\ntitle: Hello\ntags: [a, b]\n---\n# Content"
+        metadata, body = _parse_frontmatter(content)
+        assert metadata["title"] == "Hello"
+        assert metadata["tags"] == ["a", "b"]
+        assert body.strip() == "# Content"
+
+    def test_no_frontmatter(self) -> None:
+        content = "# Just Markdown\nNo frontmatter here"
+        metadata, body = _parse_frontmatter(content)
+        assert metadata == {}
+        assert "# Just Markdown" in body
+
+    def test_empty_frontmatter(self) -> None:
+        content = "---\n---\nBody"
+        metadata, body = _parse_frontmatter(content)
+        assert metadata == {}
+        assert "Body" in body
+
+    def test_complex_frontmatter(self) -> None:
+        content = "---\ntitle: Complex\ndate: 2026-01-15\ncustom_field: value\n---\n# Doc"
+        metadata, body = _parse_frontmatter(content)
+        assert metadata["title"] == "Complex"
+        assert metadata["custom_field"] == "value"
+
+
+class TestExtractWikilinks:
+    def test_simple_link(self) -> None:
+        links = _extract_wikilinks("See [[Page One]] for details.")
+        assert len(links) == 1
+        assert links[0]["target"] == "Page One"
+
+    def test_link_with_display(self) -> None:
+        links = _extract_wikilinks("Check [[Real Page|Displayed Text]].")
+        assert len(links) == 1
+        assert links[0]["target"] == "Real Page"
+        assert links[0]["display"] == "Displayed Text"
+
+    def test_multiple_links(self) -> None:
+        text = "See [[A]], [[B|Display]], and [[C]]."
+        links = _extract_wikilinks(text)
+        targets = {l["target"] for l in links}
+        assert targets == {"A", "B", "C"}
+
+    def test_no_links(self) -> None:
+        assert _extract_wikilinks("No links here.") == []
+
+    def test_deduplicates(self) -> None:
+        links = _extract_wikilinks("[[Same]] and [[Same]] again.")
+        assert len(links) == 1
+
+
+class TestExtractTags:
+    def test_simple_tag(self) -> None:
+        tags = _extract_tags("Some text #python here")
+        assert "python" in tags
+
+    def test_nested_tag(self) -> None:
+        tags = _extract_tags("Tagged #parent/child here")
+        assert "parent/child" in tags
+
+    def test_multiple_tags(self) -> None:
+        tags = _extract_tags("#alpha #beta #gamma")
+        assert tags == ["alpha", "beta", "gamma"]
+
+    def test_no_tags(self) -> None:
+        assert _extract_tags("No tags here.") == []
+
+    def test_tag_at_line_start(self) -> None:
+        tags = _extract_tags("#beginning of line")
+        assert "beginning" in tags
+
+    def test_deduplicates_and_sorts(self) -> None:
+        tags = _extract_tags("#b #a #b #a")
+        assert tags == ["a", "b"]
 
 
 # ---------------------------------------------------------------------------

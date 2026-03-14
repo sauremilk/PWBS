@@ -1,4 +1,5 @@
-"""Obsidian Vault connector with filesystem watcher (TASK-051).
+"""Obsidian Vault connector with filesystem watcher (TASK-051) and
+Markdown parser (TASK-052).
 
 Implements ``BaseConnector`` for local Obsidian vaults.  Unlike the OAuth-based
 connectors, Obsidian uses direct filesystem access:
@@ -12,30 +13,41 @@ connectors, Obsidian uses direct filesystem access:
 - ``.obsidian/``, ``.git/``, ``.trash/`` and similar configuration directories
   are excluded from scanning and watching.
 
+TASK-051 provides:
+- Vault path validation and recursive ``.md`` file scanning
+- ``ObsidianWatcher`` for real-time filesystem monitoring
+- ``fetch_since()`` for polling-based sync
+
+TASK-052 adds:
+- ``normalize()`` implementation with YAML-Frontmatter parsing
+- Wikilink extraction ``[[Page Name]]`` and ``[[Page Name|Display Text]]``
+- Tag extraction ``#tag`` and nested ``#parent/child``
+- Content-Type is ``MARKDOWN`` (Frontmatter stripped from content)
+
 References:
 - Architecture: D1 §3.1 (Connector table: File-System-Watcher via watchdog)
 - PRD: D4 US-1.4 / F-006
-
-TASK-052 will add:
-- ``normalize()`` implementation (Markdown-Parser with Frontmatter + Link extraction)
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import frontmatter
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from pwbs.connectors.base import BaseConnector, ConnectorConfig, SyncError, SyncResult
+from pwbs.connectors.normalizer import normalize_document
 from pwbs.core.exceptions import ConnectorError
-from pwbs.schemas.enums import SourceType
+from pwbs.schemas.enums import ContentType, SourceType
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -130,6 +142,72 @@ def _file_to_raw(file_path: Path, vault_root: Path) -> dict[str, object]:
         "size_bytes": stat.st_size,
         "filename": file_path.stem,
     }
+
+
+# ---------------------------------------------------------------------------
+# Markdown parsing helpers (TASK-052)
+# ---------------------------------------------------------------------------
+
+# Matches [[Page Name]] or [[Page Name|Display Text]]
+_WIKILINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
+
+# Matches #tag or #parent/child (but not inside code blocks or URLs)
+# Must be preceded by whitespace or start of line
+_TAG_RE = re.compile(r"(?:^|(?<=\s))#([\w][\w/\-]*)", re.UNICODE)
+
+
+def _parse_frontmatter(content: str) -> tuple[dict[str, object], str]:
+    """Parse YAML frontmatter from Markdown content.
+
+    Returns ``(metadata_dict, content_without_frontmatter)``.
+    If no frontmatter is found, metadata is empty and content is unchanged.
+    """
+    try:
+        post = frontmatter.loads(content)
+        return dict(post.metadata), post.content
+    except Exception:  # noqa: BLE001
+        # If parsing fails, return raw content with empty metadata
+        return {}, content
+
+
+def _extract_wikilinks(content: str) -> list[dict[str, str]]:
+    """Extract Obsidian-style wikilinks from Markdown content.
+
+    Returns a list of dicts with ``target`` and optionally ``display``::
+
+        [[Page Name]]           → {"target": "Page Name"}
+        [[Page Name|Display]]   → {"target": "Page Name", "display": "Display"}
+    """
+    links: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for match in _WIKILINK_RE.finditer(content):
+        raw = match.group(1)
+        if "|" in raw:
+            target, display = raw.split("|", 1)
+            key = target.strip()
+            if key not in seen:
+                seen.add(key)
+                links.append({"target": key, "display": display.strip()})
+        else:
+            key = raw.strip()
+            if key not in seen:
+                seen.add(key)
+                links.append({"target": key})
+
+    return links
+
+
+def _extract_tags(content: str) -> list[str]:
+    """Extract hashtags from Markdown content.
+
+    Recognises ``#tag`` and nested ``#parent/child`` patterns.
+    Returns a sorted, deduplicated list.
+    """
+    tags: set[str] = set()
+    for match in _TAG_RE.finditer(content):
+        tags.add(match.group(1))
+    return sorted(tags)
 
 
 # ---------------------------------------------------------------------------
@@ -398,15 +476,6 @@ class ObsidianConnector(BaseConnector):
                 if latest_mtime is None or file_mtime > latest_mtime:
                     latest_mtime = file_mtime
 
-            except NotImplementedError:
-                # TASK-052 not yet done
-                relative = str(file_path.relative_to(vault_path)).replace(os.sep, "/")
-                errors.append(
-                    SyncError(
-                        source_id=relative,
-                        error="Normalizer not yet implemented (TASK-052)",
-                    ),
-                )
             except Exception as exc:  # noqa: BLE001
                 relative = str(file_path.relative_to(vault_path)).replace(os.sep, "/")
                 errors.append(
@@ -431,13 +500,6 @@ class ObsidianConnector(BaseConnector):
                 }
                 doc = self.normalize(raw_deleted)
                 documents.append(doc)
-            except NotImplementedError:
-                errors.append(
-                    SyncError(
-                        source_id=deleted_path,
-                        error="Normalizer not yet implemented (TASK-052)",
-                    ),
-                )
             except Exception as exc:  # noqa: BLE001
                 errors.append(
                     SyncError(source_id=deleted_path, error=str(exc)),
@@ -461,9 +523,106 @@ class ObsidianConnector(BaseConnector):
     def normalize(self, raw: dict[str, object]) -> UnifiedDocument:
         """Normalize a raw Obsidian file dict into a UnifiedDocument.
 
-        Will be implemented in TASK-052 (Obsidian Markdown-Parser).
+        Parses YAML frontmatter, extracts wikilinks and tags, and builds
+        a ``UnifiedDocument`` with ``content_type=MARKDOWN``.
+
+        Expected *raw* dict from ``_file_to_raw()``::
+
+            {
+                "relative_path": "notes/meeting.md",
+                "content": "---\\ntitle: Meeting\\n---\\n# Content",
+                "modified_at": "2026-03-14T10:00:00+00:00",
+                "created_at": "2026-03-14T09:00:00+00:00",
+                "filename": "meeting",
+                "deleted": False,  # optional
+            }
         """
-        raise NotImplementedError("TASK-052: Obsidian normalize not yet implemented")
+        relative_path = str(raw.get("relative_path", ""))
+        if not relative_path:
+            raise ConnectorError(
+                "Raw file data missing 'relative_path'",
+                code="OBSIDIAN_MISSING_PATH",
+            )
+
+        # Handle deleted files
+        if raw.get("deleted", False):
+            return normalize_document(
+                owner_id=self.owner_id,
+                source_type=SourceType.OBSIDIAN,
+                source_id=relative_path,
+                title=str(raw.get("filename", Path(relative_path).stem)),
+                content="",
+                content_type=ContentType.MARKDOWN,
+                metadata={"deleted": True, "relative_path": relative_path},
+            )
+
+        raw_content = str(raw.get("content", ""))
+
+        # Parse frontmatter → metadata + clean content
+        fm_metadata, content = _parse_frontmatter(raw_content)
+
+        # Extract wikilinks and tags from the Markdown body
+        wikilinks = _extract_wikilinks(content)
+        tags_from_content = _extract_tags(content)
+
+        # Merge frontmatter tags with content tags
+        fm_tags = fm_metadata.pop("tags", None)
+        all_tags: list[str] = []
+        if isinstance(fm_tags, list):
+            all_tags.extend(str(t) for t in fm_tags)
+        elif isinstance(fm_tags, str):
+            all_tags.extend(t.strip() for t in fm_tags.split(",") if t.strip())
+        all_tags.extend(t for t in tags_from_content if t not in all_tags)
+
+        # Build metadata
+        title = str(fm_metadata.pop("title", "") or raw.get("filename", Path(relative_path).stem))
+        aliases = fm_metadata.pop("aliases", [])
+
+        metadata: dict[str, object] = {
+            "relative_path": relative_path,
+            "size_bytes": raw.get("size_bytes", 0),
+        }
+        if wikilinks:
+            metadata["wikilinks"] = wikilinks
+        if all_tags:
+            metadata["tags"] = all_tags
+        if aliases:
+            metadata["aliases"] = aliases if isinstance(aliases, list) else [aliases]
+        # Preserve remaining frontmatter fields
+        for key, value in fm_metadata.items():
+            if key not in metadata:
+                metadata[key] = value
+
+        # Parse timestamps
+        created_at: datetime | None = None
+        fm_date = fm_metadata.get("date") or raw.get("created_at")
+        if isinstance(fm_date, str) and fm_date:
+            try:
+                created_at = datetime.fromisoformat(fm_date.replace("Z", "+00:00"))
+            except ValueError:
+                pass
+        elif isinstance(fm_date, datetime):
+            created_at = fm_date
+
+        modified_at_str = raw.get("modified_at")
+        updated_at: datetime | None = None
+        if isinstance(modified_at_str, str) and modified_at_str:
+            try:
+                updated_at = datetime.fromisoformat(modified_at_str.replace("Z", "+00:00"))
+            except ValueError:
+                pass
+
+        return normalize_document(
+            owner_id=self.owner_id,
+            source_type=SourceType.OBSIDIAN,
+            source_id=relative_path,
+            title=title,
+            content=content,
+            content_type=ContentType.MARKDOWN,
+            metadata=metadata,  # type: ignore[arg-type]
+            created_at=created_at,
+            updated_at=updated_at,
+        )
 
     async def health_check(self) -> bool:
         """Verify the vault path is valid and accessible."""
