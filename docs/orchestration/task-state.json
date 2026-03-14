@@ -1009,9 +1009,9 @@
       "priority": "P1",
       "effort": "M",
       "area": "LLM",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-F",
+      "claimed_at": "2026-06-01T12:05:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-061"
@@ -1450,13 +1450,14 @@
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-G",
       "claimed_at": "2026-03-14T12:22:22.360177+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T12:25:30.075703+00:00",
       "blocked_by": [
         "TASK-086"
-      ]
+      ],
+      "commit": "2057115"
     },
     "TASK-093": {
       "stream": "STREAM-AUTH-API",
