@@ -77,3 +77,18 @@ class Urgency(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
+
+class OrgRole(str, Enum):
+    """Role of a user within an organization."""
+
+    OWNER = "owner"
+    MEMBER = "member"
+    VIEWER = "viewer"
+
+
+class DocumentVisibility(str, Enum):
+    """Visibility scope of a document."""
+
+    PRIVATE = "private"
+    TEAM = "team"

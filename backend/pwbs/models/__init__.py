@@ -9,6 +9,7 @@ from pwbs.models.data_export import DataExport
 from pwbs.models.decision import Decision
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
+from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
@@ -25,6 +26,8 @@ __all__ = [
     "Document",
     "Entity",
     "EntityMention",
+    "Organization",
+    "OrganizationMember",
     "RefreshToken",
     "Reminder",
     "ScheduledJobRun",

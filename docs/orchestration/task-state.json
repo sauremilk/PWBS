@@ -2203,7 +2203,7 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-14T13:40:32.332901+00:00",
       "completed_at": null,
