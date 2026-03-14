@@ -78,12 +78,14 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: SecretStr = SecretStr("")
     google_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/google-calendar/callback"
+    google_login_redirect_uri: str = "http://localhost:3000/api/auth/google/callback"
     notion_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/notion/callback"
     notion_client_id: str = ""
     notion_client_secret: SecretStr = SecretStr("")
     zoom_client_id: str = ""
     zoom_client_secret: SecretStr = SecretStr("")
     zoom_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/zoom/callback"
+    zoom_webhook_secret_token: str = ""
     slack_client_id: str = ""
     slack_client_secret: SecretStr = SecretStr("")
 

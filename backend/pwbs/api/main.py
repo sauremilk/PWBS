@@ -175,6 +175,7 @@ def create_app() -> FastAPI:
     # -- Routers -------------------------------------------------------------
 
     from pwbs.api.v1.routes.auth import router as auth_router
+    from pwbs.api.v1.routes.auth_google import router as auth_google_router
     from pwbs.api.v1.routes.auth_refresh import router as auth_refresh_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
     from pwbs.api.v1.routes.health import router as health_router
@@ -182,6 +183,7 @@ def create_app() -> FastAPI:
 
     application.include_router(health_router)
     application.include_router(auth_router)
+    application.include_router(auth_google_router)
     application.include_router(auth_refresh_router)
     application.include_router(connectors_router)
     application.include_router(search_router)
