@@ -102,6 +102,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="Pers\u00f6nliches Wissens-Betriebssystem \u2013 API",
         lifespan=lifespan,
+        openapi_url="/api/v1/openapi.json",
         docs_url="/docs" if settings.debug else None,
         redoc_url="/redoc" if settings.debug else None,
     )

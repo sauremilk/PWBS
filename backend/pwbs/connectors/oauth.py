@@ -243,6 +243,10 @@ def _get_client_credentials(
             getattr(settings, "google_client_id", ""),
             getattr(settings, "google_client_secret", SecretStr("")).get_secret_value(),
         ),
+        SourceType.GMAIL: (
+            getattr(settings, "google_client_id", ""),
+            getattr(settings, "google_client_secret", SecretStr("")).get_secret_value(),
+        ),
         SourceType.NOTION: (
             getattr(settings, "notion_client_id", ""),
             getattr(settings, "notion_client_secret", SecretStr("")).get_secret_value(),

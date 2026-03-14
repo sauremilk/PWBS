@@ -31,11 +31,16 @@ from pwbs.db.postgres import get_db_session
 from pwbs.models.connection import Connection
 from pwbs.models.document import Document
 from pwbs.models.user import User
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.enums import ConnectionStatus, SourceType
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/connectors", tags=["connectors"])
+router = APIRouter(
+    prefix="/api/v1/connectors",
+    tags=["connectors"],
+    responses={**AUTH_RESPONSES, **COMMON_RESPONSES},
+)
 
 
 # ---------------------------------------------------------------------------
@@ -63,17 +68,24 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
         "description": "Meeting-Transkripte und Aufzeichnungen aus Zoom",
         "auth_method": "oauth2",
     },
+    SourceType.GMAIL.value: {
+        "name": "Gmail",
+        "description": "E-Mails und Threads aus Gmail",
+        "auth_method": "oauth2",
+    },
 }
 
 # OAuth2 authorization URLs per provider
 _AUTH_URLS: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://accounts.google.com/o/oauth2/v2/auth",
+    SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
     SourceType.ZOOM: "https://zoom.us/oauth/authorize",
 }
 
 _SCOPES: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://www.googleapis.com/auth/calendar.readonly",
+    SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
     SourceType.NOTION: "",
     SourceType.ZOOM: "recording:read",
 }
@@ -292,6 +304,7 @@ async def get_auth_url(
     # Build redirect URI from settings
     redirect_uri_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_oauth_redirect_uri,
+        SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
     }
@@ -300,6 +313,7 @@ async def get_auth_url(
     # Get client_id
     client_id_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_id,
+        SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
     }
@@ -433,6 +447,7 @@ async def _exchange_code_for_tokens(
 
     token_endpoints: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: "https://oauth2.googleapis.com/token",
+        SourceType.GMAIL: "https://oauth2.googleapis.com/token",
         SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
         SourceType.ZOOM: "https://zoom.us/oauth/token",
     }
@@ -449,17 +464,20 @@ async def _exchange_code_for_tokens(
 
     redirect_uri_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_oauth_redirect_uri,
+        SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
     }
 
     client_id_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_id,
+        SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
     }
     client_secret_map: dict[SourceType, SecretStr] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_secret,
+        SourceType.GMAIL: settings.google_client_secret,
         SourceType.NOTION: settings.notion_client_secret,
         SourceType.ZOOM: settings.zoom_client_secret,
     }

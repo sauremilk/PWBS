@@ -12,6 +12,7 @@ class SourceType(str, Enum):
     """
 
     GOOGLE_CALENDAR = "google_calendar"
+    GMAIL = "gmail"
     NOTION = "notion"
     OBSIDIAN = "obsidian"
     ZOOM = "zoom"
