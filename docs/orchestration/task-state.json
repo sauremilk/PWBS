@@ -903,7 +903,7 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-E",
       "claimed_at": null,
       "completed_at": null,
@@ -911,7 +911,8 @@
         "TASK-044",
         "TASK-054"
       ],
-      "started_at": "2026-03-14T18:20:00Z"
+      "started_at": "2026-03-14T18:20:00Z",
+      "assignee": "ORCH-E"
     },
     "TASK-056": {
       "stream": "STREAM-PROCESSING",
