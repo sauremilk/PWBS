@@ -1318,9 +1318,9 @@
       "priority": "P0",
       "effort": "S",
       "area": "Auth",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-G",
+      "claimed_at": "2026-03-14T10:35:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-081"
