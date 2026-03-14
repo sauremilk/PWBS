@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 # Token refresh endpoint mapping per provider
 _REFRESH_ENDPOINTS: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://oauth2.googleapis.com/token",
+    SourceType.GOOGLE_DOCS: "https://oauth2.googleapis.com/token",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
     SourceType.ZOOM: "https://zoom.us/oauth/token",
     SourceType.SLACK: "https://slack.com/api/oauth.v2.access",

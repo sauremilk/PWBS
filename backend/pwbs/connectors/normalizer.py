@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Default data retention periods per source type (DSGVO)
 _DEFAULT_RETENTION_DAYS: dict[SourceType, int] = {
     SourceType.GOOGLE_CALENDAR: 365,
+    SourceType.GOOGLE_DOCS: 730,
     SourceType.NOTION: 730,
     SourceType.OBSIDIAN: 730,
     SourceType.ZOOM: 180,

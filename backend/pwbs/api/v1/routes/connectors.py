@@ -73,6 +73,11 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
         "description": "E-Mails und Threads aus Gmail",
         "auth_method": "oauth2",
     },
+    SourceType.GOOGLE_DOCS.value: {
+        "name": "Google Docs",
+        "description": "Dokumente aus Google Docs",
+        "auth_method": "oauth2",
+    },
     SourceType.SLACK.value: {
         "name": "Slack",
         "description": "Nachrichten und Threads aus Slack-Channels",
@@ -84,6 +89,7 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
 _AUTH_URLS: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
+    SourceType.GOOGLE_DOCS: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
     SourceType.ZOOM: "https://zoom.us/oauth/authorize",
     SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
@@ -92,6 +98,7 @@ _AUTH_URLS: dict[SourceType, str] = {
 _SCOPES: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://www.googleapis.com/auth/calendar.readonly",
     SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
+    SourceType.GOOGLE_DOCS: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly",
     SourceType.NOTION: "",
     SourceType.ZOOM: "recording:read",
     SourceType.SLACK: "channels:history,channels:read,users:read",
