@@ -44,6 +44,7 @@ _REFRESH_ENDPOINTS: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://oauth2.googleapis.com/token",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
     SourceType.ZOOM: "https://zoom.us/oauth/token",
+    SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
 }
 
 # SSRF protection: timeout for all external HTTP calls
@@ -254,6 +255,10 @@ def _get_client_credentials(
         SourceType.ZOOM: (
             getattr(settings, "zoom_client_id", ""),
             getattr(settings, "zoom_client_secret", SecretStr("")).get_secret_value(),
+        ),
+        SourceType.SLACK: (
+            getattr(settings, "slack_client_id", ""),
+            getattr(settings, "slack_client_secret", SecretStr("")).get_secret_value(),
         ),
     }
 

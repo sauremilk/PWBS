@@ -73,6 +73,11 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
         "description": "E-Mails und Threads aus Gmail",
         "auth_method": "oauth2",
     },
+    SourceType.SLACK.value: {
+        "name": "Slack",
+        "description": "Nachrichten und Threads aus Slack-Channels",
+        "auth_method": "oauth2",
+    },
 }
 
 # OAuth2 authorization URLs per provider
@@ -81,6 +86,7 @@ _AUTH_URLS: dict[SourceType, str] = {
     SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
     SourceType.ZOOM: "https://zoom.us/oauth/authorize",
+    SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
 }
 
 _SCOPES: dict[SourceType, str] = {
@@ -88,6 +94,7 @@ _SCOPES: dict[SourceType, str] = {
     SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
     SourceType.NOTION: "",
     SourceType.ZOOM: "recording:read",
+    SourceType.SLACK: "channels:history,channels:read,users:read",
 }
 
 
@@ -307,6 +314,7 @@ async def get_auth_url(
         SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
+        SourceType.SLACK: settings.slack_oauth_redirect_uri,
     }
     redirect_uri = redirect_uri_map.get(source_type, "")
 
@@ -316,6 +324,7 @@ async def get_auth_url(
         SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
+        SourceType.SLACK: settings.slack_client_id,
     }
     client_id = client_id_map.get(source_type, "")
     if not client_id:
@@ -450,6 +459,7 @@ async def _exchange_code_for_tokens(
         SourceType.GMAIL: "https://oauth2.googleapis.com/token",
         SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
         SourceType.ZOOM: "https://zoom.us/oauth/token",
+        SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
     }
 
     endpoint = token_endpoints.get(source_type)
@@ -467,6 +477,7 @@ async def _exchange_code_for_tokens(
         SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
+        SourceType.SLACK: settings.slack_oauth_redirect_uri,
     }
 
     client_id_map: dict[SourceType, str] = {
@@ -474,12 +485,14 @@ async def _exchange_code_for_tokens(
         SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
+        SourceType.SLACK: settings.slack_client_id,
     }
     client_secret_map: dict[SourceType, SecretStr] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_secret,
         SourceType.GMAIL: settings.google_client_secret,
         SourceType.NOTION: settings.notion_client_secret,
         SourceType.ZOOM: settings.zoom_client_secret,
+        SourceType.SLACK: settings.slack_client_secret,
     }
 
     payload = {

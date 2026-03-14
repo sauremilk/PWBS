@@ -30,6 +30,7 @@ _DEFAULT_RETENTION_DAYS: dict[SourceType, int] = {
     SourceType.NOTION: 730,
     SourceType.OBSIDIAN: 730,
     SourceType.ZOOM: 180,
+    SourceType.SLACK: 365,
 }
 
 # Fallback retention if source type has no specific default

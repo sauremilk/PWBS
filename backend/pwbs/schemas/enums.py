@@ -15,6 +15,7 @@ class SourceType(str, Enum):
     GMAIL = "gmail"
     NOTION = "notion"
     OBSIDIAN = "obsidian"
+    SLACK = "slack"
     ZOOM = "zoom"
 
 

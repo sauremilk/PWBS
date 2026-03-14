@@ -108,6 +108,8 @@ class Settings(BaseSettings):
     zoom_webhook_secret_token: str = ""
     slack_client_id: str = ""
     slack_client_secret: SecretStr = SecretStr("")
+    slack_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/slack/callback"
+    slack_signing_secret: str = ""
 
     #  Derived / computed properties
 
