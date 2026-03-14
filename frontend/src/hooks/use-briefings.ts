@@ -30,8 +30,13 @@ export function useBriefingDetail(id: string) {
 export function useGenerateBriefing() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (type: BriefingType) =>
-      generateBriefing({ briefing_type: type }),
+    mutationFn: ({
+      type,
+      trigger_context,
+    }: {
+      type: BriefingType;
+      trigger_context?: Record<string, unknown>;
+    }) => generateBriefing({ briefing_type: type, trigger_context }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["briefings"] });
     },

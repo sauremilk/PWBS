@@ -200,7 +200,7 @@ class TestBriefingResponse:
 
 class TestBriefingTypeEnum:
     def test_values(self) -> None:
-        expected = {"morning", "meeting_prep", "weekly"}
+        expected = {"morning", "meeting_prep", "project", "weekly"}
         actual = {bt.value for bt in BriefingType}
         assert actual == expected
 

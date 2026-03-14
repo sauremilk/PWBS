@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import delete, select, text
@@ -38,6 +38,7 @@ __all__ = [
 _EXPIRY_DURATIONS: dict[BriefingType, timedelta] = {
     BriefingType.MORNING: timedelta(hours=24),
     BriefingType.MEETING_PREP: timedelta(hours=48),
+    BriefingType.PROJECT: timedelta(days=7),
     BriefingType.WEEKLY: timedelta(days=7),
 }
 
@@ -53,6 +54,7 @@ class PersistenceConfig:
 
     morning_expiry_hours: int = 24
     meeting_expiry_hours: int = 48
+    project_expiry_hours: int = 168  # 7 days
     weekly_expiry_hours: int = 168  # 7 days
 
 
@@ -161,7 +163,10 @@ class BriefingPersistenceService:
 
         logger.info(
             "Briefing persisted: id=%s type=%s user=%s chunks=%d",
-            bid, briefing_type.value, user_id, len(source_chunks),
+            bid,
+            briefing_type.value,
+            user_id,
+            len(source_chunks),
         )
 
         return PersistedBriefing(
@@ -288,10 +293,7 @@ class BriefingPersistenceService:
 
         if not include_expired:
             now = datetime.now(timezone.utc)
-            stmt = stmt.where(
-                (BriefingORM.expires_at.is_(None))
-                | (BriefingORM.expires_at > now)
-            )
+            stmt = stmt.where((BriefingORM.expires_at.is_(None)) | (BriefingORM.expires_at > now))
 
         stmt = stmt.order_by(BriefingORM.generated_at.desc()).limit(limit)
 

@@ -8,6 +8,7 @@ import {
   Search,
   Network,
   Scale,
+  FolderKanban,
   Cable,
   Settings,
 } from "lucide-react";
@@ -15,6 +16,7 @@ import {
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/briefings", label: "Briefings", icon: FileText },
+  { href: "/projects", label: "Projekte", icon: FolderKanban },
   { href: "/search", label: "Suche", icon: Search },
   { href: "/knowledge", label: "Knowledge", icon: Network },
   { href: "/decisions", label: "Entscheidungen", icon: Scale },

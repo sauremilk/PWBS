@@ -48,6 +48,7 @@ class BriefingType(str, Enum):
 
     MORNING = "morning"
     MEETING_PREP = "meeting_prep"
+    PROJECT = "project"
     WEEKLY = "weekly"
 
 
@@ -55,6 +56,7 @@ class BriefingType(str, Enum):
 _TEMPLATE_USE_CASES: dict[BriefingType, str] = {
     BriefingType.MORNING: "briefing_morning",
     BriefingType.MEETING_PREP: "briefing_meeting_prep",
+    BriefingType.PROJECT: "briefing_project",
     BriefingType.WEEKLY: "briefing_weekly",
 }
 
@@ -62,6 +64,7 @@ _TEMPLATE_USE_CASES: dict[BriefingType, str] = {
 _MAX_WORDS: dict[BriefingType, int] = {
     BriefingType.MORNING: 800,
     BriefingType.MEETING_PREP: 400,
+    BriefingType.PROJECT: 1200,
     BriefingType.WEEKLY: 600,
 }
 
@@ -73,6 +76,7 @@ class BriefingGeneratorConfig:
     default_temperature: float = 0.3
     morning_max_output_tokens: int = 2000
     meeting_max_output_tokens: int = 1000
+    project_max_output_tokens: int = 3000
     weekly_max_output_tokens: int = 1500
     enable_grounding: bool = True
 
@@ -231,6 +235,8 @@ class BriefingGenerator:
 
         if briefing_type == BriefingType.MORNING:
             return self._config.morning_max_output_tokens
+        if briefing_type == BriefingType.PROJECT:
+            return self._config.project_max_output_tokens
         if briefing_type == BriefingType.WEEKLY:
             return self._config.weekly_max_output_tokens
         return self._config.meeting_max_output_tokens

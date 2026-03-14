@@ -346,6 +346,45 @@ async def _run_briefing_generation(
             # For morning briefings, assemble context
             if briefing_type == BriefingType.MORNING:
                 context: dict[str, Any] = trigger_context or {}
+            elif briefing_type == BriefingType.PROJECT:
+                from pwbs.briefing.project_context import (
+                    NullProjectGraphService,
+                    ProjectContextAssembler,
+                )
+                from pwbs.search.service import SemanticSearchService as _ProjSearchSvc
+
+                project_name = (trigger_context or {}).get("project_name", "")
+                project_entity_id = (trigger_context or {}).get(
+                    "project_entity_id", None,
+                )
+                if not project_name:
+                    logger.warning(
+                        "Project briefing requested without project_name: id=%s",
+                        briefing_id,
+                    )
+                    return
+
+                proj_search_svc = _ProjSearchSvc(session)
+                proj_assembler = ProjectContextAssembler(
+                    session=session,
+                    search_service=proj_search_svc,
+                    graph_service=NullProjectGraphService(),
+                )
+                proj_ctx = await proj_assembler.assemble(
+                    user_id=user_id,
+                    project_name=project_name,
+                    project_id=project_entity_id,
+                )
+                context = {
+                    "project_name": proj_ctx.project_name,
+                    "project_id": proj_ctx.project_id,
+                    "timeline": proj_ctx.timeline,
+                    "decisions": proj_ctx.decisions,
+                    "participants": proj_ctx.participants,
+                    "open_items": proj_ctx.open_items,
+                    "recent_documents": proj_ctx.recent_documents,
+                    "summary_stats": proj_ctx.summary_stats,
+                }
             elif briefing_type == BriefingType.WEEKLY:
                 from pwbs.briefing.weekly_context import (
                     NullWeeklyGraphService,

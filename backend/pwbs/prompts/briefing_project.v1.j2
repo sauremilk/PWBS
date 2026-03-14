@@ -1,0 +1,63 @@
+---
+model_preference: claude-sonnet-4-20250514
+max_output_tokens: 3000
+temperature: 0.3
+system_prompt: |
+  Du bist ein präziser Briefing-Assistent im PWBS. Erstelle sachliche,
+  quellenbasierte Projektübersichten. Verwende ausschließlich die bereitgestellten
+  Informationen. Kennzeichne jede Aussage mit [Quelle: Titel, Datum].
+  Maximal 1200 Wörter. Struktur: Zusammenfassung, Entscheidungen, Timeline,
+  Beteiligte, Offene Punkte, Relevante Dokumente.
+required_context:
+  - project_name
+  - decisions
+  - timeline
+  - participants
+  - open_items
+  - recent_documents
+  - summary_stats
+---
+## Projektbriefing: {{ project_name }}
+
+### Zusammenfassung
+Projekt **{{ project_name }}** – {{ summary_stats.document_count }} Dokumente, {{ summary_stats.decision_count }} Entscheidungen, {{ summary_stats.participant_count }} Beteiligte (letzter {{ summary_stats.lookback_days }}-Tage-Zeitraum).
+
+### Entscheidungen
+{% for decision in decisions %}
+- **{{ decision.title }}** – Status: {{ decision.status }}{% if decision.date %} ({{ decision.date }}){% endif %}{% if decision.context %} | {{ decision.context }}{% endif %}
+{% endfor %}
+{% if not decisions %}
+- Keine Entscheidungen in diesem Zeitraum.
+{% endif %}
+
+### Timeline
+{% for event in timeline %}
+- {{ event.date }}: **{{ event.title }}** ({{ event.type }})
+{% endfor %}
+{% if not timeline %}
+- Keine Timeline-Einträge vorhanden.
+{% endif %}
+
+### Beteiligte
+{% for person in participants %}
+- **{{ person.name }}** ({{ person.role }}){% if person.last_activity %} – Letzte Aktivität: {{ person.last_activity }}{% endif %}{% if person.contributions %} – {{ person.contributions }} Beiträge{% endif %}
+{% endfor %}
+{% if not participants %}
+- Keine Beteiligten erfasst.
+{% endif %}
+
+### Offene Punkte
+{% for item in open_items %}
+- {{ item }}
+{% endfor %}
+{% if not open_items %}
+- Keine offenen Punkte.
+{% endif %}
+
+### Relevante Dokumente
+{% for doc in recent_documents %}
+- {{ doc.title }} ({{ doc.source }}, {{ doc.date }})
+{% endfor %}
+{% if not recent_documents %}
+- Keine relevanten Dokumente im Zeitraum.
+{% endif %}

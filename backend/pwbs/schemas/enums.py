@@ -45,6 +45,7 @@ class BriefingType(str, Enum):
 
     MORNING = "morning"
     MEETING_PREP = "meeting_prep"
+    PROJECT = "project"
     WEEKLY = "weekly"
 
 
