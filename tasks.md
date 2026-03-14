@@ -4335,15 +4335,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-166: Prometheus Metrics Exporter und Grafana-Dashboard-Templates
 
-| Feld             | Wert                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| **Priorität**    | P1 (Ohne Monitoring kein belastbarer Beta-Betrieb)                                                     |
-| **Bereich**      | Infra                                                                                                  |
-| **Aufwand**      | M (2–3 Tage)                                                                                           |
-| **Status**       | 🔴 Offen                                                                                               |
-| **Quelle**       | PRD-SPEC NF-001 bis NF-010, ROADMAP Phase 3 „Produktreife"                                             |
-| **Abhängig von** | –                                                                                                      |
-| **Blockiert**    | TASK-170                                                                                               |
+| Feld             | Wert                                                       |
+| ---------------- | ---------------------------------------------------------- |
+| **Priorität**    | P1 (Ohne Monitoring kein belastbarer Beta-Betrieb)         |
+| **Bereich**      | Infra                                                      |
+| **Aufwand**      | M (2–3 Tage)                                               |
+| **Status**       | 🔴 Offen                                                   |
+| **Quelle**       | PRD-SPEC NF-001 bis NF-010, ROADMAP Phase 3 „Produktreife" |
+| **Abhängig von** | –                                                          |
+| **Blockiert**    | TASK-170                                                   |
 
 **Beschreibung:** Prometheus-kompatible Metriken aus der FastAPI-Anwendung exportieren und vorkonfigurierte Grafana-Dashboards bereitstellen. Metriken umfassen: Request-Latenz (p50/p95/p99), DB-Connection-Pool-Auslastung, Queue-Tiefe (Celery), LLM-Call-Dauer und Embedding-Batch-Zeiten. Dashboards für die NFs NF-001 (Suche < 2s), NF-002 (Briefing < 10s), NF-003 (API < 500ms).
 
@@ -4360,15 +4360,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-167: Database Backup-Strategie und automatisiertes Recovery-Testing
 
-| Feld             | Wert                                                                                    |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| **Priorität**    | P1 (Voraussetzung für Beta mit echten Nutzerdaten)                                      |
-| **Bereich**      | Infra                                                                                   |
-| **Aufwand**      | M (2–3 Tage)                                                                            |
-| **Status**       | 🔴 Offen                                                                                |
-| **Quelle**       | PRD-SPEC NF-006 (99.5% Verfügbarkeit), KP-09 (Backup/DR für Weaviate/Neo4j)            |
-| **Abhängig von** | –                                                                                       |
-| **Blockiert**    | –                                                                                       |
+| Feld             | Wert                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Voraussetzung für Beta mit echten Nutzerdaten)                          |
+| **Bereich**      | Infra                                                                       |
+| **Aufwand**      | M (2–3 Tage)                                                                |
+| **Status**       | 🔴 Offen                                                                    |
+| **Quelle**       | PRD-SPEC NF-006 (99.5% Verfügbarkeit), KP-09 (Backup/DR für Weaviate/Neo4j) |
+| **Abhängig von** | –                                                                           |
+| **Blockiert**    | –                                                                           |
 
 **Beschreibung:** Backup-Strategie für alle drei Datenbanken (PostgreSQL, Weaviate, Neo4j) definieren und automatisieren. RPO: 1 Stunde, RTO: 4 Stunden. PostgreSQL: WAL-Archivierung + täglicher pg_dump. Weaviate: Backup-API + S3-Storage. Neo4j: `neo4j-admin dump` + S3-Upload. Automatisierter Recovery-Test als wöchentlicher CI-Job, der Restore in einen temporären Container validiert.
 
@@ -4385,15 +4385,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-168: API Rate Limiting auf allen öffentlichen Endpunkten
 
-| Feld             | Wert                                                          |
-| ---------------- | ------------------------------------------------------------- |
-| **Priorität**    | P1 (Sicherheitskritisch für Beta)                             |
-| **Bereich**      | Backend                                                       |
-| **Aufwand**      | S (0.5–1 Tag)                                                 |
-| **Status**       | 🔴 Offen                                                      |
-| **Quelle**       | PRD-SPEC NF-015 (100 req/min allgemein, 5/min Login)          |
-| **Abhängig von** | –                                                             |
-| **Blockiert**    | –                                                             |
+| Feld             | Wert                                                 |
+| ---------------- | ---------------------------------------------------- |
+| **Priorität**    | P1 (Sicherheitskritisch für Beta)                    |
+| **Bereich**      | Backend                                              |
+| **Aufwand**      | S (0.5–1 Tag)                                        |
+| **Status**       | 🔴 Offen                                             |
+| **Quelle**       | PRD-SPEC NF-015 (100 req/min allgemein, 5/min Login) |
+| **Abhängig von** | –                                                    |
+| **Blockiert**    | –                                                    |
 
 **Beschreibung:** Redis-basiertes Rate Limiting als FastAPI-Middleware implementieren. Zwei Tiers: 100 Requests/Minute pro authentifiziertem Nutzer auf allgemeine Endpunkte, 5 Requests/Minute auf Login/Register-Endpunkte (Brute-Force-Schutz). Bei Überschreitung HTTP 429 mit `Retry-After`-Header. Rate-Limit-Status in Response-Headern (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
 
@@ -4411,15 +4411,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-169: Barrierefreiheits-Audit und WCAG 2.1 AA Compliance
 
-| Feld             | Wert                                                                        |
-| ---------------- | --------------------------------------------------------------------------- |
-| **Priorität**    | P2 (Beta-Pflicht, aber nicht Launch-Blocker)                                |
-| **Bereich**      | Frontend                                                                    |
-| **Aufwand**      | M (2–3 Tage)                                                                |
-| **Status**       | 🔴 Offen                                                                    |
-| **Quelle**       | PRD-SPEC NF-026 (WCAG 2.1 Level AA für Kernfunktionen)                      |
-| **Abhängig von** | –                                                                           |
-| **Blockiert**    | –                                                                           |
+| Feld             | Wert                                                   |
+| ---------------- | ------------------------------------------------------ |
+| **Priorität**    | P2 (Beta-Pflicht, aber nicht Launch-Blocker)           |
+| **Bereich**      | Frontend                                               |
+| **Aufwand**      | M (2–3 Tage)                                           |
+| **Status**       | 🔴 Offen                                               |
+| **Quelle**       | PRD-SPEC NF-026 (WCAG 2.1 Level AA für Kernfunktionen) |
+| **Abhängig von** | –                                                      |
+| **Blockiert**    | –                                                      |
 
 **Beschreibung:** Alle Kernseiten (Dashboard, Suche, Briefings, Einstellungen, Konnektoren) mit Axe und Lighthouse auf WCAG 2.1 AA prüfen. Gefundene Verstöße beheben: fehlende aria-Labels, unzureichende Farbkontraste, Keyboard-Navigation. CI-Integration mit Lighthouse-Accessibility-Score ≥ 90.
 
@@ -4436,15 +4436,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-170: Performance-Regression-Test-Suite mit CI-Integration
 
-| Feld             | Wert                                                                      |
-| ---------------- | ------------------------------------------------------------------------- |
-| **Priorität**    | P2 (Verhindert schleichende Performance-Degradierung)                     |
-| **Bereich**      | Testing                                                                   |
-| **Aufwand**      | M (2–3 Tage)                                                              |
-| **Status**       | 🔴 Offen                                                                  |
-| **Quelle**       | PRD-SPEC NF-001 bis NF-005, TASK-112 (Load-Tests als Basis)               |
-| **Abhängig von** | TASK-166                                                                  |
-| **Blockiert**    | –                                                                         |
+| Feld             | Wert                                                        |
+| ---------------- | ----------------------------------------------------------- |
+| **Priorität**    | P2 (Verhindert schleichende Performance-Degradierung)       |
+| **Bereich**      | Testing                                                     |
+| **Aufwand**      | M (2–3 Tage)                                                |
+| **Status**       | 🔴 Offen                                                    |
+| **Quelle**       | PRD-SPEC NF-001 bis NF-005, TASK-112 (Load-Tests als Basis) |
+| **Abhängig von** | TASK-166                                                    |
+| **Blockiert**    | –                                                           |
 
 **Beschreibung:** Automatisierte Performance-Benchmarks, die bei jedem PR gegen definierte Schwellenwerte prüfen. Messung von: Semantische Suche (< 2s p95), Briefing-Generierung (< 10s p95), API-Endpunkte allgemein (< 500ms p95). Bei Überschreitung: PR-Check schlägt fehl. Benchmarks nutzen synthetische Daten (100 Dokumente, 1000 Chunks) in Testcontainern.
 
@@ -4461,15 +4461,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-171: Briefing-Feedback-Mechanismus: Bewertung und Freitext
 
-| Feld             | Wert                                                                                   |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| **Priorität**    | P2 (Feedback für LLM-Tuning und Briefing-Qualität)                                    |
-| **Bereich**      | Backend                                                                                |
-| **Aufwand**      | S (0.5–1 Tag)                                                                          |
-| **Status**       | 🔴 Offen                                                                               |
-| **Quelle**       | PRD-SPEC F-020 (Briefing-Feedback-Mechanismus)                                         |
-| **Abhängig von** | –                                                                                      |
-| **Blockiert**    | –                                                                                      |
+| Feld             | Wert                                               |
+| ---------------- | -------------------------------------------------- |
+| **Priorität**    | P2 (Feedback für LLM-Tuning und Briefing-Qualität) |
+| **Bereich**      | Backend                                            |
+| **Aufwand**      | S (0.5–1 Tag)                                      |
+| **Status**       | 🔴 Offen                                           |
+| **Quelle**       | PRD-SPEC F-020 (Briefing-Feedback-Mechanismus)     |
+| **Abhängig von** | –                                                  |
+| **Blockiert**    | –                                                  |
 
 **Beschreibung:** Nutzer können Briefings mit Daumen-hoch/Daumen-runter bewerten und bei negativem Feedback optionalen Freitext angeben. Feedback wird mit `briefing_id`, `owner_id` und Timestamp gespeichert. API-Endpunkt für Feedback-Abgabe und Abruf aggregierter Statistiken (für zukünftiges LLM-Prompt-Tuning).
 
@@ -4486,15 +4486,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-172: DSGVO-Transparenzbericht und Datennutzungs-Dashboard
 
-| Feld             | Wert                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------- |
-| **Priorität**    | P2 (DSGVO-Compliance und Nutzervertrauen)                                          |
-| **Bereich**      | Backend                                                                            |
-| **Aufwand**      | M (2–3 Tage)                                                                       |
-| **Status**       | 🔴 Offen                                                                           |
-| **Quelle**       | ROADMAP Phase 4 „Transparenzbericht zur Datennutzung", PRD-SPEC NF-017             |
-| **Abhängig von** | –                                                                                  |
-| **Blockiert**    | –                                                                                  |
+| Feld             | Wert                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| **Priorität**    | P2 (DSGVO-Compliance und Nutzervertrauen)                              |
+| **Bereich**      | Backend                                                                |
+| **Aufwand**      | M (2–3 Tage)                                                           |
+| **Status**       | 🔴 Offen                                                               |
+| **Quelle**       | ROADMAP Phase 4 „Transparenzbericht zur Datennutzung", PRD-SPEC NF-017 |
+| **Abhängig von** | –                                                                      |
+| **Blockiert**    | –                                                                      |
 
 **Beschreibung:** Nutzer erhalten eine Übersichtsseite mit allen gespeicherten Daten: Anzahl Dokumente pro Quelle, letzter Sync-Zeitpunkt, Ablaufdaten, LLM-Verarbeitungshistorie (wann wurde welches Dokument an welchen LLM-Provider gesendet). Exportierbar als JSON/PDF. Transparenz darüber, welche Daten an externe Dienste (LLM-Provider) übermittelt wurden.
 
@@ -4511,15 +4511,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-173: Consent-Management-UI pro Datenquelle mit Widerruf
 
-| Feld             | Wert                                                                        |
-| ---------------- | --------------------------------------------------------------------------- |
-| **Priorität**    | P1 (DSGVO Art. 7 – Einwilligung muss nachweisbar und widerrufbar sein)      |
-| **Bereich**      | Frontend                                                                    |
-| **Aufwand**      | M (2–3 Tage)                                                                |
-| **Status**       | 🔴 Offen                                                                    |
-| **Quelle**       | PRD-SPEC F-031 (Consent-Management pro Quelle)                              |
-| **Abhängig von** | –                                                                           |
-| **Blockiert**    | –                                                                           |
+| Feld             | Wert                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| **Priorität**    | P1 (DSGVO Art. 7 – Einwilligung muss nachweisbar und widerrufbar sein) |
+| **Bereich**      | Frontend                                                               |
+| **Aufwand**      | M (2–3 Tage)                                                           |
+| **Status**       | 🔴 Offen                                                               |
+| **Quelle**       | PRD-SPEC F-031 (Consent-Management pro Quelle)                         |
+| **Abhängig von** | –                                                                      |
+| **Blockiert**    | –                                                                      |
 
 **Beschreibung:** Jede Datenquelle erfordert explizite, granulare Einwilligung. Beim Verbinden eines Konnektors wird ein Consent-Dialog angezeigt: welche Daten werden importiert, wie werden sie verarbeitet, an welche LLM-Provider übermittelt. Einwilligung jederzeit widerrufbar (= Quelle trennen + alle Daten dieser Quelle löschen). Consent-Zeitstempel in der Datenbank für Audit-Zwecke.
 
@@ -4536,15 +4536,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-174: Feature-Flag-System für kontrollierte Beta-Rollouts
 
-| Feld             | Wert                                                                          |
-| ---------------- | ----------------------------------------------------------------------------- |
-| **Priorität**    | P2 (Ermöglicht sichere inkrementelle Rollouts in der Beta)                    |
-| **Bereich**      | Backend                                                                       |
-| **Aufwand**      | S (0.5–1 Tag)                                                                 |
-| **Status**       | 🔴 Offen                                                                      |
-| **Quelle**       | ROADMAP Phase 4 „Public Beta", ARCHITECTURE.md Modularitätsprinzip            |
-| **Abhängig von** | –                                                                             |
-| **Blockiert**    | –                                                                             |
+| Feld             | Wert                                                               |
+| ---------------- | ------------------------------------------------------------------ |
+| **Priorität**    | P2 (Ermöglicht sichere inkrementelle Rollouts in der Beta)         |
+| **Bereich**      | Backend                                                            |
+| **Aufwand**      | S (0.5–1 Tag)                                                      |
+| **Status**       | 🔴 Offen                                                           |
+| **Quelle**       | ROADMAP Phase 4 „Public Beta", ARCHITECTURE.md Modularitätsprinzip |
+| **Abhängig von** | –                                                                  |
+| **Blockiert**    | –                                                                  |
 
 **Beschreibung:** Einfaches Feature-Flag-System für kontrolliertes Aktivieren neuer Features pro Nutzer oder Nutzergruppe. Konfigurationsbasiert (DB + Environment-Override). Admin-Endpunkt zum Setzen von Flags. In der Beta: neue Konnektoren, Briefing-Typen und UI-Features gezielt an Testgruppen ausrollen, bevor sie für alle freigeschaltet werden.
 
@@ -4561,15 +4561,15 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 #### TASK-175: Automatisierte Alembic-Migrations-Validierung in CI
 
-| Feld             | Wert                                                                              |
-| ---------------- | --------------------------------------------------------------------------------- |
-| **Priorität**    | P2 (Verhindert kaputte Migrationen in Produktion)                                 |
-| **Bereich**      | DevOps                                                                            |
-| **Aufwand**      | S (0.5–1 Tag)                                                                     |
-| **Status**       | 🔴 Offen                                                                          |
+| Feld             | Wert                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Verhindert kaputte Migrationen in Produktion)                                     |
+| **Bereich**      | DevOps                                                                                |
+| **Aufwand**      | S (0.5–1 Tag)                                                                         |
+| **Status**       | 🔴 Offen                                                                              |
 | **Quelle**       | copilot-instructions.md „Alembic-Migration erstellen. Niemals Schema direkt mutieren" |
-| **Abhängig von** | –                                                                                 |
-| **Blockiert**    | –                                                                                 |
+| **Abhängig von** | –                                                                                     |
+| **Blockiert**    | –                                                                                     |
 
 **Beschreibung:** CI-Schritt, der bei jedem PR automatisch alle Alembic-Migrationen auf einer leeren PostgreSQL-Testdatenbank ausführt (upgrade head), dann downgrade bis base, und erneut upgrade. Verhindert, dass fehlerhafte Migrationen in den Main-Branch gelangen. Prüft zusätzlich, ob `alembic check` keine ausstehenden Änderungen findet (Model-Schema-Drift).
 
@@ -4581,6 +4581,386 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 - [ ] Job läuft in < 60 Sekunden (leere DB, keine Seed-Daten)
 
 **Technische Hinweise:** GitHub Actions Job nutzt `testcontainers` oder `services: postgres` für isolierte DB. Alembic `check`-Befehl seit Alembic 1.9+. Downgrade-Test fängt fehlende `downgrade()`-Implementierungen ab. Job in bestehendem CI-Workflow `.github/workflows/ci.yml` einhängen.
+
+---
+
+
+---
+
+## Launch-Readiness: User-facing Features & Growth-Infrastruktur
+
+#### TASK-176: Transaktions-Email-Service: SendGrid/SMTP-Anbindung mit Template-Engine
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ROADMAP.md Phase 3, ADR-014 |
+| **Abhaengig von** | – |
+| **Blockiert**    | TASK-177, TASK-180 |
+
+**Beschreibung:** SMTP/SendGrid-Anbindung als zentraler Email-Service. Jinja2-basierte HTML-Templates fuer Willkommens-Mail, Passwort-Reset und System-Benachrichtigungen. Konfiguration ueber Umgebungsvariablen. Async-Versand. Kein Nutzer-Tracking in Emails (DSGVO).
+
+**Acceptance Criteria:**
+
+- [ ] Email-Service sendet ueber SMTP oder SendGrid (konfigurierbar via env) erfolgreich Mails
+- [ ] Mindestens 3 HTML-Templates: welcome, password_reset, briefing_notification
+- [ ] Alle Emails enthalten Abmelde-Link und Impressum (DSGVO-konform)
+- [ ] Unit-Tests mit Mock-SMTP-Server pruefen Versand und Template-Rendering
+
+**Technische Hinweise:** Neues Modul pwbs/services/email.py. aiosmtplib oder sendgrid SDK. Templates in pwbs/templates/email/.
+
+---
+
+#### TASK-177: Email-Briefing-Zustellung: Taegliches Morgenbriefing per E-Mail versenden
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | PRD-SPEC.md US-3.1, ROADMAP.md Phase 3 |
+| **Abhaengig von** | TASK-176 |
+| **Blockiert**    | – |
+
+**Beschreibung:** BriefingAgent um optionale Email-Zustellung erweitern. Nach Generierung wird das Morgenbriefing als HTML-Email versendet. Nutzer aktivieren/deaktivieren die Zustellung in den Einstellungen.
+
+**Acceptance Criteria:**
+
+- [ ] Nach Briefing-Generierung wird automatisch eine Email versendet (falls aktiviert)
+- [ ] Email-Briefing enthaelt Quellenreferenzen als klickbare Links
+- [ ] Nutzer kann Email-Zustellung in /api/v1/users/settings an/aus schalten
+- [ ] Celery-Task send_briefing_email wird nach generate_morning_briefing aufgerufen
+
+**Technische Hinweise:** Erweitere pwbs/briefing/ und pwbs/queue/tasks/briefing.py. User-Model um email_briefing_enabled und briefing_email_time erweitern.
+
+---
+
+#### TASK-178: Beta-Landing-Page: Wartelisten-Formular, Feature-Uebersicht und Social Proof
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ADR-014 Phase 1 Fundament, ROADMAP.md Phase 3 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Landing Page unter Root-URL fuer nicht-eingeloggte Besucher. Hero-Section mit Wertversprechen, Feature-Uebersicht, Testimonial-Bereich, Wartelisten-Formular mit Email-Validierung. Responsive Design.
+
+**Acceptance Criteria:**
+
+- [ ] Landing Page unter / fuer nicht-authentifizierte Nutzer, Dashboard fuer authentifizierte
+- [ ] Wartelisten-Formular speichert Email in PostgreSQL (waitlist-Tabelle)
+- [ ] Lighthouse Performance Score >= 90
+- [ ] Responsive auf 320px, 768px und 1440px Viewport
+
+**Technische Hinweise:** Next.js Root-Page app/page.tsx fuer Besucher, Redirect fuer eingeloggte. Server Component. API-Endpoint POST /api/v1/waitlist.
+
+---
+
+#### TASK-179: Plausible-Analytics: DSGVO-konformes Event-Tracking ohne Cookies
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Infra |
+| **Aufwand**      | S (0.5-1 Tag) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ADR-014 DSGVO-Implikationen, NF-024 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Plausible Analytics integrieren fuer anonymisierte Nutzungsmetriken. Kein Cookie-Consent noetig. Custom Events: signup, first_connector, first_briefing, search_query, referral_click.
+
+**Acceptance Criteria:**
+
+- [ ] Plausible-Script in allen Frontend-Seiten eingebunden
+- [ ] Mindestens 5 Custom Events: signup, first_connector, first_briefing, search, referral
+- [ ] Kein Cookie wird gesetzt, kein personenbezogenes Datum an Plausible
+- [ ] Docker-Compose enthaelt optionalen Plausible-Service
+
+**Technische Hinweise:** Plausible Script in app/layout.tsx. Custom Events via window.plausible(). Env NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
+
+---
+
+#### TASK-180: Referral-System: UUID-basierte Einladungs-Codes mit Conversion-Tracking
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ADR-014 Phase 4 Wachstum |
+| **Abhaengig von** | TASK-176 |
+| **Blockiert**    | – |
+
+**Beschreibung:** Jeder registrierte Nutzer erhaelt einen UUID-Referral-Code. Einladungslink fuehrt zur Landing Page mit Tracking. Bei Registrierung ueber Referral-Link wird der Einladende benachrichtigt. Dashboard-Widget zeigt Einladungsstatus.
+
+**Acceptance Criteria:**
+
+- [ ] Jeder Nutzer hat einen UUID-Referral-Code bei Registrierung
+- [ ] GET /api/v1/referrals liefert eigene Einladungen mit Status
+- [ ] Registrierung mit ?ref=UUID verknuepft neuen Nutzer mit Einladendem
+- [ ] Referral-Code enthaelt keine personenbezogenen Daten
+
+**Technische Hinweise:** Model Referral in pwbs/models/. Tabelle referrals(id, referrer_id, referee_id, code, status, created_at). API pwbs/api/v1/routes/referrals.py.
+
+---
+
+#### TASK-181: Interaktives Onboarding: First-Run-Wizard mit Konnektor-Setup-Anleitung
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | docs/public-beta/onboarding-flow.md, PRD-SPEC.md US-1.1 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Mehrstufiger Onboarding-Wizard: (1) Willkommen, (2) Konnektor verbinden, (3) Sync-Fortschritt, (4) Erstes Briefing generieren. Progress-Indicator. Kann uebersprungen werden.
+
+**Acceptance Criteria:**
+
+- [ ] Neue Nutzer sehen beim ersten Login den Onboarding-Wizard (4 Schritte)
+- [ ] Time-to-First-Briefing messbar unter 5 Minuten (NF-025)
+- [ ] Wizard kann uebersprungen werden
+- [ ] Onboarding-Completion als Plausible-Event getrackt
+
+**Technische Hinweise:** Komponente frontend/src/components/onboarding/wizard.tsx. User-Model um onboarding_completed erweitern. Client Component mit Steps-State.
+
+---
+
+#### TASK-182: Suchverbesserungen: Auto-Complete, gespeicherte Suchen und Verlaufsanzeige
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | PRD-SPEC.md Epic 2, US-2.1 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Auto-Complete basierend auf Entity-Namen. Nutzer koennen Suchen speichern. Suchverlauf der letzten 50 Suchen pro Nutzer. Alle Daten owner_id-gefiltert.
+
+**Acceptance Criteria:**
+
+- [ ] Auto-Complete nach 2+ Zeichen mit Entity-Namen (< 200ms)
+- [ ] POST /api/v1/search/saved speichert benannte Suche
+- [ ] GET /api/v1/search/history liefert letzte 50 Suchanfragen
+- [ ] Alle Endpoints filtern nach owner_id
+
+**Technische Hinweise:** Tabellen saved_searches und search_history. Auto-Complete via Entity-Index + tsvector. Frontend: Debounced Combobox.
+
+---
+
+#### TASK-183: Benutzereinstellungen erweitern: Zeitzone, Briefing-Zeitplan, Benachrichtigungen
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | PRD-SPEC.md US-3.1, ROADMAP.md Phase 3 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** User-Settings um Zeitzone (IANA), Briefing-Zeitplan, Benachrichtigungs-Praeferenzen und Sprache erweitern. PATCH /api/v1/users/settings. Frontend-Settings-Seite erweitern.
+
+**Acceptance Criteria:**
+
+- [ ] PATCH /api/v1/users/settings akzeptiert timezone, briefing_time, email_notifications, language
+- [ ] Zeitzone wird bei Briefing-Generierung beruecksichtigt
+- [ ] Frontend Settings-Page zeigt neue Felder mit Validierung
+- [ ] Defaults: timezone=Europe/Berlin, briefing_time=06:30, email_notifications=true, language=de
+
+**Technische Hinweise:** UserSettings erweitern. Alembic-Migration. Frontend settings/page.tsx aktualisieren.
+
+---
+
+#### TASK-184: Konnektor-Sync-Verlauf: Import-Historie und Fehler-Details-UI
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | S (0.5-1 Tag) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | PRD-SPEC.md US-1.6 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Konnektoren-Seite um Sync-Verlauf erweitern: Zeitpunkt, Dokument-Anzahl, Dauer, Fehler-Details. Klickbare Fehler-Zeilen mit vollstaendigem Fehlertext.
+
+**Acceptance Criteria:**
+
+- [ ] Jeder Konnektor zeigt letzte 10 Sync-Laeufe mit Timestamp und Status
+- [ ] Fehlerhafte Syncs mit expandierbarem Fehler-Detail
+- [ ] GET /api/v1/connectors/{id}/history liefert paginierte Historie
+- [ ] Leerer Zustand zeigt Noch kein Sync durchgefuehrt
+
+**Technische Hinweise:** Tabelle sync_runs(id, connection_id, started_at, completed_at, document_count, error_count, errors_json, status). Frontend: Accordion-Komponente.
+
+---
+
+#### TASK-185: Mobile-Responsive Optimierung: Touch-freundliche Breakpoints und Navigation
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P1 (Launch-kritisch) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ROADMAP.md Phase 3, ADR-014 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Responsive-Optimierung aller Dashboard-Seiten fuer Tablet (768px) und Smartphone (375px). Hamburger-Menu. Touch-freundliche Tap-Targets (min 44x44px). Card-Layout fuer Briefings.
+
+**Acceptance Criteria:**
+
+- [ ] Alle Dashboard-Seiten auf 375px und 768px ohne horizontales Scrollen
+- [ ] Navigation auf < 768px als Hamburger-Menu mit Slide-in Sidebar
+- [ ] Alle interaktiven Elemente mindestens 44x44px Touch-Target
+- [ ] Lighthouse Accessibility Score >= 90
+
+**Technische Hinweise:** Tailwind Breakpoints sm/md/lg. Sidebar mobile Variante. Sheet/Drawer-Pattern.
+
+---
+
+#### TASK-186: Briefing-Personalisierung: Nutzer-konfigurierbare Themen-Filter und Prioritaeten
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | PRD-SPEC.md US-3.1, ROADMAP.md Phase 3 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Nutzer koennen Themen-Filter konfigurieren: priorisierte Projekte, ausgeschlossene Quellen, Fokus-Themen. BriefingAgent nutzt diese Praeferenzen bei LLM-Aufruf und Dokumenten-Selektion.
+
+**Acceptance Criteria:**
+
+- [ ] PATCH /api/v1/users/briefing-preferences akzeptiert focus_projects, excluded_sources, priority_topics
+- [ ] Generierte Briefings reflektieren konfigurierte Praeferenzen
+- [ ] Preferences als JSON in user_settings gespeichert
+- [ ] Default: keine Filter, alle Daten beruecksichtigt
+
+**Technische Hinweise:** Erweitere pwbs/briefing/. UserSettings um briefing_preferences JSON-Feld. LLM-Prompt erweitern.
+
+---
+
+#### TASK-187: LLM-Response-Cache: Semantischer Cache fuer wiederkehrende Queries
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ROADMAP.md Phase 3, NF-012 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Semantischer Cache fuer LLM-Antworten. Bei aehnlichen Queries (Cosine-Similarity > 0.95) gecachte Antwort zurueckgeben. TTL konfigurierbar. Invalidierung bei neuen Dokumenten. Cache-Hit-Rate als Prometheus-Metrik.
+
+**Acceptance Criteria:**
+
+- [ ] Identische Suchanfragen innerhalb der TTL liefern gecachte Antwort (< 50ms)
+- [ ] Cache-Hit-Rate als Prometheus-Metrik pwbs_llm_cache_hit_ratio
+- [ ] Cache invalidiert bei neuen Dokumenten fuer den owner_id
+- [ ] TTL per Query-Typ konfigurierbar (search vs briefing)
+
+**Technische Hinweise:** Redis als Cache-Backend. Cache-Key: Hash aus Query-Embedding + owner_id + filter-hash. Modul pwbs/services/llm_cache.py.
+
+---
+
+#### TASK-188: Kontextbezogenes Feedback-Widget: In-App Bug-Reports mit Kontext-Metadaten
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P2 (Wichtig fuer Beta-Qualitaet) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | S (0.5-1 Tag) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ADR-014 Community-Feedback, docs/public-beta/community-setup.md |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Schwebendes Feedback-Widget auf allen Dashboard-Seiten. Feedback-Typ (Bug/Feature/Lob), Freitext, optionaler Screenshot. Automatische Kontext-Metadaten: URL, Browser, Viewport, letzte API-Errors.
+
+**Acceptance Criteria:**
+
+- [ ] Feedback-Button auf allen Dashboard-Seiten (Floating Button unten rechts)
+- [ ] POST /api/v1/feedback speichert Feedback mit Typ, Text und Kontext-Metadaten
+- [ ] Kontext-Metadaten: url, browser_info, viewport_size (keine sensiblen Daten)
+- [ ] Admin-API GET /api/v1/admin/feedback listet Feedbacks paginiert
+
+**Technische Hinweise:** Frontend: Sheet/Dialog mit Formular. Backend: Model Feedback, Route pwbs/api/v1/routes/feedback.py.
+
+---
+
+#### TASK-189: Webhook-Outbound: Event-Benachrichtigungen an externe Dienste senden
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P3 (Wuenschenswert) |
+| **Bereich**      | Backend |
+| **Aufwand**      | M (2-3 Tage) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ROADMAP.md Phase 5 (API Drittanbieter), PRD-SPEC.md F-020 |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Outbound-Webhook-System: Nutzer registrieren URLs und abonnieren Events (briefing.generated, document.ingested, connector.error). Signierte HTTP POST (HMAC-SHA256). Retry mit Exponential Backoff.
+
+**Acceptance Criteria:**
+
+- [ ] POST /api/v1/webhooks registriert Webhook mit URL, Events und generiertem Secret
+- [ ] Events als signierte POST-Requests (X-PWBS-Signature, HMAC-SHA256)
+- [ ] Fehlgeschlagene Deliveries 3x mit Exponential Backoff wiederholt
+- [ ] GET /api/v1/webhooks/{id}/deliveries zeigt letzte 20 Delivery-Versuche
+
+**Technische Hinweise:** Modul pwbs/services/webhooks.py. Model Webhook und WebhookDelivery. HMAC-Signierung mit hmac.new().
+
+---
+
+#### TASK-190: In-App Changelog: Feature-Announcements und Release-Notes-Overlay
+
+| Feld             | Wert                         |
+| ---------------- | ---------------------------- |
+| **Prioritaet**   | P3 (Wuenschenswert) |
+| **Bereich**      | Frontend |
+| **Aufwand**      | S (0.5-1 Tag) |
+| **Status**       | 🔴 Offen |
+| **Quelle**       | ADR-014 Community-Engagement, docs/public-beta/community-setup.md |
+| **Abhaengig von** | – |
+| **Blockiert**    | – |
+
+**Beschreibung:** Changelog-System mit Markdown-basierten Eintraegen. Badge auf Changelog-Icon zeigt ungelesene Eintraege. Overlay mit chronologischer Release-Liste. Gelesen-Status in localStorage.
+
+**Acceptance Criteria:**
+
+- [ ] Changelog-Icon im Header mit Badge fuer ungelesene Eintraege
+- [ ] Klick oeffnet Overlay mit chronologischer Release-Liste
+- [ ] Eintraege aus statischer JSON-Datei geladen (kein DB-Overhead)
+- [ ] Gelesen-Status in localStorage (kein Server-Roundtrip)
+
+**Technische Hinweise:** Datei frontend/public/changelog.json. Komponente frontend/src/components/layout/changelog.tsx. Badge via localStorage lastReadDate.
 
 ---
 

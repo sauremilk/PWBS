@@ -2,8 +2,8 @@
   "$schema": "./task-state.schema.json",
   "meta": {
     "schema_version": "1.0",
-    "total_tasks": 175,
-    "generated_at": "2026-03-14T15:52:25.300302+00:00",
+    "total_tasks": 190,
+    "generated_at": "2026-03-14T21:43:31.830962+00:00",
     "source": "tasks.md",
     "claiming_protocol": "Orchestrator liest diese Datei, findet ersten Task mit status=open in seinem Stream ohne offene blocked_by-EintrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ge, setzt status=in_progress + claimed_by + claimed_at. Commit atomar via git."
   },
@@ -145,6 +145,17 @@
         "STREAM-INFRA"
       ],
       "task_range": "166-175"
+    },
+    "STREAM-LAUNCH-OPS": {
+      "name": "Launch-Readiness: User-facing Features und Growth-Infrastruktur",
+      "description": "Email-Service, Landing Page, Analytics, Referral, Onboarding-Tutorial, Mobile-Responsive und weitere Launch-kritische Features.",
+      "phase": 3,
+      "orchestrator_slot": "ORCH-O",
+      "depends_on_streams": [
+        "STREAM-BETA-PREP",
+        "STREAM-FRONTEND",
+        "STREAM-AUTH-API"
+      ]
     }
   },
   "tasks": {
@@ -2665,6 +2676,190 @@
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T22:40:00.000000+00:00",
       "completed_at": "2026-03-14T22:50:00.000000+00:00",
+      "blocked_by": []
+    },
+    "TASK-176": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Transaktions-Email-Service: SendGrid/SMTP-Anbindung mit Template-Engine",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-177": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Email-Briefing-Zustellung: Taegliches Morgenbriefing per E-Mail versenden",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-176"
+      ]
+    },
+    "TASK-178": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Beta-Landing-Page: Wartelisten-Formular, Feature-Uebersicht und Social Proof",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-179": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Plausible-Analytics: DSGVO-konformes Event-Tracking ohne Cookies",
+      "priority": "P1",
+      "effort": "S",
+      "area": "Infra",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-180": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Referral-System: UUID-basierte Einladungs-Codes mit Conversion-Tracking",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": [
+        "TASK-176"
+      ]
+    },
+    "TASK-181": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Interaktives Onboarding: First-Run-Wizard mit Konnektor-Setup-Anleitung",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-182": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Suchverbesserungen: Auto-Complete, gespeicherte Suchen und Verlaufsanzeige",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-183": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Benutzereinstellungen erweitern: Zeitzone, Briefing-Zeitplan, Benachrichtigungen",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-184": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Konnektor-Sync-Verlauf: Import-Historie und Fehler-Details-UI",
+      "priority": "P2",
+      "effort": "S",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-185": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Mobile-Responsive Optimierung: Touch-freundliche Breakpoints und Navigation",
+      "priority": "P1",
+      "effort": "M",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-186": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Briefing-Personalisierung: Nutzer-konfigurierbare Themen-Filter und Prioritaeten",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-187": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "LLM-Response-Cache: Semantischer Cache fuer wiederkehrende Queries",
+      "priority": "P2",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-188": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Kontextbezogenes Feedback-Widget: In-App Bug-Reports mit Kontext-Metadaten",
+      "priority": "P2",
+      "effort": "S",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-189": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "Webhook-Outbound: Event-Benachrichtigungen an externe Dienste senden",
+      "priority": "P3",
+      "effort": "M",
+      "area": "Backend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
+      "blocked_by": []
+    },
+    "TASK-190": {
+      "stream": "STREAM-LAUNCH-OPS",
+      "title": "In-App Changelog: Feature-Announcements und Release-Notes-Overlay",
+      "priority": "P3",
+      "effort": "S",
+      "area": "Frontend",
+      "status": "open",
+      "claimed_by": null,
+      "claimed_at": null,
+      "completed_at": null,
       "blocked_by": []
     }
   }
