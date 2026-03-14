@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.7.0",
     "structlog>=24.1.0",
     "sentry-sdk[fastapi]>=2.0.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",

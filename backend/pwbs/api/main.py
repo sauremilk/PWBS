@@ -35,6 +35,7 @@ from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
 from pwbs.core.logging import setup_logging
+from pwbs.core.metrics import setup_metrics
 from pwbs.core.sentry import init_sentry
 
 logger = logging.getLogger(__name__)
@@ -214,6 +215,10 @@ def create_app() -> FastAPI:
     application.include_router(search_router)
     application.include_router(user_router)
     application.include_router(webhooks_router)
+
+    # Prometheus metrics (TASK-116) -- must be after all routers are mounted
+    setup_metrics(application)
+
     return application
 
 
