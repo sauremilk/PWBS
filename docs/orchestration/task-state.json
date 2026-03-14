@@ -1,4 +1,4 @@
-﻿{
+{
     "$schema":  "./task-state.schema.json",
     "meta":  {
                  "schema_version":  "1.0",
@@ -1738,9 +1738,9 @@
                                    "priority":  "P2",
                                    "effort":  "L",
                                    "area":  "Testing",
-                                   "status":  "open",
-                                   "claimed_by":  null,
-                                   "claimed_at":  null,
+                                   "status":  "in-progress",
+                                   "claimed_by":  "ORCH-I",
+                                   "claimed_at":  "2026-03-14T17:05:00+01:00",
                                    "completed_at":  null,
                                    "blocked_by":  [
                                                       "TASK-096",
