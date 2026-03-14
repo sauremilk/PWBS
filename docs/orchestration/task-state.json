@@ -1979,14 +1979,15 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-J",
+      "claimed_at": "2025-07-24T12:10:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-041",
         "TASK-043"
-      ]
+      ],
+      "commit": "2822528"
     },
     "TASK-128": {
       "stream": "STREAM-PHASE3",
@@ -2052,10 +2053,10 @@
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2025-07-24T11:00:00Z",
-      "completed_at": null,
+      "completed_at": "2025-07-24T11:30:00Z",
       "blocked_by": [
         "TASK-131"
       ]
@@ -2066,13 +2067,14 @@
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2025-07-24T12:10:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-078"
-      ]
+      ],
+      "commit": "b69c6f2"
     },
     "TASK-134": {
       "stream": "STREAM-PHASE4",
@@ -2278,10 +2280,10 @@
       "priority": "P2",
       "effort": "L",
       "area": "DevOps",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2025-07-24T11:00:00Z",
-      "completed_at": null,
+      "completed_at": "2025-07-24T12:00:00Z",
       "blocked_by": [
         "TASK-147"
       ]
@@ -2292,9 +2294,9 @@
       "priority": "P2",
       "effort": "XL",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-L",
+      "claimed_at": "2025-07-24T12:10:00Z",
       "completed_at": null,
       "blocked_by": [
         "TASK-144"
