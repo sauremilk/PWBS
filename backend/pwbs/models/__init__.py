@@ -15,6 +15,7 @@ from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
 from pwbs.models.subscription import Subscription
 from pwbs.models.user import User
+from pwbs.models.user_profile import UserProfile
 
 __all__ = [
     "AuditLog",
@@ -34,4 +35,5 @@ __all__ = [
     "ScheduledJobRun",
     "Subscription",
     "User",
+    "UserProfile",
 ]

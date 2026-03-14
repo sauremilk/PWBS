@@ -247,14 +247,10 @@ class MorningContextAssembler:
 
         histories: list[ParticipantHistory] = []
         if unique_participants:
-            histories = await self._graph.get_participant_history(
-                unique_participants, user_id
-            )
+            histories = await self._graph.get_participant_history(unique_participants, user_id)
 
         # Build participant history lookup per event
-        history_map: dict[str, ParticipantHistory] = {
-            h.name: h for h in histories
-        }
+        history_map: dict[str, ParticipantHistory] = {h.name: h for h in histories}
         event_histories: dict[str, list[ParticipantHistory]] = {}
         for ev in events:
             event_histories[ev.event_id] = [
@@ -270,6 +266,9 @@ class MorningContextAssembler:
                 user_id=user_id,
                 top_k=self._config.max_documents,
             )
+
+        # Step 3b: Profile-based re-ranking (TASK-134)
+        recent_docs = await self._rerank_by_profile(user_id, recent_docs)
 
         # Step 4: Pending decisions from graph
         decisions = await self._graph.get_pending_decisions(
@@ -307,7 +306,9 @@ class MorningContextAssembler:
         and parsed from the normalised format.
         """
         day_start = datetime(
-            target_date.year, target_date.month, target_date.day,
+            target_date.year,
+            target_date.month,
+            target_date.day,
             tzinfo=timezone.utc,
         )
         day_end = day_start + timedelta(days=1)
@@ -360,6 +361,7 @@ class MorningContextAssembler:
         'Participants: Name1, Name2' in the content.
         """
         import re
+
         for line in content.split("\n"):
             match = re.match(
                 r"(?:Teilnehmer|Participants)\s*:\s*(.+)",
@@ -401,6 +403,60 @@ class MorningContextAssembler:
         except Exception:
             logger.debug("Pattern detection unavailable, skipping", exc_info=True)
             return []
+
+    # ------------------------------------------------------------------
+    # Step 3b: Profile-based re-ranking (TASK-134)
+    # ------------------------------------------------------------------
+
+    async def _fetch_user_profile_themes(
+        self,
+        user_id: uuid.UUID,
+    ) -> list[str]:
+        """Load top theme names from the latest UserProfile (best-effort)."""
+        try:
+            from pwbs.models.user_profile import UserProfile
+
+            stmt = text("""
+                SELECT top_themes
+                FROM user_profiles
+                WHERE user_id = :uid
+                ORDER BY version DESC
+                LIMIT 1
+            """)
+            result = await self._session.execute(stmt, {"uid": user_id})
+            row = result.first()
+            if row and row.top_themes:
+                return [t["name"].lower() for t in row.top_themes if t.get("name")]
+        except Exception:
+            logger.debug("User profile unavailable, skipping re-ranking", exc_info=True)
+        return []
+
+    async def _rerank_by_profile(
+        self,
+        user_id: uuid.UUID,
+        docs: list[SemanticSearchResult],
+    ) -> list[SemanticSearchResult]:
+        """Re-rank search results by boosting docs that match user's top themes.
+
+        Documents whose title or content mentions the user's frequent themes
+        are moved to the front of the list, preserving relative order within
+        the boosted and non-boosted groups.
+        """
+        if not docs:
+            return docs
+
+        themes = await self._fetch_user_profile_themes(user_id)
+        if not themes:
+            return docs
+
+        def _theme_score(doc: SemanticSearchResult) -> int:
+            text_lower = (doc.title + " " + doc.content).lower()
+            return sum(1 for theme in themes if theme in text_lower)
+
+        boosted = [d for d in docs if _theme_score(d) > 0]
+        rest = [d for d in docs if _theme_score(d) == 0]
+        boosted.sort(key=lambda d: _theme_score(d), reverse=True)
+        return boosted + rest
 
     # ------------------------------------------------------------------
     # Step 3: Search query construction
@@ -510,26 +566,17 @@ class MorningContextAssembler:
         )
 
         # Trim background documents first
-        while (
-            context.recent_documents
-            and self._count_tokens(context) > self._config.token_budget
-        ):
+        while context.recent_documents and self._count_tokens(context) > self._config.token_budget:
             context.recent_documents.pop()
             context.truncated = True
 
         # Trim patterns if still over
-        while (
-            context.patterns
-            and self._count_tokens(context) > self._config.token_budget
-        ):
+        while context.patterns and self._count_tokens(context) > self._config.token_budget:
             context.patterns.pop()
             context.truncated = True
 
         # Trim decisions if still over
-        while (
-            context.pending_decisions
-            and self._count_tokens(context) > self._config.token_budget
-        ):
+        while context.pending_decisions and self._count_tokens(context) > self._config.token_budget:
             context.pending_decisions.pop()
             context.truncated = True
 

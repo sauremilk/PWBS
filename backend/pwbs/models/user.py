@@ -70,3 +70,8 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         uselist=False,
         lazy="selectin",
     )
+    profiles: Mapped[list["UserProfile"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
