@@ -39,6 +39,10 @@ class ExternalServiceError(PWBSError):
     """Raised when an external service (LLM, DB, API) fails."""
 
 
+class ConnectorError(PWBSError):
+    """Raised when a connector operation fails (fetch, auth, normalize)."""
+
+
 class IngestionError(PWBSError):
     """Raised when data ingestion fails."""
 
@@ -49,3 +53,11 @@ class ProcessingError(PWBSError):
 
 class EncryptionError(PWBSError):
     """Raised when encryption or decryption operations fail."""
+
+
+class TokenEncryptionError(EncryptionError):
+    """Raised when OAuth token encryption/decryption fails."""
+
+
+class TokenRefreshError(ConnectorError):
+    """Raised when OAuth token refresh fails."""
