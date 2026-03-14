@@ -18,6 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
+from pwbs.api.middleware.rate_limit import RateLimitMiddleware
 from pwbs.api.middleware.request_id import RequestIDMiddleware
 from pwbs.core.config import get_settings
 
@@ -84,6 +85,9 @@ def create_app() -> FastAPI:
 
     # 3. RequestID – must be outermost to tag every response
     application.add_middleware(RequestIDMiddleware)
+
+    # 2½. RateLimit – after RequestID, before TrustedHost (TASK-085)
+    application.add_middleware(RateLimitMiddleware)
 
     # 2. TrustedHost
     application.add_middleware(

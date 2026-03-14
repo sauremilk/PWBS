@@ -63,6 +63,14 @@ class Settings(BaseSettings):
     jwt_private_key: SecretStr = SecretStr("")
     jwt_public_key: str = ""
 
+    #  Rate Limiting (TASK-085)
+    rate_limit_general_max: int = 100
+    rate_limit_general_window: int = 60  # seconds
+    rate_limit_auth_max: int = 5
+    rate_limit_auth_window: int = 60  # seconds
+    rate_limit_sync_max: int = 1
+    rate_limit_sync_window: int = 300  # 5 minutes
+
     #  Encryption (Envelope Encryption, AES-256)
     encryption_master_key: SecretStr
 
