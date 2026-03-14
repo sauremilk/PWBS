@@ -410,6 +410,8 @@ class TestDisconnect:
 class TestTriggerSync:
     @pytest.mark.asyncio
     async def test_sync_succeeds(self) -> None:
+        from unittest.mock import patch
+
         from pwbs.api.v1.routes.connectors import trigger_sync
 
         user = _make_user()
@@ -419,8 +421,11 @@ class TestTriggerSync:
         find_result.scalar_one_or_none.return_value = conn
         db.execute.return_value = find_result
 
-        result = await trigger_sync(type="google-calendar", current_user=user, db=db)
+        with patch("pwbs.queue.tasks.ingestion.run_connector") as mock_task:
+            mock_task.delay = MagicMock()
+            result = await trigger_sync(type="google-calendar", current_user=user, db=db)
         assert result.status == "started"
+        mock_task.delay.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_not_found_404(self) -> None:

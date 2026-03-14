@@ -741,11 +741,14 @@ async def trigger_sync(
                 headers={"Retry-After": str(remaining)},
             )
 
-    # In MVP we don't have async workers; mark sync as started
+    # Dispatch connector sync to Celery worker queue
+    from pwbs.queue.tasks.ingestion import run_connector
+
     sync_id = uuid.uuid4()
+    run_connector.delay(str(connection.id), str(current_user.id))
 
     logger.info(
-        "Manual sync triggered: user_id=%s source_type=%s sync_id=%s",
+        "Manual sync dispatched to queue: user_id=%s source_type=%s sync_id=%s",
         current_user.id,
         source_type.value,
         sync_id,

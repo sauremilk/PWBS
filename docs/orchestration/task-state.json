@@ -1882,10 +1882,10 @@
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-J",
       "claimed_at": "2026-03-14T13:08:14.095164+00:00",
-      "completed_at": null,
+      "completed_at": "2025-07-16T12:00:00+00:00",
       "blocked_by": [
         "TASK-121"
       ]
