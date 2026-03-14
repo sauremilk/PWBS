@@ -2570,10 +2570,10 @@
       "priority": "P1",
       "effort": "S",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-14T19:46:13.805780+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T19:49:47.094129+00:00",
       "blocked_by": []
     },
     "TASK-169": {
