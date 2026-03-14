@@ -1,4 +1,4 @@
-"""Zoom connector — OAuth2, Webhook-Receiver, Polling-Sync (TASK-053..054).
+"""Zoom connector — OAuth2, Webhook-Receiver, Polling-Sync, Normalizer (TASK-053..055).
 
 Implements User-Level OAuth2 for accessing Zoom Cloud Recording transcripts.
 Zoom uses HTTP Basic Auth (base64(client_id:client_secret)) for the token
@@ -12,6 +12,12 @@ TASK-054 adds:
 - Polling-based ``fetch_since()`` via GET /users/me/recordings
 - ``process_recording_completed()`` for webhook-driven ingestion
 - Idempotency: duplicate recording_ids are skipped
+
+TASK-055 adds:
+- VTT → Plaintext parser with speaker attribution
+- ``normalize()`` implementation (recordings → UnifiedDocument)
+- Participant extraction from VTT speaker labels
+- Metadata: duration_minutes, start_time, end_time, participant_count
 
 References
 ----------
@@ -28,6 +34,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
@@ -37,10 +44,11 @@ import httpx
 from pydantic import BaseModel, SecretStr
 
 from pwbs.connectors.base import BaseConnector, ConnectorConfig, SyncError, SyncResult
+from pwbs.connectors.normalizer import normalize_document
 from pwbs.connectors.oauth import OAuthTokens
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import ConnectorError, RateLimitError
-from pwbs.schemas.enums import SourceType
+from pwbs.schemas.enums import ContentType, SourceType
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -168,11 +176,14 @@ def validate_zoom_webhook_signature(
         ``True`` if the signature is valid.
     """
     message = f"v0:{timestamp}:{request_body.decode()}"
-    expected = "v0=" + hmac.new(
-        secret.encode(),
-        message.encode(),
-        hashlib.sha256,
-    ).hexdigest()
+    expected = (
+        "v0="
+        + hmac.new(
+            secret.encode(),
+            message.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+    )
     return hmac.compare_digest(expected, signature)
 
 
@@ -230,6 +241,109 @@ def _decode_recordings_cursor(cursor: str) -> tuple[str | None, str | None]:
         except json.JSONDecodeError:
             return cursor, None
     return cursor, None
+
+
+# ---------------------------------------------------------------------------
+# VTT parsing helpers (TASK-055)
+# ---------------------------------------------------------------------------
+
+# Matches a VTT timestamp line: "00:00:01.000 --> 00:00:05.000"
+_VTT_TIMESTAMP_RE = re.compile(
+    r"^\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}",
+)
+
+
+def _parse_vtt(vtt_content: str) -> tuple[str, list[str]]:
+    """Parse a VTT transcript into plaintext with speaker labels.
+
+    Zoom VTT transcripts have the format::
+
+        WEBVTT
+
+        1
+        00:00:01.000 --> 00:00:05.000
+        Speaker Name: Hello everyone.
+
+        2
+        00:00:05.000 --> 00:00:10.000
+        Another Speaker: Thanks for joining.
+
+    Parameters
+    ----------
+    vtt_content:
+        Raw VTT file content.
+
+    Returns
+    -------
+    tuple[str, list[str]]
+        - Cleaned plaintext (speaker labels preserved for attribution).
+        - List of unique speaker names extracted from the transcript.
+    """
+    lines: list[str] = []
+    speakers: set[str] = set()
+
+    for line in vtt_content.splitlines():
+        stripped = line.strip()
+
+        # Skip WEBVTT header, blank lines, and numeric cue identifiers
+        if not stripped:
+            continue
+        if stripped == "WEBVTT":
+            continue
+        if stripped.isdigit():
+            continue
+        # Skip timestamp lines
+        if _VTT_TIMESTAMP_RE.match(stripped):
+            continue
+
+        # Extract speaker name if present ("Speaker: text")
+        colon_idx = stripped.find(": ")
+        if colon_idx > 0:
+            potential_speaker = stripped[:colon_idx].strip()
+            # Speaker names are typically short and don't contain timestamps
+            if (
+                len(potential_speaker) < 100  # noqa: PLR2004
+                and not _VTT_TIMESTAMP_RE.match(potential_speaker)
+                and not potential_speaker.isdigit()
+            ):
+                speakers.add(potential_speaker)
+
+        lines.append(stripped)
+
+    plaintext = "\n".join(lines)
+    # Sort speakers for deterministic output
+    return plaintext, sorted(speakers)
+
+
+def _extract_participants_from_files(
+    recording_files: list[dict[str, object]],
+) -> list[str]:
+    """Extract participant names/emails from recording file metadata.
+
+    Zoom ``participant_audio_files`` include per-participant info.  This
+    function gathers unique names from the ``file_name`` or ``user_name``
+    fields.
+    """
+    participants: set[str] = set()
+    for rf in recording_files:
+        if not isinstance(rf, dict):
+            continue
+        # participant_audio_files have user_name / user_email
+        user_name = rf.get("user_name")
+        user_email = rf.get("user_email")
+        if isinstance(user_email, str) and user_email:
+            participants.add(user_email)
+        elif isinstance(user_name, str) and user_name:
+            participants.add(user_name)
+        # file_name can also contain participant names
+        file_name = rf.get("file_name")
+        if (
+            isinstance(file_name, str)
+            and file_name
+            and rf.get("recording_type") == "participant_audio"
+        ):
+            participants.add(file_name)
+    return sorted(participants)
 
 
 # ---------------------------------------------------------------------------
@@ -407,9 +521,7 @@ class ZoomConnector(BaseConnector):
 
         return OAuthTokens(
             access_token=SecretStr(access_token),
-            refresh_token=(
-                SecretStr(refresh_token_value) if refresh_token_value else None
-            ),
+            refresh_token=(SecretStr(refresh_token_value) if refresh_token_value else None),
             token_type=data.get("token_type", "Bearer"),
             expires_at=expires_at,
             scope=data.get("scope", ZOOM_SCOPES),
@@ -491,12 +603,12 @@ class ZoomConnector(BaseConnector):
         - ``cursor=<date>`` → **incremental sync**: fetches recordings
           from that date onward.
 
-        For each recording, transcript files are downloaded and a raw dict
-        is built for ``normalize()``.  Since normalization is TASK-055,
-        individual recordings will appear in ``errors`` until then.
+        For each recording, transcript files are downloaded, parsed to
+        plaintext via ``normalize()``, and returned as ``UnifiedDocument``
+        objects.
 
-        Returns a ``SyncResult`` with normalised documents (when TASK-055
-        is implemented), errors, and the new cursor.
+        Returns a ``SyncResult`` with normalised documents, errors, and the
+        new cursor.
         """
         access_token = self._get_access_token()
 
@@ -504,9 +616,7 @@ class ZoomConnector(BaseConnector):
 
         # Default to 30 days back for initial sync
         if not watermark:
-            watermark = (
-                datetime.now(tz=timezone.utc) - timedelta(days=30)
-            ).strftime("%Y-%m-%d")
+            watermark = (datetime.now(tz=timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
 
         today = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
 
@@ -535,8 +645,7 @@ class ZoomConnector(BaseConnector):
 
         if response.status_code != 200:  # noqa: PLR2004
             raise ConnectorError(
-                f"Zoom recordings API error: HTTP {response.status_code} — "
-                f"{response.text}",
+                f"Zoom recordings API error: HTTP {response.status_code} — {response.text}",
                 code="ZOOM_RECORDINGS_API_ERROR",
             )
 
@@ -576,10 +685,12 @@ class ZoomConnector(BaseConnector):
             try:
                 transcript_content = await self.fetch_transcript(transcript_url)
             except (ConnectorError, RateLimitError) as exc:
-                errors.append(SyncError(
-                    source_id=meeting_uuid,
-                    error=f"Transcript download failed: {exc}",
-                ))
+                errors.append(
+                    SyncError(
+                        source_id=meeting_uuid,
+                        error=f"Transcript download failed: {exc}",
+                    )
+                )
                 continue
 
             # Build raw dict for normalize()
@@ -597,16 +708,13 @@ class ZoomConnector(BaseConnector):
                 doc = self.normalize(raw)  # type: ignore[arg-type]
                 documents.append(doc)
                 self._processed_recording_ids.add(meeting_uuid)
-            except NotImplementedError:
-                errors.append(SyncError(
-                    source_id=meeting_uuid,
-                    error="Normalizer not yet implemented (TASK-055)",
-                ))
             except Exception as exc:  # noqa: BLE001
-                errors.append(SyncError(
-                    source_id=meeting_uuid,
-                    error=f"Normalization failed: {exc}",
-                ))
+                errors.append(
+                    SyncError(
+                        source_id=meeting_uuid,
+                        error=f"Normalization failed: {exc}",
+                    )
+                )
 
         has_more = bool(next_page)
         new_cursor = _encode_recordings_cursor(
@@ -624,9 +732,93 @@ class ZoomConnector(BaseConnector):
     def normalize(self, raw: dict[str, object]) -> UnifiedDocument:
         """Normalize a Zoom recording/transcript into a UnifiedDocument.
 
-        Will be implemented in TASK-055 (Zoom Normalizer).
+        Expects the *raw* dict built by ``fetch_since()`` or
+        ``process_recording_completed()`` with at least::
+
+            {
+                "uuid": "meeting-uuid",
+                "topic": "Meeting title",
+                "start_time": "2026-01-15T10:00:00Z",
+                "duration": 30,
+                "transcript": "WEBVTT\\n\\n...",
+                "recording_files": [...],
+            }
+
+        The VTT transcript is parsed into plaintext with speaker labels
+        preserved.  Speaker names serve as participants alongside any
+        participant info in ``recording_files``.
         """
-        raise NotImplementedError("TASK-055: Zoom normalize not yet implemented")
+        meeting_uuid = str(raw.get("uuid", ""))
+        if not meeting_uuid:
+            raise ConnectorError(
+                "Raw recording data missing 'uuid'",
+                code="ZOOM_MISSING_UUID",
+            )
+
+        topic = str(raw.get("topic", "")) or "(Kein Titel)"
+        transcript_raw = raw.get("transcript", "")
+        transcript_str = str(transcript_raw) if transcript_raw else ""
+
+        # Parse VTT → plaintext + speakers
+        if transcript_str.strip():
+            content, vtt_speakers = _parse_vtt(transcript_str)
+        else:
+            content = ""
+            vtt_speakers = []
+
+        # Collect participants from VTT speakers + recording files
+        recording_files = raw.get("recording_files", [])
+        file_participants: list[str] = []
+        if isinstance(recording_files, list):
+            file_participants = _extract_participants_from_files(
+                recording_files,  # type: ignore[arg-type]
+            )
+
+        # Merge and deduplicate, preferring file-based (emails) over VTT names
+        all_participants = sorted(
+            set(file_participants) | set(vtt_speakers),
+        )
+
+        # Parse timestamps
+        start_time_str = str(raw.get("start_time", ""))
+        duration = raw.get("duration", 0)
+        duration_minutes = int(duration) if isinstance(duration, (int, float)) else 0
+
+        created_at: datetime | None = None
+        if start_time_str:
+            try:
+                created_at = datetime.fromisoformat(
+                    start_time_str.replace("Z", "+00:00"),
+                )
+            except ValueError:
+                pass
+
+        # Compute end_time from start + duration
+        end_time_str = ""
+        if created_at and duration_minutes > 0:
+            end_time = created_at + timedelta(minutes=duration_minutes)
+            end_time_str = end_time.isoformat()
+
+        metadata: dict[str, str | int | list[str]] = {
+            "duration_minutes": duration_minutes,
+            "start_time": start_time_str,
+            "end_time": end_time_str,
+            "participant_count": len(all_participants),
+        }
+        if vtt_speakers:
+            metadata["speakers"] = vtt_speakers
+
+        return normalize_document(
+            owner_id=self.owner_id,
+            source_type=SourceType.ZOOM,
+            source_id=meeting_uuid,
+            title=topic,
+            content=content,
+            content_type=ContentType.PLAINTEXT,
+            metadata=metadata,  # type: ignore[arg-type]
+            participants=all_participants,
+            created_at=created_at,
+        )
 
     # ------------------------------------------------------------------
     # Webhook-driven ingestion (TASK-054)
@@ -650,7 +842,7 @@ class ZoomConnector(BaseConnector):
         Returns
         -------
         SyncResult
-            Documents (after TASK-055) or errors for each recording.
+            Normalised documents or errors for each recording.
         """
         if event.payload is None:
             return SyncResult()
@@ -687,10 +879,12 @@ class ZoomConnector(BaseConnector):
         try:
             transcript_content = await self.fetch_transcript(transcript_url)
         except (ConnectorError, RateLimitError) as exc:
-            errors.append(SyncError(
-                source_id=meeting_uuid,
-                error=f"Transcript download failed: {exc}",
-            ))
+            errors.append(
+                SyncError(
+                    source_id=meeting_uuid,
+                    error=f"Transcript download failed: {exc}",
+                )
+            )
             return SyncResult(errors=errors)
 
         raw: dict[str, object] = {
@@ -707,16 +901,13 @@ class ZoomConnector(BaseConnector):
             doc = self.normalize(raw)  # type: ignore[arg-type]
             documents.append(doc)
             self._processed_recording_ids.add(meeting_uuid)
-        except NotImplementedError:
-            errors.append(SyncError(
-                source_id=meeting_uuid,
-                error="Normalizer not yet implemented (TASK-055)",
-            ))
         except Exception as exc:  # noqa: BLE001
-            errors.append(SyncError(
-                source_id=meeting_uuid,
-                error=f"Normalization failed: {exc}",
-            ))
+            errors.append(
+                SyncError(
+                    source_id=meeting_uuid,
+                    error=f"Normalization failed: {exc}",
+                )
+            )
 
         return SyncResult(documents=documents, errors=errors)
 
@@ -728,8 +919,7 @@ class ZoomConnector(BaseConnector):
         access_token = self.config.extra.get("access_token")
         if not access_token or not isinstance(access_token, str):
             logger.warning(
-                "Health check skipped — no access_token in config.extra: "
-                "connection_id=%s",
+                "Health check skipped — no access_token in config.extra: connection_id=%s",
                 self.connection_id,
             )
             return False
