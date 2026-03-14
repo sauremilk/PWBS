@@ -1318,10 +1318,10 @@
       "priority": "P0",
       "effort": "S",
       "area": "Auth",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-G",
       "claimed_at": "2026-03-14T10:35:00Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T11:00:00Z",
       "blocked_by": [
         "TASK-081"
       ]
