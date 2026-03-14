@@ -1143,10 +1143,10 @@
       "priority": "P0",
       "effort": "S",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-F",
       "claimed_at": "2026-03-14T10:20:00Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T10:45:00Z",
       "blocked_by": [
         "TASK-059",
         "TASK-035"
