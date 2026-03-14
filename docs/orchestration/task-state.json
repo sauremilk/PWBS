@@ -1769,10 +1769,10 @@
       "priority": "P1",
       "effort": "XS",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-I",
       "claimed_at": "2026-03-14T13:36:34.428124+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-14T13:41:29.417004+00:00",
       "blocked_by": [
         "TASK-031"
       ]
