@@ -2099,9 +2099,9 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Mobile",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2026-03-14T19:21:38.327332+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-086"
