@@ -83,6 +83,7 @@ class Settings(BaseSettings):
     notion_client_secret: SecretStr = SecretStr("")
     zoom_client_id: str = ""
     zoom_client_secret: SecretStr = SecretStr("")
+    zoom_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/zoom/callback"
     slack_client_id: str = ""
     slack_client_secret: SecretStr = SecretStr("")
 
