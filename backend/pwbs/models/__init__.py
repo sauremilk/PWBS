@@ -10,6 +10,7 @@ from pwbs.models.decision import Decision
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
 from pwbs.models.refresh_token import RefreshToken
+from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
 from pwbs.models.user import User
 
@@ -25,6 +26,7 @@ __all__ = [
     "Entity",
     "EntityMention",
     "RefreshToken",
+    "Reminder",
     "ScheduledJobRun",
     "User",
 ]

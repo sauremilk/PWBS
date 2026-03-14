@@ -118,3 +118,60 @@ async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
             )
 
     return {"users_processed": processed, "briefing_type": briefing_type}
+
+
+@app.task(
+    name="pwbs.queue.tasks.briefing.run_daily_reminder_triggers",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+    soft_time_limit=120,
+    queue="briefing.generate",
+    acks_late=True,
+)
+def run_daily_reminder_triggers(self: object) -> dict[str, object]:
+    """Run the reminder trigger engine for all users (daily)."""
+    start = time.monotonic()
+    try:
+        result = _run_async(_run_triggers_async())
+        duration_ms = (time.monotonic() - start) * 1000
+        logger.info(
+            "run_daily_reminder_triggers completed: users=%d new_reminders=%d duration=%.0fms",
+            result["users_processed"],
+            result["total_new_reminders"],
+            duration_ms,
+        )
+        return result
+    except Exception as exc:
+        logger.error("run_daily_reminder_triggers failed: %s", exc)
+        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+
+
+async def _run_triggers_async() -> dict[str, object]:
+    """Run reminder trigger engine for all active users."""
+    from sqlalchemy import select
+
+    from pwbs.db.postgres import get_session_factory
+    from pwbs.models.user import User
+    from pwbs.reminders.service import run_trigger_engine
+
+    factory = get_session_factory()
+    processed = 0
+    total_new = 0
+
+    async with factory() as db:
+        stmt = select(User)
+        result = await db.execute(stmt)
+        users = result.scalars().all()
+
+    for user in users:
+        try:
+            async with factory() as db:
+                new_reminders = await run_trigger_engine(db, user_id=user.id)
+                await db.commit()
+                total_new += len(new_reminders)
+            processed += 1
+        except Exception:
+            logger.exception("Failed to run trigger engine for user_id=%s", user.id)
+
+    return {"users_processed": processed, "total_new_reminders": total_new}

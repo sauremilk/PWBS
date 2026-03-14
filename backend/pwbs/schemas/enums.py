@@ -52,3 +52,28 @@ class ConnectionStatus(str, Enum):
     PAUSED = "paused"
     ERROR = "error"
     REVOKED = "revoked"
+
+
+class ReminderType(str, Enum):
+    """Types of reminders the trigger engine can generate."""
+
+    FOLLOW_UP = "follow_up"
+    INACTIVE_TOPIC = "inactive_topic"
+    OPEN_QUESTION = "open_question"
+
+
+class ReminderStatus(str, Enum):
+    """Lifecycle status of a reminder."""
+
+    PENDING = "pending"
+    ACKNOWLEDGED = "acknowledged"
+    DISMISSED = "dismissed"
+    SNOOZED = "snoozed"
+
+
+class Urgency(str, Enum):
+    """Urgency level for reminders."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"

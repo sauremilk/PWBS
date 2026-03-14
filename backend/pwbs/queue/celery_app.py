@@ -130,6 +130,15 @@ app.conf.beat_schedule = {
         },
         "options": {"queue": "briefing.generate"},
     },
+    "daily-reminder-triggers": {
+        "task": "pwbs.queue.tasks.briefing.run_daily_reminder_triggers",
+        "schedule": {
+            "__type__": "crontab",
+            "minute": "0",
+            "hour": "7",
+        },
+        "options": {"queue": "briefing.generate"},
+    },
 }
 
 # -- Auto-discover tasks in pwbs.queue.tasks --

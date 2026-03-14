@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 
 _FOLLOWUP_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
-        r"(?:ich|wir)\s+(?:schicke?|sende?|liefere?|mache?|erledige?|"
-        r"bereite?\s+vor|klaere?|pruefe?)\s+.*?(?:bis|morgen|naechste\s+woche|"
+        r"(?:ich|wir)\s+(?:schicke?n?|sende?n?|liefere?n?|mache?n?|erledige?n?|"
+        r"bereite?n?\s+vor|klaere?n?|pruefe?n?)\s+.*?(?:bis|morgen|naechste\s+woche|"
         r"montag|dienstag|mittwoch|donnerstag|freitag|heute)",
         re.IGNORECASE,
     ),
@@ -121,7 +121,7 @@ async def create_reminder(
         due_at=due_at,
         responsible_person=responsible_person,
         source_document_id=source_document_id,
-        metadata=metadata or {},
+        reminder_metadata=metadata or {},
         expires_at=datetime.now(tz=timezone.utc) + timedelta(days=90),
     )
     db.add(reminder)
@@ -223,38 +223,26 @@ async def run_trigger_engine(
             reminder.urgency = Urgency.HIGH.value
             logger.info("Escalated overdue reminder %s to HIGH", reminder.id)
 
-    # 2. Detect inactive topics (entities not mentioned in >30 days)
-    from pwbs.models.entity import Entity, EntityMention
+    # 2. Detect inactive topics (entities with last_seen > 30 days ago)
+    from pwbs.models.entity import Entity
 
     thirty_days_ago = now - timedelta(days=30)
 
-    old_entities_stmt = (
+    inactive_stmt = (
         select(Entity.id, Entity.name, Entity.entity_type)
-        .join(EntityMention, Entity.id == EntityMention.entity_id)
         .where(
             Entity.user_id == user_id,
-            EntityMention.created_at < thirty_days_ago,
+            Entity.last_seen < thirty_days_ago,
+            Entity.last_seen.is_not(None),
         )
-        .group_by(Entity.id, Entity.name, Entity.entity_type)
     )
-    old_result = await db.execute(old_entities_stmt)
-    old_entities = {row.id: (row.name, row.entity_type) for row in old_result.all()}
+    inactive_result = await db.execute(inactive_stmt)
+    inactive_entities = {
+        row.id: (row.name, row.entity_type) for row in inactive_result.all()
+    }
 
-    if old_entities:
-        recent_entities_stmt = (
-            select(EntityMention.entity_id)
-            .where(
-                EntityMention.entity_id.in_(list(old_entities.keys())),
-                EntityMention.created_at >= thirty_days_ago,
-            )
-            .distinct()
-        )
-        recent_result = await db.execute(recent_entities_stmt)
-        recent_ids = {row[0] for row in recent_result.all()}
-
-        inactive_ids = set(old_entities.keys()) - recent_ids
-
-        # Skip entities that already have a pending reminder
+    if inactive_entities:
+        # Skip entities that already have a pending inactive-topic reminder
         existing_stmt = (
             select(Reminder.reminder_metadata["entity_id"].as_string())
             .where(
@@ -266,10 +254,9 @@ async def run_trigger_engine(
         existing_result = await db.execute(existing_stmt)
         existing_entity_ids = {row[0] for row in existing_result.all()}
 
-        for entity_id in inactive_ids:
+        for entity_id, (name, etype) in inactive_entities.items():
             if str(entity_id) in existing_entity_ids:
                 continue
-            name, etype = old_entities[entity_id]
             reminder = await create_reminder(
                 db,
                 user_id=user_id,
