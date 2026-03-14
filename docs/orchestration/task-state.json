@@ -903,14 +903,15 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-E",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-044",
         "TASK-054"
-      ]
+      ],
+      "started_at": "2026-03-14T18:20:00Z"
     },
     "TASK-056": {
       "stream": "STREAM-PROCESSING",
@@ -1395,14 +1396,15 @@
       "priority": "P0",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
+      "status": "in-progress",
+      "claimed_by": "ORCH-G",
       "claimed_at": null,
       "completed_at": null,
       "blocked_by": [
         "TASK-086",
         "TASK-080"
-      ]
+      ],
+      "started_at": "2026-03-14T14:10:00Z"
     },
     "TASK-090": {
       "stream": "STREAM-AUTH-API",
