@@ -19,7 +19,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     encryption_key_enc: Mapped[str] = mapped_column(Text, nullable=False)
     deletion_scheduled_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None,
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
 
     # Relationships

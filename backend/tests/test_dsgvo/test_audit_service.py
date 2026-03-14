@@ -9,13 +9,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from pwbs.audit.audit_service import (
-    AuditAction,
     _PII_KEYS,
+    AuditAction,
     get_client_ip,
     log_event,
     sanitize_metadata,
 )
-
 
 # ---------------------------------------------------------------------------
 # AuditAction enum

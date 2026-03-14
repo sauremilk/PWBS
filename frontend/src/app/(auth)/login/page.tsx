@@ -7,10 +7,9 @@ import { Suspense } from "react";
 import { useAuth } from "@/lib/providers";
 import { ApiClientError } from "@/lib/api-client";
 
-const GOOGLE_AUTH_URL =
-  process.env.NEXT_PUBLIC_API_URL
-    ? `${process.env.NEXT_PUBLIC_API_URL}/auth/google`
-    : "http://localhost:8000/api/v1/auth/google";
+const GOOGLE_AUTH_URL = process.env.NEXT_PUBLIC_API_URL
+  ? `${process.env.NEXT_PUBLIC_API_URL}/auth/google`
+  : "http://localhost:8000/api/v1/auth/google";
 
 export default function LoginPage() {
   return (
@@ -43,10 +42,14 @@ function LoginContent() {
         if (err.status === 401 || err.status === 400) {
           setError("E-Mail oder Passwort falsch.");
         } else {
-          setError("Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.");
+          setError(
+            "Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.",
+          );
         }
       } else {
-        setError("Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.");
+        setError(
+          "Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.",
+        );
       }
     } finally {
       setLoading(false);
@@ -71,7 +74,10 @@ function LoginContent() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             E-Mail
           </label>
           <input
@@ -86,7 +92,10 @@ function LoginContent() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Passwort
           </label>
           <input
@@ -147,7 +156,10 @@ function LoginContent() {
 
       <p className="mt-6 text-center text-sm text-gray-600">
         Noch kein Konto?{" "}
-        <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+        <Link
+          href="/register"
+          className="font-medium text-blue-600 hover:text-blue-500"
+        >
           Registrieren
         </Link>
       </p>

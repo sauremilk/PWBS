@@ -83,10 +83,10 @@ def generate_weekly_briefings(self: object) -> dict[str, object]:
 
 async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
     """Generate briefings for all active users."""
+    from sqlalchemy import select
+
     from pwbs.db.postgres import get_session_factory
     from pwbs.models.user import User
-
-    from sqlalchemy import select
 
     factory = get_session_factory()
     processed = 0

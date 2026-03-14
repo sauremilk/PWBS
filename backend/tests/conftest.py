@@ -303,4 +303,3 @@ async def fake_redis() -> AsyncGenerator[Any, None]:
     client = fakeredis.aioredis.FakeRedis(server=server, decode_responses=True)
     yield client
     await client.aclose()
-

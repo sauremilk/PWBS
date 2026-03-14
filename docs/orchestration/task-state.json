@@ -1808,9 +1808,9 @@
                                    "priority":  "P2",
                                    "effort":  "M",
                                    "area":  "DevOps",
-                                   "status":  "ready",
-                                   "claimed_by":  null,
-                                   "claimed_at":  null,
+                                   "status":  "in-progress",
+                                   "claimed_by":  "ORCH-I",
+                                   "claimed_at":  "2026-03-14T14:56:49.1875637+01:00",
                                    "completed_at":  null,
                                    "blocked_by":  [
                                                       "TASK-037"

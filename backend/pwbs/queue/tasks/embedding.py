@@ -57,18 +57,16 @@ def generate_embeddings(self: object, document_ids: list[str], owner_id: str) ->
         raise self.retry(exc=exc)  # type: ignore[attr-defined]
 
 
-async def _generate_embeddings_async(
-    document_ids: list[str], owner_id: str
-) -> dict[str, object]:
+async def _generate_embeddings_async(document_ids: list[str], owner_id: str) -> dict[str, object]:
     """Async implementation of embedding generation."""
+    from sqlalchemy import select
+
     from pwbs.core.config import get_settings
     from pwbs.db.postgres import get_session_factory
     from pwbs.models.document import Document
     from pwbs.processing.chunking import ChunkingService
     from pwbs.processing.embedding import EmbeddingConfig, EmbeddingService
     from pwbs.processing.embedding_pipeline import EmbeddingPipelineHandler
-
-    from sqlalchemy import select
 
     owner_uuid = UUID(owner_id)
     factory = get_session_factory()

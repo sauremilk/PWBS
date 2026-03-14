@@ -12,6 +12,7 @@ from pwbs.connectors.registry import (
     clear_registry,
     create_connector,
     get_connector_class,
+    health_check_all,
     list_registered_types,
     register_connector,
 )
@@ -118,3 +119,96 @@ class TestClearRegistry:
         assert len(list_registered_types()) == 1
         clear_registry()
         assert len(list_registered_types()) == 0
+
+
+# ---------------------------------------------------------------------------
+# health_check_all
+# ---------------------------------------------------------------------------
+
+
+class FakeHealthyConnector(BaseConnector):
+    async def fetch_since(self, cursor: str | None) -> SyncResult:
+        return SyncResult()
+
+    async def normalize(self, raw: dict[str, Any]) -> UnifiedDocument:
+        raise NotImplementedError
+
+    async def health_check(self) -> bool:
+        return True
+
+
+class FakeUnhealthyConnector(BaseConnector):
+    async def fetch_since(self, cursor: str | None) -> SyncResult:
+        return SyncResult()
+
+    async def normalize(self, raw: dict[str, Any]) -> UnifiedDocument:
+        raise NotImplementedError
+
+    async def health_check(self) -> bool:
+        return False
+
+
+class FakeExplodingConnector(BaseConnector):
+    async def fetch_since(self, cursor: str | None) -> SyncResult:
+        return SyncResult()
+
+    async def normalize(self, raw: dict[str, Any]) -> UnifiedDocument:
+        raise NotImplementedError
+
+    async def health_check(self) -> bool:
+        raise ConnectionError("Service unreachable")
+
+
+class TestHealthCheckAll:
+    @pytest.mark.asyncio
+    async def test_all_healthy(self) -> None:
+        register_connector(SourceType.GOOGLE_CALENDAR, FakeHealthyConnector)
+        register_connector(SourceType.NOTION, FakeHealthyConnector)
+        owner_id = uuid.uuid4()
+        connection_id = uuid.uuid4()
+        config = ConnectorConfig(source_type=SourceType.GOOGLE_CALENDAR)
+
+        results = await health_check_all(
+            owner_id=owner_id,
+            connection_id=connection_id,
+            config=config,
+        )
+        assert results[SourceType.GOOGLE_CALENDAR] is True
+        assert results[SourceType.NOTION] is True
+
+    @pytest.mark.asyncio
+    async def test_unhealthy_connector(self) -> None:
+        register_connector(SourceType.GOOGLE_CALENDAR, FakeUnhealthyConnector)
+        owner_id = uuid.uuid4()
+        connection_id = uuid.uuid4()
+        config = ConnectorConfig(source_type=SourceType.GOOGLE_CALENDAR)
+
+        results = await health_check_all(
+            owner_id=owner_id,
+            connection_id=connection_id,
+            config=config,
+        )
+        assert results[SourceType.GOOGLE_CALENDAR] is False
+
+    @pytest.mark.asyncio
+    async def test_exception_maps_to_false(self) -> None:
+        register_connector(SourceType.ZOOM, FakeExplodingConnector)
+        owner_id = uuid.uuid4()
+        connection_id = uuid.uuid4()
+        config = ConnectorConfig(source_type=SourceType.ZOOM)
+
+        results = await health_check_all(
+            owner_id=owner_id,
+            connection_id=connection_id,
+            config=config,
+        )
+        assert results[SourceType.ZOOM] is False
+
+    @pytest.mark.asyncio
+    async def test_empty_registry(self) -> None:
+        results = await health_check_all(
+            owner_id=uuid.uuid4(),
+            connection_id=uuid.uuid4(),
+            config=ConnectorConfig(source_type=SourceType.GOOGLE_CALENDAR),
+        )
+        assert results == {}

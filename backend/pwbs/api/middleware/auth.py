@@ -33,9 +33,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     user_id -- endpoint-level dependencies decide whether to reject.
     """
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         user_id = None
         auth_header = request.headers.get("authorization", "")
 

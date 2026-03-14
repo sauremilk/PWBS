@@ -7,7 +7,8 @@ import json
 import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -22,6 +23,7 @@ from pwbs.dsgvo.export_service import (
     create_export_job,
     get_export,
     is_export_expired,
+    run_export,
 )
 
 # ---------------------------------------------------------------------------
@@ -302,3 +304,96 @@ class TestCollectors:
         assert "email" not in result[0]
         assert "ip_address" not in result[0]
         assert "metadata" not in result[0]
+
+
+# ---------------------------------------------------------------------------
+# run_export (background task)
+# ---------------------------------------------------------------------------
+
+
+def _mock_session_factory(mock_session: AsyncMock) -> MagicMock:
+    """Build a mock async_sessionmaker that yields *mock_session*."""
+    ctx = AsyncMock()
+    ctx.__aenter__.return_value = mock_session
+    ctx.__aexit__.return_value = None
+    factory = MagicMock(return_value=ctx)
+    return factory
+
+
+class TestRunExport:
+    @pytest.mark.asyncio
+    async def test_successful_export_writes_zip(self, tmp_path: Any) -> None:
+        export_id = uuid.uuid4()
+        user_id = uuid.uuid4()
+
+        mock_session = AsyncMock()
+        # Collectors return empty lists for simplicity
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = []
+
+        # For the final SELECT to get the export record
+        export_record = MagicMock()
+        scalar_result = MagicMock()
+        scalar_result.scalar_one.return_value = export_record
+
+        mock_session.execute.side_effect = [
+            mock_result,  # documents
+            mock_result,  # chunks
+            mock_result,  # entities
+            mock_result,  # briefings
+            mock_result,  # audit
+            scalar_result,  # SELECT export record
+        ]
+
+        factory = _mock_session_factory(mock_session)
+        mock_engine = AsyncMock()
+
+        with (
+            patch("pwbs.dsgvo.export_service.create_async_engine", return_value=mock_engine),
+            patch("pwbs.dsgvo.export_service.async_sessionmaker", return_value=factory),
+        ):
+            await run_export(export_id, user_id, "postgresql+asyncpg://test", str(tmp_path))
+
+        assert export_record.status == "completed"
+        assert export_record.file_path is not None
+        assert export_record.completed_at is not None
+        assert export_record.expires_at is not None
+        mock_session.commit.assert_awaited()
+        mock_engine.dispose.assert_awaited()
+
+    @pytest.mark.asyncio
+    async def test_failed_export_sets_status_failed(self, tmp_path: Any) -> None:
+        export_id = uuid.uuid4()
+        user_id = uuid.uuid4()
+
+        # First session raises, second session for error handling
+        fail_session = AsyncMock()
+        fail_session.execute.side_effect = RuntimeError("DB broke")
+
+        error_session = AsyncMock()
+        error_record = MagicMock()
+        error_result = MagicMock()
+        error_result.scalar_one_or_none.return_value = error_record
+
+        error_session.execute.return_value = error_result
+
+        call_count = 0
+        call_contexts = []
+        for s in [fail_session, error_session]:
+            ctx = AsyncMock()
+            ctx.__aenter__.return_value = s
+            ctx.__aexit__.return_value = None
+            call_contexts.append(ctx)
+
+        factory = MagicMock(side_effect=call_contexts)
+        mock_engine = AsyncMock()
+
+        with (
+            patch("pwbs.dsgvo.export_service.create_async_engine", return_value=mock_engine),
+            patch("pwbs.dsgvo.export_service.async_sessionmaker", return_value=factory),
+        ):
+            await run_export(export_id, user_id, "postgresql+asyncpg://test", str(tmp_path))
+
+        assert error_record.status == "failed"
+        assert error_record.error_message == "Internal export error"
+        mock_engine.dispose.assert_awaited()

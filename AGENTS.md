@@ -205,6 +205,7 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | `.github/prompts/gen-architecture.prompt.md`     | Architektur: Designprinzipien mit Implikationen, Komponenten, Tech-Stack         |
 | `.github/prompts/gen-prd-spec.prompt.md`         | PRD-SPEC: Tiefe Personas, falsifizierbare Hypothese, FRs mit Acceptance Criteria |
 | `.github/prompts/gen-tasks.prompt.md`            | Task-Backlog: Atomare Tasks mit Quellenrückverfolgbarkeit                        |
+| `.github/prompts/enrich-foundation.prompt.md`    | **Schritt 2:** Tiefe Dokumente – Tasks von 20 auf 100+, Personas vertiefen, NFs konkretisieren |
 
 ### Optimierungs-Suite
 

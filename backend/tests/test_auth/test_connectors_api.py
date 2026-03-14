@@ -379,7 +379,12 @@ class TestDisconnect:
         # Third call: delete documents; fourth: nothing (delete connection is via db.delete)
         db.execute.side_effect = [find_result, count_result, MagicMock()]
 
-        result = await disconnect(type="google-calendar", request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), current_user=user, db=db)
+        result = await disconnect(
+            type="google-calendar",
+            request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+            current_user=user,
+            db=db,
+        )
         assert result.deleted_doc_count == 5
         assert "google_calendar" in result.message
         db.delete.assert_called_once_with(conn)
@@ -398,7 +403,12 @@ class TestDisconnect:
         db.execute.return_value = find_result
 
         with pytest.raises(HTTPException) as exc_info:
-            await disconnect(type="notion", request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), current_user=user, db=db)
+            await disconnect(
+                type="notion",
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                current_user=user,
+                db=db,
+            )
         assert exc_info.value.status_code == 404
 
 

@@ -58,16 +58,14 @@ def extract_entities(self: object, document_ids: list[str], owner_id: str) -> di
         raise self.retry(exc=exc)  # type: ignore[attr-defined]
 
 
-async def _extract_entities_async(
-    document_ids: list[str], owner_id: str
-) -> dict[str, object]:
+async def _extract_entities_async(document_ids: list[str], owner_id: str) -> dict[str, object]:
     """Async implementation of entity extraction."""
+    from sqlalchemy import select
+
     from pwbs.db.postgres import get_session_factory
     from pwbs.models.document import Document
     from pwbs.models.entity import Entity, EntityMention
     from pwbs.processing.ner import RuleBasedNER
-
-    from sqlalchemy import select
 
     owner_uuid = UUID(owner_id)
     factory = get_session_factory()

@@ -22,7 +22,6 @@ from pwbs.core.logging import (
     user_id_var,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -268,6 +267,7 @@ class TestLogLevelConfig:
 class TestLogLevelEnvVar:
     def test_accepts_log_level(self) -> None:
         from pwbs.core.config import Settings
+
         s = Settings(
             log_level="DEBUG",
             jwt_secret_key="test-key",
@@ -278,7 +278,9 @@ class TestLogLevelEnvVar:
     def test_accepts_pwbs_log_level(self) -> None:
         import os
         from unittest.mock import patch as mock_patch
+
         from pwbs.core.config import Settings
+
         env = {
             "PWBS_LOG_LEVEL": "WARNING",
             "JWT_SECRET_KEY": "test-key",
@@ -423,6 +425,7 @@ class TestAuthMiddlewareContextVar:
     @pytest.mark.asyncio
     async def test_sets_user_id_contextvar(self) -> None:
         from unittest.mock import patch as mock_patch
+
         from pwbs.api.middleware.auth import AuthMiddleware
 
         uid = uuid.uuid4()

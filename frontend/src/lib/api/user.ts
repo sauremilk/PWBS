@@ -43,9 +43,10 @@ export async function cancelAccountDeletion(): Promise<CancelDeletionResponse> {
   return apiClient.post<CancelDeletionResponse>("/user/delete/cancel");
 }
 
-export async function getAuditLog(
-  params?: { limit?: number; offset?: number },
-): Promise<AuditLogResponse> {
+export async function getAuditLog(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<AuditLogResponse> {
   const query = new URLSearchParams();
   if (params?.limit) query.set("limit", String(params.limit));
   if (params?.offset) query.set("offset", String(params.offset));

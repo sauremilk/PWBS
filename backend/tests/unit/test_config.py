@@ -36,7 +36,7 @@ class TestSettingsDefaults:
         assert settings.neo4j_uri == "bolt://localhost:7687"
         assert settings.neo4j_user == "neo4j"
         assert settings.jwt_algorithm == "HS256"
-        assert settings.jwt_access_token_expire_minutes == 30
+        assert settings.jwt_access_token_expire_minutes == 15
 
     def test_debug_true_in_development(self) -> None:
         settings = Settings(**MINIMAL_KWARGS)  # type: ignore[arg-type]

@@ -20,7 +20,6 @@ from pwbs.api.v1.routes.auth import (
 from pwbs.services.auth import TokenPair
 from pwbs.services.user import RegisterRequest
 
-
 # ---------------------------------------------------------------------------
 # Schema validation tests
 # ---------------------------------------------------------------------------
@@ -98,7 +97,9 @@ class TestRegisterEndpoint:
         mock_db = AsyncMock()
 
         with (
-            patch("pwbs.api.v1.routes.auth.register_user", new_callable=AsyncMock, return_value=pair),
+            patch(
+                "pwbs.api.v1.routes.auth.register_user", new_callable=AsyncMock, return_value=pair
+            ),
             patch(
                 "pwbs.api.v1.routes.auth.validate_access_token",
                 return_value=MagicMock(user_id=uid),
@@ -152,7 +153,9 @@ class TestRegisterEndpoint:
         with patch(
             "pwbs.api.v1.routes.auth.register_user",
             new_callable=AsyncMock,
-            side_effect=AuthenticationError("Registrierung fehlgeschlagen", code="REGISTRATION_FAILED"),
+            side_effect=AuthenticationError(
+                "Registrierung fehlgeschlagen", code="REGISTRATION_FAILED"
+            ),
         ):
             body = RegisterRequest(
                 email="test@example.com",
@@ -191,7 +194,11 @@ class TestLoginEndpoint:
 
         with (
             patch("pwbs.api.v1.routes.auth.verify_password", return_value=True),
-            patch("pwbs.api.v1.routes.auth.create_token_pair", new_callable=AsyncMock, return_value=pair),
+            patch(
+                "pwbs.api.v1.routes.auth.create_token_pair",
+                new_callable=AsyncMock,
+                return_value=pair,
+            ),
         ):
             mock_request = MagicMock()
             mock_request.headers = {}

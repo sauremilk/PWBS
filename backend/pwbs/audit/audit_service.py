@@ -14,8 +14,8 @@ import logging
 import uuid
 from typing import Any
 
-from starlette.requests import Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 
 from pwbs.models.audit_log import AuditLog
 
@@ -38,11 +38,25 @@ class AuditAction(str, enum.Enum):
 
 
 # Keys that must never appear in audit metadata (PII prevention).
-_PII_KEYS = frozenset({
-    "email", "password", "password_hash", "display_name", "name",
-    "content", "body", "text", "token", "access_token", "refresh_token",
-    "secret", "api_key", "phone", "address",
-})
+_PII_KEYS = frozenset(
+    {
+        "email",
+        "password",
+        "password_hash",
+        "display_name",
+        "name",
+        "content",
+        "body",
+        "text",
+        "token",
+        "access_token",
+        "refresh_token",
+        "secret",
+        "api_key",
+        "phone",
+        "address",
+    }
+)
 
 
 def sanitize_metadata(metadata: dict[str, Any] | None) -> dict[str, Any]:

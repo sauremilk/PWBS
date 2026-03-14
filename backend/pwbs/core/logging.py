@@ -35,26 +35,28 @@ user_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 # PII prevention -- keys that MUST NOT appear in log output
 # ---------------------------------------------------------------------------
 
-_PII_KEYS = frozenset({
-    "email",
-    "password",
-    "password_hash",
-    "display_name",
-    "name",
-    "content",
-    "body",
-    "text",
-    "token",
-    "access_token",
-    "refresh_token",
-    "secret",
-    "api_key",
-    "phone",
-    "address",
-    "embedding",
-    "embeddings",
-    "metadata",
-})
+_PII_KEYS = frozenset(
+    {
+        "email",
+        "password",
+        "password_hash",
+        "display_name",
+        "name",
+        "content",
+        "body",
+        "text",
+        "token",
+        "access_token",
+        "refresh_token",
+        "secret",
+        "api_key",
+        "phone",
+        "address",
+        "embedding",
+        "embeddings",
+        "metadata",
+    }
+)
 
 
 # ---------------------------------------------------------------------------

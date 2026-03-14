@@ -34,14 +34,14 @@ provider "aws" {
   }
 }
 
-#  Networking 
+#  Networking
 module "networking" {
   source      = "./modules/networking"
   environment = var.environment
   project     = var.project
 }
 
-#  RDS (PostgreSQL) 
+#  RDS (PostgreSQL)
 module "rds" {
   source              = "./modules/rds"
   environment         = var.environment
@@ -53,7 +53,7 @@ module "rds" {
   enable_read_replica     = var.environment == "production"
   rds_proxy_role_arn      = var.rds_proxy_role_arn
   db_credentials_secret_arn = var.db_credentials_secret_arn
-#  ECS (Fargate  Backend API) 
+#  ECS (Fargate  Backend API)
 module "ecs" {
   source             = "./modules/ecs"
   environment        = var.environment
@@ -75,7 +75,7 @@ module "ecs" {
   private_subnet_ids = module.networking.private_subnet_ids
 }
 
-#  ElastiCache (Redis) 
+#  ElastiCache (Redis)
 module "elasticache" {
   source             = "./modules/elasticache"
   environment        = var.environment
@@ -96,13 +96,13 @@ module "cloudfront" {
   domain_aliases      = var.domain_aliases
 }
 
-#  KMS (Envelope Encryption) 
+#  KMS (Envelope Encryption)
 module "kms" {
   source      = "./modules/kms"
   environment = var.environment
 }
 
-#  Monitoring (CloudWatch) 
+#  Monitoring (CloudWatch)
 module "monitoring" {
   source      = "./modules/monitoring"
   environment = var.environment

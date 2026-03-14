@@ -15,9 +15,7 @@ class TestMockUser:
         assert mock_user.display_name == "Test User"
         assert mock_user.deletion_scheduled_at is None
 
-    def test_unique_per_test(
-        self, mock_user: MagicMock, test_user_id: uuid.UUID
-    ) -> None:
+    def test_unique_per_test(self, mock_user: MagicMock, test_user_id: uuid.UUID) -> None:
         assert mock_user.id == test_user_id
 
 
