@@ -1,5 +1,6 @@
 """PWBS ORM models  all models must be imported here for Alembic discovery."""
 
+from pwbs.models.api_key import ApiKey
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.base import Base
 from pwbs.models.briefing import Briefing
@@ -23,6 +24,7 @@ from pwbs.models.user import User
 from pwbs.models.user_profile import UserProfile
 
 __all__ = [
+    "ApiKey",
     "AuditLog",
     "Base",
     "Briefing",

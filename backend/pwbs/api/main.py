@@ -199,6 +199,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.billing import router as billing_router
     from pwbs.api.v1.routes.briefings import router as briefings_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
+    from pwbs.api.v1.routes.developer import router as developer_router
     from pwbs.api.v1.routes.documents import router as documents_router
     from pwbs.api.v1.routes.feature_flags import router as feature_flags_router
     from pwbs.api.v1.routes.health import router as health_router
@@ -209,13 +210,14 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.organizations import (
         visibility_router,
     )
+    from pwbs.api.v1.routes.public_api import router as public_api_router
+    from pwbs.api.v1.routes.rbac import router as rbac_router
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
     from pwbs.api.v1.routes.slack import router as slack_router
     from pwbs.api.v1.routes.user import router as user_router
     from pwbs.api.v1.routes.webhooks import router as webhooks_router
 
-    application.include_router(health_router)
     application.include_router(auth_router)
     application.include_router(auth_google_router)
     application.include_router(auth_refresh_router)
@@ -233,6 +235,9 @@ def create_app() -> FastAPI:
     application.include_router(slack_router)
     application.include_router(webhooks_router)
     application.include_router(billing_router)
+    application.include_router(rbac_router)
+    application.include_router(developer_router)
+    application.include_router(public_api_router)
 
     # Prometheus metrics (TASK-116) -- must be after all routers are mounted
     setup_metrics(application)

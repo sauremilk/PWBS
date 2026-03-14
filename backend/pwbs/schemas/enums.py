@@ -19,6 +19,7 @@ class SourceType(str, Enum):
     OUTLOOK_MAIL = "outlook_mail"
     SLACK = "slack"
     ZOOM = "zoom"
+    API_UPLOAD = "api_upload"
 
 
 class ContentType(str, Enum):
@@ -89,11 +90,47 @@ class Urgency(str, Enum):
 
 
 class OrgRole(str, Enum):
-    """Role of a user within an organization."""
+    """Role of a user within an organization.
+
+    Hierarchy (highest to lowest): OWNER > ADMIN > MANAGER > MEMBER > VIEWER.
+    """
 
     OWNER = "owner"
+    ADMIN = "admin"
+    MANAGER = "manager"
     MEMBER = "member"
     VIEWER = "viewer"
+
+
+class Permission(str, Enum):
+    """Granular permissions for RBAC on organization level (TASK-153)."""
+
+    # Organization management
+    ORG_DELETE = "org:delete"
+    ORG_EDIT = "org:edit"
+    ORG_VIEW = "org:view"
+
+    # Member management
+    MEMBERS_INVITE = "members:invite"
+    MEMBERS_REMOVE = "members:remove"
+    MEMBERS_CHANGE_ROLE = "members:change_role"
+    MEMBERS_VIEW = "members:view"
+
+    # Connector management
+    CONNECTORS_MANAGE = "connectors:manage"
+    CONNECTORS_SHARE = "connectors:share"
+    CONNECTORS_VIEW = "connectors:view"
+
+    # Document / knowledge
+    DOCUMENTS_MANAGE_VISIBILITY = "documents:manage_visibility"
+    DOCUMENTS_VIEW_TEAM = "documents:view_team"
+
+    # Briefings
+    BRIEFINGS_GENERATE = "briefings:generate"
+    BRIEFINGS_VIEW = "briefings:view"
+
+    # Audit
+    AUDIT_VIEW = "audit:view"
 
 
 class DocumentVisibility(str, Enum):

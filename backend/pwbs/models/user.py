@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, time
 
-from sqlalchemy import Boolean, DateTime, Text
+from sqlalchemy import Boolean, DateTime, Text, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -25,6 +25,12 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         DateTime(timezone=True),
         nullable=True,
         default=None,
+    )
+    email_briefing_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false",
+    )
+    briefing_email_time: Mapped[time] = mapped_column(
+        Time, nullable=False, default=time(6, 30), server_default="06:30:00",
     )
 
     # Relationships
@@ -74,6 +80,11 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         lazy="selectin",
     )
     profiles: Mapped[list["UserProfile"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    api_keys: Mapped[list["ApiKey"]] = relationship(  # noqa: F821
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
