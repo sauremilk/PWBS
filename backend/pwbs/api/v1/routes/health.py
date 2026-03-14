@@ -17,6 +17,7 @@ from pwbs.db.postgres import check_postgres_health
 from pwbs.db.weaviate_client import check_weaviate_health
 from pwbs.db.neo4j_client import check_neo4j_health
 from pwbs.db.redis_client import check_redis_health
+from pwbs.queue.health import check_queue_health
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -55,4 +56,11 @@ async def health_check() -> dict[str, Any]:
     else:
         overall = "unhealthy"
 
-    return {"status": overall, "components": components}
+    # Queue status (TASK-121) – non-critical, does not affect overall status
+    queue_info: dict[str, Any] = {}
+    try:
+        queue_info = await check_queue_health()
+    except Exception:
+        queue_info = {"status": "unavailable"}
+
+    return {"status": overall, "components": components, "queue": queue_info}

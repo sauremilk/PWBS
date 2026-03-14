@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     #  Redis
     redis_url: str = "redis://localhost:6379/0"
 
+    #  Celery (TASK-121)
+    celery_broker_url: str = ""  # falls leer, wird redis_url verwendet
+    celery_result_backend: str = ""  # falls leer, redis_url DB 1
+
     #  LLM APIs
     anthropic_api_key: SecretStr = SecretStr("")
     openai_api_key: SecretStr = SecretStr("")

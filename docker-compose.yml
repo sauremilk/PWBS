@@ -95,18 +95,116 @@ services:
       retries: 5
     restart: unless-stopped
 
-  #  Redis 
+#  Redis (AOF persistence enabled for queue reliability – TASK-121)
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --appendonly yes --appendfsync everysec
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  #  Celery Worker – Ingestion queues (TASK-121)
+  celery-worker-ingestion:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pwbs:pwbs_dev@postgres:5432/pwbs
+      - WEAVIATE_URL=http://weaviate:8080
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=dev_password
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - APP_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: celery -A pwbs.queue.celery_app worker -Q ingestion.high,ingestion.bulk -c 4 --loglevel=info
+    restart: unless-stopped
+
+  #  Celery Worker – Processing queues (TASK-121)
+  celery-worker-processing:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pwbs:pwbs_dev@postgres:5432/pwbs
+      - WEAVIATE_URL=http://weaviate:8080
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=dev_password
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - APP_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: celery -A pwbs.queue.celery_app worker -Q processing.embed,processing.extract -c 2 --loglevel=info
+    restart: unless-stopped
+
+  #  Celery Worker – Briefing queue (TASK-121)
+  celery-worker-briefing:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pwbs:pwbs_dev@postgres:5432/pwbs
+      - WEAVIATE_URL=http://weaviate:8080
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=dev_password
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - APP_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: celery -A pwbs.queue.celery_app worker -Q briefing.generate -c 2 --loglevel=info
+    restart: unless-stopped
+
+  #  Celery Beat – Scheduler (TASK-121)
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - APP_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: celery -A pwbs.queue.celery_app beat --loglevel=info
     restart: unless-stopped
 
   #  Frontend 
