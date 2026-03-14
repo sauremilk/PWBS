@@ -8,6 +8,9 @@ import {
   configure,
   disconnect,
   syncConnector,
+  getConsentStatus,
+  grantConsent,
+  revokeConsent,
 } from "@/lib/api/connectors";
 
 export function useConnectorTypes() {
@@ -61,6 +64,40 @@ export function useSyncConnector() {
     mutationFn: (connectorType: string) => syncConnector(connectorType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connectors", "status"] });
+    },
+  });
+}
+
+export function useConsentStatus(connectorType: string | null) {
+  return useQuery({
+    queryKey: ["connectors", "consent", connectorType],
+    queryFn: () => getConsentStatus(connectorType!),
+    enabled: connectorType !== null,
+  });
+}
+
+export function useGrantConsent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      connectorType,
+      consentVersion,
+    }: {
+      connectorType: string;
+      consentVersion: number;
+    }) => grantConsent(connectorType, { consent_version: consentVersion }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connectors"] });
+    },
+  });
+}
+
+export function useRevokeConsent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (connectorType: string) => revokeConsent(connectorType),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connectors"] });
     },
   });
 }

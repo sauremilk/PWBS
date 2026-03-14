@@ -149,6 +149,29 @@ export interface SyncResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Consent (TASK-173)
+// ---------------------------------------------------------------------------
+
+export interface ConsentGrantRequest {
+  consent_version: number;
+}
+
+export interface ConsentStatusResponse {
+  connector_type: string;
+  consented: boolean;
+  consent_version: number | null;
+  consented_at: string | null;
+  data_types: string[];
+  processing_purpose: string;
+  llm_providers: string[];
+}
+
+export interface ConsentRevokeResponse {
+  message: string;
+  deleted_doc_count: number;
+}
+
+// ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
 

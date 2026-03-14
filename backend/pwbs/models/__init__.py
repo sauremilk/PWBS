@@ -5,6 +5,7 @@ from pwbs.models.base import Base
 from pwbs.models.briefing import Briefing
 from pwbs.models.chunk import Chunk
 from pwbs.models.connection import Connection
+from pwbs.models.connector_consent import ConnectorConsent
 from pwbs.models.data_export import DataExport
 from pwbs.models.decision import Decision
 from pwbs.models.document import Document
@@ -23,6 +24,7 @@ __all__ = [
     "Base",
     "Briefing",
     "Chunk",
+    "ConnectorConsent",
     "DataExport",
     "Connection",
     "Decision",

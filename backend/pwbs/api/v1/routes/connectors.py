@@ -1,4 +1,4 @@
-"""Connectors API endpoints (TASK-087).
+"""Connectors API endpoints (TASK-087, TASK-173).
 
 GET    /api/v1/connectors/              -- List available connector types
 GET    /api/v1/connectors/status        -- Status of all connected sources
@@ -7,6 +7,9 @@ POST   /api/v1/connectors/{type}/callback  -- OAuth2 callback
 POST   /api/v1/connectors/{type}/config    -- Configure connector (e.g. Obsidian vault)
 DELETE /api/v1/connectors/{type}           -- Disconnect + cascade delete
 POST   /api/v1/connectors/{type}/sync      -- Trigger manual sync
+GET    /api/v1/connectors/{type}/consent   -- Get consent status
+POST   /api/v1/connectors/{type}/consent   -- Grant consent
+DELETE /api/v1/connectors/{type}/consent   -- Revoke consent + cascade delete
 """
 
 from __future__ import annotations
@@ -29,6 +32,7 @@ from pwbs.connectors.registry import list_registered_types
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.models.connection import Connection
+from pwbs.models.connector_consent import ConnectorConsent
 from pwbs.models.document import Document
 from pwbs.models.user import User
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
@@ -186,9 +190,60 @@ class SyncResponse(BaseModel):
     status: str = "started"
 
 
+class ConsentGrantRequest(BaseModel):
+    """Body for granting consent to a connector."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+    consent_version: int = 1
+
+
+class ConsentStatusResponse(BaseModel):
+    """Current consent status for a connector type."""
+
+    model_config = ConfigDict(frozen=True)
+    connector_type: str
+    consented: bool
+    consent_version: int | None = None
+    consented_at: datetime | None = None
+    data_types: list[str] = []
+    processing_purpose: str = ""
+    llm_providers: list[str] = []
+
+
+class ConsentRevokeResponse(BaseModel):
+    """Response after revoking consent."""
+
+    model_config = ConfigDict(frozen=True)
+    message: str
+    deleted_doc_count: int
+
+
 # ---------------------------------------------------------------------------
-# Helper: resolve and validate source_type path param
+# Consent metadata: what each connector ingests and how data is processed
 # ---------------------------------------------------------------------------
+
+_CONSENT_INFO: dict[str, dict[str, list[str] | str]] = {
+    SourceType.GOOGLE_CALENDAR.value: {
+        "data_types": ["Kalendereinträge", "Teilnehmerlisten", "Besprechungsnotizen"],
+        "processing_purpose": "Automatische Erstellung von Meeting-Briefings und Terminübersichten",
+        "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
+    },
+    SourceType.NOTION.value: {
+        "data_types": ["Notion-Seiten", "Datenbanken", "Kommentare"],
+        "processing_purpose": "Semantische Suche und Wissensvernetzung über Notion-Inhalte",
+        "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
+    },
+    SourceType.OBSIDIAN.value: {
+        "data_types": ["Markdown-Dateien", "Vault-Struktur", "Tags und Links"],
+        "processing_purpose": "Integration lokaler Notizen in die Wissenssuche und Briefings",
+        "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
+    },
+    SourceType.ZOOM.value: {
+        "data_types": ["Meeting-Transkripte", "Aufnahme-Metadaten", "Teilnehmerlisten"],
+        "processing_purpose": "Automatische Zusammenfassung und Entscheidungsextraktion aus Meetings",
+        "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
+    },
+}
 
 
 def _resolve_source_type(type_str: str) -> SourceType:
@@ -806,3 +861,225 @@ async def trigger_sync(
     )
 
     return SyncResponse(sync_id=sync_id, status="started")
+
+
+# ---------------------------------------------------------------------------
+# GET /connectors/{type}/consent
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/{type}/consent",
+    response_model=ConsentStatusResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get consent status for a connector type",
+)
+async def get_consent(
+    type: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> ConsentStatusResponse:
+    source_type = _resolve_source_type(type)
+
+    stmt = select(ConnectorConsent).where(
+        ConnectorConsent.owner_id == current_user.id,
+        ConnectorConsent.connector_type == source_type.value,
+        ConnectorConsent.revoked_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    consent = result.scalar_one_or_none()
+
+    info = _CONSENT_INFO.get(source_type.value, {})
+
+    if consent is None:
+        return ConsentStatusResponse(
+            connector_type=source_type.value,
+            consented=False,
+            data_types=info.get("data_types", []),  # type: ignore[arg-type]
+            processing_purpose=info.get("processing_purpose", ""),  # type: ignore[arg-type]
+            llm_providers=info.get("llm_providers", []),  # type: ignore[arg-type]
+        )
+
+    return ConsentStatusResponse(
+        connector_type=source_type.value,
+        consented=True,
+        consent_version=consent.consent_version,
+        consented_at=consent.consented_at,
+        data_types=info.get("data_types", []),  # type: ignore[arg-type]
+        processing_purpose=info.get("processing_purpose", ""),  # type: ignore[arg-type]
+        llm_providers=info.get("llm_providers", []),  # type: ignore[arg-type]
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /connectors/{type}/consent
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/{type}/consent",
+    response_model=ConsentStatusResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Grant consent for a connector type",
+)
+async def grant_consent(
+    type: str,
+    body: ConsentGrantRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> ConsentStatusResponse:
+    source_type = _resolve_source_type(type)
+
+    # Check for existing active consent
+    stmt = select(ConnectorConsent).where(
+        ConnectorConsent.owner_id == current_user.id,
+        ConnectorConsent.connector_type == source_type.value,
+        ConnectorConsent.revoked_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    existing = result.scalar_one_or_none()
+
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "CONSENT_ALREADY_GRANTED",
+                "message": f"Active consent already exists for {source_type.value}",
+            },
+        )
+
+    consent = ConnectorConsent(
+        owner_id=current_user.id,
+        connector_type=source_type.value,
+        consent_version=body.consent_version,
+    )
+    db.add(consent)
+    await db.commit()
+    await db.refresh(consent)
+
+    await log_event(
+        db,
+        action=AuditAction.CONSENT_GRANTED,
+        user_id=current_user.id,
+        resource_type="connector_consent",
+        resource_id=consent.id,
+        ip_address=get_client_ip(request),
+        metadata={
+            "connector_type": source_type.value,
+            "consent_version": body.consent_version,
+        },
+    )
+    await db.commit()
+
+    info = _CONSENT_INFO.get(source_type.value, {})
+    return ConsentStatusResponse(
+        connector_type=source_type.value,
+        consented=True,
+        consent_version=consent.consent_version,
+        consented_at=consent.consented_at,
+        data_types=info.get("data_types", []),  # type: ignore[arg-type]
+        processing_purpose=info.get("processing_purpose", ""),  # type: ignore[arg-type]
+        llm_providers=info.get("llm_providers", []),  # type: ignore[arg-type]
+    )
+
+
+# ---------------------------------------------------------------------------
+# DELETE /connectors/{type}/consent
+# ---------------------------------------------------------------------------
+
+
+@router.delete(
+    "/{type}/consent",
+    response_model=ConsentRevokeResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Revoke consent and cascade-delete all data for this source",
+)
+async def revoke_consent(
+    type: str,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> ConsentRevokeResponse:
+    source_type = _resolve_source_type(type)
+
+    # Find active consent
+    stmt = select(ConnectorConsent).where(
+        ConnectorConsent.owner_id == current_user.id,
+        ConnectorConsent.connector_type == source_type.value,
+        ConnectorConsent.revoked_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    consent = result.scalar_one_or_none()
+
+    if consent is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "CONSENT_NOT_FOUND",
+                "message": f"No active consent found for {source_type.value}",
+            },
+        )
+
+    # Mark consent as revoked
+    consent.revoked_at = datetime.now(timezone.utc)
+
+    # Count documents before deletion
+    doc_count_stmt = (
+        select(func.count())
+        .select_from(Document)
+        .where(
+            Document.user_id == current_user.id,
+            Document.source_type == source_type.value,
+        )
+    )
+    doc_count_result = await db.execute(doc_count_stmt)
+    deleted_doc_count = doc_count_result.scalar() or 0
+
+    # Cascade delete: documents (chunks cascade via FK)
+    await db.execute(
+        delete(Document).where(
+            Document.user_id == current_user.id,
+            Document.source_type == source_type.value,
+        )
+    )
+
+    # Delete the connection if it exists
+    conn_stmt = select(Connection).where(
+        Connection.user_id == current_user.id,
+        Connection.source_type == source_type.value,
+    )
+    conn_result = await db.execute(conn_stmt)
+    connection = conn_result.scalar_one_or_none()
+    connection_id = connection.id if connection else None
+    if connection is not None:
+        await db.delete(connection)
+
+    await db.commit()
+
+    await log_event(
+        db,
+        action=AuditAction.CONSENT_REVOKED,
+        user_id=current_user.id,
+        resource_type="connector_consent",
+        resource_id=consent.id,
+        ip_address=get_client_ip(request),
+        metadata={
+            "connector_type": source_type.value,
+            "deleted_doc_count": deleted_doc_count,
+            "connection_deleted": connection_id is not None,
+        },
+    )
+    await db.commit()
+
+    logger.info(
+        "Consent revoked: user_id=%s connector_type=%s deleted_docs=%d",
+        current_user.id,
+        source_type.value,
+        deleted_doc_count,
+    )
+
+    return ConsentRevokeResponse(
+        message=f"Consent revoked for {source_type.value}. All data deleted.",
+        deleted_doc_count=deleted_doc_count,
+    )

@@ -35,6 +35,8 @@ class AuditAction(str, enum.Enum):
     SEARCH_EXECUTED = "search.executed"
     DATA_EXPORTED = "data.exported"
     USER_DELETED = "user.deleted"
+    CONSENT_GRANTED = "consent.granted"
+    CONSENT_REVOKED = "consent.revoked"
 
 
 # Keys that must never appear in audit metadata (PII prevention).

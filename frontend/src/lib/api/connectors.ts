@@ -7,6 +7,9 @@ import type {
   CallbackResponse,
   ConfigRequest,
   ConfigResponse,
+  ConsentGrantRequest,
+  ConsentRevokeResponse,
+  ConsentStatusResponse,
   DisconnectResponse,
   SyncResponse,
 } from "@/types/api";
@@ -60,5 +63,31 @@ export async function syncConnector(
 ): Promise<SyncResponse> {
   return apiClient.post<SyncResponse>(
     `/connectors/${encodeURIComponent(connectorType)}/sync`,
+  );
+}
+
+export async function getConsentStatus(
+  connectorType: string,
+): Promise<ConsentStatusResponse> {
+  return apiClient.get<ConsentStatusResponse>(
+    `/connectors/${encodeURIComponent(connectorType)}/consent`,
+  );
+}
+
+export async function grantConsent(
+  connectorType: string,
+  data: ConsentGrantRequest,
+): Promise<ConsentStatusResponse> {
+  return apiClient.post<ConsentStatusResponse>(
+    `/connectors/${encodeURIComponent(connectorType)}/consent`,
+    data,
+  );
+}
+
+export async function revokeConsent(
+  connectorType: string,
+): Promise<ConsentRevokeResponse> {
+  return apiClient.delete<ConsentRevokeResponse>(
+    `/connectors/${encodeURIComponent(connectorType)}/consent`,
   );
 }

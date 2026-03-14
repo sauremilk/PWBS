@@ -10,6 +10,7 @@ import {
   XCircle,
   AlertTriangle,
   FolderOpen,
+  ShieldOff,
 } from "lucide-react";
 import {
   useConnectorTypes,
@@ -18,7 +19,9 @@ import {
   useConfigureConnector,
   useDisconnectConnector,
   useSyncConnector,
+  useRevokeConsent,
 } from "@/hooks/use-connectors";
+import { ConsentDialog } from "@/components/connectors/consent-dialog";
 import type { ConnectorType, ConnectionStatus } from "@/types/api";
 
 const STATUS_CONFIG: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
@@ -48,14 +51,19 @@ function ConnectedCard({
   connection,
   onSync,
   onDisconnect,
+  onRevokeConsent,
   isSyncing,
+  isRevoking,
 }: {
   connection: ConnectionStatus;
   onSync: () => void;
   onDisconnect: () => void;
+  onRevokeConsent: () => void;
   isSyncing: boolean;
+  isRevoking: boolean;
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
   const statusCfg = STATUS_CONFIG[connection.status] ?? STATUS_CONFIG.error;
 
   return (
@@ -83,6 +91,13 @@ function ConnectedCard({
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
             Sync
+          </button>
+          <button
+            onClick={() => setShowRevokeConfirm(true)}
+            className="inline-flex items-center gap-1 rounded-md border border-orange-200 px-2.5 py-1.5 text-xs font-medium text-orange-600 hover:bg-orange-50"
+          >
+            <ShieldOff className="h-3.5 w-3.5" />
+            Widerruf
           </button>
           <button
             onClick={() => setShowConfirm(true)}
@@ -113,7 +128,7 @@ function ConnectedCard({
       {showConfirm && (
         <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
           <p className="text-sm text-red-800">
-            Alle importierten Daten dieser Quelle werden unwiderruflich gel\u00f6scht.
+            Alle importierten Daten dieser Quelle werden unwiderruflich gel&#246;scht.
           </p>
           <div className="mt-2 flex items-center gap-2">
             <button
@@ -123,10 +138,39 @@ function ConnectedCard({
               }}
               className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
             >
-              Endg\u00fcltig trennen
+              Endg&#252;ltig trennen
             </button>
             <button
               onClick={() => setShowConfirm(false)}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-white"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Revoke consent confirmation */}
+      {showRevokeConfirm && (
+        <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-3">
+          <p className="text-sm text-orange-800">
+            Einwilligung widerrufen? Alle importierten Daten und die Verbindung
+            werden unwiderruflich gel&#246;scht.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              onClick={() => {
+                onRevokeConsent();
+                setShowRevokeConfirm(false);
+              }}
+              disabled={isRevoking}
+              className="inline-flex items-center gap-1 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+            >
+              {isRevoking && <Loader2 className="h-3 w-3 animate-spin" />}
+              Einwilligung widerrufen
+            </button>
+            <button
+              onClick={() => setShowRevokeConfirm(false)}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-white"
             >
               Abbrechen
@@ -235,6 +279,8 @@ export default function ConnectorsPage() {
   const connectOAuth = useConnectOAuth();
   const disconnectMutation = useDisconnectConnector();
   const syncMutation = useSyncConnector();
+  const revokeConsentMutation = useRevokeConsent();
+  const [consentTarget, setConsentTarget] = useState<string | null>(null);
 
   const isLoading = typesLoading || statusLoading;
   const connectedTypes = new Set(status?.connections.map((c) => c.type) ?? []);
@@ -264,7 +310,9 @@ export default function ConnectorsPage() {
                 connection={conn}
                 onSync={() => syncMutation.mutate(conn.type)}
                 onDisconnect={() => disconnectMutation.mutate(conn.type)}
+                onRevokeConsent={() => revokeConsentMutation.mutate(conn.type)}
                 isSyncing={syncMutation.isPending && syncMutation.variables === conn.type}
+                isRevoking={revokeConsentMutation.isPending && revokeConsentMutation.variables === conn.type}
               />
             ))}
           </div>
@@ -280,7 +328,7 @@ export default function ConnectorsPage() {
               <AvailableConnectorCard
                 key={connector.type}
                 connector={connector}
-                onConnect={() => connectOAuth.mutate(connector.type)}
+                onConnect={() => setConsentTarget(connector.type)}
                 isConnecting={
                   connectOAuth.isPending && connectOAuth.variables === connector.type
                 }
@@ -294,11 +342,23 @@ export default function ConnectorsPage() {
       {(!types || types.connectors.length === 0) && (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
           <Plug className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-          <h3 className="mb-1 text-sm font-semibold text-gray-900">Keine Konnektoren verf\u00fcgbar</h3>
+          <h3 className="mb-1 text-sm font-semibold text-gray-900">Keine Konnektoren verf&#252;gbar</h3>
           <p className="text-sm text-gray-500">
-            Konnektoren werden bald hinzugef\u00fcgt.
+            Konnektoren werden bald hinzugef&#252;gt.
           </p>
         </div>
+      )}
+
+      {/* Consent dialog before OAuth redirect */}
+      {consentTarget && (
+        <ConsentDialog
+          connectorType={consentTarget}
+          onConsented={() => {
+            connectOAuth.mutate(consentTarget);
+            setConsentTarget(null);
+          }}
+          onCancel={() => setConsentTarget(null)}
+        />
       )}
     </div>
   );

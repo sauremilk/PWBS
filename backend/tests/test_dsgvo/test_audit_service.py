@@ -36,12 +36,14 @@ class TestAuditAction:
             "search.executed",
             "data.exported",
             "user.deleted",
+            "consent.granted",
+            "consent.revoked",
         }
         values = {a.value for a in AuditAction}
         assert values == expected
 
     def test_action_count(self) -> None:
-        assert len(AuditAction) == 10
+        assert len(AuditAction) == 12
 
     def test_str_enum_value(self) -> None:
         assert AuditAction.USER_LOGIN == "user.login"
