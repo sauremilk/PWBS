@@ -22,7 +22,6 @@ from pwbs.schemas.search import SearchFilters, SearchRequest, SearchResponse
 from pwbs.search.enrichment import EnrichedSearchResult
 from pwbs.search.hybrid import HybridSearchResult
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

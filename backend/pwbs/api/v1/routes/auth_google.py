@@ -95,15 +95,17 @@ async def google_auth_url() -> GoogleAuthUrlResponse:
     redis = get_redis_client()
     await redis.setex(f"google_login_state:{state}", _STATE_TTL, "valid")
 
-    params = urlencode({
-        "client_id": settings.google_client_id,
-        "redirect_uri": settings.google_login_redirect_uri,
-        "response_type": "code",
-        "scope": _GOOGLE_LOGIN_SCOPES,
-        "state": state,
-        "access_type": "offline",
-        "prompt": "consent",
-    })
+    params = urlencode(
+        {
+            "client_id": settings.google_client_id,
+            "redirect_uri": settings.google_login_redirect_uri,
+            "response_type": "code",
+            "scope": _GOOGLE_LOGIN_SCOPES,
+            "state": state,
+            "access_type": "offline",
+            "prompt": "consent",
+        }
+    )
 
     auth_url = f"{_GOOGLE_AUTH_URL}?{params}"
     return GoogleAuthUrlResponse(auth_url=auth_url, state=state)

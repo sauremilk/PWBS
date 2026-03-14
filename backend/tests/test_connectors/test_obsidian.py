@@ -11,11 +11,11 @@ import pytest
 
 from pwbs.connectors.base import ConnectorConfig
 from pwbs.connectors.obsidian import (
+    _EXCLUDE_DIRS,
     FileEvent,
     ObsidianConnector,
     ObsidianFileHandler,
     ObsidianWatcher,
-    _EXCLUDE_DIRS,
     _extract_tags,
     _extract_wikilinks,
     _file_to_raw,
@@ -181,11 +181,14 @@ class TestScanVaultFiles:
         assert files == []
 
     def test_sorted_output(self, tmp_path: Path) -> None:
-        vault = _create_vault(tmp_path, {
-            "z_note.md": "z",
-            "a_note.md": "a",
-            "m_note.md": "m",
-        })
+        vault = _create_vault(
+            tmp_path,
+            {
+                "z_note.md": "z",
+                "a_note.md": "a",
+                "m_note.md": "m",
+            },
+        )
         files = scan_vault_files(vault)
         names = [f.name for f in files]
         assert names == sorted(names)

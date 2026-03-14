@@ -127,8 +127,7 @@ class BaseLLMProvider(ABC):
 
     @property
     @abstractmethod
-    def provider_type(self) -> LLMProvider:
-        ...
+    def provider_type(self) -> LLMProvider: ...
 
 
 # ------------------------------------------------------------------
@@ -294,8 +293,16 @@ class LLMGateway:
         Raises:
             ProviderError: If all providers fail and no cached response exists.
         """
-        temperature = request.temperature if request.temperature is not None else self._config.default_temperature
-        max_tokens = request.max_tokens if request.max_tokens is not None else self._config.default_max_tokens
+        temperature = (
+            request.temperature
+            if request.temperature is not None
+            else self._config.default_temperature
+        )
+        max_tokens = (
+            request.max_tokens
+            if request.max_tokens is not None
+            else self._config.default_max_tokens
+        )
 
         # Build provider cascade
         cascade = self._build_cascade(request.model_preference)
@@ -430,7 +437,7 @@ class LLMGateway:
             except Exception as exc:
                 last_error = exc
                 if attempt < self._config.max_retries and self._is_transient(exc):
-                    delay = self._config.base_retry_delay * (5 ** attempt)
+                    delay = self._config.base_retry_delay * (5**attempt)
                     logger.warning(
                         "LLM %s attempt %d/%d failed (%s) — retrying in %.1fs",
                         provider.provider_type.value,
@@ -451,9 +458,9 @@ class LLMGateway:
         """Check if an exception is transient (worth retrying)."""
         # Anthropic
         try:
+            from anthropic import APIStatusError as AnthropicStatusError
             from anthropic import APITimeoutError as AnthropicTimeout
             from anthropic import RateLimitError as AnthropicRateLimit
-            from anthropic import APIStatusError as AnthropicStatusError
 
             if isinstance(exc, (AnthropicTimeout, AnthropicRateLimit)):
                 return True
@@ -464,9 +471,9 @@ class LLMGateway:
 
         # OpenAI
         try:
+            from openai import APIStatusError as OpenAIStatusError
             from openai import APITimeoutError as OpenAITimeout
             from openai import RateLimitError as OpenAIRateLimit
-            from openai import APIStatusError as OpenAIStatusError
 
             if isinstance(exc, (OpenAITimeout, OpenAIRateLimit)):
                 return True

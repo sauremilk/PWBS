@@ -94,15 +94,17 @@ class TestSearch:
     @pytest.mark.asyncio
     async def test_result_fields(self) -> None:
         cid = uuid.uuid4()
-        objs = [_make_weaviate_object(
-            chunk_id=cid,
-            content="hello",
-            title="Doc Title",
-            source_type="notion",
-            created_at="2026-01-15T10:00:00Z",
-            certainty=0.88,
-            chunk_index=3,
-        )]
+        objs = [
+            _make_weaviate_object(
+                chunk_id=cid,
+                content="hello",
+                title="Doc Title",
+                source_type="notion",
+                created_at="2026-01-15T10:00:00Z",
+                certainty=0.88,
+                chunk_index=3,
+            )
+        ]
         svc = _make_service(weaviate_objects=objs)
 
         results = await svc.search("test", _USER_ID)

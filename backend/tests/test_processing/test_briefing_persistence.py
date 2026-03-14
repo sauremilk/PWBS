@@ -16,7 +16,6 @@ from pwbs.briefing.persistence import (
 )
 from pwbs.schemas.enums import BriefingType
 
-
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------

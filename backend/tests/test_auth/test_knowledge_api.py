@@ -482,14 +482,17 @@ class TestGetEntity:
         result_mock.scalar_one_or_none.return_value = entity
         db.execute.return_value = result_mock
 
-        with patch(
-            "pwbs.api.v1.routes.knowledge._get_neo4j_related",
-            new_callable=AsyncMock,
-            return_value=[],
-        ), patch(
-            "pwbs.api.v1.routes.knowledge._get_related_from_postgres",
-            new_callable=AsyncMock,
-            return_value=[],
+        with (
+            patch(
+                "pwbs.api.v1.routes.knowledge._get_neo4j_related",
+                new_callable=AsyncMock,
+                return_value=[],
+            ),
+            patch(
+                "pwbs.api.v1.routes.knowledge._get_related_from_postgres",
+                new_callable=AsyncMock,
+                return_value=[],
+            ),
         ):
             resp = await get_entity(
                 entity_id=ENTITY_ID,

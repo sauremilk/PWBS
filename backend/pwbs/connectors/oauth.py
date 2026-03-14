@@ -116,9 +116,7 @@ def encrypt_tokens(tokens: OAuthTokens, *, owner_id: UUID) -> str:
         data = {
             "access_token": tokens.access_token.get_secret_value(),
             "refresh_token": (
-                tokens.refresh_token.get_secret_value()
-                if tokens.refresh_token
-                else None
+                tokens.refresh_token.get_secret_value() if tokens.refresh_token else None
             ),
             "token_type": tokens.token_type,
             "expires_at": tokens.expires_at,

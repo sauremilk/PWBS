@@ -250,11 +250,12 @@ class TestOAuthCallback:
 
         body = CallbackRequest(code="auth-code-123", state="state-abc")
 
-        with patch(
-            "pwbs.api.v1.routes.connectors._exchange_code_for_tokens"
-        ) as mock_exchange, patch(
-            "pwbs.api.v1.routes.connectors.encrypt_tokens",
-            return_value="encrypted",
+        with (
+            patch("pwbs.api.v1.routes.connectors._exchange_code_for_tokens") as mock_exchange,
+            patch(
+                "pwbs.api.v1.routes.connectors.encrypt_tokens",
+                return_value="encrypted",
+            ),
         ):
             from pwbs.connectors.oauth import OAuthTokens
 

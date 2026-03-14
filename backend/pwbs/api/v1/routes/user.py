@@ -208,9 +208,7 @@ async def update_settings(
         timezone=update.timezone or "UTC",
         language=update.language or "de",
         briefing_auto_generate=(
-            update.briefing_auto_generate
-            if update.briefing_auto_generate is not None
-            else True
+            update.briefing_auto_generate if update.briefing_auto_generate is not None else True
         ),
     )
 

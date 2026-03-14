@@ -123,9 +123,9 @@ class WeaviateChunkStore:
             # Reactivate if inactive
             tenant = existing[tenant_name]
             if tenant.activity_status != TenantActivityStatus.ACTIVE:
-                collection.tenants.update([
-                    Tenant(name=tenant_name, activity_status=TenantActivityStatus.ACTIVE)
-                ])
+                collection.tenants.update(
+                    [Tenant(name=tenant_name, activity_status=TenantActivityStatus.ACTIVE)]
+                )
             return
 
         collection.tenants.create([Tenant(name=tenant_name)])
@@ -207,10 +207,7 @@ class WeaviateChunkStore:
 
         # Check for batch errors
         if tenant_collection.batch.failed_objects:
-            failed_ids = {
-                str(obj.original_uuid)
-                for obj in tenant_collection.batch.failed_objects
-            }
+            failed_ids = {str(obj.original_uuid) for obj in tenant_collection.batch.failed_objects}
             for result in results:
                 if str(result.weaviate_id) in failed_ids:
                     results = [

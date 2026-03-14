@@ -413,8 +413,9 @@ async def _exchange_code_for_tokens(
 
     Makes an HTTP POST to the provider's token endpoint.
     """
-    import httpx
     import time
+
+    import httpx
     from pydantic import SecretStr
 
     token_endpoints: dict[SourceType, str] = {

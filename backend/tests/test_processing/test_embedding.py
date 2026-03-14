@@ -112,9 +112,7 @@ class TestBatching:
     @pytest.mark.asyncio
     async def test_exactly_64_chunks_single_batch(self) -> None:
         mock_client = AsyncMock()
-        mock_client.embeddings.create = AsyncMock(
-            return_value=_make_embedding_response(64)
-        )
+        mock_client.embeddings.create = AsyncMock(return_value=_make_embedding_response(64))
         svc = _make_service(client=mock_client)
 
         chunks = [_make_chunk(i) for i in range(64)]
@@ -163,8 +161,8 @@ class TestTokenLimits:
 class TestRetryLogic:
     @pytest.mark.asyncio
     async def test_retries_on_rate_limit(self) -> None:
-        from openai import RateLimitError
         from httpx import Request, Response
+        from openai import RateLimitError
 
         mock_client = AsyncMock()
         mock_request = Request("POST", "https://api.openai.com/v1/embeddings")
@@ -190,14 +188,12 @@ class TestRetryLogic:
 
     @pytest.mark.asyncio
     async def test_retries_on_timeout(self) -> None:
-        from openai import APITimeoutError
         from httpx import Request
+        from openai import APITimeoutError
 
         mock_client = AsyncMock()
         error = APITimeoutError(request=Request("POST", "https://api.openai.com"))
-        mock_client.embeddings.create = AsyncMock(
-            side_effect=[error, _make_embedding_response(1)]
-        )
+        mock_client.embeddings.create = AsyncMock(side_effect=[error, _make_embedding_response(1)])
 
         config = EmbeddingConfig(base_retry_delay=0.01)
         svc = _make_service(config=config, client=mock_client)
@@ -210,8 +206,8 @@ class TestRetryLogic:
 
     @pytest.mark.asyncio
     async def test_retries_on_server_error(self) -> None:
-        from openai import APIStatusError
         from httpx import Request, Response
+        from openai import APIStatusError
 
         mock_client = AsyncMock()
         mock_request = Request("POST", "https://api.openai.com/v1/embeddings")
@@ -221,9 +217,7 @@ class TestRetryLogic:
             response=mock_response,
             body=None,
         )
-        mock_client.embeddings.create = AsyncMock(
-            side_effect=[error, _make_embedding_response(1)]
-        )
+        mock_client.embeddings.create = AsyncMock(side_effect=[error, _make_embedding_response(1)])
 
         config = EmbeddingConfig(base_retry_delay=0.01)
         svc = _make_service(config=config, client=mock_client)
@@ -235,8 +229,8 @@ class TestRetryLogic:
 
     @pytest.mark.asyncio
     async def test_raises_after_max_retries(self) -> None:
-        from openai import RateLimitError
         from httpx import Request, Response
+        from openai import RateLimitError
 
         mock_client = AsyncMock()
         mock_request = Request("POST", "https://api.openai.com/v1/embeddings")
@@ -260,8 +254,8 @@ class TestRetryLogic:
 
     @pytest.mark.asyncio
     async def test_client_error_not_retried(self) -> None:
-        from openai import APIStatusError
         from httpx import Request, Response
+        from openai import APIStatusError
 
         mock_client = AsyncMock()
         mock_request = Request("POST", "https://api.openai.com/v1/embeddings")

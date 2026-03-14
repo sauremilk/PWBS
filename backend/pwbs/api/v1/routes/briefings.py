@@ -214,9 +214,7 @@ async def list_briefings(
     offset = max(0, offset)
 
     base = select(BriefingORM).where(BriefingORM.user_id == user.id)
-    count_base = select(func.count()).select_from(BriefingORM).where(
-        BriefingORM.user_id == user.id
-    )
+    count_base = select(func.count()).select_from(BriefingORM).where(BriefingORM.user_id == user.id)
 
     if briefing_type is not None:
         base = base.where(BriefingORM.briefing_type == briefing_type)
@@ -274,9 +272,7 @@ async def latest_briefings(
         result = await db.execute(stmt)
         row = result.scalar_one_or_none()
         if row is not None:
-            sources = await _resolve_sources(
-                row.source_chunks or [], user.id, db
-            )
+            sources = await _resolve_sources(row.source_chunks or [], user.id, db)
             results.append(_orm_to_detail(row, sources))
 
     return results

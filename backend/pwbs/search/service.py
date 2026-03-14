@@ -141,7 +141,11 @@ class SemanticSearchService:
         for obj in response.objects:
             props = obj.properties
             # Weaviate returns certainty in [0, 1] where 1 = identical
-            score = obj.metadata.certainty if obj.metadata and obj.metadata.certainty is not None else 0.0
+            score = (
+                obj.metadata.certainty
+                if obj.metadata and obj.metadata.certainty is not None
+                else 0.0
+            )
 
             results.append(
                 SemanticSearchResult(

@@ -482,13 +482,16 @@ class TestDeleteDocument:
 
         from pwbs.api.v1.routes.documents import delete_document
 
-        with patch(
-            "pwbs.api.v1.routes.documents._cascade_delete_neo4j",
-            new_callable=AsyncMock,
-        ), patch(
-            "pwbs.api.v1.routes.documents._cascade_delete_weaviate",
-            new_callable=AsyncMock,
-            return_value=0,
+        with (
+            patch(
+                "pwbs.api.v1.routes.documents._cascade_delete_neo4j",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "pwbs.api.v1.routes.documents._cascade_delete_weaviate",
+                new_callable=AsyncMock,
+                return_value=0,
+            ),
         ):
             result = await delete_document(
                 document_id=doc_id,

@@ -176,7 +176,7 @@ class EmbeddingService:
             except (RateLimitError, APITimeoutError) as exc:
                 last_error = exc
                 if attempt < self._config.max_retries:
-                    delay = self._config.base_retry_delay * (5 ** attempt)
+                    delay = self._config.base_retry_delay * (5**attempt)
                     logger.warning(
                         "OpenAI API error (attempt %d/%d): %s — retrying in %.1fs",
                         attempt + 1,
@@ -190,7 +190,7 @@ class EmbeddingService:
                 if exc.status_code >= 500:
                     last_error = exc
                     if attempt < self._config.max_retries:
-                        delay = self._config.base_retry_delay * (5 ** attempt)
+                        delay = self._config.base_retry_delay * (5**attempt)
                         logger.warning(
                             "OpenAI server error %d (attempt %d/%d) — retrying in %.1fs",
                             exc.status_code,

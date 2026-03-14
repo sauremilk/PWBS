@@ -1106,12 +1106,7 @@ class TestParseVtt:
         assert speakers == []
 
     def test_multiline_cue(self) -> None:
-        vtt = (
-            "WEBVTT\n\n"
-            "00:00:01.000 --> 00:00:05.000\n"
-            "Line one.\n"
-            "Line two.\n"
-        )
+        vtt = "WEBVTT\n\n00:00:01.000 --> 00:00:05.000\nLine one.\nLine two.\n"
         text, speakers = _parse_vtt(vtt)
         assert "Line one." in text
         assert "Line two." in text
@@ -1218,11 +1213,7 @@ class TestNormalize:
             "topic": "Team Call",
             "start_time": "2026-03-14T10:00:00Z",
             "duration": 20,
-            "transcript": (
-                "WEBVTT\n\n"
-                "00:00:01.000 --> 00:00:03.000\n"
-                "Charlie: Hello\n"
-            ),
+            "transcript": ("WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nCharlie: Hello\n"),
             "recording_files": [
                 {"user_email": "alice@example.com"},
             ],

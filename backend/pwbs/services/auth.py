@@ -200,9 +200,7 @@ async def validate_refresh_token(
     or has been revoked.
     """
     token_hash = _hash_token(token)
-    result = await db.execute(
-        select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-    )
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
     db_token = result.scalar_one_or_none()
 
     if db_token is None:
@@ -309,6 +307,7 @@ async def create_token_pair(
         expires_in=settings.jwt_access_token_expire_minutes * 60,
     )
 
+
 # ---------------------------------------------------------------------------
 # Token rotation (TASK-084)
 # ---------------------------------------------------------------------------
@@ -340,7 +339,9 @@ async def rotate_refresh_token(
 
     # Step 3: issue new pair in the same family
     pair = await create_token_pair(
-        db_token.user_id, db, family_id=db_token.family_id,
+        db_token.user_id,
+        db,
+        family_id=db_token.family_id,
     )
 
     logger.info(

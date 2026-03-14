@@ -251,9 +251,7 @@ class TestRetryLogic:
 class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_usage_fields_populated(self) -> None:
-        claude = FakeProvider(
-            LLMProvider.CLAUDE, input_tokens=100, output_tokens=50
-        )
+        claude = FakeProvider(LLMProvider.CLAUDE, input_tokens=100, output_tokens=50)
         gw = _make_gateway(claude=claude)
 
         resp = await gw.generate(_make_request())

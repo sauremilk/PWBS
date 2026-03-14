@@ -10,12 +10,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from pwbs.briefing.validation import (
+    _SOURCE_REF_RE,
     BriefingSourceValidator,
     SourceValidationResult,
     ValidatedReference,
-    _SOURCE_REF_RE,
 )
-
 
 # ------------------------------------------------------------------
 # Helpers
@@ -86,10 +85,7 @@ class TestSourceRefRegex:
         assert matches[0][1].strip() == "2025-01-15"
 
     def test_multiple_matches(self) -> None:
-        text = (
-            "Text [Quelle: Doc A, 15.01.2025] und "
-            "[Quelle: Doc B, 16.01.2025] Ende."
-        )
+        text = "Text [Quelle: Doc A, 15.01.2025] und [Quelle: Doc B, 16.01.2025] Ende."
         matches = _SOURCE_REF_RE.findall(text)
         assert len(matches) == 2
 
@@ -126,9 +122,7 @@ class TestExtractReferences:
         assert refs[0]["raw"] == "[Quelle: My Document, 2025-01-15]"
 
     def test_extract_multiple(self) -> None:
-        text = (
-            "[Quelle: A, 2025-01-01] text [Quelle: B, 2025-01-02] end"
-        )
+        text = "[Quelle: A, 2025-01-01] text [Quelle: B, 2025-01-02] end"
         refs = BriefingSourceValidator._extract_references(text)
         assert len(refs) == 2
         assert refs[0]["title"] == "A"
@@ -221,10 +215,14 @@ class TestTextCleaning:
     def test_remove_invalid(self) -> None:
         validator = BriefingSourceValidator(self.session, remove_invalid=True)
         vref = ValidatedReference(
-            title="Fake", date="2025", raw="[Quelle: Fake, 2025]", is_valid=False,
+            title="Fake",
+            date="2025",
+            raw="[Quelle: Fake, 2025]",
+            is_valid=False,
         )
         result = validator._clean_text(
-            "Begin [Quelle: Fake, 2025] end.", [vref],
+            "Begin [Quelle: Fake, 2025] end.",
+            [vref],
         )
         assert "[Quelle: Fake, 2025]" not in result
         assert "Begin" in result
@@ -232,31 +230,44 @@ class TestTextCleaning:
     def test_mark_invalid(self) -> None:
         validator = BriefingSourceValidator(self.session, remove_invalid=False)
         vref = ValidatedReference(
-            title="Fake", date="2025", raw="[Quelle: Fake, 2025]", is_valid=False,
+            title="Fake",
+            date="2025",
+            raw="[Quelle: Fake, 2025]",
+            is_valid=False,
         )
         result = validator._clean_text(
-            "Begin [Quelle: Fake, 2025] end.", [vref],
+            "Begin [Quelle: Fake, 2025] end.",
+            [vref],
         )
         assert "[WARNUNG: Quelle nicht verifiziert]" in result
 
     def test_valid_refs_preserved(self) -> None:
         validator = BriefingSourceValidator(self.session, remove_invalid=True)
         vref = ValidatedReference(
-            title="Real", date="2025", raw="[Quelle: Real, 2025]",
-            document_id=uuid.uuid4(), is_valid=True, match_score=1.0,
+            title="Real",
+            date="2025",
+            raw="[Quelle: Real, 2025]",
+            document_id=uuid.uuid4(),
+            is_valid=True,
+            match_score=1.0,
         )
         result = validator._clean_text(
-            "Begin [Quelle: Real, 2025] end.", [vref],
+            "Begin [Quelle: Real, 2025] end.",
+            [vref],
         )
         assert "[Quelle: Real, 2025]" in result
 
     def test_double_spaces_cleaned(self) -> None:
         validator = BriefingSourceValidator(self.session, remove_invalid=True)
         vref = ValidatedReference(
-            title="X", date="2025", raw="[Quelle: X, 2025]", is_valid=False,
+            title="X",
+            date="2025",
+            raw="[Quelle: X, 2025]",
+            is_valid=False,
         )
         result = validator._clean_text(
-            "A  [Quelle: X, 2025]  B", [vref],
+            "A  [Quelle: X, 2025]  B",
+            [vref],
         )
         assert "  " not in result
 
@@ -315,10 +326,7 @@ class TestValidateFlow:
         session = _mock_session([doc])
         validator = BriefingSourceValidator(session)
 
-        text = (
-            "A [Quelle: Real Doc, 2025-01-15] B "
-            "[Quelle: Zzz Nonexistent, 2025-01-01] C."
-        )
+        text = "A [Quelle: Real Doc, 2025-01-15] B [Quelle: Zzz Nonexistent, 2025-01-01] C."
         result = await validator.validate(text, uuid.uuid4())
 
         assert result.total_refs == 2
@@ -347,10 +355,7 @@ class TestValidateFlow:
         session = _mock_session([doc])
         validator = BriefingSourceValidator(session)
 
-        text = (
-            "[Quelle: Same Doc, 2025-01-15] und "
-            "[Quelle: Same Doc, 2025-01-16]"
-        )
+        text = "[Quelle: Same Doc, 2025-01-15] und [Quelle: Same Doc, 2025-01-16]"
         result = await validator.validate(text, uuid.uuid4())
 
         assert result.total_refs == 2
@@ -396,7 +401,8 @@ class TestValidateFlow:
 
         validator = BriefingSourceValidator(session)
         result = await validator.validate(
-            "[Quelle: Lonely Doc, 2025]", uuid.uuid4(),
+            "[Quelle: Lonely Doc, 2025]",
+            uuid.uuid4(),
         )
 
         assert result.total_refs == 1

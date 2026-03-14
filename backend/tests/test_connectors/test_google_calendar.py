@@ -319,9 +319,7 @@ def _make_connector(
 class TestFetchSinceInitialSync:
     """Initial full sync (cursor=None)."""
 
-    async def test_initial_sync_returns_documents(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    async def test_initial_sync_returns_documents(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """TASK-047 normalizer is implemented — events become documents."""
 
         async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
@@ -330,12 +328,18 @@ class TestFetchSinceInitialSync:
                 json={
                     "kind": "calendar#events",
                     "items": [
-                        {"id": "evt1", "summary": "Meeting 1",
-                         "start": {"dateTime": "2026-03-14T09:00:00Z"},
-                         "end": {"dateTime": "2026-03-14T10:00:00Z"}},
-                        {"id": "evt2", "summary": "Meeting 2",
-                         "start": {"dateTime": "2026-03-14T11:00:00Z"},
-                         "end": {"dateTime": "2026-03-14T12:00:00Z"}},
+                        {
+                            "id": "evt1",
+                            "summary": "Meeting 1",
+                            "start": {"dateTime": "2026-03-14T09:00:00Z"},
+                            "end": {"dateTime": "2026-03-14T10:00:00Z"},
+                        },
+                        {
+                            "id": "evt2",
+                            "summary": "Meeting 2",
+                            "start": {"dateTime": "2026-03-14T11:00:00Z"},
+                            "end": {"dateTime": "2026-03-14T12:00:00Z"},
+                        },
                     ],
                     "nextSyncToken": "sync-token-abc",
                 },
@@ -716,9 +720,7 @@ class TestNormalizeContentBuilding:
 class TestNormalizeFetchSinceIntegration:
     """After TASK-047, fetch_since should produce documents instead of errors."""
 
-    async def test_fetch_since_produces_documents(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    async def test_fetch_since_produces_documents(self, monkeypatch: pytest.MonkeyPatch) -> None:
         async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
             return httpx.Response(
                 200,
@@ -746,6 +748,8 @@ class TestNormalizeFetchSinceIntegration:
         assert result.error_count == 0
         assert result.documents[0].source_id == "evt1"
         assert result.documents[0].title == "Meeting 1"
+
+
 # Helpers
 # ---------------------------------------------------------------------------
 

@@ -195,6 +195,17 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | `.github/prompts/orchestrator-init.prompt.md` | Parallele Orchestrator-Session initialisieren (Claim → Implement)  |
 | `.github/prompts/task-executor.prompt.md`     | Einzelnen Task vollständig durchführen (Implement → Test → Commit) |
 
+### Workspace-Fundament-Suite (übertragbar auf andere Projekte)
+
+| Datei                                            | Verwendung                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `.github/prompts/bootstrap-foundation.prompt.md` | Alle 5 Fundament-Dokumente in Sequenz generieren (Interview → Generierung)       |
+| `.github/prompts/gen-vision.prompt.md`           | Vision-Dokument: Problem, Zielgruppe, "Was es NICHT ist", Kernfähigkeiten        |
+| `.github/prompts/gen-roadmap.prompt.md`          | Roadmap: Phasen mit messbaren KPIs, Risiken, Out-of-Scope                        |
+| `.github/prompts/gen-architecture.prompt.md`     | Architektur: Designprinzipien mit Implikationen, Komponenten, Tech-Stack         |
+| `.github/prompts/gen-prd-spec.prompt.md`         | PRD-SPEC: Tiefe Personas, falsifizierbare Hypothese, FRs mit Acceptance Criteria |
+| `.github/prompts/gen-tasks.prompt.md`            | Task-Backlog: Atomare Tasks mit Quellenrückverfolgbarkeit                        |
+
 ### Optimierungs-Suite
 
 | Datei                                               | Verwendung                                          |

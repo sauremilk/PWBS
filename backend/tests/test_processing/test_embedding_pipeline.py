@@ -20,7 +20,6 @@ from pwbs.processing.embedding_pipeline import (
     PipelineResult,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -77,7 +76,9 @@ class TestPipelineConfig:
         assert cfg.save_partial is True
 
     def test_custom_values(self) -> None:
-        cfg = PipelineConfig(max_batch_retries=5, base_retry_delay=10.0, backoff_factor=2.0, save_partial=False)
+        cfg = PipelineConfig(
+            max_batch_retries=5, base_retry_delay=10.0, backoff_factor=2.0, save_partial=False
+        )
         assert cfg.max_batch_retries == 5
         assert cfg.base_retry_delay == 10.0
         assert cfg.backoff_factor == 2.0
@@ -205,7 +206,9 @@ class TestRetryBehavior:
         config = PipelineConfig(max_batch_retries=3, base_retry_delay=0.0)
         updater = _make_status_updater()
         audit = _make_audit_logger()
-        handler = EmbeddingPipelineHandler(svc, config=config, status_updater=updater, audit_logger=audit)
+        handler = EmbeddingPipelineHandler(
+            svc, config=config, status_updater=updater, audit_logger=audit
+        )
 
         result = await handler.process_document(_DOC_ID, _USER_ID, chunks)
 

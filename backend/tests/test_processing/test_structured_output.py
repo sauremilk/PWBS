@@ -14,7 +14,6 @@ from pwbs.core.structured_output import (
     StructuredOutputService,
 )
 
-
 # ------------------------------------------------------------------
 # Test schemas
 # ------------------------------------------------------------------
@@ -316,9 +315,10 @@ class TestErrorReporting:
         gw = _make_gateway(bad, bad)
         svc = StructuredOutputService(gw, max_retries=1)
 
-        with pytest.raises(StructuredOutputError), patch(
-            "pwbs.core.structured_output.logger"
-        ) as mock_logger:
+        with (
+            pytest.raises(StructuredOutputError),
+            patch("pwbs.core.structured_output.logger") as mock_logger,
+        ):
             await svc.generate(
                 system_prompt="Extract.",
                 user_prompt="Input",

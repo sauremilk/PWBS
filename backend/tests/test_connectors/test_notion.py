@@ -410,7 +410,9 @@ def _make_page(
 
 
 async def _mock_get_empty_blocks(
-    self: httpx.AsyncClient, url: str, **kwargs: object,
+    self: httpx.AsyncClient,
+    url: str,
+    **kwargs: object,
 ) -> httpx.Response:
     """Mock GET for /blocks/{id}/children — returns empty block list."""
     return httpx.Response(

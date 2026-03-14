@@ -22,7 +22,6 @@ from pwbs.services.user import (
     verify_password,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -59,9 +58,7 @@ def valid_request() -> RegisterRequest:
 
 class TestPasswordValidation:
     def test_valid_password(self) -> None:
-        req = RegisterRequest(
-            email="a@b.com", password="ValidPass123", display_name="User"
-        )
+        req = RegisterRequest(email="a@b.com", password="ValidPass123", display_name="User")
         assert req.password == "ValidPass123"
 
     def test_too_short(self) -> None:
@@ -70,20 +67,14 @@ class TestPasswordValidation:
 
     def test_no_uppercase(self) -> None:
         with pytest.raises(PydanticValidationError, match="Großbuchstaben"):
-            RegisterRequest(
-                email="a@b.com", password="alllowercase123", display_name="User"
-            )
+            RegisterRequest(email="a@b.com", password="alllowercase123", display_name="User")
 
     def test_no_digit(self) -> None:
         with pytest.raises(PydanticValidationError, match="Zahl"):
-            RegisterRequest(
-                email="a@b.com", password="NoDigitsHereABC", display_name="User"
-            )
+            RegisterRequest(email="a@b.com", password="NoDigitsHereABC", display_name="User")
 
     def test_exactly_12_chars_valid(self) -> None:
-        req = RegisterRequest(
-            email="a@b.com", password="Abcdefghij1!", display_name="User"
-        )
+        req = RegisterRequest(email="a@b.com", password="Abcdefghij1!", display_name="User")
         assert len(req.password) == 12
 
 
@@ -94,16 +85,12 @@ class TestPasswordValidation:
 
 class TestEmailValidation:
     def test_valid_email(self) -> None:
-        req = RegisterRequest(
-            email="USER@Example.COM", password="SecurePass123", display_name="U"
-        )
+        req = RegisterRequest(email="USER@Example.COM", password="SecurePass123", display_name="U")
         assert req.email == "user@example.com"  # lowered
 
     def test_invalid_email(self) -> None:
         with pytest.raises(PydanticValidationError, match="E-Mail"):
-            RegisterRequest(
-                email="not-an-email", password="SecurePass123", display_name="U"
-            )
+            RegisterRequest(email="not-an-email", password="SecurePass123", display_name="U")
 
 
 # ---------------------------------------------------------------------------

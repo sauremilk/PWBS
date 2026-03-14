@@ -6,15 +6,14 @@ import pytest
 
 from pwbs.core.grounding import (
     Confidence,
+    GroundedStatement,
     GroundingConfig,
     GroundingResult,
     GroundingService,
-    GroundedStatement,
     SourceReference,
     build_grounding_system_prompt,
     build_structured_prompt,
 )
-
 
 # ------------------------------------------------------------------
 # Prompt builder tests
@@ -85,10 +84,7 @@ class TestSourceExtraction:
         assert refs[0].date == "2026-03-14"
 
     def test_multiple_references(self) -> None:
-        text = (
-            "Punkt A. [Quelle: Doc A, 2026-03-14] "
-            "Punkt B. [Quelle: Doc B, März 2026]"
-        )
+        text = "Punkt A. [Quelle: Doc A, 2026-03-14] Punkt B. [Quelle: Doc B, März 2026]"
         refs = GroundingService._extract_sources(text)
         assert len(refs) == 2
         assert refs[0].title == "Doc A"
@@ -185,10 +181,7 @@ class TestSourceValidation:
 
     def test_mixed_valid_and_invalid(self) -> None:
         svc = GroundingService(known_sources=[{"title": "Doc A"}])
-        text = (
-            "Punkt 1. [Quelle: Doc A, 2026-03-14]\n"
-            "Punkt 2. [Quelle: Fake Doc, 2026-03-14]"
-        )
+        text = "Punkt 1. [Quelle: Doc A, 2026-03-14]\nPunkt 2. [Quelle: Fake Doc, 2026-03-14]"
         result = svc.analyze(text)
         assert result.valid_source_count == 1
         assert result.invalid_source_count == 1

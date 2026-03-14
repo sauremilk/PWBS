@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -111,6 +111,7 @@ class TestEnsureTenant:
         client = _mock_client()
         collection = client.collections.get.return_value
         from weaviate.classes.tenants import TenantActivityStatus
+
         existing_tenant = MagicMock()
         existing_tenant.activity_status = TenantActivityStatus.ACTIVE
         collection.tenants.get.return_value = {str(_USER_ID): existing_tenant}

@@ -187,8 +187,7 @@ class BaseConnector(abc.ABC):
             except RateLimitError as exc:
                 if attempt >= len(self.RETRY_DELAYS):
                     self._logger.error(
-                        "Rate limit retries exhausted after %d attempts "
-                        "(connection_id=%s): %s",
+                        "Rate limit retries exhausted after %d attempts (connection_id=%s): %s",
                         max_attempts,
                         self.connection_id,
                         exc,
@@ -196,8 +195,7 @@ class BaseConnector(abc.ABC):
                     raise
                 delay = self.RETRY_DELAYS[attempt]
                 self._logger.warning(
-                    "Rate limited (attempt %d/%d), retrying in %.0fs "
-                    "(connection_id=%s): %s",
+                    "Rate limited (attempt %d/%d), retrying in %.0fs (connection_id=%s): %s",
                     attempt + 1,
                     max_attempts,
                     delay,

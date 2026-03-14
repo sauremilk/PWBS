@@ -72,8 +72,7 @@ class MissingContextError(Exception):
         self.template_id = template_id
         self.missing = missing
         super().__init__(
-            f"Prompt '{template_id}' benötigt fehlende Kontextvariablen: "
-            f"{', '.join(missing)}"
+            f"Prompt '{template_id}' benötigt fehlende Kontextvariablen: {', '.join(missing)}"
         )
 
 
