@@ -135,8 +135,7 @@ class WeightResult:
 class Neo4jSession(Protocol):
     """Protocol for async Neo4j session / transaction."""
 
-    async def run(self, query: str, parameters: dict[str, Any] | None = None) -> Any:
-        ...
+    async def run(self, query: str, parameters: dict[str, Any] | None = None) -> Any: ...
 
 
 # ------------------------------------------------------------------

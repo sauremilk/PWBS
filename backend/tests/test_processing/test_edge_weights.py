@@ -17,7 +17,6 @@ from pwbs.graph.edge_weights import (
     compute_weight,
 )
 
-
 # ------------------------------------------------------------------
 # Constants
 # ------------------------------------------------------------------
@@ -251,8 +250,7 @@ class TestUpdateWeights:
         await svc.update_weights(cos, USER_ID, reference_time=NOW)
         call_args = session.run.call_args
         params = (
-            call_args[0][1] if len(call_args[0]) > 1
-            else call_args.kwargs.get("parameters", {})
+            call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
         )
         assert params.get("userId") == USER_ID
 
@@ -420,8 +418,7 @@ class TestBatchProcessing:
         svc = _service(session=session, config=cfg)
         # 5 distinct Person+Meeting pairs
         cos = [
-            _co(a_id=f"p{i}", b_id=f"m{i}", a_label="Person", b_label="Meeting")
-            for i in range(5)
+            _co(a_id=f"p{i}", b_id=f"m{i}", a_label="Person", b_label="Meeting") for i in range(5)
         ]
         result = await svc.update_weights(cos, USER_ID, reference_time=NOW)
         assert result.edges_updated == 5

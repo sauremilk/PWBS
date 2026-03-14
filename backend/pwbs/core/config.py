@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     jwt_private_key: SecretStr = SecretStr("")
     jwt_public_key: str = ""
 
+    #  DSGVO Export (TASK-104)
+    export_dir: str = "data/exports"
+
     #  Rate Limiting (TASK-085)
     rate_limit_general_max: int = 100
     rate_limit_general_window: int = 60  # seconds

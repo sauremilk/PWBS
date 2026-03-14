@@ -265,47 +265,171 @@ class TestUpdateSettings:
         assert resp.timezone == "UTC"
 
 
-# ── POST /export (NotImplementedError) ───────────────────────────────────────
+# ── POST /export (TASK-104 implemented) ───────────────────────────────────────
 
 
 class TestStartExport:
     """Test POST /api/v1/user/export."""
 
     @pytest.mark.asyncio
-    async def test_raises_not_implemented(self) -> None:
+    async def test_starts_export_successfully(self) -> None:
         from pwbs.api.v1.routes.user import start_export
 
         user = _make_user()
         db = AsyncMock()
+        bg_tasks = MagicMock()
+        export_mock = MagicMock()
+        export_mock.id = uuid.uuid4()
 
-        with pytest.raises(NotImplementedError, match="TASK-104"):
-            await start_export(
+        with (
+            patch(
+                "pwbs.api.v1.routes.user.export_service.check_running_export", return_value=None
+            ) as check_mock,
+            patch(
+                "pwbs.api.v1.routes.user.export_service.create_export_job", return_value=export_mock
+            ) as create_mock,
+            patch("pwbs.api.v1.routes.user.get_settings") as settings_mock,
+        ):
+            settings_mock.return_value.database_url = "postgresql+asyncpg://test"
+            settings_mock.return_value.export_dir = "/tmp/exports"
+            resp = await start_export(
+                background_tasks=bg_tasks,
                 response=MagicMock(),
                 user=user,
                 db=db,
             )
+        assert resp.status == "processing"
+        assert resp.export_id == export_mock.id
+        check_mock.assert_awaited_once_with(user.id, db)
+        create_mock.assert_awaited_once_with(user.id, db)
+        bg_tasks.add_task.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_returns_429_when_export_already_running(self) -> None:
+        from fastapi import HTTPException
+
+        from pwbs.api.v1.routes.user import start_export
+
+        user = _make_user()
+        db = AsyncMock()
+        bg_tasks = MagicMock()
+        running_export = MagicMock()
+        running_export.id = uuid.uuid4()
+
+        with patch(
+            "pwbs.api.v1.routes.user.export_service.check_running_export",
+            return_value=running_export,
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await start_export(
+                    background_tasks=bg_tasks,
+                    response=MagicMock(),
+                    user=user,
+                    db=db,
+                )
+        assert exc_info.value.status_code == 429
 
 
-# ── GET /export/{id} (NotImplementedError) ───────────────────────────────────
+# ── GET /export/{id} (TASK-104 implemented) ──────────────────────────────────
 
 
 class TestGetExportStatus:
     """Test GET /api/v1/user/export/{export_id}."""
 
     @pytest.mark.asyncio
-    async def test_raises_not_implemented(self) -> None:
+    async def test_returns_status_for_processing_export(self) -> None:
+        from pwbs.api.v1.routes.user import get_export_status
+
+        user = _make_user()
+        db = AsyncMock()
+        export_mock = MagicMock()
+        export_mock.id = uuid.uuid4()
+        export_mock.status = "processing"
+        export_mock.file_path = None
+        export_mock.created_at = datetime.now(tz=timezone.utc)
+
+        with patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock):
+            resp = await get_export_status(
+                export_id=export_mock.id,
+                response=MagicMock(),
+                user=user,
+                db=db,
+            )
+        assert resp.status == "processing"
+        assert resp.download_url is None
+
+    @pytest.mark.asyncio
+    async def test_returns_download_url_for_completed_export(self) -> None:
+        from pwbs.api.v1.routes.user import get_export_status
+
+        user = _make_user()
+        db = AsyncMock()
+        export_id = uuid.uuid4()
+        export_mock = MagicMock()
+        export_mock.id = export_id
+        export_mock.status = "completed"
+        export_mock.file_path = "/tmp/exports/test.zip"
+        export_mock.created_at = datetime.now(tz=timezone.utc)
+
+        with (
+            patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock),
+            patch("pwbs.api.v1.routes.user.export_service.is_export_expired", return_value=False),
+        ):
+            resp = await get_export_status(
+                export_id=export_id,
+                response=MagicMock(),
+                user=user,
+                db=db,
+            )
+        assert resp.status == "completed"
+        assert resp.download_url is not None
+        assert str(export_id) in resp.download_url
+
+    @pytest.mark.asyncio
+    async def test_returns_404_for_unknown_export(self) -> None:
+        from fastapi import HTTPException
+
         from pwbs.api.v1.routes.user import get_export_status
 
         user = _make_user()
         db = AsyncMock()
 
-        with pytest.raises(NotImplementedError, match="TASK-104"):
-            await get_export_status(
-                export_id=uuid.uuid4(),
-                response=MagicMock(),
-                user=user,
-                db=db,
-            )
+        with patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=None):
+            with pytest.raises(HTTPException) as exc_info:
+                await get_export_status(
+                    export_id=uuid.uuid4(),
+                    response=MagicMock(),
+                    user=user,
+                    db=db,
+                )
+        assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_returns_410_for_expired_export(self) -> None:
+        from fastapi import HTTPException
+
+        from pwbs.api.v1.routes.user import get_export_status
+
+        user = _make_user()
+        db = AsyncMock()
+        export_mock = MagicMock()
+        export_mock.id = uuid.uuid4()
+        export_mock.status = "completed"
+        export_mock.file_path = "/tmp/exports/test.zip"
+        export_mock.created_at = datetime.now(tz=timezone.utc)
+
+        with (
+            patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock),
+            patch("pwbs.api.v1.routes.user.export_service.is_export_expired", return_value=True),
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await get_export_status(
+                    export_id=export_mock.id,
+                    response=MagicMock(),
+                    user=user,
+                    db=db,
+                )
+        assert exc_info.value.status_code == 410
 
 
 # ── DELETE /account ──────────────────────────────────────────────────────────
@@ -495,6 +619,8 @@ class TestRouterMetadata:
         paths = [r.path for r in router.routes]
         assert "/api/v1/user/settings" in paths
         assert "/api/v1/user/export" in paths
+        assert "/api/v1/user/export/{export_id}" in paths
+        assert "/api/v1/user/export/{export_id}/download" in paths
         assert "/api/v1/user/account" in paths
         assert "/api/v1/user/account/cancel-deletion" in paths
         assert "/api/v1/user/audit-log" in paths

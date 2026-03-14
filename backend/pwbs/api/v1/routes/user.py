@@ -16,7 +16,7 @@ import logging
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
+from pwbs.dsgvo import export_service
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.user import User
 
@@ -224,18 +225,36 @@ async def update_settings(
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def start_export(
+    background_tasks: BackgroundTasks,
     response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> ExportStartResponse:
     """Start asynchronous DSGVO data export (Art. 15/20).
 
-    Delegates to the export service (TASK-104).
+    Rate limit: 1 concurrent export per user (429 if already running).
     """
-    raise NotImplementedError(
-        "DSGVO export service not yet implemented (TASK-104). "
-        "Endpoint structure is ready for integration."
+    running = await export_service.check_running_export(user.id, db)
+    if running is not None:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "code": "EXPORT_ALREADY_RUNNING",
+                "message": "An export is already in progress",
+                "export_id": str(running.id),
+            },
+        )
+
+    export = await export_service.create_export_job(user.id, db)
+    settings = get_settings()
+    background_tasks.add_task(
+        export_service.run_export,
+        export_id=export.id,
+        user_id=user.id,
+        database_url=settings.database_url,
+        export_dir=settings.export_dir,
     )
+    return ExportStartResponse(export_id=export.id, status="processing")
 
 
 # ---------------------------------------------------------------------------
@@ -252,11 +271,78 @@ async def get_export_status(
 ) -> ExportStatusResponse:
     """Check status of a DSGVO data export.
 
-    Delegates to the export service (TASK-104).
+    Returns download URL once completed; 404 if export not found or expired.
     """
-    raise NotImplementedError(
-        "DSGVO export service not yet implemented (TASK-104). "
-        "Endpoint structure is ready for integration."
+    export = await export_service.get_export(export_id, user.id, db)
+    if export is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "EXPORT_NOT_FOUND", "message": "Export not found"},
+        )
+
+    if export.status == "completed" and export_service.is_export_expired(export):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail={"code": "EXPORT_EXPIRED", "message": "Export has expired"},
+        )
+
+    download_url: str | None = None
+    if export.status == "completed" and export.file_path:
+        download_url = f"/api/v1/user/export/{export_id}/download"
+
+    return ExportStatusResponse(
+        export_id=export.id,
+        status=export.status,
+        download_url=download_url,
+        created_at=export.created_at,
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/user/export/{export_id}/download — download export ZIP
+# ---------------------------------------------------------------------------
+
+
+@router.get("/export/{export_id}/download")
+async def download_export(
+    export_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> Response:
+    """Download a completed DSGVO data export as ZIP."""
+    from pathlib import Path as _Path
+
+    export = await export_service.get_export(export_id, user.id, db)
+    if export is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "EXPORT_NOT_FOUND", "message": "Export not found"},
+        )
+
+    if export.status != "completed" or not export.file_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "EXPORT_NOT_READY", "message": "Export not yet completed"},
+        )
+
+    if export_service.is_export_expired(export):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail={"code": "EXPORT_EXPIRED", "message": "Export has expired"},
+        )
+
+    file_path = _Path(export.file_path)
+    if not file_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "EXPORT_FILE_MISSING", "message": "Export file not found on disk"},
+        )
+
+    data = file_path.read_bytes()
+    return Response(
+        content=data,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="pwbs-export-{export_id}.zip"'},
     )
 
 
