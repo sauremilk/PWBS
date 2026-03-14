@@ -24,7 +24,6 @@ from pwbs.dsgvo.export_service import (
     is_export_expired,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -134,17 +133,56 @@ class TestIsExportExpired:
 
 class TestBuildZip:
     def test_creates_valid_zip_with_all_sections(self) -> None:
-        docs = [{"id": "d1", "source_type": "notion", "source_id": "s1",
-                 "title": "Test", "language": "de", "chunk_count": 1,
-                 "processing_status": "done", "created_at": None, "updated_at": None}]
-        chunks = [{"id": "c1", "document_id": "d1", "chunk_index": 0,
-                   "token_count": 50, "content_preview": "Hello world"}]
-        entities = [{"id": "e1", "entity_type": "Person", "name": "Alice",
-                     "normalized_name": "alice", "first_seen": None, "last_seen": None}]
-        briefings = [{"id": "b1", "briefing_type": "morning", "title": "Morning",
-                      "content": "Good morning", "generated_at": None}]
-        audit = [{"id": 1, "action": "POST", "resource_type": "doc",
-                  "resource_id": None, "created_at": None}]
+        docs = [
+            {
+                "id": "d1",
+                "source_type": "notion",
+                "source_id": "s1",
+                "title": "Test",
+                "language": "de",
+                "chunk_count": 1,
+                "processing_status": "done",
+                "created_at": None,
+                "updated_at": None,
+            }
+        ]
+        chunks = [
+            {
+                "id": "c1",
+                "document_id": "d1",
+                "chunk_index": 0,
+                "token_count": 50,
+                "content_preview": "Hello world",
+            }
+        ]
+        entities = [
+            {
+                "id": "e1",
+                "entity_type": "Person",
+                "name": "Alice",
+                "normalized_name": "alice",
+                "first_seen": None,
+                "last_seen": None,
+            }
+        ]
+        briefings = [
+            {
+                "id": "b1",
+                "briefing_type": "morning",
+                "title": "Morning",
+                "content": "Good morning",
+                "generated_at": None,
+            }
+        ]
+        audit = [
+            {
+                "id": 1,
+                "action": "POST",
+                "resource_type": "doc",
+                "resource_id": None,
+                "created_at": None,
+            }
+        ]
 
         zip_bytes = _build_zip(
             documents=docs,
@@ -169,8 +207,11 @@ class TestBuildZip:
 
     def test_empty_data_produces_valid_zip(self) -> None:
         zip_bytes = _build_zip(
-            documents=[], chunks=[], entities=[],
-            briefings=[], audit_entries=[],
+            documents=[],
+            chunks=[],
+            entities=[],
+            briefings=[],
+            audit_entries=[],
         )
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
             assert "documents.json" in zf.namelist()

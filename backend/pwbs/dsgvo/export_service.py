@@ -32,9 +32,7 @@ logger = logging.getLogger(__name__)
 _EXPORT_EXPIRY_HOURS = 24
 
 
-async def check_running_export(
-    user_id: uuid.UUID, db: AsyncSession
-) -> DataExport | None:
+async def check_running_export(user_id: uuid.UUID, db: AsyncSession) -> DataExport | None:
     """Return an in-progress export for the user, or None."""
     stmt = (
         select(DataExport)
@@ -153,9 +151,7 @@ def is_export_expired(export: DataExport) -> bool:
 # ---------------------------------------------------------------------------
 
 
-async def _collect_documents(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_documents(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     stmt = select(Document).where(Document.user_id == user_id)
     result = await session.execute(stmt)
     rows = result.scalars().all()
@@ -175,9 +171,7 @@ async def _collect_documents(
     ]
 
 
-async def _collect_chunks(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_chunks(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     stmt = select(Chunk).where(Chunk.user_id == user_id)
     result = await session.execute(stmt)
     rows = result.scalars().all()
@@ -193,9 +187,7 @@ async def _collect_chunks(
     ]
 
 
-async def _collect_entities(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_entities(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     stmt = select(Entity).where(Entity.user_id == user_id)
     result = await session.execute(stmt)
     rows = result.scalars().all()
@@ -212,9 +204,7 @@ async def _collect_entities(
     ]
 
 
-async def _collect_briefings(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_briefings(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     stmt = select(Briefing).where(Briefing.user_id == user_id)
     result = await session.execute(stmt)
     rows = result.scalars().all()
@@ -230,15 +220,9 @@ async def _collect_briefings(
     ]
 
 
-async def _collect_audit_log(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_audit_log(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     """Collect audit log entries.  No PII in exported metadata."""
-    stmt = (
-        select(AuditLog)
-        .where(AuditLog.user_id == user_id)
-        .order_by(AuditLog.created_at.desc())
-    )
+    stmt = select(AuditLog).where(AuditLog.user_id == user_id).order_by(AuditLog.created_at.desc())
     result = await session.execute(stmt)
     rows = result.scalars().all()
     return [

@@ -3,9 +3,9 @@
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.base import Base
 from pwbs.models.briefing import Briefing
-from pwbs.models.data_export import DataExport
 from pwbs.models.chunk import Chunk
 from pwbs.models.connection import Connection
+from pwbs.models.data_export import DataExport
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
 from pwbs.models.refresh_token import RefreshToken

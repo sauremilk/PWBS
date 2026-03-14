@@ -26,9 +26,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("user_id", sa.Uuid(), nullable=False),
-        sa.Column(
-            "status", sa.Text(), server_default="processing", nullable=False
-        ),
+        sa.Column("status", sa.Text(), server_default="processing", nullable=False),
         sa.Column("file_path", sa.Text(), nullable=True),
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.Column(
@@ -39,9 +37,7 @@ def upgrade() -> None:
         ),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["user_id"], ["users.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
