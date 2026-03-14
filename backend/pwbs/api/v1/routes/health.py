@@ -1,27 +1,78 @@
-"""Combined health-check endpoint (TASK-031).
+"""Health-check endpoint (TASK-031, TASK-114).
 
-GET /api/v1/admin/health  no authentication required.
-Checks PostgreSQL, Weaviate, Neo4j and Redis in parallel with
+GET /api/v1/admin/health — no authentication required.
+Checks PostgreSQL, Weaviate, Neo4j, Redis and LLM API in parallel with
 a 5-second timeout per service.
+
+Returns HTTP 200 when PostgreSQL and at least one search component are
+reachable, HTTP 503 when PostgreSQL is not reachable (critical failure).
 """
 
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from typing import Any
 
+import httpx
 from fastapi import APIRouter
+from starlette.responses import JSONResponse
 
-from pwbs.db.postgres import check_postgres_health
-from pwbs.db.weaviate_client import check_weaviate_health
+from pwbs.core.config import get_settings
 from pwbs.db.neo4j_client import check_neo4j_health
+from pwbs.db.postgres import check_postgres_health
 from pwbs.db.redis_client import check_redis_health
+from pwbs.db.weaviate_client import check_weaviate_health
 from pwbs.queue.health import check_queue_health
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 _HEALTH_TIMEOUT = 5.0  # seconds per check
+
+
+async def _check_llm_health() -> bool:
+    """Lightweight LLM API reachability check.
+
+    Tests connectivity to the configured LLM provider without consuming
+    tokens — uses the models-list endpoint (free API call).
+    """
+    settings = get_settings()
+    provider = settings.llm_provider
+
+    if provider == "claude":
+        api_key = settings.anthropic_api_key.get_secret_value()
+        if not api_key:
+            return False
+        async with httpx.AsyncClient(timeout=_HEALTH_TIMEOUT) as client:
+            resp = await client.get(
+                "https://api.anthropic.com/v1/models",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                },
+            )
+            return resp.status_code < 500
+    elif provider == "gpt4":
+        api_key = settings.openai_api_key.get_secret_value()
+        if not api_key:
+            return False
+        async with httpx.AsyncClient(timeout=_HEALTH_TIMEOUT) as client:
+            resp = await client.get(
+                "https://api.openai.com/v1/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            return resp.status_code < 500
+    elif provider == "ollama":
+        base_url = settings.ollama_base_url
+        if not base_url:
+            return False
+        async with httpx.AsyncClient(timeout=_HEALTH_TIMEOUT) as client:
+            resp = await client.get(f"{base_url}/api/tags")
+            return resp.status_code < 500
+    return False
 
 
 async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
@@ -36,31 +87,43 @@ async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
 
 
 @router.get("/health")
-async def health_check() -> dict[str, Any]:
+async def health_check() -> JSONResponse:
     checks = [
         _timed_check("postgres", check_postgres_health),
         _timed_check("weaviate", check_weaviate_health),
         _timed_check("neo4j", check_neo4j_health),
         _timed_check("redis", check_redis_health),
+        _timed_check("llm_api", _check_llm_health),
     ]
     results = await asyncio.gather(*checks)
 
-    components = {r["name"]: {"status": r["status"], "latency_ms": r["latency_ms"]} for r in results}
-    all_up = all(r["status"] == "up" for r in results)
-    any_up = any(r["status"] == "up" for r in results)
+    components = {
+        r["name"]: {"status": r["status"], "latency_ms": r["latency_ms"]} for r in results
+    }
 
-    if all_up:
+    pg_up = components["postgres"]["status"] == "up"
+    # Search is available if Weaviate is up (PostgreSQL keyword search is
+    # always available when PG is up, so pg_up alone counts as one search path).
+    search_up = components["weaviate"]["status"] == "up" or pg_up
+
+    if pg_up and all(r["status"] == "up" for r in results):
         overall = "healthy"
-    elif any_up:
+    elif pg_up and search_up:
         overall = "degraded"
     else:
         overall = "unhealthy"
 
-    # Queue status (TASK-121) – non-critical, does not affect overall status
+    # Queue status (TASK-121) — non-critical, does not affect overall status
     queue_info: dict[str, Any] = {}
     try:
         queue_info = await check_queue_health()
     except Exception:
         queue_info = {"status": "unavailable"}
 
-    return {"status": overall, "components": components, "queue": queue_info}
+    # HTTP 503 when PostgreSQL is unreachable (critical failure)
+    status_code = 200 if pg_up else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={"status": overall, "components": components, "queue": queue_info},
+    )

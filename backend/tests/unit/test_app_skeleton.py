@@ -78,8 +78,8 @@ class TestHealthRouterMounted:
         transport = ASGITransport(app=app)  # type: ignore[arg-type]
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             response = await client.get("/api/v1/admin/health")
-            # Health check may fail because DBs are not running, but the
+            # Health check may return 503 because DBs are not running, but the
             # endpoint should respond (not 404 Not Found).
-            assert response.status_code == 200
+            assert response.status_code in (200, 503)
             data = response.json()
             assert "status" in data
