@@ -35,6 +35,7 @@ from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
 from pwbs.core.logging import setup_logging
+from pwbs.core.sentry import init_sentry
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,13 @@ def create_app() -> FastAPI:
 
     # Structured JSON logging (TASK-113) -- must be called before any log use
     setup_logging(settings.log_level)
+
+    # Sentry error-tracking (TASK-115) -- before app creation for auto-instrument
+    init_sentry(
+        dsn=settings.sentry_dsn,
+        environment=settings.environment,
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+    )
 
     application = FastAPI(
         title="PWBS API",
@@ -192,6 +200,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.search import router as search_router
     from pwbs.api.v1.routes.user import router as user_router
+    from pwbs.api.v1.routes.webhooks import router as webhooks_router
 
     application.include_router(health_router)
     application.include_router(auth_router)
@@ -203,7 +212,7 @@ def create_app() -> FastAPI:
     application.include_router(knowledge_router)
     application.include_router(search_router)
     application.include_router(user_router)
-
+    application.include_router(webhooks_router)
     return application
 
 

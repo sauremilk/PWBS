@@ -74,6 +74,10 @@ class Settings(BaseSettings):
     jwt_private_key: SecretStr = SecretStr("")
     jwt_public_key: str = ""
 
+    #  Sentry (TASK-115)
+    sentry_dsn: str = ""  # empty = disabled
+    sentry_traces_sample_rate: float = 1.0
+
     #  DSGVO Export (TASK-104)
     export_dir: str = "data/exports"
 
@@ -93,6 +97,8 @@ class Settings(BaseSettings):
     google_client_secret: SecretStr = SecretStr("")
     google_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/google-calendar/callback"
     google_login_redirect_uri: str = "http://localhost:3000/api/auth/google/callback"
+    gmail_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/gmail/callback"
+    gmail_pubsub_topic: str = ""  # e.g. projects/my-proj/topics/pwbs-gmail
     notion_oauth_redirect_uri: str = "http://localhost:3000/api/connectors/notion/callback"
     notion_client_id: str = ""
     notion_client_secret: SecretStr = SecretStr("")
