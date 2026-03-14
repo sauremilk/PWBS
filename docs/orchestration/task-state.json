@@ -2685,9 +2685,9 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-K",
+      "claimed_at": "2026-03-15T14:35:00.000000+00:00",
       "completed_at": null,
       "blocked_by": []
     },
