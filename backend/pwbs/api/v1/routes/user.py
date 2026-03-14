@@ -18,7 +18,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func as sa_func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
@@ -27,6 +27,9 @@ from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.dsgvo import deletion_service, export_service
 from pwbs.models.audit_log import AuditLog
+from pwbs.models.connection import Connection
+from pwbs.models.document import Document
+from pwbs.models.llm_audit_log import LlmAuditLog
 from pwbs.models.user import User
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
@@ -573,3 +576,195 @@ async def get_security_status(
             "Responses include source references for auditability."
         ),
     )
+
+
+# ---------------------------------------------------------------------------
+# Data-report / LLM-usage schemas
+# ---------------------------------------------------------------------------
+
+
+class SourceStats(BaseModel):
+    source_type: str
+    document_count: int
+    oldest_document: datetime | None = None
+    newest_document: datetime | None = None
+
+
+class ConnectionInfo(BaseModel):
+    source_type: str
+    status: str
+    last_sync: datetime | None = None
+
+
+class LlmProviderUsage(BaseModel):
+    provider: str
+    model: str
+    total_input_tokens: int
+    total_output_tokens: int
+    call_count: int
+
+
+class DataReportResponse(BaseModel):
+    total_documents: int
+    sources: list[SourceStats]
+    connections: list[ConnectionInfo]
+    llm_provider_usage: list[LlmProviderUsage]
+
+
+class LlmUsageEntry(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    provider: str
+    model: str
+    input_tokens: int
+    output_tokens: int
+    purpose: str
+    created_at: datetime
+
+
+class LlmUsageResponse(BaseModel):
+    entries: list[LlmUsageEntry]
+    total: int
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/user/data-report — DSGVO transparency report
+# ---------------------------------------------------------------------------
+
+_DATA_REPORT_LIMIT = 100
+
+
+@router.get("/data-report", response_model=DataReportResponse)
+async def get_data_report(
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> DataReportResponse:
+    """DSGVO transparency report: document counts per source, connections, LLM usage."""
+    # Document stats per source_type
+    doc_stmt = (
+        select(
+            Document.source_type,
+            sa_func.count(Document.id).label("doc_count"),
+            sa_func.min(Document.created_at).label("oldest"),
+            sa_func.max(Document.created_at).label("newest"),
+        )
+        .where(Document.user_id == user.id)
+        .group_by(Document.source_type)
+    )
+    doc_result = await db.execute(doc_stmt)
+    doc_rows = doc_result.all()
+
+    sources = [
+        SourceStats(
+            source_type=row.source_type,
+            document_count=row.doc_count,
+            oldest_document=row.oldest,
+            newest_document=row.newest,
+        )
+        for row in doc_rows
+    ]
+    total_documents = sum(s.document_count for s in sources)
+
+    # Connection info (last sync = watermark)
+    conn_stmt = select(Connection).where(Connection.user_id == user.id)
+    conn_result = await db.execute(conn_stmt)
+    conn_rows = conn_result.scalars().all()
+
+    connections = [
+        ConnectionInfo(
+            source_type=c.source_type,
+            status=c.status,
+            last_sync=c.watermark,
+        )
+        for c in conn_rows
+    ]
+
+    # LLM provider usage aggregation
+    llm_stmt = (
+        select(
+            LlmAuditLog.provider,
+            LlmAuditLog.model,
+            sa_func.sum(LlmAuditLog.input_tokens).label("total_in"),
+            sa_func.sum(LlmAuditLog.output_tokens).label("total_out"),
+            sa_func.count(LlmAuditLog.id).label("call_count"),
+        )
+        .where(LlmAuditLog.owner_id == user.id)
+        .group_by(LlmAuditLog.provider, LlmAuditLog.model)
+    )
+    llm_result = await db.execute(llm_stmt)
+    llm_rows = llm_result.all()
+
+    llm_usage = [
+        LlmProviderUsage(
+            provider=row.provider,
+            model=row.model,
+            total_input_tokens=row.total_in or 0,
+            total_output_tokens=row.total_out or 0,
+            call_count=row.call_count,
+        )
+        for row in llm_rows
+    ]
+
+    return DataReportResponse(
+        total_documents=total_documents,
+        sources=sources,
+        connections=connections,
+        llm_provider_usage=llm_usage,
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/user/llm-usage — LLM audit log entries
+# ---------------------------------------------------------------------------
+
+_LLM_USAGE_MAX = 200
+
+
+@router.get("/llm-usage", response_model=LlmUsageResponse)
+async def get_llm_usage(
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    limit: int = 50,
+    offset: int = 0,
+) -> LlmUsageResponse:
+    """Return LLM audit log entries for the authenticated user.
+
+    Each entry records provider, model, token counts, and purpose.
+    """
+    limit = max(1, min(limit, _LLM_USAGE_MAX))
+    offset = max(0, offset)
+
+    count_stmt = (
+        select(sa_func.count(LlmAuditLog.id))
+        .where(LlmAuditLog.owner_id == user.id)
+    )
+    count_result = await db.execute(count_stmt)
+    total = count_result.scalar() or 0
+
+    stmt = (
+        select(LlmAuditLog)
+        .where(LlmAuditLog.owner_id == user.id)
+        .order_by(desc(LlmAuditLog.created_at))
+        .limit(limit)
+        .offset(offset)
+    )
+    result = await db.execute(stmt)
+    rows = result.scalars().all()
+
+    entries = [
+        LlmUsageEntry(
+            id=r.id,
+            provider=r.provider,
+            model=r.model,
+            input_tokens=r.input_tokens,
+            output_tokens=r.output_tokens,
+            purpose=r.purpose,
+            created_at=r.created_at,
+        )
+        for r in rows
+    ]
+
+    return LlmUsageResponse(entries=entries, total=total)

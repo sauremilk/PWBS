@@ -11,6 +11,7 @@ import {
   Loader2,
   Check,
   AlertTriangle,
+  Database,
 } from "lucide-react";
 import {
   useUserSettings,
@@ -26,7 +27,11 @@ type TabId = "profile" | "notifications" | "privacy" | "security" | "account";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profil", icon: <User className="h-4 w-4" /> },
-  { id: "notifications", label: "Erinnerungen", icon: <Bell className="h-4 w-4" /> },
+  {
+    id: "notifications",
+    label: "Erinnerungen",
+    icon: <Bell className="h-4 w-4" />,
+  },
   { id: "privacy", label: "Datenschutz", icon: <Shield className="h-4 w-4" /> },
   { id: "security", label: "Sicherheit", icon: <Shield className="h-4 w-4" /> },
   { id: "account", label: "Account", icon: <Trash2 className="h-4 w-4" /> },
@@ -130,7 +135,12 @@ function ProfileTab() {
   return (
     <div className="space-y-4 max-w-md">
       <div>
-        <label htmlFor="display-name" className="block text-sm font-medium text-gray-700">Anzeigename</label>
+        <label
+          htmlFor="display-name"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Anzeigename
+        </label>
         <input
           id="display-name"
           type="text"
@@ -141,7 +151,12 @@ function ProfileTab() {
       </div>
 
       <div>
-        <label htmlFor="timezone" className="block text-sm font-medium text-gray-700">Zeitzone</label>
+        <label
+          htmlFor="timezone"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Zeitzone
+        </label>
         <select
           id="timezone"
           value={timezone}
@@ -156,7 +171,12 @@ function ProfileTab() {
       </div>
 
       <div>
-        <label htmlFor="language" className="block text-sm font-medium text-gray-700">Sprache</label>
+        <label
+          htmlFor="language"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Sprache
+        </label>
         <select
           id="language"
           value={language}
@@ -210,7 +230,9 @@ function NotificationsTab() {
   }, [data]);
 
   function handleSave() {
-    update.mutate({ reminder_frequency: frequency as "daily" | "weekly" | "off" });
+    update.mutate({
+      reminder_frequency: frequency as "daily" | "weekly" | "off",
+    });
   }
 
   if (isLoading) {
@@ -224,19 +246,36 @@ function NotificationsTab() {
   return (
     <div className="space-y-6 max-w-md">
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">Erinnerungsfrequenz</h3>
+        <h3 className="text-sm font-semibold text-gray-900">
+          Erinnerungsfrequenz
+        </h3>
         <p className="mt-1 text-sm text-gray-500">
-          Bestimme, wie oft du proaktive Erinnerungen und Follow-up-Benachrichtigungen erhalten möchtest.
+          Bestimme, wie oft du proaktive Erinnerungen und
+          Follow-up-Benachrichtigungen erhalten möchtest.
         </p>
       </div>
 
       <fieldset className="space-y-3">
         <legend className="sr-only">Erinnerungsfrequenz</legend>
-        {([
-          { value: "daily", label: "Täglich", desc: "Jeden Tag eine Zusammenfassung offener Erinnerungen" },
-          { value: "weekly", label: "Wöchentlich", desc: "Einmal pro Woche (freitags) eine Übersicht" },
-          { value: "off", label: "Aus", desc: "Keine proaktiven Erinnerungen – nur manuell abrufbar" },
-        ] as const).map((opt) => (
+        {(
+          [
+            {
+              value: "daily",
+              label: "Täglich",
+              desc: "Jeden Tag eine Zusammenfassung offener Erinnerungen",
+            },
+            {
+              value: "weekly",
+              label: "Wöchentlich",
+              desc: "Einmal pro Woche (freitags) eine Übersicht",
+            },
+            {
+              value: "off",
+              label: "Aus",
+              desc: "Keine proaktiven Erinnerungen – nur manuell abrufbar",
+            },
+          ] as const
+        ).map((opt) => (
           <label
             key={opt.value}
             className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
@@ -254,7 +293,9 @@ function NotificationsTab() {
               className="mt-0.5"
             />
             <div>
-              <span className="text-sm font-medium text-gray-900">{opt.label}</span>
+              <span className="text-sm font-medium text-gray-900">
+                {opt.label}
+              </span>
               <p className="text-xs text-gray-500">{opt.desc}</p>
             </div>
           </label>
@@ -295,6 +336,21 @@ function PrivacyTab() {
   return (
     <div className="space-y-6">
       <div>
+        <h3 className="text-sm font-semibold text-gray-900">Transparenzbericht</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Detaillierte Übersicht über gespeicherte Daten und KI-Nutzung (DSGVO Art. 15).
+        </p>
+        <div className="mt-3">
+          <a
+            href="/settings/data"
+            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <Database className="h-4 w-4" />
+            Transparenzbericht anzeigen
+          </a>
+        </div>
+      </div>
+      <div>
         <h3 className="text-sm font-semibold text-gray-900">Datenexport</h3>
         <p className="mt-1 text-sm text-gray-500">
           Exportiere alle deine Daten als JSON-Datei (DSGVO Art. 20).
@@ -302,7 +358,10 @@ function PrivacyTab() {
         <div className="mt-3 flex items-center gap-3">
           <button
             onClick={handleExport}
-            disabled={startExport.isPending || (!!exportId && exportStatus?.status !== "completed")}
+            disabled={
+              startExport.isPending ||
+              (!!exportId && exportStatus?.status !== "completed")
+            }
             className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             {startExport.isPending ? (
@@ -313,18 +372,21 @@ function PrivacyTab() {
             Daten exportieren
           </button>
           {exportStatus && exportStatus.status !== "completed" && (
-            <span className="text-sm text-gray-500">Export wird erstellt\u2026</span>
+            <span className="text-sm text-gray-500">
+              Export wird erstellt\u2026
+            </span>
           )}
-          {exportStatus?.status === "completed" && exportStatus.download_url && (
-            <a
-              href={exportStatus.download_url}
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
-              download
-            >
-              <Download className="h-4 w-4" />
-              Herunterladen
-            </a>
-          )}
+          {exportStatus?.status === "completed" &&
+            exportStatus.download_url && (
+              <a
+                href={exportStatus.download_url}
+                className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+                download
+              >
+                <Download className="h-4 w-4" />
+                Herunterladen
+              </a>
+            )}
         </div>
       </div>
     </div>
@@ -367,7 +429,9 @@ function AccountTab() {
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
             <p className="text-sm font-medium text-yellow-800">
               Dein Account wird am{" "}
-              {new Date(deleteMutation.data.deletion_scheduled_at).toLocaleDateString("de-DE")}{" "}
+              {new Date(
+                deleteMutation.data.deletion_scheduled_at,
+              ).toLocaleDateString("de-DE")}{" "}
               gel\u00f6scht.
             </p>
           </div>
@@ -382,9 +446,12 @@ function AccountTab() {
       )}
 
       <div>
-        <h3 className="text-sm font-semibold text-red-900">Account l\u00f6schen</h3>
+        <h3 className="text-sm font-semibold text-red-900">
+          Account l\u00f6schen
+        </h3>
         <p className="mt-1 text-sm text-gray-500">
-          Dein Account und alle Daten werden nach einer 30-Tage-Karenzzeit unwiderruflich gel\u00f6scht.
+          Dein Account und alle Daten werden nach einer 30-Tage-Karenzzeit
+          unwiderruflich gel\u00f6scht.
         </p>
         <button
           onClick={() => setShowDeleteDialog(true)}
@@ -399,10 +466,13 @@ function AccountTab() {
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-bold text-red-900">Account endg\u00fcltig l\u00f6schen</h2>
+            <h2 className="text-lg font-bold text-red-900">
+              Account endg\u00fcltig l\u00f6schen
+            </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Alle deine Daten werden nach 30 Tagen unwiderruflich gel\u00f6scht. 
-              Innerhalb der Karenzzeit kannst du die L\u00f6schung abbrechen.
+              Alle deine Daten werden nach 30 Tagen unwiderruflich
+              gel\u00f6scht. Innerhalb der Karenzzeit kannst du die
+              L\u00f6schung abbrechen.
             </p>
 
             <label className="mt-4 flex items-start gap-2 text-sm">
@@ -412,11 +482,15 @@ function AccountTab() {
                 onChange={(e) => setConfirmed(e.target.checked)}
                 className="mt-0.5 rounded border-gray-300"
               />
-              Ich verstehe, dass diese Aktion nicht r\u00fcckg\u00e4ngig gemacht werden kann.
+              Ich verstehe, dass diese Aktion nicht r\u00fcckg\u00e4ngig gemacht
+              werden kann.
             </label>
 
             <div className="mt-3">
-              <label htmlFor="delete-password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="delete-password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Passwort zur Best\u00e4tigung
               </label>
               <input
@@ -435,7 +509,9 @@ function AccountTab() {
                 disabled={!confirmed || !password || deleteMutation.isPending}
                 className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
-                {deleteMutation.isPending ? "L\u00f6sche\u2026" : "Account l\u00f6schen"}
+                {deleteMutation.isPending
+                  ? "L\u00f6sche\u2026"
+                  : "Account l\u00f6schen"}
               </button>
               <button
                 onClick={() => {

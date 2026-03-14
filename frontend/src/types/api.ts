@@ -573,3 +573,50 @@ export interface DecisionUpdateRequest {
   decided_at?: string | null;
   expires_at?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Data Transparency Report (TASK-172)
+// ---------------------------------------------------------------------------
+
+export interface SourceStats {
+  source_type: string;
+  document_count: number;
+  oldest_document: string | null;
+  newest_document: string | null;
+}
+
+export interface ConnectionInfo {
+  source_type: string;
+  status: string;
+  last_sync: string | null;
+}
+
+export interface LlmProviderUsage {
+  provider: string;
+  model: string;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  call_count: number;
+}
+
+export interface DataReportResponse {
+  total_documents: number;
+  sources: SourceStats[];
+  connections: ConnectionInfo[];
+  llm_provider_usage: LlmProviderUsage[];
+}
+
+export interface LlmUsageEntry {
+  id: string;
+  provider: string;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  purpose: string;
+  created_at: string;
+}
+
+export interface LlmUsageResponse {
+  entries: LlmUsageEntry[];
+  total: number;
+}

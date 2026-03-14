@@ -8,6 +8,8 @@ import {
   getExportStatus,
   requestAccountDeletion,
   cancelAccountDeletion,
+  getDataReport,
+  getLlmUsage,
 } from "@/lib/api/user";
 import type { UserSettingsUpdate, AccountDeletionRequest } from "@/types/api";
 
@@ -57,5 +59,19 @@ export function useCancelDeletion() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
+  });
+}
+
+export function useDataReport() {
+  return useQuery({
+    queryKey: ["user", "data-report"],
+    queryFn: getDataReport,
+  });
+}
+
+export function useLlmUsage(params?: { limit?: number; offset?: number }) {
+  return useQuery({
+    queryKey: ["user", "llm-usage", params],
+    queryFn: () => getLlmUsage(params),
   });
 }

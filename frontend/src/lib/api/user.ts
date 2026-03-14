@@ -9,6 +9,8 @@ import type {
   CancelDeletionResponse,
   AuditLogResponse,
   SecurityStatusResponse,
+  DataReportResponse,
+  LlmUsageResponse,
 } from "@/types/api";
 
 export async function getSettings(): Promise<UserSettingsResponse> {
@@ -59,4 +61,22 @@ export async function getAuditLog(params?: {
 
 export async function getSecurityStatus(): Promise<SecurityStatusResponse> {
   return apiClient.get<SecurityStatusResponse>("/user/security-status");
+}
+
+export async function getDataReport(): Promise<DataReportResponse> {
+  return apiClient.get<DataReportResponse>("/user/data-report");
+}
+
+export async function getLlmUsage(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<LlmUsageResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.offset) query.set("offset", String(params.offset));
+
+  const qs = query.toString();
+  return apiClient.get<LlmUsageResponse>(
+    `/user/llm-usage${qs ? `?${qs}` : ""}`,
+  );
 }

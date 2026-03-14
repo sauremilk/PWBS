@@ -26,6 +26,7 @@ from pwbs.models.chunk import Chunk
 from pwbs.models.data_export import DataExport
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity
+from pwbs.models.llm_audit_log import LlmAuditLog
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ async def run_export(
             entities = await _collect_entities(user_id, session)
             briefings = await _collect_briefings(user_id, session)
             audit_entries = await _collect_audit_log(user_id, session)
+            llm_usage = await _collect_llm_audit_log(user_id, session)
 
             zip_bytes = _build_zip(
                 documents=documents,
@@ -95,6 +97,7 @@ async def run_export(
                 entities=entities,
                 briefings=briefings,
                 audit_entries=audit_entries,
+                llm_usage=llm_usage,
             )
 
             export_path = Path(export_dir)
@@ -237,6 +240,31 @@ async def _collect_audit_log(user_id: uuid.UUID, session: AsyncSession) -> list[
     ]
 
 
+async def _collect_llm_audit_log(
+    user_id: uuid.UUID, session: AsyncSession
+) -> list[dict[str, Any]]:
+    """Collect LLM audit log entries for DSGVO export."""
+    stmt = (
+        select(LlmAuditLog)
+        .where(LlmAuditLog.owner_id == user_id)
+        .order_by(LlmAuditLog.created_at.desc())
+    )
+    result = await session.execute(stmt)
+    rows = result.scalars().all()
+    return [
+        {
+            "id": str(r.id),
+            "provider": r.provider,
+            "model": r.model,
+            "input_tokens": r.input_tokens,
+            "output_tokens": r.output_tokens,
+            "purpose": r.purpose,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in rows
+    ]
+
+
 # ---------------------------------------------------------------------------
 # ZIP builder
 # ---------------------------------------------------------------------------
@@ -249,6 +277,7 @@ def _build_zip(
     entities: list[dict[str, Any]],
     briefings: list[dict[str, Any]],
     audit_entries: list[dict[str, Any]],
+    llm_usage: list[dict[str, Any]],
 ) -> bytes:
     """Build a ZIP archive with all user data."""
     buf = io.BytesIO()
@@ -291,6 +320,12 @@ def _build_zip(
         zf.writestr(
             "audit_log.json",
             json.dumps(audit_entries, indent=2, ensure_ascii=False),
+        )
+
+        # LLM Usage (JSON)
+        zf.writestr(
+            "llm_usage.json",
+            json.dumps(llm_usage, indent=2, ensure_ascii=False),
         )
 
     return buf.getvalue()
