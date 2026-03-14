@@ -2597,12 +2597,13 @@
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
-      "status": "in_progress",
-      "claimed_by": "ORCH-L",
+      "status": "done",
+      "claimed_by": "ORCH-K",
       "claimed_at": "2026-03-15T12:00:00.000000+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T14:30:00.000000+00:00",
       "blocked_by": [],
-      "notes": "ORCH-L: Reclaimed from ORCH-K (abandoned). Full WCAG 2.1 AA audit + fixes."
+      "commit": "32f9fad",
+      "notes": "ORCH-K: WCAG 2.1 AA - focus-visible, aria-hidden, role/aria attrs, contrast fixes, label association, fieldset/legend. 24 files, lint clean."
     },
     "TASK-170": {
       "stream": "STREAM-BETA-PREP",
