@@ -408,48 +408,70 @@ class TestNormalize:
 
 
 class TestFetchSince:
-    async def test_initial_sync_fetches_messages(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def test_initial_sync_fetches_threads(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Initial sync groups messages by thread and produces one UDF per thread (TASK-124)."""
         connector = _make_connector()
         text = "Email body"
         encoded = base64.urlsafe_b64encode(text.encode()).decode().rstrip("=")
 
-        call_count = {"list": 0, "get": 0, "profile": 0}
-
         async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
             if url.endswith("/messages") or "/messages?" in url:
-                call_count["list"] += 1
                 return httpx.Response(
                     200,
                     json={
-                        "messages": [{"id": "msg-001", "threadId": "t-001"}],
-                        "resultSizeEstimate": 1,
+                        "messages": [
+                            {"id": "msg-001", "threadId": "t-001"},
+                            {"id": "msg-002", "threadId": "t-001"},
+                        ],
+                        "resultSizeEstimate": 2,
                     },
                     request=httpx.Request("GET", url),
                 )
-            if "/messages/msg-001" in url:
-                call_count["get"] += 1
+            if "/threads/t-001" in url:
                 return httpx.Response(
                     200,
                     json={
-                        "id": "msg-001",
-                        "threadId": "t-001",
-                        "internalDate": "1704067200000",
-                        "historyId": "12345",
-                        "payload": {
-                            "headers": [
-                                {"name": "Subject", "value": "Welcome"},
-                                {"name": "From", "value": "noreply@example.com"},
-                                {"name": "To", "value": "user@example.com"},
-                                {"name": "Date", "value": "Mon, 1 Jan 2024 00:00:00 +0000"},
-                            ],
-                            "mimeType": "text/plain",
-                            "body": {"data": encoded},
-                        },
+                        "id": "t-001",
+                        "messages": [
+                            {
+                                "id": "msg-001",
+                                "threadId": "t-001",
+                                "internalDate": "1704067200000",
+                                "payload": {
+                                    "headers": [
+                                        {"name": "Subject", "value": "Welcome"},
+                                        {"name": "From", "value": "noreply@example.com"},
+                                        {"name": "To", "value": "user@example.com"},
+                                        {"name": "Date", "value": "Mon, 1 Jan 2024 00:00:00 +0000"},
+                                    ],
+                                    "mimeType": "text/plain",
+                                    "body": {"data": encoded},
+                                },
+                            },
+                            {
+                                "id": "msg-002",
+                                "threadId": "t-001",
+                                "internalDate": "1704153600000",
+                                "payload": {
+                                    "headers": [
+                                        {"name": "Subject", "value": "Re: Welcome"},
+                                        {"name": "From", "value": "user@example.com"},
+                                        {"name": "To", "value": "noreply@example.com"},
+                                        {"name": "Date", "value": "Tue, 2 Jan 2024 00:00:00 +0000"},
+                                    ],
+                                    "mimeType": "text/plain",
+                                    "body": {
+                                        "data": base64.urlsafe_b64encode(b"Reply body")
+                                        .decode()
+                                        .rstrip("=")
+                                    },
+                                },
+                            },
+                        ],
                     },
                     request=httpx.Request("GET", url),
                 )
             if "/profile" in url:
-                call_count["profile"] += 1
                 return httpx.Response(
                     200,
                     json={"emailAddress": "user@example.com", "historyId": "12345"},
@@ -460,11 +482,21 @@ class TestFetchSince:
         monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
 
         result = await connector.fetch_since(None)
+        # Two messages in one thread  one UDF document
         assert len(result.documents) == 1
-        assert result.documents[0].source_id == "msg-001"
+        doc = result.documents[0]
+        assert doc.source_id == "t-001"
+        assert doc.title == "Welcome"
+        assert "Email body" in doc.content
+        assert "Reply body" in doc.content
+        assert "noreply@example.com" in doc.participants
+        assert "user@example.com" in doc.participants
+        assert doc.metadata["message_count"] == 2
+        assert doc.metadata["thread_id"] == "t-001"
         assert result.new_cursor is not None
 
-    async def test_incremental_sync_uses_history(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def test_incremental_sync_resolves_threads(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Incremental sync via history.list() re-fetches affected threads (TASK-124)."""
         connector = _make_connector()
         text = "Updated email"
         encoded = base64.urlsafe_b64encode(text.encode()).decode().rstrip("=")
@@ -488,24 +520,28 @@ class TestFetchSince:
                     },
                     request=httpx.Request("GET", url),
                 )
-            if "/messages/msg-new" in url:
+            if "/threads/t-new" in url:
                 return httpx.Response(
                     200,
                     json={
-                        "id": "msg-new",
-                        "threadId": "t-new",
-                        "internalDate": "1704153600000",
-                        "historyId": "10002",
-                        "payload": {
-                            "headers": [
-                                {"name": "Subject", "value": "New Email"},
-                                {"name": "From", "value": "person@example.com"},
-                                {"name": "To", "value": "user@example.com"},
-                                {"name": "Date", "value": "Tue, 2 Jan 2024 00:00:00 +0000"},
-                            ],
-                            "mimeType": "text/plain",
-                            "body": {"data": encoded},
-                        },
+                        "id": "t-new",
+                        "messages": [
+                            {
+                                "id": "msg-new",
+                                "threadId": "t-new",
+                                "internalDate": "1704153600000",
+                                "payload": {
+                                    "headers": [
+                                        {"name": "Subject", "value": "New Email"},
+                                        {"name": "From", "value": "person@example.com"},
+                                        {"name": "To", "value": "user@example.com"},
+                                        {"name": "Date", "value": "Tue, 2 Jan 2024 00:00:00 +0000"},
+                                    ],
+                                    "mimeType": "text/plain",
+                                    "body": {"data": encoded},
+                                },
+                            },
+                        ],
                     },
                     request=httpx.Request("GET", url),
                 )
@@ -515,7 +551,9 @@ class TestFetchSince:
 
         result = await connector.fetch_since(cursor)
         assert len(result.documents) == 1
-        assert result.documents[0].source_id == "msg-new"
+        assert result.documents[0].source_id == "t-new"
+        assert result.documents[0].title == "New Email"
+        assert result.documents[0].metadata["message_count"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -546,3 +584,263 @@ class TestSetupPubsubWatch:
 
         with pytest.raises(ConnectorError, match="gmail_pubsub_topic"):
             await GmailConnector.setup_pubsub_watch("test-token")
+
+
+# ---------------------------------------------------------------------------
+# Thread-Resolution (TASK-124)
+# ---------------------------------------------------------------------------
+
+
+def _make_message(
+    *,
+    msg_id: str = "msg-001",
+    thread_id: str = "t-001",
+    subject: str = "Test",
+    from_addr: str = "sender@example.com",
+    to_addr: str = "recipient@example.com",
+    cc_addr: str = "",
+    date_str: str = "Mon, 1 Jan 2024 00:00:00 +0000",
+    internal_date: str = "1704067200000",
+    body_text: str = "Hello World",
+) -> dict[str, object]:
+    """Build a minimal Gmail message dict for testing."""
+    encoded = base64.urlsafe_b64encode(body_text.encode()).decode().rstrip("=")
+    headers = [
+        {"name": "Subject", "value": subject},
+        {"name": "From", "value": from_addr},
+        {"name": "To", "value": to_addr},
+        {"name": "Date", "value": date_str},
+    ]
+    if cc_addr:
+        headers.append({"name": "Cc", "value": cc_addr})
+    return {
+        "id": msg_id,
+        "threadId": thread_id,
+        "internalDate": internal_date,
+        "labelIds": ["INBOX"],
+        "payload": {
+            "headers": headers,
+            "mimeType": "text/plain",
+            "body": {"data": encoded},
+        },
+    }
+
+
+class TestNormalizeThread:
+    """Tests for _normalize_thread (TASK-124)."""
+
+    def test_single_message_thread(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-single",
+            "messages": [
+                _make_message(msg_id="m1", thread_id="t-single", subject="Solo"),
+            ],
+        }
+        doc = connector._normalize_thread(thread_data)
+        assert doc.source_id == "t-single"
+        assert doc.title == "Solo"
+        assert doc.source_type == SourceType.GMAIL
+        assert "Hello World" in doc.content
+        assert doc.metadata["message_count"] == 1
+        assert doc.metadata["thread_id"] == "t-single"
+        assert len(doc.participants) >= 2  # sender + recipient
+
+    def test_multi_message_thread_merges_content(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-multi",
+            "messages": [
+                _make_message(
+                    msg_id="m1",
+                    thread_id="t-multi",
+                    subject="Discussion",
+                    from_addr="alice@example.com",
+                    to_addr="bob@example.com",
+                    internal_date="1704067200000",
+                    body_text="First message",
+                ),
+                _make_message(
+                    msg_id="m2",
+                    thread_id="t-multi",
+                    subject="Re: Discussion",
+                    from_addr="bob@example.com",
+                    to_addr="alice@example.com",
+                    internal_date="1704153600000",
+                    body_text="Reply message",
+                ),
+            ],
+        }
+        doc = connector._normalize_thread(thread_data)
+
+        assert doc.source_id == "t-multi"
+        assert doc.title == "Discussion"  # First message subject
+        assert "First message" in doc.content
+        assert "Reply message" in doc.content
+        assert doc.metadata["message_count"] == 2
+
+    def test_participants_are_deduplicated(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-dedup",
+            "messages": [
+                _make_message(
+                    msg_id="m1",
+                    thread_id="t-dedup",
+                    from_addr="alice@example.com",
+                    to_addr="bob@example.com",
+                ),
+                _make_message(
+                    msg_id="m2",
+                    thread_id="t-dedup",
+                    from_addr="bob@example.com",
+                    to_addr="alice@example.com",
+                    cc_addr="charlie@example.com",
+                ),
+            ],
+        }
+        doc = connector._normalize_thread(thread_data)
+
+        # alice, bob, charlie – deduplicated (case-insensitive)
+        lower_participants = [p.lower() for p in doc.participants]
+        assert "alice@example.com" in lower_participants
+        assert "bob@example.com" in lower_participants
+        assert "charlie@example.com" in lower_participants
+        assert len(doc.participants) == 3
+
+    def test_messages_sorted_chronologically(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-chrono",
+            "messages": [
+                _make_message(
+                    msg_id="m2",
+                    thread_id="t-chrono",
+                    internal_date="1704153600000",
+                    body_text="Second",
+                ),
+                _make_message(
+                    msg_id="m1",
+                    thread_id="t-chrono",
+                    internal_date="1704067200000",
+                    body_text="First",
+                ),
+            ],
+        }
+        doc = connector._normalize_thread(thread_data)
+
+        # First should come before Second in content
+        first_pos = doc.content.index("First")
+        second_pos = doc.content.index("Second")
+        assert first_pos < second_pos
+
+    def test_content_hash_for_idempotency(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-hash",
+            "messages": [
+                _make_message(msg_id="m1", thread_id="t-hash", body_text="Same content"),
+            ],
+        }
+        doc1 = connector._normalize_thread(thread_data)
+        doc2 = connector._normalize_thread(thread_data)
+
+        assert doc1.raw_hash == doc2.raw_hash
+        assert doc1.raw_hash != ""
+
+    def test_missing_thread_id_raises(self) -> None:
+        connector = _make_connector()
+        with pytest.raises(ConnectorError, match="missing"):
+            connector._normalize_thread({"messages": [_make_message()]})
+
+    def test_empty_messages_raises(self) -> None:
+        connector = _make_connector()
+        with pytest.raises(ConnectorError, match="no messages"):
+            connector._normalize_thread({"id": "t-empty", "messages": []})
+
+    def test_cc_participants_included(self) -> None:
+        connector = _make_connector()
+        thread_data = {
+            "id": "t-cc",
+            "messages": [
+                _make_message(
+                    msg_id="m1",
+                    thread_id="t-cc",
+                    from_addr="sender@example.com",
+                    to_addr="main@example.com",
+                    cc_addr="cc1@example.com, cc2@example.com",
+                ),
+            ],
+        }
+        doc = connector._normalize_thread(thread_data)
+        lower_participants = [p.lower() for p in doc.participants]
+        assert "cc1@example.com" in lower_participants
+        assert "cc2@example.com" in lower_participants
+
+
+class TestResolveThreads:
+    """Tests for _resolve_threads which fetches and merges threads (TASK-124)."""
+
+    async def test_resolve_multiple_threads(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        connector = _make_connector()
+
+        async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
+            if "/threads/t-A" in url:
+                return httpx.Response(
+                    200,
+                    json={
+                        "id": "t-A",
+                        "messages": [
+                            _make_message(msg_id="mA1", thread_id="t-A", subject="Thread A"),
+                        ],
+                    },
+                    request=httpx.Request("GET", url),
+                )
+            if "/threads/t-B" in url:
+                return httpx.Response(
+                    200,
+                    json={
+                        "id": "t-B",
+                        "messages": [
+                            _make_message(msg_id="mB1", thread_id="t-B", subject="Thread B"),
+                        ],
+                    },
+                    request=httpx.Request("GET", url),
+                )
+            return httpx.Response(404, request=httpx.Request("GET", url))
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        docs, errors = await connector._resolve_threads(
+            access_token="test-token",
+            thread_ids={"t-A", "t-B"},
+        )
+        assert len(docs) == 2
+        assert len(errors) == 0
+        source_ids = {d.source_id for d in docs}
+        assert source_ids == {"t-A", "t-B"}
+
+    async def test_thread_fetch_error_captured(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        connector = _make_connector()
+
+        async def mock_get(self: httpx.AsyncClient, url: str, **kwargs: object) -> httpx.Response:
+            return httpx.Response(500, request=httpx.Request("GET", url))
+
+        monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
+
+        docs, errors = await connector._resolve_threads(
+            access_token="test-token",
+            thread_ids={"t-fail"},
+        )
+        assert len(docs) == 0
+        assert len(errors) == 1
+        assert errors[0].source_id == "t-fail"
+
+    async def test_empty_thread_ids(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        connector = _make_connector()
+        docs, errors = await connector._resolve_threads(
+            access_token="test-token",
+            thread_ids=set(),
+        )
+        assert len(docs) == 0
+        assert len(errors) == 0

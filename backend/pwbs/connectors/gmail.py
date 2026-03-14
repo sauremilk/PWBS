@@ -1,11 +1,13 @@
-﻿"""Gmail connector  OAuth2 flow + Pub/Sub push notifications (TASK-123).
+﻿"""Gmail connector  OAuth2 flow + Pub/Sub push notifications (TASK-123, TASK-124).
 
 Implements:
 - OAuth2 authorization URL generation (scope: gmail.readonly)
 - Authorization code  token exchange (reuses Google client credentials)
-- Cursor-based incremental sync via historyId
+- Cursor-based incremental sync via historyId (History API)
+- Thread-Resolution: merges messages in the same thread into one UDF document
 - Google Pub/Sub push notification webhook endpoint
 - Health check via Gmail API profile endpoint
+- Idempotent ingestion via content_hash (raw_hash) deduplication
 
 Privacy: Only metadata and text content are imported.
 No attachments in the MVP (metadata only).
@@ -286,12 +288,13 @@ class GmailConnector(BaseConnector):
         - ``cursor=None`` -> initial full sync: fetches recent messages.
         - ``cursor=<encoded>`` -> incremental sync using history.list().
 
+        Messages belonging to the same thread are merged into a single
+        UDF document (TASK-124 Thread-Resolution).
+
         Returns a SyncResult with normalised documents and the new cursor.
         """
         access_token = self._get_access_token()
         headers = {"Authorization": f"Bearer {access_token}"}
-        documents: list[UnifiedDocument] = []
-        errors: list[SyncError] = []
 
         if cursor is not None:
             history_id, page_token = _decode_cursor(cursor)
@@ -336,15 +339,17 @@ class GmailConnector(BaseConnector):
         next_page_token = data.get("nextPageToken")
         has_more = next_page_token is not None
 
-        # Fetch individual messages
+        # Collect thread IDs from message references
+        thread_ids: set[str] = set()
         for msg_ref in message_refs:
-            msg_id = msg_ref.get("id", "unknown")
-            try:
-                msg_data = await self._fetch_message(access_token, msg_id)
-                doc = await self.normalize(msg_data)
-                documents.append(doc)
-            except Exception as exc:
-                errors.append(SyncError(source_id=str(msg_id), error=str(exc)))
+            tid = msg_ref.get("threadId")
+            if tid:
+                thread_ids.add(tid)
+
+        documents, errors = await self._resolve_threads(
+            access_token=access_token,
+            thread_ids=thread_ids,
+        )
 
         # Build cursor from profile historyId
         new_history_id = await self._get_history_id(access_token)
@@ -372,10 +377,12 @@ class GmailConnector(BaseConnector):
         page_token: str | None,
         headers: dict[str, str],
     ) -> SyncResult:
-        """Incremental sync using Gmail history.list() API."""
-        documents: list[UnifiedDocument] = []
-        errors: list[SyncError] = []
+        """Incremental sync using Gmail history.list() API.
 
+        Messages returned by history.list() are grouped by thread and
+        each affected thread is re-fetched as a whole, producing one
+        UDF document per thread (TASK-124).
+        """
         params: dict[str, str | int] = {
             "startHistoryId": history_id,
             "historyTypes": "messageAdded",
@@ -416,23 +423,19 @@ class GmailConnector(BaseConnector):
                 code="GMAIL_NETWORK_ERROR",
             ) from exc
 
-        # Extract message IDs from history records
-        seen_ids: set[str] = set()
+        # Collect unique thread IDs from history records
+        thread_ids: set[str] = set()
         for record in data.get("history", []):
             for msg_added in record.get("messagesAdded", []):
                 msg = msg_added.get("message", {})
-                msg_id = msg.get("id")
-                if msg_id and msg_id not in seen_ids:
-                    seen_ids.add(msg_id)
+                tid = msg.get("threadId")
+                if tid:
+                    thread_ids.add(tid)
 
-        # Fetch and normalize each new message
-        for msg_id in seen_ids:
-            try:
-                msg_data = await self._fetch_message(access_token, msg_id)
-                doc = await self.normalize(msg_data)
-                documents.append(doc)
-            except Exception as exc:
-                errors.append(SyncError(source_id=msg_id, error=str(exc)))
+        documents, errors = await self._resolve_threads(
+            access_token=access_token,
+            thread_ids=thread_ids,
+        )
 
         next_page_token = data.get("nextPageToken")
         new_history_id = data.get("historyId", history_id)
@@ -447,6 +450,161 @@ class GmailConnector(BaseConnector):
             new_cursor=new_cursor,
             errors=errors,
             has_more=next_page_token is not None,
+        )
+
+    async def _resolve_threads(
+        self,
+        *,
+        access_token: str,
+        thread_ids: set[str],
+    ) -> tuple[list[UnifiedDocument], list[SyncError]]:
+        """Fetch full threads and merge messages into one UDF per thread.
+
+        Each thread becomes a single ``UnifiedDocument`` with:
+        - ``source_id``: the Gmail thread ID
+        - ``content``: concatenated messages in chronological order
+        - ``participants``: deduplicated From/To addresses across all messages
+        - ``raw_hash``: SHA-256 of the merged content for idempotent upsert
+        """
+        documents: list[UnifiedDocument] = []
+        errors: list[SyncError] = []
+
+        for thread_id in thread_ids:
+            try:
+                thread_data = await self._fetch_thread(access_token, thread_id)
+                doc = self._normalize_thread(thread_data)
+                documents.append(doc)
+            except Exception as exc:
+                errors.append(SyncError(source_id=thread_id, error=str(exc)))
+
+        return documents, errors
+
+    async def _fetch_thread(self, access_token: str, thread_id: str) -> dict[str, object]:
+        """Fetch a full Gmail thread by ID (format=full)."""
+        try:
+            async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
+                response = await client.get(
+                    f"{_GMAIL_API}/users/me/threads/{thread_id}",
+                    params={"format": "full"},
+                    headers={"Authorization": f"Bearer {access_token}"},
+                )
+                _raise_for_rate_limit(response)
+                response.raise_for_status()
+                return response.json()
+        except RateLimitError:
+            raise
+        except httpx.HTTPStatusError as exc:
+            raise ConnectorError(
+                f"Gmail fetch thread failed: HTTP {exc.response.status_code}",
+                code="GMAIL_THREAD_ERROR",
+            ) from exc
+        except httpx.RequestError as exc:
+            raise ConnectorError(
+                f"Gmail fetch thread network error: {exc}",
+                code="GMAIL_NETWORK_ERROR",
+            ) from exc
+
+    def _normalize_thread(self, thread_data: dict[str, object]) -> UnifiedDocument:
+        """Merge all messages in a thread into a single UDF document."""
+        thread_id = thread_data.get("id")
+        if not thread_id:
+            raise ConnectorError("Gmail thread missing 'id'", code="GMAIL_INVALID_THREAD")
+
+        messages = thread_data.get("messages", [])
+        if not isinstance(messages, list) or not messages:
+            raise ConnectorError(
+                f"Gmail thread {thread_id} has no messages",
+                code="GMAIL_EMPTY_THREAD",
+            )
+
+        # Sort messages chronologically by internalDate
+        sorted_msgs = sorted(
+            messages,
+            key=lambda m: int(m.get("internalDate", 0))
+            if isinstance(m.get("internalDate"), (str, int))
+            else 0,
+        )
+
+        # Extract thread-level data from first message (subject) and all messages (participants)
+        all_participants: list[str] = []
+        seen_participants: set[str] = set()
+        content_parts: list[str] = []
+        thread_subject = ""
+        earliest_date = ""
+        all_label_ids: set[str] = set()
+
+        for msg in sorted_msgs:
+            payload = msg.get("payload", {})
+            if not isinstance(payload, dict):
+                payload = {}
+
+            headers_list = payload.get("headers", [])
+            if not isinstance(headers_list, list):
+                headers_list = []
+
+            subject = _extract_header(headers_list, "Subject")
+            from_addr = _extract_header(headers_list, "From")
+            to_addr = _extract_header(headers_list, "To")
+            cc_addr = _extract_header(headers_list, "Cc")
+            date_str = _extract_header(headers_list, "Date")
+
+            if not thread_subject and subject:
+                thread_subject = subject
+            if not earliest_date and date_str:
+                earliest_date = date_str
+
+            # Collect unique participants
+            for addr in [from_addr, to_addr, cc_addr]:
+                if addr:
+                    for part in addr.split(","):
+                        normalized = part.strip()
+                        lower = normalized.lower()
+                        if lower and lower not in seen_participants:
+                            seen_participants.add(lower)
+                            all_participants.append(normalized)
+
+            # Accumulate labels
+            label_ids = msg.get("labelIds", [])
+            if isinstance(label_ids, list):
+                all_label_ids.update(str(lid) for lid in label_ids)
+
+            # Build per-message content block
+            text_content = _extract_text_content(payload)
+            snippet = msg.get("snippet", "")
+
+            msg_parts: list[str] = []
+            if from_addr:
+                msg_parts.append(f"Von: {from_addr}")
+            if date_str:
+                msg_parts.append(f"Datum: {date_str}")
+            if text_content:
+                msg_parts.append(text_content)
+            elif snippet:
+                msg_parts.append(str(snippet))
+
+            if msg_parts:
+                content_parts.append("\n".join(msg_parts))
+
+        # Build merged content
+        thread_header = f"Betreff: {thread_subject}" if thread_subject else ""
+        separator = "\n\n---\n\n"
+        merged_body = separator.join(content_parts)
+        content = f"{thread_header}\n\n{merged_body}" if thread_header else merged_body
+
+        return normalize_document(
+            owner_id=self.owner_id,
+            source_type=SourceType.GMAIL,
+            source_id=str(thread_id),
+            title=thread_subject or "(kein Betreff)",
+            content=content,
+            participants=all_participants,
+            metadata={
+                "thread_id": str(thread_id),
+                "message_count": len(sorted_msgs),
+                "subject": thread_subject,
+                "date": earliest_date,
+                "label_ids": sorted(all_label_ids),
+            },
         )
 
     async def _fetch_message(self, access_token: str, msg_id: str) -> dict[str, object]:
