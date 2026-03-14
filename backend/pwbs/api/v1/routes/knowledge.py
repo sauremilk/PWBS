@@ -1,10 +1,11 @@
-"""Knowledge API endpoints (TASK-090, TASK-129).
+"""Knowledge API endpoints (TASK-090, TASK-129, TASK-139).
 
 GET    /api/v1/knowledge/entities              -- Paginated entity list (filterable by type)
 GET    /api/v1/knowledge/entities/{id}         -- Entity detail with connections
 GET    /api/v1/knowledge/entities/{id}/related -- Related entities up to depth 2
 GET    /api/v1/knowledge/entities/{id}/documents -- Documents mentioning an entity
 GET    /api/v1/knowledge/graph                 -- Subgraph for D3.js visualisation (max 50 nodes)
+GET    /api/v1/knowledge/patterns              -- Detected patterns (recurring themes, assumptions, questions)
 GET    /api/v1/knowledge/decisions             -- Paginated decisions list
 POST   /api/v1/knowledge/decisions             -- Create a decision
 PATCH  /api/v1/knowledge/decisions/{id}        -- Update a decision
@@ -498,6 +499,118 @@ async def get_graph(
     """Return subgraph for D3.js visualisation (max 50 nodes)."""
     limit = max(1, min(limit, _MAX_GRAPH_NODES))
     return await _get_neo4j_graph(user.id, limit=limit)
+
+
+# ---------------------------------------------------------------------------
+# Pattern detection schemas (TASK-139)
+# ---------------------------------------------------------------------------
+
+
+class PatternSourceRefResponse(BaseModel):
+    """Source reference backing a detected pattern."""
+
+    document_id: str
+    title: str
+    source_type: str
+    date: str
+
+
+class DetectedPatternResponse(BaseModel):
+    """A single detected pattern."""
+
+    pattern_type: str
+    entity_id: str
+    entity_name: str
+    summary: str
+    context_count: int
+    first_seen: str
+    last_seen: str
+    sources: list[PatternSourceRefResponse]
+
+
+class PatternListResponse(BaseModel):
+    """Response for /knowledge/patterns endpoint."""
+
+    patterns: list[DetectedPatternResponse]
+    total: int
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/knowledge/patterns — detected patterns (TASK-139)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/patterns", response_model=PatternListResponse)
+async def get_patterns(
+    response: Response,
+    user: User = Depends(get_current_user),
+    pattern_type: str | None = None,
+    limit: int = 30,
+) -> PatternListResponse:
+    """Return detected patterns (recurring themes, changing assumptions, unresolved questions)."""
+    limit = max(1, min(limit, 50))
+
+    try:
+        from pwbs.db.neo4j_client import get_neo4j_driver
+        from pwbs.graph.pattern_recognition import (
+            PatternRecognitionService,
+            PatternType,
+        )
+
+        driver = get_neo4j_driver()
+        async with driver.session() as neo4j_session:
+            service = PatternRecognitionService(neo4j_session)
+
+            if pattern_type:
+                try:
+                    pt = PatternType(pattern_type)
+                except ValueError:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail={
+                            "code": "INVALID_PATTERN_TYPE",
+                            "message": f"pattern_type muss einer von "
+                            f"{[t.value for t in PatternType]} sein",
+                        },
+                    )
+                if pt == PatternType.RECURRING_THEME:
+                    patterns = await service.find_recurring_themes(user.id)
+                elif pt == PatternType.CHANGING_ASSUMPTION:
+                    patterns = await service.find_changing_assumptions(user.id)
+                else:
+                    patterns = await service.find_unresolved_questions(user.id)
+            else:
+                patterns = await service.detect_all_patterns(user.id)
+
+        patterns = patterns[:limit]
+        items = [
+            DetectedPatternResponse(
+                pattern_type=p.pattern_type.value,
+                entity_id=p.entity_id,
+                entity_name=p.entity_name,
+                summary=p.summary,
+                context_count=p.context_count,
+                first_seen=p.first_seen,
+                last_seen=p.last_seen,
+                sources=[
+                    PatternSourceRefResponse(
+                        document_id=s.document_id,
+                        title=s.title,
+                        source_type=s.source_type,
+                        date=s.date,
+                    )
+                    for s in p.sources
+                ],
+            )
+            for p in patterns
+        ]
+        return PatternListResponse(patterns=items, total=len(items))
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Pattern detection failed")
+        return PatternListResponse(patterns=[], total=0)
 
 
 # ---------------------------------------------------------------------------

@@ -34,6 +34,7 @@ __all__ = [
     "MorningBriefingContext",
     "MorningContextAssembler",
     "ParticipantHistory",
+    "PatternInsight",
     "PendingDecision",
 ]
 
@@ -86,6 +87,16 @@ class PendingDecision:
 
 
 @dataclass(frozen=True, slots=True)
+class PatternInsight:
+    """A detected pattern for the 'Muster im Blick' briefing section."""
+
+    pattern_type: str
+    entity_name: str
+    summary: str
+    context_count: int
+
+
+@dataclass(frozen=True, slots=True)
 class MorningBriefingConfig:
     """Configuration for morning briefing context assembly."""
 
@@ -110,6 +121,7 @@ class MorningBriefingContext:
     participant_histories: dict[str, list[ParticipantHistory]]
     recent_documents: list[dict]
     pending_decisions: list[dict]
+    patterns: list[dict] = field(default_factory=list)
     token_count: int = 0
     truncated: bool = False
 
@@ -264,6 +276,9 @@ class MorningContextAssembler:
             user_id, limit=self._config.max_decisions
         )
 
+        # Step 4b: Pattern insights (TASK-139)
+        patterns = await self._fetch_pattern_insights(user_id)
+
         # Step 5: Assemble and check token budget
         context = self._build_context(
             today=today,
@@ -271,6 +286,7 @@ class MorningContextAssembler:
             event_histories=event_histories,
             recent_docs=recent_docs,
             decisions=decisions,
+            patterns=patterns,
         )
 
         return self._enforce_token_budget(context)
@@ -356,6 +372,37 @@ class MorningContextAssembler:
         return []
 
     # ------------------------------------------------------------------
+    # Step 4b: Pattern insights (TASK-139)
+    # ------------------------------------------------------------------
+
+    async def _fetch_pattern_insights(
+        self,
+        user_id: uuid.UUID,
+    ) -> list[PatternInsight]:
+        """Fetch pattern insights from Neo4j (best-effort)."""
+        try:
+            from pwbs.db.neo4j_client import get_neo4j_driver
+            from pwbs.graph.pattern_recognition import PatternRecognitionService
+
+            driver = get_neo4j_driver()
+            async with driver.session() as neo4j_session:
+                service = PatternRecognitionService(neo4j_session)
+                detected = await service.detect_all_patterns(user_id)
+
+            return [
+                PatternInsight(
+                    pattern_type=p.pattern_type.value,
+                    entity_name=p.entity_name,
+                    summary=p.summary,
+                    context_count=p.context_count,
+                )
+                for p in detected[:5]  # Limit to top 5 for briefing
+            ]
+        except Exception:
+            logger.debug("Pattern detection unavailable, skipping", exc_info=True)
+            return []
+
+    # ------------------------------------------------------------------
     # Step 3: Search query construction
     # ------------------------------------------------------------------
 
@@ -384,6 +431,7 @@ class MorningContextAssembler:
         event_histories: dict[str, list[ParticipantHistory]],
         recent_docs: list[SemanticSearchResult],
         decisions: list[PendingDecision],
+        patterns: list[PatternInsight] | None = None,
     ) -> MorningBriefingContext:
         """Build the structured context for the prompt template."""
         calendar_dicts = []
@@ -420,12 +468,23 @@ class MorningContextAssembler:
             for d in decisions
         ]
 
+        pattern_dicts = [
+            {
+                "type": p.pattern_type,
+                "entity": p.entity_name,
+                "summary": p.summary,
+                "count": p.context_count,
+            }
+            for p in (patterns or [])
+        ]
+
         return MorningBriefingContext(
             date=today.isoformat(),
             calendar_events=calendar_dicts,
             participant_histories=event_histories,
             recent_documents=doc_dicts,
             pending_decisions=decision_dicts,
+            patterns=pattern_dicts,
         )
 
     def _enforce_token_budget(
@@ -458,6 +517,14 @@ class MorningContextAssembler:
             context.recent_documents.pop()
             context.truncated = True
 
+        # Trim patterns if still over
+        while (
+            context.patterns
+            and self._count_tokens(context) > self._config.token_budget
+        ):
+            context.patterns.pop()
+            context.truncated = True
+
         # Trim decisions if still over
         while (
             context.pending_decisions
@@ -488,6 +555,10 @@ class MorningContextAssembler:
         for dec in context.pending_decisions:
             text_parts.append(dec.get("title", ""))
             text_parts.append(dec.get("context", ""))
+
+        for pat in context.patterns:
+            text_parts.append(pat.get("summary", ""))
+            text_parts.append(pat.get("entity", ""))
 
         combined = " ".join(text_parts)
         return len(_ENCODING.encode(combined))

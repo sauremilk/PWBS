@@ -7,6 +7,7 @@ import type {
   EntityDetailResponse,
   EntityDocumentsResponse,
   GraphResponse,
+  PatternListResponse,
 } from "@/types/api";
 
 export function useEntities(params?: {
@@ -40,5 +41,15 @@ export function useGraph(params?: { depth?: number; entity_id?: string }) {
   return useQuery<GraphResponse>({
     queryKey: ["graph", params],
     queryFn: () => knowledgeApi.getGraph(params),
+  });
+}
+
+export function usePatterns(params?: {
+  pattern_type?: string;
+  limit?: number;
+}) {
+  return useQuery<PatternListResponse>({
+    queryKey: ["patterns", params],
+    queryFn: () => knowledgeApi.getPatterns(params),
   });
 }

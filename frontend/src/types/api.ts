@@ -310,6 +310,29 @@ export interface GraphResponse {
   edges: GraphEdge[];
 }
 
+export interface PatternSourceRef {
+  document_id: string;
+  title: string;
+  source_type: string;
+  date: string;
+}
+
+export interface DetectedPattern {
+  pattern_type: string;
+  entity_id: string;
+  entity_name: string;
+  summary: string;
+  context_count: number;
+  first_seen: string;
+  last_seen: string;
+  sources: PatternSourceRef[];
+}
+
+export interface PatternListResponse {
+  patterns: DetectedPattern[];
+  total: number;
+}
+
 // ---------------------------------------------------------------------------
 // Documents
 // ---------------------------------------------------------------------------

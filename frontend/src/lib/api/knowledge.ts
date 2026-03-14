@@ -4,6 +4,7 @@ import type {
   EntityDetailResponse,
   EntityDocumentsResponse,
   GraphResponse,
+  PatternListResponse,
 } from "@/types/api";
 
 export async function listEntities(
@@ -48,5 +49,18 @@ export async function getGraph(
   const qs = query.toString();
   return apiClient.get<GraphResponse>(
     `/knowledge/graph${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export async function getPatterns(
+  params?: { pattern_type?: string; limit?: number },
+): Promise<PatternListResponse> {
+  const query = new URLSearchParams();
+  if (params?.pattern_type) query.set("pattern_type", params.pattern_type);
+  if (params?.limit) query.set("limit", String(params.limit));
+
+  const qs = query.toString();
+  return apiClient.get<PatternListResponse>(
+    `/knowledge/patterns${qs ? `?${qs}` : ""}`,
   );
 }

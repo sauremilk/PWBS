@@ -774,3 +774,4 @@ class TestRouterMetadata:
         assert "/api/v1/knowledge/entities/{entity_id}/related" in paths
         assert "/api/v1/knowledge/entities/{entity_id}/documents" in paths
         assert "/api/v1/knowledge/graph" in paths
+        assert "/api/v1/knowledge/patterns" in paths
