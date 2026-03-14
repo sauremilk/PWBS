@@ -1275,10 +1275,10 @@
       "priority": "P0",
       "effort": "M",
       "area": "Auth",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-G",
       "claimed_at": "2026-03-14T10:00:00Z",
-      "completed_at": null,
+      "completed_at": "2026-03-14T10:30:00Z",
       "blocked_by": [
         "TASK-036"
       ]
