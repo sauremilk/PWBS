@@ -73,47 +73,52 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
         "description": "Meeting-Transkripte und Aufzeichnungen aus Zoom",
         "auth_method": "oauth2",
     },
-    SourceType.GMAIL.value: {
-        "name": "Gmail",
-        "description": "E-Mails und Threads aus Gmail",
-        "auth_method": "oauth2",
-    },
-    SourceType.GOOGLE_DOCS.value: {
-        "name": "Google Docs",
-        "description": "Dokumente aus Google Docs",
-        "auth_method": "oauth2",
-    },
-    SourceType.SLACK.value: {
-        "name": "Slack",
-        "description": "Nachrichten und Threads aus Slack-Channels",
-        "auth_method": "oauth2",
-    },
-    SourceType.OUTLOOK_MAIL.value: {
-        "name": "Outlook Mail",
-        "description": "E-Mails und Threads aus Microsoft Outlook",
-        "auth_method": "oauth2",
-    },
+    # DEFERRED: Phase 3 – Gmail, Google Docs, Slack, Outlook
+    # SourceType.GMAIL.value: {
+    #     "name": "Gmail",
+    #     "description": "E-Mails und Threads aus Gmail",
+    #     "auth_method": "oauth2",
+    # },
+    # SourceType.GOOGLE_DOCS.value: {
+    #     "name": "Google Docs",
+    #     "description": "Dokumente aus Google Docs",
+    #     "auth_method": "oauth2",
+    # },
+    # SourceType.SLACK.value: {
+    #     "name": "Slack",
+    #     "description": "Nachrichten und Threads aus Slack-Channels",
+    #     "auth_method": "oauth2",
+    # },
+    # SourceType.OUTLOOK_MAIL.value: {
+    #     "name": "Outlook Mail",
+    #     "description": "E-Mails und Threads aus Microsoft Outlook",
+    #     "auth_method": "oauth2",
+    # },
 }
 
 # OAuth2 authorization URLs per provider
 _AUTH_URLS: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://accounts.google.com/o/oauth2/v2/auth",
-    SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
-    SourceType.GOOGLE_DOCS: "https://accounts.google.com/o/oauth2/v2/auth",
+    # DEFERRED: Phase 3
+    # SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
+    # SourceType.GOOGLE_DOCS: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
     SourceType.ZOOM: "https://zoom.us/oauth/authorize",
-    SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
-    SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    # DEFERRED: Phase 3
+    # SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
+    # SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
 }
 
 _SCOPES: dict[SourceType, str] = {
     SourceType.GOOGLE_CALENDAR: "https://www.googleapis.com/auth/calendar.readonly",
-    SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
-    SourceType.GOOGLE_DOCS: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly",
+    # DEFERRED: Phase 3
+    # SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
+    # SourceType.GOOGLE_DOCS: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly",
     SourceType.NOTION: "",
     SourceType.ZOOM: "recording:read",
-    SourceType.SLACK: "channels:history,channels:read,users:read",
-    SourceType.OUTLOOK_MAIL: "https://graph.microsoft.com/Mail.Read offline_access",
+    # DEFERRED: Phase 3
+    # SourceType.SLACK: "channels:history,channels:read,users:read",
+    # SourceType.OUTLOOK_MAIL: "https://graph.microsoft.com/Mail.Read offline_access",
 }
 
 
@@ -276,6 +281,7 @@ def _resolve_source_type(type_str: str) -> SourceType:
     response_model=ConnectorListResponse,
     status_code=status.HTTP_200_OK,
     summary="List available connector types",
+    description="Gibt alle verfügbaren Konnektor-Typen mit Name, Beschreibung und Auth-Methode zurück.",
 )
 async def list_connectors(
     current_user: User = Depends(get_current_user),
@@ -313,6 +319,7 @@ async def list_connectors(
     response_model=ConnectionStatusResponse,
     status_code=status.HTTP_200_OK,
     summary="Status of all connected sources",
+    description="Zeigt den Verbindungsstatus aller konfigurierten Datenquellen inkl. letztem Sync-Zeitpunkt und Dokumentanzahl.",
 )
 async def connection_status(
     current_user: User = Depends(get_current_user),
@@ -360,6 +367,7 @@ async def connection_status(
     response_model=AuthUrlResponse,
     status_code=status.HTTP_200_OK,
     summary="Generate OAuth2 authorization URL",
+    description="Generiert eine OAuth2-Autorisierungs-URL für den angegebenen Konnektor-Typ mit CSRF-State-Parameter.",
 )
 async def get_auth_url(
     type: str,
@@ -381,22 +389,26 @@ async def get_auth_url(
     # Build redirect URI from settings
     redirect_uri_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_oauth_redirect_uri,
-        SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
-        SourceType.SLACK: settings.slack_oauth_redirect_uri,
-        SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: settings.slack_oauth_redirect_uri,
+        # SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
     }
     redirect_uri = redirect_uri_map.get(source_type, "")
 
     # Get client_id
     client_id_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_id,
-        SourceType.GMAIL: settings.google_client_id,
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
-        SourceType.SLACK: settings.slack_client_id,
-        SourceType.OUTLOOK_MAIL: settings.ms_client_id,
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: settings.slack_client_id,
+        # SourceType.OUTLOOK_MAIL: settings.ms_client_id,
     }
     client_id = client_id_map.get(source_type, "")
     if not client_id:
@@ -434,6 +446,7 @@ async def get_auth_url(
     response_model=CallbackResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Process OAuth2 callback",
+    description="Verarbeitet den OAuth2-Callback, tauscht den Authorization-Code gegen Tokens und speichert die Verbindung.",
 )
 async def oauth_callback(
     type: str,
@@ -528,11 +541,13 @@ async def _exchange_code_for_tokens(
 
     token_endpoints: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: "https://oauth2.googleapis.com/token",
-        SourceType.GMAIL: "https://oauth2.googleapis.com/token",
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: "https://oauth2.googleapis.com/token",
         SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
         SourceType.ZOOM: "https://zoom.us/oauth/token",
-        SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
-        SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
+        # SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
     }
 
     endpoint = token_endpoints.get(source_type)
@@ -547,28 +562,34 @@ async def _exchange_code_for_tokens(
 
     redirect_uri_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_oauth_redirect_uri,
-        SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
         SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
-        SourceType.SLACK: settings.slack_oauth_redirect_uri,
-        SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: settings.slack_oauth_redirect_uri,
+        # SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
     }
 
     client_id_map: dict[SourceType, str] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_id,
-        SourceType.GMAIL: settings.google_client_id,
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
         SourceType.ZOOM: settings.zoom_client_id,
-        SourceType.SLACK: settings.slack_client_id,
-        SourceType.OUTLOOK_MAIL: settings.ms_client_id,
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: settings.slack_client_id,
+        # SourceType.OUTLOOK_MAIL: settings.ms_client_id,
     }
     client_secret_map: dict[SourceType, SecretStr] = {
         SourceType.GOOGLE_CALENDAR: settings.google_client_secret,
-        SourceType.GMAIL: settings.google_client_secret,
+        # DEFERRED: Phase 3
+        # SourceType.GMAIL: settings.google_client_secret,
         SourceType.NOTION: settings.notion_client_secret,
         SourceType.ZOOM: settings.zoom_client_secret,
-        SourceType.SLACK: settings.slack_client_secret,
-        SourceType.OUTLOOK_MAIL: settings.ms_client_secret,
+        # DEFERRED: Phase 3
+        # SourceType.SLACK: settings.slack_client_secret,
+        # SourceType.OUTLOOK_MAIL: settings.ms_client_secret,
     }
 
     payload = {
@@ -628,6 +649,7 @@ async def _exchange_code_for_tokens(
     response_model=ConfigResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Configure connector (e.g. Obsidian vault path)",
+    description="Konfiguriert einen Konnektor, der keine OAuth2-Autorisierung benötigt (z.B. lokaler Obsidian-Vault-Pfad).",
 )
 async def configure_connector(
     type: str,
@@ -712,6 +734,7 @@ async def configure_connector(
     response_model=DisconnectResponse,
     status_code=status.HTTP_200_OK,
     summary="Disconnect source and cascade-delete data",
+    description="Trennt eine Datenquelle und löscht kaskadierend alle importierten Dokumente, Chunks und Entitäten.",
 )
 async def disconnect(
     type: str,
@@ -799,6 +822,7 @@ async def disconnect(
     response_model=SyncResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger manual sync",
+    description="Löst einen manuellen Sync-Vorgang für die angegebene Datenquelle aus. Cursor-basierte inkrementelle Synchronisation.",
 )
 async def trigger_sync(
     type: str,
@@ -874,6 +898,7 @@ async def trigger_sync(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_200_OK,
     summary="Get consent status for a connector type",
+    description="Gibt den Einwilligungsstatus (DSGVO-Consent) für einen bestimmten Konnektor-Typ zurück.",
 )
 async def get_consent(
     type: str,
@@ -922,6 +947,7 @@ async def get_consent(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Grant consent for a connector type",
+    description="Erteilt die DSGVO-Einwilligung für die Datenverarbeitung eines bestimmten Konnektor-Typs.",
 )
 async def grant_consent(
     type: str,
@@ -995,6 +1021,7 @@ async def grant_consent(
     response_model=ConsentRevokeResponse,
     status_code=status.HTTP_200_OK,
     summary="Revoke consent and cascade-delete all data for this source",
+    description="Widerruft die DSGVO-Einwilligung und löscht kaskadierend alle Daten dieser Quelle (Dokumente, Chunks, Entitäten).",
 )
 async def revoke_consent(
     type: str,
@@ -1114,6 +1141,7 @@ class SyncHistoryResponse(BaseModel):
     "/{type}/history",
     response_model=SyncHistoryResponse,
     summary="Sync history for a connector",
+    description="Gibt die paginierte Sync-Historie für einen Konnektor-Typ zurück inkl. Status, Dauer und Dokumentanzahl pro Sync.",
 )
 async def get_sync_history(
     type: str,

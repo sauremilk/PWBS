@@ -93,6 +93,8 @@ class MeResponse(BaseModel):
     response_model=RegisterResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
+    description="Erstellt einen neuen Benutzeraccount mit E-Mail und Passwort. "
+    "Gibt ein JWT-Token-Paar (Access + Refresh) zurück. E-Mail muss eindeutig sein.",
 )
 async def register(
     body: RegisterRequest,
@@ -144,6 +146,8 @@ async def register(
     response_model=LoginResponse,
     status_code=status.HTTP_200_OK,
     summary="Login with email and password",
+    description="Authentifiziert einen Benutzer mit E-Mail und Passwort. "
+    "Gibt ein JWT-Token-Paar zurück. Constant-time Passwortvergleich auch bei unbekanntem Nutzer.",
 )
 async def login(
     body: LoginRequest,
@@ -202,6 +206,7 @@ async def login(
     response_model=LogoutResponse,
     status_code=status.HTTP_200_OK,
     summary="Logout (invalidate refresh token)",
+    description="Invalidiert das übergebene Refresh-Token. Das Access-Token bleibt bis zum Ablauf gültig.",
 )
 async def logout(
     body: LogoutRequest,
@@ -226,6 +231,7 @@ async def logout(
     response_model=MeResponse,
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
+    description="Gibt das Profil des aktuell authentifizierten Benutzers zurück (ID, E-Mail, Anzeigename, Erstelldatum).",
 )
 async def me(
     current_user: User = Depends(get_current_user),

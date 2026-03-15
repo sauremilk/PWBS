@@ -124,6 +124,7 @@ def _validate_events(events: list[str]) -> None:
     response_model=WebhookOut,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new outbound webhook",
+    description="Registriert einen neuen Outbound-Webhook mit URL, Event-Typen und HMAC-SHA256-Secret. Max. 10 Webhooks pro Nutzer.",
 )
 async def create_webhook(
     body: WebhookCreate,
@@ -170,6 +171,7 @@ async def create_webhook(
     "",
     response_model=WebhookListOut,
     summary="List own webhook subscriptions",
+    description="Gibt alle Webhook-Subscriptions des authentifizierten Nutzers zurück.",
 )
 async def list_webhooks(
     response: Response,
@@ -189,6 +191,7 @@ async def list_webhooks(
     "/{webhook_id}",
     response_model=WebhookOut,
     summary="Get webhook details",
+    description="Gibt die Details eines Webhooks zurück (URL, Events, Status, Erstelldatum).",
 )
 async def get_webhook(
     webhook_id: uuid.UUID,
@@ -208,6 +211,7 @@ async def get_webhook(
     "/{webhook_id}",
     response_model=WebhookOut,
     summary="Update webhook",
+    description="Aktualisiert URL, Events, Beschreibung oder Aktivierungsstatus eines Webhooks.",
 )
 async def update_webhook(
     webhook_id: uuid.UUID,
@@ -241,6 +245,7 @@ async def update_webhook(
     "/{webhook_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a webhook",
+    description="Löscht einen Webhook und alle zugehörigen Delivery-Records unwiderruflich.",
 )
 async def delete_webhook(
     webhook_id: uuid.UUID,
@@ -259,6 +264,7 @@ async def delete_webhook(
     "/{webhook_id}/deliveries",
     response_model=DeliveryListOut,
     summary="List recent delivery attempts",
+    description="Gibt die letzten Zustellversuche für einen Webhook zurück inkl. HTTP-Status und Payload.",
 )
 async def list_deliveries(
     webhook_id: uuid.UUID,
@@ -301,6 +307,7 @@ async def list_deliveries(
     "/{webhook_id}/test",
     response_model=DeliveryOut,
     summary="Send a test event to the webhook",
+    description="Sendet ein Test-Event an die Webhook-URL und gibt das Zustellergebnis zurück.",
 )
 async def test_webhook(
     webhook_id: uuid.UUID,

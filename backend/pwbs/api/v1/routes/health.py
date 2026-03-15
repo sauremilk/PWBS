@@ -91,7 +91,14 @@ async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
         return {"name": name, "status": "down", "latency_ms": latency_ms}
 
 
-@router.get("/health")
+@router.get(
+    "/health",
+    summary="Health Check",
+    description="Prüft PostgreSQL, Weaviate, Neo4j, Redis und LLM-API parallel "
+    "mit 5s Timeout pro Service. HTTP 200 wenn PostgreSQL und mindestens eine "
+    "Such-Komponente erreichbar sind, HTTP 503 bei PostgreSQL-Ausfall.",
+    responses={200: {"description": "System healthy oder degraded"}, 503: {"description": "PostgreSQL nicht erreichbar"}},
+)
 async def health_check() -> JSONResponse:
     checks = [
         _timed_check("postgres", check_postgres_health),
