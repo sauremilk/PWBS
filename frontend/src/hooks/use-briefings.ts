@@ -1,8 +1,21 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listBriefings, getBriefing, generateBriefing, submitFeedback } from "@/lib/api/briefings";
-import type { BriefingType, FeedbackRequest } from "@/types/api";
+import {
+  listBriefings,
+  getBriefing,
+  generateBriefing,
+  submitFeedback,
+} from "@/lib/api/briefings";
+import {
+  getBriefingPreferences,
+  updateBriefingPreferences,
+} from "@/lib/api/user";
+import type {
+  BriefingType,
+  FeedbackRequest,
+  BriefingPreferencesUpdate,
+} from "@/types/api";
 
 export function useBriefingList(params?: { type?: string; limit?: number }) {
   return useQuery({
@@ -49,6 +62,24 @@ export function useBriefingFeedback(briefingId: string) {
     mutationFn: (data: FeedbackRequest) => submitFeedback(briefingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["briefing", briefingId] });
+    },
+  });
+}
+
+export function useBriefingPreferences() {
+  return useQuery({
+    queryKey: ["briefing-preferences"],
+    queryFn: getBriefingPreferences,
+  });
+}
+
+export function useUpdateBriefingPreferences() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: BriefingPreferencesUpdate) =>
+      updateBriefingPreferences(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["briefing-preferences"] });
     },
   });
 }

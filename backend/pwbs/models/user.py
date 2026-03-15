@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, time
 
 from sqlalchemy import Boolean, DateTime, Text, Time
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -67,6 +68,12 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
         default="daily",
         server_default="daily",
+    )
+    briefing_preferences: Mapped[dict | None] = mapped_column(
+        JSONB,
+        nullable=True,
+        default=None,
+        server_default=None,
     )
 
     # Relationships

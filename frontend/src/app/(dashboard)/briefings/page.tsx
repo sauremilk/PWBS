@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FileText, Calendar, ChevronRight, Loader2, Plus } from "lucide-react";
 import { useBriefingList, useGenerateBriefing } from "@/hooks/use-briefings";
 import { trackFirstBriefing } from "@/lib/analytics";
+import BriefingPreferencesPanel from "@/components/briefings/briefing-preferences";
 import type { BriefingType, BriefingListItem } from "@/types/api";
 
 const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
@@ -63,6 +64,8 @@ export default function BriefingsPage() {
           Neues Briefing
         </button>
       </div>
+
+      <BriefingPreferencesPanel />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12" role="status">

@@ -147,6 +147,7 @@ class BriefingGenerator:
         user_id: uuid.UUID,
         known_sources: list[dict[str, str]] | None = None,
         vertical_profile: str = "general",
+        briefing_preferences: dict[str, Any] | None = None,
     ) -> BriefingLLMResult:
         """Generate a briefing via LLM.
 
@@ -163,6 +164,9 @@ class BriefingGenerator:
         vertical_profile:
             User's vertical profile (e.g. "researcher", "consultant", "developer").
             Augments the system prompt with domain-specific instructions.
+        briefing_preferences:
+            User's briefing personalisation preferences (TASK-186).
+            Keys: focus_projects, excluded_sources, priority_topics.
 
         Returns
         -------
@@ -189,6 +193,27 @@ class BriefingGenerator:
         # Add word limit instruction
         max_words = _MAX_WORDS.get(briefing_type, 800)
         system_prompt += f"\n\nMaximale Wortanzahl: {max_words}."
+
+        # Briefing personalisation preferences (TASK-186)
+        prefs = briefing_preferences or {}
+        pref_parts: list[str] = []
+        if prefs.get("focus_projects"):
+            projects = ", ".join(prefs["focus_projects"])
+            pref_parts.append(
+                f"Priorisiere Informationen zu diesen Projekten: {projects}."
+            )
+        if prefs.get("priority_topics"):
+            topics = ", ".join(prefs["priority_topics"])
+            pref_parts.append(
+                f"Fokussiere besonders auf folgende Themen: {topics}."
+            )
+        if prefs.get("excluded_sources"):
+            excluded = ", ".join(prefs["excluded_sources"])
+            pref_parts.append(
+                f"Ignoriere Inhalte aus diesen Quellen: {excluded}."
+            )
+        if pref_parts:
+            system_prompt += "\n\nNutzer-Präferenzen:\n" + "\n".join(pref_parts)
 
         # Step 4: LLM call
         max_tokens = self._get_max_output_tokens(briefing_type, template)

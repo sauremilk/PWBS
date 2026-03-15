@@ -325,6 +325,18 @@ export interface FeedbackResponse {
   message: string;
 }
 
+export interface BriefingPreferencesUpdate {
+  focus_projects?: string[];
+  excluded_sources?: string[];
+  priority_topics?: string[];
+}
+
+export interface BriefingPreferencesResponse {
+  focus_projects: string[];
+  excluded_sources: string[];
+  priority_topics: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Knowledge
 // ---------------------------------------------------------------------------

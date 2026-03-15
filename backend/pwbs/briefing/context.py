@@ -219,6 +219,7 @@ class MorningContextAssembler:
         self,
         user_id: uuid.UUID,
         target_date: date | None = None,
+        briefing_preferences: dict | None = None,
     ) -> MorningBriefingContext:
         """Assemble the morning briefing context.
 
@@ -228,6 +229,9 @@ class MorningContextAssembler:
             Owner ID for data access.
         target_date:
             The date for the briefing (default: today).
+        briefing_preferences:
+            User's briefing personalisation preferences (TASK-186).
+            Keys: focus_projects, excluded_sources, priority_topics.
 
         Returns
         -------
@@ -235,6 +239,7 @@ class MorningContextAssembler:
             Assembled context ready for prompt template rendering.
         """
         today = target_date or date.today()
+        prefs = briefing_preferences or {}
 
         # Step 1: Fetch today's calendar events
         events = await self._fetch_calendar_events(user_id, today)
@@ -259,6 +264,14 @@ class MorningContextAssembler:
 
         # Step 3: Semantic search for recent relevant docs
         search_query = self._build_search_query(events, today)
+
+        # Enrich search query with user preferences (TASK-186)
+        focus_projects = prefs.get("focus_projects", [])
+        priority_topics = prefs.get("priority_topics", [])
+        if focus_projects or priority_topics:
+            extra_terms = focus_projects + priority_topics
+            search_query += " " + " ".join(extra_terms[:10])
+
         recent_docs: list[SemanticSearchResult] = []
         if search_query:
             recent_docs = await self._search.search(
@@ -266,6 +279,14 @@ class MorningContextAssembler:
                 user_id=user_id,
                 top_k=self._config.max_documents,
             )
+
+        # Filter out excluded sources (TASK-186)
+        excluded_sources = {s.lower() for s in prefs.get("excluded_sources", [])}
+        if excluded_sources:
+            recent_docs = [
+                d for d in recent_docs
+                if d.source_type.lower() not in excluded_sources
+            ]
 
         # Step 3b: Profile-based re-ranking (TASK-134)
         recent_docs = await self._rerank_by_profile(user_id, recent_docs)

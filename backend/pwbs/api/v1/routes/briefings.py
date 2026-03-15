@@ -400,6 +400,20 @@ async def _run_briefing_generation(
             registry = PromptRegistry()
             generator = BriefingGenerator(llm, registry)
 
+            # Load user's briefing preferences (TASK-186)
+            from pwbs.models.user import User as UserModel
+
+            user_result = await session.execute(
+                select(UserModel).where(UserModel.id == user_id)
+            )
+            user_row = user_result.scalar_one_or_none()
+            briefing_preferences = (
+                user_row.briefing_preferences if user_row else None
+            )
+            vertical_profile = (
+                user_row.vertical_profile if user_row else "general"
+            )
+
             # For morning briefings, assemble context
             if briefing_type == BriefingType.MORNING:
                 context: dict[str, Any] = trigger_context or {}
@@ -473,6 +487,8 @@ async def _run_briefing_generation(
                 briefing_type=briefing_type,
                 context=context,
                 user_id=user_id,
+                vertical_profile=vertical_profile,
+                briefing_preferences=briefing_preferences,
             )
 
             persistence = BriefingPersistenceService(session)

@@ -11,6 +11,8 @@ import type {
   SecurityStatusResponse,
   DataReportResponse,
   LlmUsageResponse,
+  BriefingPreferencesResponse,
+  BriefingPreferencesUpdate,
 } from "@/types/api";
 
 export async function getSettings(): Promise<UserSettingsResponse> {
@@ -78,5 +80,18 @@ export async function getLlmUsage(params?: {
   const qs = query.toString();
   return apiClient.get<LlmUsageResponse>(
     `/user/llm-usage${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export async function getBriefingPreferences(): Promise<BriefingPreferencesResponse> {
+  return apiClient.get<BriefingPreferencesResponse>("/user/briefing-preferences");
+}
+
+export async function updateBriefingPreferences(
+  data: BriefingPreferencesUpdate,
+): Promise<BriefingPreferencesResponse> {
+  return apiClient.patch<BriefingPreferencesResponse>(
+    "/user/briefing-preferences",
+    data,
   );
 }

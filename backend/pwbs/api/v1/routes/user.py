@@ -117,6 +117,34 @@ class CancelDeletionResponse(BaseModel):
     message: str
 
 
+class BriefingPreferencesUpdate(BaseModel):
+    """Update briefing personalisation preferences (TASK-186)."""
+
+    focus_projects: list[str] | None = Field(
+        default=None,
+        max_length=20,
+        description="Prioritised project names to highlight in briefings",
+    )
+    excluded_sources: list[str] | None = Field(
+        default=None,
+        max_length=20,
+        description="Source types to exclude from briefing context",
+    )
+    priority_topics: list[str] | None = Field(
+        default=None,
+        max_length=30,
+        description="Topics to prioritise in the briefing",
+    )
+
+
+class BriefingPreferencesResponse(BaseModel):
+    """Current briefing preferences."""
+
+    focus_projects: list[str]
+    excluded_sources: list[str]
+    priority_topics: list[str]
+
+
 class AuditLogEntry(BaseModel):
     """Single audit log entry (no PII, metadata only)."""
 
@@ -285,6 +313,67 @@ async def update_settings(
         email_briefing_enabled=user.email_briefing_enabled,
         briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
         vertical_profile=user.vertical_profile,
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/user/briefing-preferences
+# ---------------------------------------------------------------------------
+
+
+@router.get("/briefing-preferences", response_model=BriefingPreferencesResponse)
+async def get_briefing_preferences(
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> BriefingPreferencesResponse:
+    """Return current briefing personalisation preferences."""
+    prefs = user.briefing_preferences or {}
+    return BriefingPreferencesResponse(
+        focus_projects=prefs.get("focus_projects", []),
+        excluded_sources=prefs.get("excluded_sources", []),
+        priority_topics=prefs.get("priority_topics", []),
+    )
+
+
+# ---------------------------------------------------------------------------
+# PATCH /api/v1/user/briefing-preferences
+# ---------------------------------------------------------------------------
+
+
+@router.patch("/briefing-preferences", response_model=BriefingPreferencesResponse)
+async def update_briefing_preferences(
+    update: BriefingPreferencesUpdate,
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> BriefingPreferencesResponse:
+    """Update briefing personalisation preferences (TASK-186).
+
+    Accepts focus_projects, excluded_sources, priority_topics.
+    Merges with existing preferences (only provided fields are overwritten).
+    Default: no filters — all data is considered for briefing generation.
+    """
+    current = dict(user.briefing_preferences or {})
+
+    if update.focus_projects is not None:
+        current["focus_projects"] = [p.strip() for p in update.focus_projects if p.strip()]
+
+    if update.excluded_sources is not None:
+        current["excluded_sources"] = [s.strip() for s in update.excluded_sources if s.strip()]
+
+    if update.priority_topics is not None:
+        current["priority_topics"] = [t.strip() for t in update.priority_topics if t.strip()]
+
+    user.briefing_preferences = current
+    await db.commit()
+    await db.refresh(user)
+
+    prefs = user.briefing_preferences or {}
+    return BriefingPreferencesResponse(
+        focus_projects=prefs.get("focus_projects", []),
+        excluded_sources=prefs.get("excluded_sources", []),
+        priority_topics=prefs.get("priority_topics", []),
     )
 
 
