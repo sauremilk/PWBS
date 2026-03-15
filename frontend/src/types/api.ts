@@ -149,6 +149,27 @@ export interface SyncResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Sync History (TASK-184)
+// ---------------------------------------------------------------------------
+
+export interface SyncRunItem {
+  id: string;
+  status: "pending" | "running" | "success" | "failed";
+  started_at: string | null;
+  completed_at: string | null;
+  document_count: number;
+  error_count: number;
+  errors_json: Array<{ step: string; message: string }> | null;
+  duration_seconds: number | null;
+}
+
+export interface SyncHistoryResponse {
+  runs: SyncRunItem[];
+  total: number;
+  has_more: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Consent (TASK-173)
 // ---------------------------------------------------------------------------
 

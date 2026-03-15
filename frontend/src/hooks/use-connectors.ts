@@ -11,6 +11,7 @@ import {
   getConsentStatus,
   grantConsent,
   revokeConsent,
+  getSyncHistory,
 } from "@/lib/api/connectors";
 
 export function useConnectorTypes() {
@@ -99,5 +100,16 @@ export function useRevokeConsent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connectors"] });
     },
+  });
+}
+
+export function useSyncHistory(
+  connectorType: string | null,
+  offset: number = 0,
+) {
+  return useQuery({
+    queryKey: ["connectors", "history", connectorType, offset],
+    queryFn: () => getSyncHistory(connectorType!, offset, 10),
+    enabled: connectorType !== null,
   });
 }

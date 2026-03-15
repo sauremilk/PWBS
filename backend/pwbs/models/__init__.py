@@ -24,6 +24,7 @@ from pwbs.models.reminder import Reminder
 from pwbs.models.scheduled_job_run import ScheduledJobRun
 from pwbs.models.slack_user_mapping import SlackUserMapping
 from pwbs.models.subscription import Subscription
+from pwbs.models.sync_run import SyncRun
 from pwbs.models.user import User
 from pwbs.models.user_profile import UserProfile
 
@@ -55,6 +56,7 @@ __all__ = [
     "ScheduledJobRun",
     "SlackUserMapping",
     "Subscription",
+    "SyncRun",
     "User",
     "UserProfile",
 ]

@@ -11,6 +11,7 @@ import type {
   ConsentRevokeResponse,
   ConsentStatusResponse,
   DisconnectResponse,
+  SyncHistoryResponse,
   SyncResponse,
 } from "@/types/api";
 
@@ -89,5 +90,15 @@ export async function revokeConsent(
 ): Promise<ConsentRevokeResponse> {
   return apiClient.delete<ConsentRevokeResponse>(
     `/connectors/${encodeURIComponent(connectorType)}/consent`,
+  );
+}
+
+export async function getSyncHistory(
+  connectorType: string,
+  offset: number = 0,
+  limit: number = 10,
+): Promise<SyncHistoryResponse> {
+  return apiClient.get<SyncHistoryResponse>(
+    `/connectors/${encodeURIComponent(connectorType)}/history?offset=${offset}&limit=${limit}`,
   );
 }

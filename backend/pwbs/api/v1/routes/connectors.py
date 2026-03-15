@@ -34,6 +34,7 @@ from pwbs.db.postgres import get_db_session
 from pwbs.models.connection import Connection
 from pwbs.models.connector_consent import ConnectorConsent
 from pwbs.models.document import Document
+from pwbs.models.sync_run import SyncRun
 from pwbs.models.user import User
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.enums import ConnectionStatus, SourceType
@@ -1082,4 +1083,106 @@ async def revoke_consent(
     return ConsentRevokeResponse(
         message=f"Consent revoked for {source_type.value}. All data deleted.",
         deleted_doc_count=deleted_doc_count,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sync history schemas + endpoint (TASK-184)
+# ---------------------------------------------------------------------------
+
+
+class SyncRunItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    status: str
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    document_count: int = 0
+    error_count: int = 0
+    errors_json: list[dict[str, Any]] | None = None
+    duration_seconds: float | None = None
+
+
+class SyncHistoryResponse(BaseModel):
+    runs: list[SyncRunItem]
+    total: int
+    has_more: bool
+
+
+@router.get(
+    "/{type}/history",
+    response_model=SyncHistoryResponse,
+    summary="Sync history for a connector",
+)
+async def get_sync_history(
+    type: str,
+    offset: int = 0,
+    limit: int = 10,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> SyncHistoryResponse:
+    """Return paginated sync history for a connector type."""
+    source_type = _resolve_source_type(type)
+
+    # Verify the user owns a connection of this type
+    conn_stmt = select(Connection).where(
+        Connection.user_id == current_user.id,
+        Connection.source_type == source_type.value,
+    )
+    conn_result = await db.execute(conn_stmt)
+    connection = conn_result.scalar_one_or_none()
+
+    if connection is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "CONNECTION_NOT_FOUND",
+                "message": f"No connection found for {source_type.value}",
+            },
+        )
+
+    limit = max(1, min(limit, 50))
+
+    # Count
+    count_stmt = select(func.count()).where(
+        SyncRun.connection_id == connection.id
+    )
+    total = (await db.execute(count_stmt)).scalar_one()
+
+    # Paginated runs
+    runs_stmt = (
+        select(SyncRun)
+        .where(SyncRun.connection_id == connection.id)
+        .order_by(SyncRun.started_at.desc().nulls_last())
+        .offset(offset)
+        .limit(limit)
+    )
+    result = await db.execute(runs_stmt)
+    runs = list(result.scalars().all())
+
+    items: list[SyncRunItem] = []
+    for run in runs:
+        duration: float | None = None
+        if run.started_at and run.completed_at:
+            duration = (
+                run.completed_at - run.started_at
+            ).total_seconds()
+        items.append(
+            SyncRunItem(
+                id=run.id,
+                status=run.status,
+                started_at=run.started_at,
+                completed_at=run.completed_at,
+                document_count=run.document_count,
+                error_count=run.error_count,
+                errors_json=run.errors_json,
+                duration_seconds=duration,
+            )
+        )
+
+    return SyncHistoryResponse(
+        runs=items,
+        total=total,
+        has_more=(offset + limit) < total,
     )

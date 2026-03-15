@@ -22,6 +22,7 @@ import {
   useRevokeConsent,
 } from "@/hooks/use-connectors";
 import { ConsentDialog } from "@/components/connectors/consent-dialog";
+import { SyncHistoryAccordion } from "@/components/connectors/sync-history-accordion";
 import { trackFirstConnector } from "@/lib/analytics";
 import type { ConnectorType, ConnectionStatus } from "@/types/api";
 
@@ -202,6 +203,9 @@ function ConnectedCard({
           </div>
         </div>
       )}
+
+      {/* Sync history (TASK-184) */}
+      <SyncHistoryAccordion connectorType={connection.type} />
     </div>
   );
 }
