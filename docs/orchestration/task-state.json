@@ -3022,16 +3022,9 @@
       "completed_at": "2025-01-27T18:30:00Z"
     },
     "TASK-202": {
-      "stream": "STREAM-MVP-FINISH",
-      "title": "DSGVO-Datenexport: Vollstaendiger Nutzer-Datenexport als ZIP (Art. 20)",
-      "priority": "P1",
-      "effort": "L",
-      "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
-      "blocked_by": []
+      "status": "in_progress",
+      "claimed_by": "ORCH-P",
+      "started_at": "2025-01-27T18:35:00Z"
     }
   }
 }
