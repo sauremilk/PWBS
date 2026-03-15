@@ -322,7 +322,7 @@ class TestSearchEndpoint:
         mock_hybrid.search.assert_called_once_with(
             query="test",
             user_id=user_id,
-            top_k=5,
+            top_k=10,
         )
         mock_enricher.enrich.assert_called_once()
         _, kwargs = mock_enricher.enrich.call_args

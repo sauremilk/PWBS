@@ -192,8 +192,8 @@ class TestBuildZip:
             entities=entities,
             briefings=briefings,
             audit_entries=audit,
+            llm_usage=[],
         )
-
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
             names = zf.namelist()
             assert "documents.json" in names
@@ -214,6 +214,7 @@ class TestBuildZip:
             entities=[],
             briefings=[],
             audit_entries=[],
+            llm_usage=[],
         )
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
             assert "documents.json" in zf.namelist()
@@ -342,6 +343,7 @@ class TestRunExport:
             mock_result,  # entities
             mock_result,  # briefings
             mock_result,  # audit
+            mock_result,  # llm_usage
             scalar_result,  # SELECT export record
         ]
 
@@ -397,3 +399,110 @@ class TestRunExport:
         assert error_record.status == "failed"
         assert error_record.error_message == "Internal export error"
         mock_engine.dispose.assert_awaited()
+
+
+# ---------------------------------------------------------------------------
+# TASK-202: 100-doc export → valid ZIP < 50 MB, README + briefings.json
+# ---------------------------------------------------------------------------
+
+
+class TestExport100Documents:
+    """Verify that an export with 100 documents produces a valid ZIP < 50 MB."""
+
+    def test_100_docs_valid_zip_under_50_mb(self) -> None:
+        documents = [
+            {
+                "id": str(uuid.uuid4()),
+                "source_type": "notion",
+                "source_id": f"src-{i}",
+                "title": f"Document {i}",
+                "language": "de",
+                "chunk_count": 3,
+                "processing_status": "done",
+                "created_at": "2025-01-15T10:00:00Z",
+                "updated_at": "2025-01-15T10:00:00Z",
+            }
+            for i in range(100)
+        ]
+        chunks = [
+            {
+                "id": str(uuid.uuid4()),
+                "document_id": documents[i // 3]["id"],
+                "chunk_index": i % 3,
+                "token_count": 128,
+                "content_preview": f"Chunk content block {i} " * 20,
+            }
+            for i in range(300)
+        ]
+        entities = [
+            {
+                "id": str(uuid.uuid4()),
+                "entity_type": "Person",
+                "name": f"Person {i}",
+                "normalized_name": f"person_{i}",
+                "first_seen": "2025-01-15T10:00:00Z",
+                "last_seen": "2025-01-16T10:00:00Z",
+            }
+            for i in range(50)
+        ]
+        briefings = [
+            {
+                "id": str(uuid.uuid4()),
+                "briefing_type": "morning",
+                "title": f"Morning Briefing {i}",
+                "content": f"Briefing content for day {i}. " * 40,
+                "generated_at": "2025-01-15T06:30:00Z",
+            }
+            for i in range(10)
+        ]
+        audit = [
+            {
+                "id": i,
+                "action": "POST",
+                "resource_type": "document",
+                "resource_id": documents[i % 100]["id"],
+                "created_at": "2025-01-15T10:00:00Z",
+            }
+            for i in range(200)
+        ]
+
+        zip_bytes = _build_zip(
+            documents=documents,
+            chunks=chunks,
+            entities=entities,
+            briefings=briefings,
+            audit_entries=audit,
+            llm_usage=[],
+        )
+
+        # Valid ZIP
+        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+            names = zf.namelist()
+
+            # README.md present
+            assert "README.md" in names
+
+            # briefings.json present
+            assert "briefings.json" in names
+            parsed_briefings = json.loads(zf.read("briefings.json"))
+            assert len(parsed_briefings) == 10
+
+            # 100 documents in documents.json
+            parsed_docs = json.loads(zf.read("documents.json"))
+            assert len(parsed_docs) == 100
+
+            # entities
+            parsed_ents = json.loads(zf.read("entities.json"))
+            assert len(parsed_ents) == 50
+
+            # chunks are grouped by document_id
+            chunk_files = [n for n in names if n.startswith("chunks/")]
+            assert len(chunk_files) > 0
+
+            # individual briefing markdown files
+            briefing_files = [n for n in names if n.startswith("briefings/")]
+            assert len(briefing_files) == 10
+
+        # Size < 50 MB
+        size_mb = len(zip_bytes) / (1024 * 1024)
+        assert size_mb < 50, f"ZIP is {size_mb:.2f} MB, expected < 50 MB"

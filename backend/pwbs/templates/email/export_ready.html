@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Ihr Datenexport ist bereit</h2>
+<p>Ihr DSGVO-Datenexport wurde erfolgreich erstellt und steht zum Download bereit.</p>
+<div style="background: #f8f9fa; padding: 16px 24px; border-radius: 8px; border-left: 4px solid #2563eb; margin: 16px 0;">
+  <strong>Export-ID:</strong> {{ export_id }}
+</div>
+<p>Sie koennen den Export in Ihrem PWBS-Dashboard herunterladen. Der Export wird nach 72 Stunden automatisch geloescht.</p>
+<p style="text-align: center; margin: 24px 0;">
+  <a href="{{ unsubscribe_url }}" class="button">Zum Dashboard</a>
+</p>
+{% endblock %}

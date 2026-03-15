@@ -428,6 +428,7 @@ async def start_export(
         user_id=user.id,
         database_url=settings.database_url,
         export_dir=settings.export_dir,
+        user_email=user.email,
     )
     return ExportStartResponse(export_id=export.id, status="processing")
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import io
 import json
 import logging
+import time
 import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -31,6 +32,32 @@ from pwbs.models.llm_audit_log import LlmAuditLog
 logger = logging.getLogger(__name__)
 
 _EXPORT_EXPIRY_HOURS = 24
+_EXPORT_EMAIL_THRESHOLD_SECONDS = 60
+
+_EXPORT_README = """\
+# PWBS Datenexport (DSGVO Art. 20)
+
+Dieser Export enthält alle Ihre im PWBS gespeicherten Daten.
+
+## Inhalt
+
+| Datei/Ordner       | Format   | Beschreibung                              |
+| ------------------ | -------- | ----------------------------------------- |
+| `documents.json`   | JSON     | Alle importierten Dokumente (Metadaten)   |
+| `entities.json`    | JSON     | Extrahierte Entitäten (Personen, Projekte)|
+| `briefings.json`   | JSON     | Generierte Briefings (maschinenlesbar)    |
+| `briefings/`       | Markdown | Briefings als lesbare Textdateien         |
+| `chunks/`          | Markdown | Textsegmente pro Dokument                 |
+| `audit_log.json`   | JSON     | Aktivitätsprotokoll (keine PII)           |
+| `llm_usage.json`   | JSON     | Protokoll der KI-Nutzung                  |
+
+## Hinweise
+
+- Alle Daten gehören ausschließlich zu Ihrem Benutzerkonto.
+- Zeitstempel sind in UTC (ISO 8601).
+- Dieser Export ist 24 Stunden nach Erstellung gültig.
+- Bei Fragen wenden Sie sich an den Datenschutzbeauftragten.
+"""
 
 
 async def check_running_export(user_id: uuid.UUID, db: AsyncSession) -> DataExport | None:
@@ -74,11 +101,16 @@ async def run_export(
     user_id: uuid.UUID,
     database_url: str,
     export_dir: str,
+    user_email: str | None = None,
 ) -> None:
     """Background task: collect all user data and create ZIP.
 
     Runs in its own DB session (background tasks outlive the request).
+    If the export takes longer than 60 seconds and *user_email* is
+    provided, a notification email is sent with the download link
+    (TASK-202).
     """
+    start_time = time.monotonic()
     engine = create_async_engine(database_url, pool_size=2, max_overflow=0)
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
@@ -120,6 +152,14 @@ async def run_export(
                 "DSGVO export completed",
                 extra={"export_id": str(export_id), "user_id": str(user_id)},
             )
+
+            # TASK-202: Send email notification if export took > 60 seconds
+            elapsed = time.monotonic() - start_time
+            if elapsed > _EXPORT_EMAIL_THRESHOLD_SECONDS and user_email:
+                await _send_export_email(
+                    user_email=user_email,
+                    export_id=export_id,
+                )
 
     except Exception:
         logger.exception(
@@ -282,6 +322,9 @@ def _build_zip(
     """Build a ZIP archive with all user data."""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # README.md — human-readable description of the export (TASK-202)
+        zf.writestr("README.md", _EXPORT_README)
+
         # Documents (JSON)
         zf.writestr(
             "documents.json",
@@ -316,6 +359,12 @@ def _build_zip(
             md += b.get("content", "")
             zf.writestr(f"briefings/{bid}.md", md)
 
+        # Briefings (JSON — machine-readable, TASK-202)
+        zf.writestr(
+            "briefings.json",
+            json.dumps(briefings, indent=2, ensure_ascii=False),
+        )
+
         # Audit Log (JSON, no PII)
         zf.writestr(
             "audit_log.json",
@@ -329,3 +378,36 @@ def _build_zip(
         )
 
     return buf.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Email notification (TASK-202)
+# ---------------------------------------------------------------------------
+
+
+async def _send_export_email(
+    user_email: str,
+    export_id: uuid.UUID,
+) -> None:
+    """Send export-ready notification via EmailService.
+
+    Wrapped in try/except so email failures don't fail the export.
+    """
+    try:
+        from pwbs.services.email import create_email_service
+
+        email_service = create_email_service()
+        await email_service.send_export_ready(
+            to=user_email,
+            export_id=str(export_id),
+        )
+        logger.info(
+            "Export email sent: export_id=%s to=%s",
+            export_id,
+            user_email,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to send export email: export_id=%s",
+            export_id,
+        )

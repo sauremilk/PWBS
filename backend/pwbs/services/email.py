@@ -325,6 +325,21 @@ class EmailService:
             },
         )
 
+    async def send_export_ready(
+        self,
+        to: str,
+        export_id: str,
+    ) -> EmailResult:
+        """Send notification that a DSGVO data export is ready (TASK-202)."""
+        return await self._send(
+            to=to,
+            subject="PWBS - Ihr Datenexport ist bereit",
+            template="export_ready.html",
+            context={
+                "export_id": export_id,
+            },
+        )
+
 
 # ---------------------------------------------------------------------------
 # Factory
