@@ -366,3 +366,106 @@ class TestConfig:
 
         request = gateway.generate.call_args[0][0]
         assert request.max_tokens == 1500
+
+
+# ------------------------------------------------------------------
+# Vertical profile integration (TASK-154)
+# ------------------------------------------------------------------
+
+
+class TestVerticalProfileIntegration:
+    @pytest.mark.asyncio
+    async def test_researcher_supplement_in_system_prompt(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(
+            BriefingType.MORNING,
+            _make_context(),
+            USER_ID,
+            vertical_profile="researcher",
+        )
+
+        request = gateway.generate.call_args[0][0]
+        assert "Forscher" in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_consultant_supplement_in_system_prompt(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(
+            BriefingType.MORNING,
+            _make_context(),
+            USER_ID,
+            vertical_profile="consultant",
+        )
+
+        request = gateway.generate.call_args[0][0]
+        assert "Berater" in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_developer_supplement_in_system_prompt(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(
+            BriefingType.MORNING,
+            _make_context(),
+            USER_ID,
+            vertical_profile="developer",
+        )
+
+        request = gateway.generate.call_args[0][0]
+        assert "Software-Entwickler" in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_general_profile_no_vertical_supplement(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(
+            BriefingType.MORNING,
+            _make_context(),
+            USER_ID,
+            vertical_profile="general",
+        )
+
+        request = gateway.generate.call_args[0][0]
+        # General profile has empty supplement, so no "Forscher"/"Berater"/"Entwickler"
+        assert "Forscher" not in request.system_prompt
+        assert "Berater" not in request.system_prompt
+        assert "Software-Entwickler" not in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_default_vertical_profile_is_general(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        # No vertical_profile arg -> defaults to "general"
+        await gen.generate(BriefingType.MORNING, _make_context(), USER_ID)
+
+        request = gateway.generate.call_args[0][0]
+        assert "Forscher" not in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_unknown_vertical_fallback_to_general(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(
+            BriefingType.MORNING,
+            _make_context(),
+            USER_ID,
+            vertical_profile="nonexistent",
+        )
+
+        request = gateway.generate.call_args[0][0]
+        # Should not crash, should fall back to general
+        assert "Forscher" not in request.system_prompt

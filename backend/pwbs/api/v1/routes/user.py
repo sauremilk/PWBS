@@ -216,6 +216,23 @@ async def update_settings(
                 },
             )
 
+    # Validate and update vertical_profile (TASK-154)
+    if update.vertical_profile is not None:
+        try:
+            VerticalProfile(update.vertical_profile)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "INVALID_VERTICAL_PROFILE",
+                    "message": (
+                        f"Invalid vertical profile: {update.vertical_profile}. "
+                        f"Must be one of: {', '.join(v.value for v in VerticalProfile)}"
+                    ),
+                },
+            )
+        user.vertical_profile = update.vertical_profile
+
     # Update display_name on the User model (only field that exists in DB)
     if update.display_name is not None:
         if len(update.display_name.strip()) == 0:
@@ -227,20 +244,6 @@ async def update_settings(
                 },
             )
         user.display_name = update.display_name.strip()
-
-    # Update vertical profile
-    if update.vertical_profile is not None:
-        try:
-            VerticalProfile(update.vertical_profile)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail={
-                    "code": "INVALID_VERTICAL_PROFILE",
-                    "message": f"Invalid vertical profile: {update.vertical_profile}. Must be one of: {', '.join(v.value for v in VerticalProfile)}",
-                },
-            )
-        user.vertical_profile = update.vertical_profile
 
     # Update email briefing settings
     if update.email_briefing_enabled is not None:

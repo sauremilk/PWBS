@@ -27,6 +27,7 @@ from pwbs.core.grounding import (
 )
 from pwbs.core.llm_gateway import LLMGateway, LLMRequest, LLMResponse, LLMUsage
 from pwbs.prompts.registry import PromptRegistry, PromptTemplate
+from pwbs.verticals.profiles import get_vertical_config
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +142,7 @@ class BriefingGenerator:
         context: dict[str, Any],
         user_id: uuid.UUID,
         known_sources: list[dict[str, str]] | None = None,
+        vertical_profile: str = "general",
     ) -> BriefingLLMResult:
         """Generate a briefing via LLM.
 
@@ -154,6 +156,9 @@ class BriefingGenerator:
             Owner ID for logging/audit.
         known_sources:
             List of known source dicts for grounding validation.
+        vertical_profile:
+            User's vertical profile (e.g. "researcher", "consultant", "developer").
+            Augments the system prompt with domain-specific instructions.
 
         Returns
         -------
@@ -171,6 +176,11 @@ class BriefingGenerator:
         system_prompt = template.system_prompt
         if self._config.enable_grounding:
             system_prompt = build_grounding_system_prompt(system_prompt)
+
+        # Vertical profile augmentation (TASK-154)
+        v_config = get_vertical_config(vertical_profile)
+        if v_config.briefing_system_supplement:
+            system_prompt += f"\n\n{v_config.briefing_system_supplement}"
 
         # Add word limit instruction
         max_words = _MAX_WORDS.get(briefing_type, 800)
