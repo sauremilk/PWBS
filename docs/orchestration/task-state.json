@@ -2989,7 +2989,9 @@
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:26:20.662277+00:00",
       "completed_at": "2026-03-15T15:30:38.968884+00:00",
-      "blocked_by": []
+      "blocked_by": [],
+      "progress": 100,
+      "notes": "seed.py implemented: 50 docs across 4 connectors, idempotent UUIDs, --clean flag. 35 unit tests."
     },
     "TASK-199": {
       "stream": "STREAM-MVP-FINISH",
@@ -2997,10 +2999,10 @@
       "priority": "P2",
       "effort": "S",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:30:54.454819+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T15:40:56.494567+00:00",
       "blocked_by": []
     },
     "TASK-200": {
