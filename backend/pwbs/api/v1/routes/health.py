@@ -1,6 +1,8 @@
-"""Health-check endpoint (TASK-031, TASK-114).
+"""Health-check endpoints (TASK-031, TASK-114, TASK-199).
 
-GET /api/v1/admin/health — no authentication required.
+GET /api/v1/admin/health          — no authentication required.
+GET /api/v1/admin/health/detailed — admin-only, per-dependency details.
+
 Checks PostgreSQL, Weaviate, Neo4j, Redis and LLM API in parallel with
 a 5-second timeout per service.
 
@@ -16,16 +18,19 @@ import time
 from typing import Any
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
+from pwbs.api.dependencies.auth import get_current_user
 from pwbs.core.config import get_settings
-from pwbs.db.neo4j_client import check_neo4j_health
+from pwbs.db.neo4j_client import check_neo4j_health, get_neo4j_driver
 from pwbs.db.postgres import check_postgres_health
 from pwbs.db.redis_client import check_redis_health
 from pwbs.db.weaviate_client import check_weaviate_health
+from pwbs.models.user import User
 from pwbs.queue.health import check_queue_health
-from pwbs.schemas.common import COMMON_RESPONSES
+from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)
 
@@ -138,4 +143,132 @@ async def health_check() -> JSONResponse:
     return JSONResponse(
         status_code=status_code,
         content={"status": overall, "components": components, "queue": queue_info},
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /health/detailed — admin-only, per-dependency details (TASK-199)
+# ---------------------------------------------------------------------------
+
+
+class DependencyStatusResponse(BaseModel):
+    status: str  # "up", "down", "unavailable"
+    latency_ms: float
+    details: str
+
+
+class DetailedHealthResponse(BaseModel):
+    status: str  # "healthy", "degraded", "unhealthy"
+    dependencies: dict[str, DependencyStatusResponse]
+
+
+def _require_admin(user: User) -> None:
+    """Raise 403 if user is not an admin."""
+    if not getattr(user, "is_admin", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "ADMIN_REQUIRED", "message": "Admin privileges required"},
+        )
+
+
+async def _detailed_timed_check(name: str, check_fn: Any) -> dict[str, Any]:
+    """Run a health check capturing status, latency, and details."""
+    start = time.monotonic()
+    try:
+        ok = await asyncio.wait_for(check_fn(), timeout=_HEALTH_TIMEOUT)
+        latency_ms = round((time.monotonic() - start) * 1000, 1)
+        return {
+            "name": name,
+            "status": "up" if ok else "down",
+            "latency_ms": latency_ms,
+            "details": "reachable" if ok else "health check failed",
+        }
+    except asyncio.TimeoutError:
+        latency_ms = round((time.monotonic() - start) * 1000, 1)
+        return {
+            "name": name,
+            "status": "down",
+            "latency_ms": latency_ms,
+            "details": f"timeout after {_HEALTH_TIMEOUT}s",
+        }
+    except Exception as exc:
+        latency_ms = round((time.monotonic() - start) * 1000, 1)
+        return {
+            "name": name,
+            "status": "down",
+            "latency_ms": latency_ms,
+            "details": str(exc),
+        }
+
+
+@router.get(
+    "/health/detailed",
+    summary="Detailed Health Check (Admin)",
+    description="Detaillierter Dependency-Check für PostgreSQL, Weaviate, Redis und Neo4j. "
+    "Erfordert Admin-JWT. Neo4j gibt 'unavailable' zurück wenn der Treiber nicht konfiguriert ist.",
+    responses={
+        200: {"description": "System healthy oder degraded"},
+        401: {"description": "Nicht authentifiziert"},
+        403: {"description": "Keine Admin-Berechtigung"},
+        503: {"description": "PostgreSQL oder Weaviate nicht erreichbar"},
+        **AUTH_RESPONSES,
+    },
+)
+async def health_check_detailed(
+    response: Response,
+    user: User = Depends(get_current_user),
+) -> JSONResponse:
+    _require_admin(user)
+
+    # Neo4j special handling: "unavailable" if driver is None (optional service)
+    neo4j_driver = get_neo4j_driver()
+
+    checks = [
+        _detailed_timed_check("postgres", check_postgres_health),
+        _detailed_timed_check("weaviate", check_weaviate_health),
+        _detailed_timed_check("redis", check_redis_health),
+    ]
+    if neo4j_driver is not None:
+        checks.append(_detailed_timed_check("neo4j", check_neo4j_health))
+
+    results = await asyncio.gather(*checks)
+
+    dependencies: dict[str, dict[str, Any]] = {}
+    for r in results:
+        dependencies[r["name"]] = {
+            "status": r["status"],
+            "latency_ms": r["latency_ms"],
+            "details": r["details"],
+        }
+
+    # Neo4j unavailable when driver is None — not an error, just unconfigured
+    if neo4j_driver is None:
+        dependencies["neo4j"] = {
+            "status": "unavailable",
+            "latency_ms": 0.0,
+            "details": "Neo4j driver not configured or unreachable",
+        }
+
+    # Overall status per AC:
+    # - unhealthy: PostgreSQL OR Weaviate down
+    # - degraded: optional services (Redis, Neo4j) down
+    # - healthy: all critical up and optionals either up or unavailable
+    pg_up = dependencies["postgres"]["status"] == "up"
+    weaviate_up = dependencies["weaviate"]["status"] == "up"
+    critical_ok = pg_up and weaviate_up
+
+    if not critical_ok:
+        overall = "unhealthy"
+    elif all(
+        d["status"] in ("up", "unavailable") for d in dependencies.values()
+    ):
+        overall = "healthy"
+    else:
+        overall = "degraded"
+
+    status_code = 200 if critical_ok else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={"status": overall, "dependencies": dependencies},
     )

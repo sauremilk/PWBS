@@ -890,6 +890,84 @@
         }
       }
     },
+    "/api/v1/admin/health/detailed": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Detailed Health Check (Admin)",
+        "description": "Detaillierter Dependency-Check für PostgreSQL, Weaviate, Redis und Neo4j. Erfordert Admin-JWT. Neo4j gibt 'unavailable' zurück wenn der Treiber nicht konfiguriert ist.",
+        "operationId": "health_check_detailed_api_v1_admin_health_detailed_get",
+        "responses": {
+          "200": {
+            "description": "System healthy oder degraded",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler -- ungültige Request-Daten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit überschritten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Serverfehler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht authentifiziert -- fehlender oder ungültiger JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Zugriff verweigert -- unzureichende Berechtigungen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL oder Weaviate nicht erreichbar"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/assumptions": {
       "get": {
         "tags": [
