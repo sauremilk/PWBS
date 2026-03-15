@@ -1,27 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Plus, Cable, AlertCircle, Loader2 } from "lucide-react";
+import { FileText, Plus, Cable, AlertCircle } from "lucide-react";
 import { useLatestBriefing, useGenerateBriefing } from "@/hooks/use-briefings";
 import { useConnectionStatus } from "@/hooks/use-connectors";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import {
+  BriefingCardSkeleton,
+  ConnectorStatusSkeleton,
+} from "@/components/ui/loading-states";
 
 function BriefingCard() {
   const { data: briefing, isLoading, error } = useLatestBriefing("morning");
   const generate = useGenerateBriefing();
 
   if (isLoading) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8"
-        role="status"
-      >
-        <Loader2
-          aria-hidden="true"
-          className="h-6 w-6 animate-spin text-gray-400"
-        />
-        <span className="sr-only">Wird geladen</span>
-      </div>
-    );
+    return <BriefingCardSkeleton />;
   }
 
   if (error) {
@@ -79,20 +73,7 @@ function ConnectorStatusWidget() {
   const { data, isLoading } = useConnectionStatus();
 
   if (isLoading) {
-    return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <h3 className="mb-3 text-sm font-semibold text-gray-900">
-          Konnektoren
-        </h3>
-        <div className="flex items-center justify-center py-4">
-          <Loader2
-            aria-hidden="true"
-            className="h-5 w-5 animate-spin text-gray-400"
-          />
-          <span className="sr-only">Wird geladen</span>
-        </div>
-      </div>
-    );
+    return <ConnectorStatusSkeleton />;
   }
 
   const connections = data?.connections ?? [];
@@ -148,12 +129,16 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Hauptinhalt: Briefing */}
         <div className="lg:col-span-2 space-y-4">
-          <BriefingCard />
+          <ErrorBoundary>
+            <BriefingCard />
+          </ErrorBoundary>
         </div>
 
         {/* Sidebar: Konnektor-Status */}
         <div className="space-y-4">
-          <ConnectorStatusWidget />
+          <ErrorBoundary>
+            <ConnectorStatusWidget />
+          </ErrorBoundary>
         </div>
       </div>
     </div>

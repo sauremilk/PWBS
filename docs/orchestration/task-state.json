@@ -2975,8 +2975,8 @@
       "area": "Frontend",
       "status": "done",
       "claimed_by": "ORCH-P",
-      "claimed_at": null,
-      "completed_at": null,
+      "claimed_at": "2026-03-15T16:02:26.668888+00:00",
+      "completed_at": "2026-03-15T16:02:26.668888+00:00",
       "blocked_by": [],
       "progress": 100,
       "notes": "ErrorBoundary with data-testid, error.tsx + loading.tsx per route, 6 skeleton components"
