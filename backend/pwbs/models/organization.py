@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Index, Text, UniqueConstraint, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -25,6 +25,11 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
     slug: Mapped[str] = mapped_column(Text, unique=True, nullable=False, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+
+    # TASK-161: SSO config (encrypted JSON) — None = SSO not configured
+    sso_config_enc: Mapped[dict | None] = mapped_column(  # type: ignore[type-arg]
+        JSONB, nullable=True, default=None,
+    )
 
     members: Mapped[list["OrganizationMember"]] = relationship(
         back_populates="organization",

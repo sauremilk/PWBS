@@ -144,6 +144,9 @@ class Permission(str, Enum):
     # Audit
     AUDIT_VIEW = "audit:view"
 
+    # SSO management (TASK-161)
+    SSO_MANAGE = "sso:manage"
+
 
 class DocumentVisibility(str, Enum):
     """Visibility scope of a document."""

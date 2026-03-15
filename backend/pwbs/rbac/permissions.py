@@ -34,6 +34,7 @@ _MANAGER_PERMISSIONS: frozenset[Permission] = _MEMBER_PERMISSIONS | frozenset({
 _ADMIN_PERMISSIONS: frozenset[Permission] = _MANAGER_PERMISSIONS | frozenset({
     Permission.MEMBERS_CHANGE_ROLE,
     Permission.ORG_EDIT,
+    Permission.SSO_MANAGE,
 })
 
 _OWNER_PERMISSIONS: frozenset[Permission] = _ADMIN_PERMISSIONS | frozenset({
