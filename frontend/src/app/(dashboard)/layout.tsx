@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { WebSocketProvider } from "@/components/layout/websocket-provider";
 import { SkipLink } from "@/components/ui/skip-link";
+import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 
 export default function DashboardLayout({
   children,
@@ -13,6 +14,7 @@ export default function DashboardLayout({
     <ProtectedRoute>
       <WebSocketProvider>
         <SkipLink />
+        <OnboardingGate />
         <div className="flex min-h-screen">
           <Sidebar />
           <div className="flex flex-1 flex-col">
