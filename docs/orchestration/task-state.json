@@ -2784,10 +2784,11 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-O",
       "claimed_at": "2026-03-15T13:05:00.000000+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T13:45:00.000000+00:00",
+      "commit": "6946030",
       "blocked_by": []
     },
     "TASK-184": {
@@ -2820,9 +2821,9 @@
       "priority": "P2",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-O",
+      "claimed_at": "2026-03-15T13:50:00.000000+00:00",
       "completed_at": null,
       "blocked_by": []
     },
