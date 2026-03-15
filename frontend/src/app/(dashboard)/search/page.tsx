@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search as SearchIcon,
@@ -11,6 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useSearch } from "@/hooks/use-search";
+import { trackSearch } from "@/lib/analytics";
 import type { SearchFilters, SourceType, SearchResult } from "@/types/api";
 
 const SOURCE_TYPE_OPTIONS: { value: SourceType; label: string }[] = [
@@ -62,7 +63,10 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div role="status" className="flex items-center justify-center py-12">
-          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2
+            aria-hidden="true"
+            className="h-8 w-8 animate-spin text-gray-400"
+          />
           <span className="sr-only">Wird geladen</span>
         </div>
       }
@@ -98,6 +102,15 @@ function SearchContent() {
       : undefined;
 
   const { data, isLoading, isFetching } = useSearch(query, filters);
+
+  // Track search events (debounced via useSearch)
+  const lastTrackedQuery = useRef("");
+  useEffect(() => {
+    if (data && query.length >= 2 && query !== lastTrackedQuery.current) {
+      lastTrackedQuery.current = query;
+      trackSearch("hybrid");
+    }
+  }, [data, query]);
 
   const syncUrl = useCallback(
     (q: string, st: SourceType[], df: string, dt: string) => {
@@ -138,7 +151,10 @@ function SearchContent() {
 
       {/* Search Input */}
       <div className="relative">
-        <SearchIcon aria-hidden="true" className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <SearchIcon
+          aria-hidden="true"
+          className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+        />
         <input
           type="text"
           value={query}
@@ -148,7 +164,10 @@ function SearchContent() {
           aria-label="Suchfeld"
         />
         {isFetching && (
-          <Loader2 aria-hidden="true" className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400" />
+          <Loader2
+            aria-hidden="true"
+            className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400"
+          />
         )}
       </div>
 
@@ -253,7 +272,10 @@ function SearchContent() {
       {/* Results */}
       {isLoading && query.length > 0 ? (
         <div role="status" className="flex items-center justify-center py-12">
-          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2
+            aria-hidden="true"
+            className="h-8 w-8 animate-spin text-gray-400"
+          />
           <span className="sr-only">Wird geladen</span>
         </div>
       ) : data && data.results.length > 0 ? (
@@ -268,7 +290,10 @@ function SearchContent() {
         </div>
       ) : query.length > 0 && !isLoading ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <SearchIcon aria-hidden="true" className="mx-auto mb-3 h-10 w-10 text-gray-300" />
+          <SearchIcon
+            aria-hidden="true"
+            className="mx-auto mb-3 h-10 w-10 text-gray-300"
+          />
           <h3 className="mb-1 text-sm font-semibold text-gray-900">
             Keine Ergebnisse gefunden
           </h3>

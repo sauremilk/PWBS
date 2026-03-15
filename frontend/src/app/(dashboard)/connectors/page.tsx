@@ -22,6 +22,7 @@ import {
   useRevokeConsent,
 } from "@/hooks/use-connectors";
 import { ConsentDialog } from "@/components/connectors/consent-dialog";
+import { trackFirstConnector } from "@/lib/analytics";
 import type { ConnectorType, ConnectionStatus } from "@/types/api";
 
 const STATUS_CONFIG: Record<
@@ -410,6 +411,7 @@ export default function ConnectorsPage() {
         <ConsentDialog
           connectorType={consentTarget}
           onConsented={() => {
+            trackFirstConnector(consentTarget);
             connectOAuth.mutate(consentTarget);
             setConsentTarget(null);
           }}

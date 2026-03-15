@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FileText, Calendar, ChevronRight, Loader2, Plus } from "lucide-react";
 import { useBriefingList, useGenerateBriefing } from "@/hooks/use-briefings";
+import { trackFirstBriefing } from "@/lib/analytics";
 import type { BriefingType, BriefingListItem } from "@/types/api";
 
 const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
@@ -51,7 +52,10 @@ export default function BriefingsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Briefings</h1>
         <button
-          onClick={() => generate.mutate({ type: "morning" })}
+          onClick={() => {
+            trackFirstBriefing("morning");
+            generate.mutate({ type: "morning" });
+          }}
           disabled={generate.isPending}
           className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >

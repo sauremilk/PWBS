@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { register } from "@/lib/api/auth";
 import { ApiClientError } from "@/lib/api-client";
+import { trackSignup } from "@/lib/analytics";
 
 interface PasswordCriteria {
   minLength: boolean;
@@ -49,19 +50,24 @@ export default function RegisterPage() {
 
     try {
       await register({ email, password, display_name: displayName });
+      trackSignup();
       setShowWelcome(true);
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.status === 409) {
           setError("Diese E-Mail-Adresse wird bereits verwendet.");
         } else if (err.status >= 500) {
-          setError("Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.");
+          setError(
+            "Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.",
+          );
         } else {
           const msg = err.data?.message ?? "Registrierung fehlgeschlagen.";
           setError(msg);
         }
       } else {
-        setError("Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.");
+        setError(
+          "Verbindungsfehler. Bitte pr\u00fcfe deine Internetverbindung.",
+        );
       }
     } finally {
       setLoading(false);
@@ -108,7 +114,10 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="display-name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="display-name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Anzeigename
           </label>
           <input
@@ -123,7 +132,10 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="reg-email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="reg-email"
+            className="block text-sm font-medium text-gray-700"
+          >
             E-Mail
           </label>
           <input
@@ -138,7 +150,10 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="reg-password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Passwort
           </label>
           <input
@@ -152,8 +167,14 @@ export default function RegisterPage() {
           />
           {password.length > 0 && (
             <ul className="mt-2 space-y-1">
-              <CriterionLine met={criteria.minLength} label="Mindestens 12 Zeichen" />
-              <CriterionLine met={criteria.uppercase} label="Ein Gro\u00dfbuchstabe" />
+              <CriterionLine
+                met={criteria.minLength}
+                label="Mindestens 12 Zeichen"
+              />
+              <CriterionLine
+                met={criteria.uppercase}
+                label="Ein Gro\u00dfbuchstabe"
+              />
               <CriterionLine met={criteria.digit} label="Eine Zahl" />
             </ul>
           )}
@@ -170,7 +191,10 @@ export default function RegisterPage() {
 
       <p className="mt-6 text-center text-sm text-gray-600">
         Bereits registriert?{" "}
-        <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+        <Link
+          href="/login"
+          className="font-medium text-blue-600 hover:text-blue-500"
+        >
           Anmelden
         </Link>
       </p>
