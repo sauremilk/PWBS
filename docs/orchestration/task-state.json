@@ -2964,7 +2964,7 @@
       "status": "done",
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:20:51.029236+00:00",
-      "completed_at": "2026-03-15T15:26:04.139861+00:00",
+      "completed_at": "2026-03-15T15:27:47.846180+00:00",
       "blocked_by": []
     },
     "TASK-197": {
@@ -2985,10 +2985,10 @@
       "priority": "P2",
       "effort": "S",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:26:20.662277+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T15:30:38.968884+00:00",
       "blocked_by": []
     },
     "TASK-199": {
