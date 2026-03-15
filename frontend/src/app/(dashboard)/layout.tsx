@@ -6,6 +6,7 @@ import { SkipLink } from "@/components/ui/skip-link";
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 import { MobileNavProvider } from "@/components/layout/mobile-nav-context";
 import { FeedbackWidget } from "@/components/feedback/feedback-widget";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 export default function DashboardLayout({
   children,
@@ -27,7 +28,7 @@ export default function DashboardLayout({
                 className="flex-1 overflow-x-hidden p-4 sm:p-6"
                 tabIndex={-1}
               >
-                {children}
+                <ErrorBoundary>{children}</ErrorBoundary>
               </main>
               <FeedbackWidget />
             </div>

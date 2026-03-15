@@ -2973,11 +2973,13 @@
       "priority": "P2",
       "effort": "M",
       "area": "Frontend",
-      "status": "open",
-      "claimed_by": null,
+      "status": "done",
+      "claimed_by": "ORCH-P",
       "claimed_at": null,
       "completed_at": null,
-      "blocked_by": []
+      "blocked_by": [],
+      "progress": 100,
+      "notes": "ErrorBoundary with data-testid, error.tsx + loading.tsx per route, 6 skeleton components"
     },
     "TASK-198": {
       "stream": "STREAM-MVP-FINISH",
