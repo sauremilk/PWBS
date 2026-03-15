@@ -101,3 +101,18 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    assumptions: Mapped[list["Assumption"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    saved_searches: Mapped[list["SavedSearch"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    search_history_entries: Mapped[list["SearchHistory"]] = relationship(  # noqa: F821
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )

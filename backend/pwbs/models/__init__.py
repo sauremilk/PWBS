@@ -21,7 +21,9 @@ from pwbs.models.plugin import InstalledPlugin, Plugin
 from pwbs.models.referral import Referral
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
+from pwbs.models.saved_search import SavedSearch
 from pwbs.models.scheduled_job_run import ScheduledJobRun
+from pwbs.models.search_history import SearchHistory
 from pwbs.models.slack_user_mapping import SlackUserMapping
 from pwbs.models.subscription import Subscription
 from pwbs.models.sync_run import SyncRun
@@ -53,7 +55,9 @@ __all__ = [
     "Referral",
     "RefreshToken",
     "Reminder",
+    "SavedSearch",
     "ScheduledJobRun",
+    "SearchHistory",
     "SlackUserMapping",
     "Subscription",
     "SyncRun",

@@ -9,9 +9,11 @@ import {
   FileText,
   Calendar,
   Loader2,
+  Bookmark,
 } from "lucide-react";
-import { useSearch } from "@/hooks/use-search";
+import { useSearch, useCreateSavedSearch } from "@/hooks/use-search";
 import { trackSearch } from "@/lib/analytics";
+import { SearchCombobox } from "@/components/search/search-combobox";
 import type { SearchFilters, SourceType, SearchResult } from "@/types/api";
 
 const SOURCE_TYPE_OPTIONS: { value: SourceType; label: string }[] = [
@@ -102,6 +104,7 @@ function SearchContent() {
       : undefined;
 
   const { data, isLoading, isFetching } = useSearch(query, filters);
+  const saveMutation = useCreateSavedSearch();
 
   // Track search events (debounced via useSearch)
   const lastTrackedQuery = useRef("");
@@ -149,27 +152,39 @@ function SearchContent() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-gray-900">Suche</h1>
 
-      {/* Search Input */}
-      <div className="relative">
-        <SearchIcon
-          aria-hidden="true"
-          className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-        />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="Dokumente, Personen, Projekte durchsuchen…"
-          className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          aria-label="Suchfeld"
-        />
-        {isFetching && (
-          <Loader2
-            aria-hidden="true"
-            className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-gray-400"
+      {/* Search Input — Combobox with auto-complete, history, saved */}
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <SearchCombobox
+            value={query}
+            onChange={handleQueryChange}
           />
+        </div>
+        {query.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              const name = prompt("Name für gespeicherte Suche:");
+              if (name) {
+                saveMutation.mutate({ name, query, filters });
+              }
+            }}
+            title="Suche speichern"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            <Bookmark aria-hidden className="h-4 w-4" />
+            <span className="hidden sm:inline">Speichern</span>
+          </button>
         )}
       </div>
+      {isFetching && (
+        <div className="flex justify-end">
+          <Loader2
+            aria-hidden="true"
+            className="h-5 w-5 animate-spin text-gray-400"
+          />
+        </div>
+      )}
 
       {/* Filter Toggle */}
       <div className="flex items-center gap-2">

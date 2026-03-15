@@ -225,6 +225,45 @@ export interface SearchResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Search Enhancements (TASK-182)
+// ---------------------------------------------------------------------------
+
+export interface AutoCompleteItem {
+  entity_id: string;
+  name: string;
+  entity_type: string;
+}
+
+export interface AutoCompleteResponse {
+  suggestions: AutoCompleteItem[];
+}
+
+export interface SavedSearchItem {
+  id: string;
+  name: string;
+  query: string;
+  filters_json: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface SavedSearchCreate {
+  name: string;
+  query: string;
+  filters?: SearchFilters;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  query: string;
+  result_count: number;
+  created_at: string;
+}
+
+export interface SearchHistoryResponse {
+  items: SearchHistoryItem[];
+}
+
+// ---------------------------------------------------------------------------
 // Briefings
 // ---------------------------------------------------------------------------
 

@@ -1,6 +1,11 @@
-"""Search API endpoint (TASK-088).
+"""Search API endpoints (TASK-088, TASK-182).
 
-POST  /api/v1/search/   -- Hybrid search with optional RAG answer
+POST  /api/v1/search/           -- Hybrid search with optional RAG answer
+GET   /api/v1/search/autocomplete  -- Entity-based auto-complete
+POST  /api/v1/search/saved      -- Save a named search
+GET   /api/v1/search/saved      -- List saved searches
+DELETE /api/v1/search/saved/{id} -- Delete a saved search
+GET   /api/v1/search/history    -- Last 50 search queries
 """
 
 from __future__ import annotations
@@ -8,7 +13,8 @@ from __future__ import annotations
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
@@ -16,10 +22,24 @@ from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.db.weaviate_client import get_weaviate_client
+from pwbs.models.entity import Entity
+from pwbs.models.saved_search import SavedSearch
+from pwbs.models.search_history import SearchHistory
 from pwbs.models.user import User
 from pwbs.processing.embedding import EmbeddingService
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
-from pwbs.schemas.search import SearchFilters, SearchRequest, SearchResponse, SearchResult
+from pwbs.schemas.search import (
+    AutoCompleteItem,
+    AutoCompleteResponse,
+    SavedSearchCreate,
+    SavedSearchOut,
+    SearchFilters,
+    SearchHistoryItem,
+    SearchHistoryResponse,
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
+)
 from pwbs.search.enrichment import EnrichedSearchResult, SearchResultEnricher
 from pwbs.search.hybrid import HybridSearchService
 from pwbs.search.keyword import KeywordSearchService
@@ -151,6 +171,14 @@ async def search(
     results = [_to_search_result(e) for e in enriched]
     sources = [e.source_ref for e in enriched]
 
+    # Record search in history (fire-and-forget, don't block response)
+    history_entry = SearchHistory(
+        user_id=user_id,
+        query=body.query,
+        result_count=len(results),
+    )
+    session.add(history_entry)
+
     await log_event(
         session,
         action=AuditAction.SEARCH_EXECUTED,
@@ -166,3 +194,177 @@ async def search(
         sources=sources,
         confidence=None,
     )
+
+
+# ---------------------------------------------------------------------------
+# Auto-Complete (TASK-182)
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/autocomplete",
+    response_model=AutoCompleteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Entity-basierte Auto-Vervollständigung",
+)
+async def autocomplete(
+    q: str = Query(min_length=2, description="Suchbegriff (mind. 2 Zeichen)"),
+    limit: int = Query(default=10, ge=1, le=30),
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> AutoCompleteResponse:
+    """Return entity names matching the prefix, filtered by owner_id."""
+    user_id: uuid.UUID = user.id
+    prefix = q.lower()
+
+    stmt = (
+        select(Entity)
+        .where(
+            Entity.user_id == user_id,
+            Entity.normalized_name.startswith(prefix),
+        )
+        .order_by(Entity.mention_count.desc())
+        .limit(limit)
+    )
+    result = await session.execute(stmt)
+    entities = result.scalars().all()
+
+    suggestions = [
+        AutoCompleteItem(
+            entity_id=e.id,
+            name=e.name,
+            entity_type=e.entity_type,
+        )
+        for e in entities
+    ]
+    return AutoCompleteResponse(suggestions=suggestions)
+
+
+# ---------------------------------------------------------------------------
+# Saved Searches (TASK-182)
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/saved",
+    response_model=SavedSearchOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Suche speichern",
+)
+async def create_saved_search(
+    body: SavedSearchCreate,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> SavedSearchOut:
+    """Persist a named search for the current user."""
+    saved = SavedSearch(
+        user_id=user.id,
+        name=body.name,
+        query=body.query,
+        filters_json=body.filters.model_dump(exclude_none=True) if body.filters else None,
+    )
+    session.add(saved)
+    await session.commit()
+    await session.refresh(saved)
+
+    return SavedSearchOut(
+        id=saved.id,
+        name=saved.name,
+        query=saved.query,
+        filters_json=saved.filters_json,
+        created_at=saved.created_at,
+    )
+
+
+@router.get(
+    "/saved",
+    response_model=list[SavedSearchOut],
+    status_code=status.HTTP_200_OK,
+    summary="Gespeicherte Suchen auflisten",
+)
+async def list_saved_searches(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[SavedSearchOut]:
+    """Return all saved searches for the current user."""
+    stmt = (
+        select(SavedSearch)
+        .where(SavedSearch.user_id == user.id)
+        .order_by(SavedSearch.created_at.desc())
+    )
+    result = await session.execute(stmt)
+    rows = result.scalars().all()
+
+    return [
+        SavedSearchOut(
+            id=r.id,
+            name=r.name,
+            query=r.query,
+            filters_json=r.filters_json,
+            created_at=r.created_at,
+        )
+        for r in rows
+    ]
+
+
+@router.delete(
+    "/saved/{search_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Gespeicherte Suche löschen",
+)
+async def delete_saved_search(
+    search_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> None:
+    """Delete a saved search owned by the current user."""
+    from fastapi import HTTPException
+
+    stmt = select(SavedSearch).where(
+        SavedSearch.id == search_id,
+        SavedSearch.user_id == user.id,
+    )
+    result = await session.execute(stmt)
+    saved = result.scalar_one_or_none()
+    if saved is None:
+        raise HTTPException(status_code=404, detail="Gespeicherte Suche nicht gefunden")
+
+    await session.delete(saved)
+    await session.commit()
+
+
+# ---------------------------------------------------------------------------
+# Search History (TASK-182)
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/history",
+    response_model=SearchHistoryResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Suchverlauf der letzten 50 Anfragen",
+)
+async def get_search_history(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> SearchHistoryResponse:
+    """Return the last 50 search queries for the current user."""
+    stmt = (
+        select(SearchHistory)
+        .where(SearchHistory.user_id == user.id)
+        .order_by(SearchHistory.created_at.desc())
+        .limit(50)
+    )
+    result = await session.execute(stmt)
+    rows = result.scalars().all()
+
+    items = [
+        SearchHistoryItem(
+            id=r.id,
+            query=r.query,
+            result_count=r.result_count,
+            created_at=r.created_at,
+        )
+        for r in rows
+    ]
+    return SearchHistoryResponse(items=items)
