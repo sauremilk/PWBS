@@ -2862,10 +2862,10 @@
       "priority": "P3",
       "effort": "M",
       "area": "Backend",
-      "status": "open",
-      "claimed_by": null,
-      "claimed_at": null,
-      "completed_at": null,
+      "status": "done",
+      "claimed_by": "ORCH-O",
+      "claimed_at": "2026-03-15T13:52:05.359897+00:00",
+      "completed_at": "2026-03-15T13:52:05.359897+00:00",
       "blocked_by": []
     },
     "TASK-190": {
