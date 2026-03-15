@@ -20,6 +20,7 @@ def _make_user(user_id: uuid.UUID = USER_ID) -> MagicMock:
     u.display_name = "Alice"
     u.email_briefing_enabled = False
     u.briefing_email_time = time(6, 30)
+    u.vertical_profile = "general"
     return u
 
 
@@ -61,6 +62,7 @@ class TestSchemaValidation:
             reminder_frequency="daily",
             email_briefing_enabled=False,
             briefing_email_time="06:30",
+            vertical_profile="general",
         )
         assert resp.timezone == "UTC"
         assert resp.reminder_frequency == "daily"

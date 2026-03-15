@@ -33,6 +33,7 @@ from pwbs.models.document import Document
 from pwbs.models.llm_audit_log import LlmAuditLog
 from pwbs.models.user import User
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
+from pwbs.schemas.enums import VerticalProfile
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ class UserSettingsResponse(BaseModel):
     reminder_frequency: str  # "daily" | "weekly" | "off"
     email_briefing_enabled: bool
     briefing_email_time: str  # HH:MM format
+    vertical_profile: str
 
 
 class UserSettingsUpdate(BaseModel):
@@ -86,6 +88,7 @@ class UserSettingsUpdate(BaseModel):
     reminder_frequency: str | None = None
     email_briefing_enabled: bool | None = None
     briefing_email_time: str | None = None  # HH:MM format
+    vertical_profile: str | None = None
 
 
 class ExportStartResponse(BaseModel):
@@ -166,6 +169,7 @@ async def get_settings_endpoint(
         reminder_frequency="daily",
         email_briefing_enabled=user.email_briefing_enabled,
         briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
+        vertical_profile=user.vertical_profile,
     )
 
 
@@ -224,6 +228,20 @@ async def update_settings(
             )
         user.display_name = update.display_name.strip()
 
+    # Update vertical profile
+    if update.vertical_profile is not None:
+        try:
+            VerticalProfile(update.vertical_profile)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "INVALID_VERTICAL_PROFILE",
+                    "message": f"Invalid vertical profile: {update.vertical_profile}. Must be one of: {', '.join(v.value for v in VerticalProfile)}",
+                },
+            )
+        user.vertical_profile = update.vertical_profile
+
     # Update email briefing settings
     if update.email_briefing_enabled is not None:
         user.email_briefing_enabled = update.email_briefing_enabled
@@ -260,6 +278,7 @@ async def update_settings(
         reminder_frequency=update.reminder_frequency or "daily",
         email_briefing_enabled=user.email_briefing_enabled,
         briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
+        vertical_profile=user.vertical_profile,
     )
 
 

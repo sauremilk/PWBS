@@ -89,6 +89,18 @@ class Urgency(str, Enum):
     LOW = "low"
 
 
+class VerticalProfile(str, Enum):
+    """Vertical specialization profile for knowledge workers (TASK-154).
+
+    Each profile adjusts briefing templates, entity priorities, and NER focus.
+    """
+
+    GENERAL = "general"
+    RESEARCHER = "researcher"
+    CONSULTANT = "consultant"
+    DEVELOPER = "developer"
+
+
 class OrgRole(str, Enum):
     """Role of a user within an organization.
 

@@ -27,10 +27,22 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=None,
     )
     email_briefing_enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="false",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
     )
     briefing_email_time: Mapped[time] = mapped_column(
-        Time, nullable=False, default=time(6, 30), server_default="06:30:00",
+        Time,
+        nullable=False,
+        default=time(6, 30),
+        server_default="06:30:00",
+    )
+    vertical_profile: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="general",
+        server_default="general",
     )
 
     # Relationships
