@@ -2412,10 +2412,10 @@
       "priority": "P3",
       "effort": "XL",
       "area": "LLM",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-15T09:21:18.311102+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T09:32:37.677288+00:00",
       "blocked_by": [
         "TASK-139"
       ]
