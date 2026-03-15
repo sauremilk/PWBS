@@ -2928,7 +2928,7 @@
       "status": "done",
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:05:06.105951+00:00",
-      "completed_at": "2026-03-15T15:15:44.916995+00:00",
+      "completed_at": "2026-03-15T15:20:16.001494+00:00",
       "blocked_by": []
     },
     "TASK-194": {
@@ -2937,10 +2937,10 @@
       "priority": "P2",
       "effort": "M",
       "area": "Docs",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-P",
       "claimed_at": "2026-03-15T15:15:44.916995+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T15:20:16.055812+00:00",
       "blocked_by": []
     },
     "TASK-195": {

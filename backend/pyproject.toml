@@ -39,6 +39,8 @@ dev = [
     "pytest-asyncio>=0.25.0",
     "pytest-benchmark>=5.1.0",
     "pytest-cov>=6.0.0",
+    "pytest-timeout>=2.3.0",
+    "openapi-spec-validator>=0.7.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
     "pre-commit>=4.0.0",
@@ -80,6 +82,9 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# --tb=short: kompakte Tracebacks; -q: kein Fortschrittsbalken-Spam;
+# --junit-xml: strukturiertes Ergebnis immer verfügbar (wird von CI + t.ps1 gelesen)
+addopts = "--tb=short -q --no-header --junit-xml=.test-results.xml --timeout=30"
 markers = [
     "unit: marks pure unit tests (no external deps)",
     "integration: marks tests requiring running databases",
