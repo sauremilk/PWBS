@@ -81,3 +81,21 @@ class RateLimitError(ConnectorError):
 
 class TokenRefreshError(ConnectorError):
     """Raised when OAuth token refresh fails."""
+
+
+class CircuitOpenError(ConnectorError):
+    """Raised when a circuit breaker is open and calls are blocked.
+
+    Attributes:
+        recovery_at: UTC datetime when the circuit will transition to half-open.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        recovery_at: float | None = None,
+        code: str | None = None,
+    ) -> None:
+        super().__init__(message, code=code or "CIRCUIT_OPEN")
+        self.recovery_at = recovery_at
