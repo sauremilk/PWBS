@@ -30,6 +30,7 @@ from pwbs.models.subscription import Subscription
 from pwbs.models.sync_run import SyncRun
 from pwbs.models.user import User
 from pwbs.models.user_profile import UserProfile
+from pwbs.models.webhook import Webhook, WebhookDelivery
 
 __all__ = [
     "ApiKey",
@@ -66,4 +67,6 @@ __all__ = [
     "SyncRun",
     "User",
     "UserProfile",
+    "Webhook",
+    "WebhookDelivery",
 ]

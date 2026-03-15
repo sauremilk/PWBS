@@ -60,7 +60,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     get_engine()
     get_weaviate_client()
-    get_neo4j_driver()
+    # Neo4j is optional in MVP – get_neo4j_driver() returns None when unavailable
+    neo4j_driver = get_neo4j_driver()
+    if neo4j_driver is None:
+        logger.warning("Neo4j unavailable – graph features disabled for this session")
     get_redis_client()
     logger.info("All database connections initialised.")
 
@@ -197,37 +200,53 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.auth import router as auth_router
     from pwbs.api.v1.routes.auth_google import router as auth_google_router
     from pwbs.api.v1.routes.auth_refresh import router as auth_refresh_router
-    from pwbs.api.v1.routes.billing import router as billing_router
+
+    # DEFERRED: Phase 3 – billing
+    # from pwbs.api.v1.routes.billing import router as billing_router
     from pwbs.api.v1.routes.briefings import router as briefings_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
-    from pwbs.api.v1.routes.developer import router as developer_router
+
+    # DEFERRED: Phase 3 – developer
+    # from pwbs.api.v1.routes.developer import router as developer_router
     from pwbs.api.v1.routes.documents import router as documents_router
     from pwbs.api.v1.routes.feature_flags import router as feature_flags_router
     from pwbs.api.v1.routes.feedback import router as feedback_router
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
-    from pwbs.api.v1.routes.marketplace import router as marketplace_router
-    from pwbs.api.v1.routes.organizations import (
-        router as organizations_router,
-    )
-    from pwbs.api.v1.routes.organizations import (
-        visibility_router,
-    )
+
+    # DEFERRED: Phase 3 – marketplace
+    # from pwbs.api.v1.routes.marketplace import router as marketplace_router
+    # DEFERRED: Phase 3 – organizations + visibility
+    # from pwbs.api.v1.routes.organizations import (
+    #     router as organizations_router,
+    # )
+    # from pwbs.api.v1.routes.organizations import (
+    #     visibility_router,
+    # )
     from pwbs.api.v1.routes.public_api import router as public_api_router
-    from pwbs.api.v1.routes.rbac import router as rbac_router
+
+    # DEFERRED: Phase 3 – rbac
+    # from pwbs.api.v1.routes.rbac import router as rbac_router
     from pwbs.api.v1.routes.referrals import router as referrals_router
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
-    from pwbs.api.v1.routes.slack import router as slack_router
-    from pwbs.api.v1.routes.sso import router as sso_router
+
+    # DEFERRED: Phase 3 – slack
+    # from pwbs.api.v1.routes.slack import router as slack_router
+    # DEFERRED: Phase 3 – sso
+    # from pwbs.api.v1.routes.sso import router as sso_router
     from pwbs.api.v1.routes.user import router as user_router
     from pwbs.api.v1.routes.waitlist import router as waitlist_router
-    from pwbs.api.v1.routes.webhooks import router as webhooks_router
+
+    # DEFERRED: Phase 3 – webhooks (Gmail + Slack only)
+    # from pwbs.api.v1.routes.webhooks import router as webhooks_router
+    from pwbs.api.v1.routes.webhook_outbound import router as webhook_outbound_router
 
     application.include_router(auth_router)
     application.include_router(auth_google_router)
     application.include_router(auth_refresh_router)
     application.include_router(admin_router)
+    application.include_router(health_router)
     application.include_router(assumptions_router)
     application.include_router(feature_flags_router)
     application.include_router(feedback_router)
@@ -235,21 +254,25 @@ def create_app() -> FastAPI:
     application.include_router(connectors_router)
     application.include_router(documents_router)
     application.include_router(knowledge_router)
-    application.include_router(marketplace_router)
-    application.include_router(organizations_router)
-    application.include_router(visibility_router)
+    # DEFERRED: Phase 3
+    # application.include_router(marketplace_router)
+    # application.include_router(organizations_router)
+    # application.include_router(visibility_router)
     application.include_router(reminders_router)
     application.include_router(search_router)
     application.include_router(user_router)
-    application.include_router(slack_router)
-    application.include_router(sso_router)
-    application.include_router(webhooks_router)
-    application.include_router(billing_router)
-    application.include_router(rbac_router)
+    # DEFERRED: Phase 3
+    # application.include_router(slack_router)
+    # application.include_router(sso_router)
+    # application.include_router(webhooks_router)
+    # application.include_router(billing_router)
+    # application.include_router(rbac_router)
     application.include_router(referrals_router)
-    application.include_router(developer_router)
+    # DEFERRED: Phase 3
+    # application.include_router(developer_router)
     application.include_router(public_api_router)
     application.include_router(waitlist_router)
+    application.include_router(webhook_outbound_router)
 
     # Prometheus metrics (TASK-116) -- must be after all routers are mounted
     setup_metrics(application)
