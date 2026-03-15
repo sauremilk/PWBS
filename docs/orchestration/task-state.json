@@ -2496,10 +2496,10 @@
       "priority": "P1",
       "effort": "M",
       "area": "Auth",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-M",
       "claimed_at": "2026-03-15T10:30:05.940083+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T10:40:07.466869+00:00",
       "blocked_by": [
         "TASK-153"
       ]
