@@ -2,6 +2,7 @@
 
 import { Menu } from "lucide-react";
 import { NotificationBell } from "@/components/reminders/notification-bell";
+import { ChangelogButton } from "@/components/layout/changelog";
 import { useMobileNav } from "@/components/layout/mobile-nav-context";
 
 interface HeaderProps {
@@ -27,6 +28,7 @@ export function Header({ title }: HeaderProps) {
         <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
       </div>
       <div className="flex items-center gap-3">
+        <ChangelogButton />
         <NotificationBell />
       </div>
     </header>

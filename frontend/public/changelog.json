@@ -1,0 +1,36 @@
+[
+  {
+    "version": "0.9.0",
+    "date": "2026-03-15",
+    "title": "Beta-Launch",
+    "entries": [
+      "Morgenbriefing mit personalisierbaren Themen-Filtern",
+      "Semantische Suche mit Auto-Complete und Suchverlauf",
+      "Google Calendar, Notion, Zoom und Obsidian Konnektoren",
+      "Kontextbezogenes Feedback-Widget fuer Bug-Reports",
+      "Mobile-optimierte Responsive-Ansicht"
+    ]
+  },
+  {
+    "version": "0.8.0",
+    "date": "2026-03-01",
+    "title": "Onboarding und Einstellungen",
+    "entries": [
+      "Interaktiver First-Run-Wizard mit Konnektor-Setup",
+      "Erweiterte Benutzereinstellungen: Zeitzone, Briefing-Zeitplan",
+      "Referral-System mit Einladungs-Codes",
+      "LLM-Response-Cache fuer schnellere Antworten"
+    ]
+  },
+  {
+    "version": "0.7.0",
+    "date": "2026-02-15",
+    "title": "Knowledge Graph und Suche",
+    "entries": [
+      "Hybrid-Suche mit Keyword- und Vektorsuche",
+      "Knowledge-Graph-Visualisierung",
+      "Konnektor-Sync-Verlauf mit Fehler-Details",
+      "DSGVO-konforme Datenexport-Funktion"
+    ]
+  }
+]
