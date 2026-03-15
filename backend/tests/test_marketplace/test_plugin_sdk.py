@@ -264,6 +264,18 @@ class TestBasePluginHooks:
         await plugin.on_install(ctx)
 
     @pytest.mark.asyncio
+    async def test_default_on_activate_is_noop(self) -> None:
+        plugin = DummyConnector()
+        ctx = _make_context()
+        await plugin.on_activate(ctx)
+
+    @pytest.mark.asyncio
+    async def test_default_on_deactivate_is_noop(self) -> None:
+        plugin = DummyConnector()
+        ctx = _make_context()
+        await plugin.on_deactivate(ctx)
+
+    @pytest.mark.asyncio
     async def test_default_on_uninstall_is_noop(self) -> None:
         plugin = DummyConnector()
         ctx = _make_context()
