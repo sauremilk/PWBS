@@ -14,6 +14,7 @@ from pwbs.models.decision import Decision
 from pwbs.models.document import Document
 from pwbs.models.entity import Entity, EntityMention
 from pwbs.models.feature_flag import FeatureFlag
+from pwbs.models.feedback import Feedback
 from pwbs.models.llm_audit_log import LlmAuditLog
 from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.plugin import InstalledPlugin, Plugin
@@ -42,6 +43,7 @@ __all__ = [
     "Entity",
     "EntityMention",
     "FeatureFlag",
+    "Feedback",
     "LlmAuditLog",
     "Organization",
     "OrganizationMember",
