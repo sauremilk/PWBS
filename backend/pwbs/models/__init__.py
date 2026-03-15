@@ -18,6 +18,7 @@ from pwbs.models.feedback import Feedback
 from pwbs.models.llm_audit_log import LlmAuditLog
 from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.plugin import InstalledPlugin, Plugin
+from pwbs.models.proactive_insight import InsightPreferences, ProactiveInsight
 from pwbs.models.referral import Referral
 from pwbs.models.refresh_token import RefreshToken
 from pwbs.models.reminder import Reminder
@@ -50,8 +51,10 @@ __all__ = [
     "LlmAuditLog",
     "Organization",
     "OrganizationMember",
+    "InsightPreferences",
     "InstalledPlugin",
     "Plugin",
+    "ProactiveInsight",
     "Referral",
     "RefreshToken",
     "Reminder",
