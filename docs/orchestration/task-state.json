@@ -2398,9 +2398,9 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
-      "status": "ready",
-      "claimed_by": null,
-      "claimed_at": null,
+      "status": "in_progress",
+      "claimed_by": "ORCH-L",
+      "claimed_at": "2026-03-15T10:20:00.000000+00:00",
       "completed_at": null,
       "blocked_by": [
         "TASK-149"
