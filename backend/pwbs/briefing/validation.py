@@ -1,4 +1,4 @@
-﻿"""Quellenreferenz-Validierung in Briefings (TASK-079).
+"""Quellenreferenz-Validierung in Briefings (TASK-079, TASK-200).
 
 Post-processing step after briefing generation:
 1. Extract `[Quelle: Titel, Datum]` annotations from generated text
@@ -7,28 +7,45 @@ Post-processing step after briefing generation:
 4. Remove invalid references or mark as low confidence
 5. Return validated text + source_chunks UUID list
 
+TASK-200 adds BriefingValidator with embedding-based confidence scoring:
+- Per-sentence cosine similarity against source chunks
+- Confidence levels: high (> 0.7), medium (0.5-0.7), low (< 0.5)
+- Blocks briefings without source references (fallback message)
+- Blocks briefings with > 30% low-confidence sentences
+
 D1 Section 3.5 (Step 7), D4 NF-022: 100% validated source references.
 """
 
 from __future__ import annotations
 
 import logging
+import math
 import re
 import uuid
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
+from enum import Enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.core.grounding import GroundingService, SourceReference
 
+if TYPE_CHECKING:
+    from pwbs.processing.embedding import EmbeddingService
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "BriefingSourceValidator",
+    "BriefingValidator",
+    "BriefingValidatorConfig",
+    "ConfidenceLevel",
+    "SentenceConfidence",
     "SourceValidationResult",
     "ValidatedReference",
-    "BriefingSourceValidator",
+    "ValidationResult",
 ]
 
 # Minimum similarity ratio for fuzzy title matching
@@ -309,3 +326,225 @@ class BriefingSourceValidator:
         # Clean up double spaces from removals
         result = re.sub(r"  +", " ", result)
         return result.strip()
+
+
+# ------------------------------------------------------------------
+# TASK-200: Confidence Scoring & Quality Validation
+# ------------------------------------------------------------------
+
+# Sentence splitting: periods, exclamation marks, question marks
+# followed by whitespace or end of string. Ignores abbreviations.
+_SENTENCE_RE = re.compile(r"(?<=[.!?])\s+|\n+")
+
+
+class ConfidenceLevel(str, Enum):
+    """Confidence level for a briefing sentence."""
+
+    HIGH = "high"  # cosine similarity > 0.7
+    MEDIUM = "medium"  # 0.5 <= similarity <= 0.7
+    LOW = "low"  # similarity < 0.5
+
+
+@dataclass(frozen=True, slots=True)
+class SentenceConfidence:
+    """Confidence score for a single briefing sentence."""
+
+    sentence: str
+    confidence: float
+    level: ConfidenceLevel
+    nearest_chunk_id: uuid.UUID | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ValidationResult:
+    """Result of briefing quality validation (TASK-200)."""
+
+    is_valid: bool
+    content: str
+    sentence_scores: list[SentenceConfidence]
+    overall_confidence: float
+    low_confidence_ratio: float
+    has_source_references: bool
+    quality_warning: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BriefingValidatorConfig:
+    """Configuration for BriefingValidator thresholds."""
+
+    high_threshold: float = 0.7
+    medium_threshold: float = 0.5
+    max_low_ratio: float = 0.3
+    min_sentence_length: int = 10
+    fallback_message: str = (
+        "Nicht genügend Quelldaten für ein vollständiges Briefing. "
+        "Bitte stellen Sie sicher, dass ausreichend Datenquellen verbunden sind."
+    )
+
+
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    """Compute cosine similarity between two vectors."""
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
+def _split_sentences(text: str) -> list[str]:
+    """Split text into sentences, filtering out short/empty fragments."""
+    raw = _SENTENCE_RE.split(text)
+    return [s.strip() for s in raw if s.strip()]
+
+
+class BriefingValidator:
+    """Post-generation quality validator for briefings (TASK-200).
+
+    Validates briefing content against source chunks using
+    embedding-based cosine similarity.  Assigns per-sentence
+    confidence levels (high / medium / low) and blocks briefings
+    that fail quality thresholds.
+
+    Parameters
+    ----------
+    embedding_service:
+        Service for generating text embeddings.
+    config:
+        Threshold configuration.  Uses sensible defaults if omitted.
+    """
+
+    def __init__(
+        self,
+        embedding_service: EmbeddingService,
+        config: BriefingValidatorConfig | None = None,
+    ) -> None:
+        self._embedding = embedding_service
+        self._config = config or BriefingValidatorConfig()
+
+    async def validate(
+        self,
+        briefing: str,
+        source_chunks: list[str],
+        source_chunk_ids: list[uuid.UUID] | None = None,
+    ) -> ValidationResult:
+        """Validate briefing content against source chunks.
+
+        Parameters
+        ----------
+        briefing:
+            Generated briefing text.
+        source_chunks:
+            Text content of the source chunks used during generation.
+        source_chunk_ids:
+            Optional UUIDs corresponding to each source chunk
+            (same order as ``source_chunks``).
+
+        Returns
+        -------
+        ValidationResult
+            Quality assessment with per-sentence confidence scores.
+        """
+        has_refs = bool(_SOURCE_REF_RE.search(briefing))
+
+        # Block briefings without any source references
+        if not has_refs or not source_chunks:
+            return ValidationResult(
+                is_valid=False,
+                content=self._config.fallback_message,
+                sentence_scores=[],
+                overall_confidence=0.0,
+                low_confidence_ratio=1.0,
+                has_source_references=False,
+                quality_warning="Briefing enthält keine Quellenreferenzen.",
+            )
+
+        # Embed source chunks
+        chunk_embeddings = await self._embed_texts(source_chunks)
+        chunk_ids = source_chunk_ids or [None] * len(source_chunks)  # type: ignore[list-item]
+
+        # Split briefing into sentences and score each
+        sentences = _split_sentences(briefing)
+        scored: list[SentenceConfidence] = []
+
+        for sentence in sentences:
+            # Skip very short fragments (headings, bullet markers)
+            if len(sentence) < self._config.min_sentence_length:
+                continue
+
+            sent_embedding = await self._embed_texts([sentence])
+            if not sent_embedding or not sent_embedding[0]:
+                scored.append(
+                    SentenceConfidence(
+                        sentence=sentence,
+                        confidence=0.0,
+                        level=ConfidenceLevel.LOW,
+                    )
+                )
+                continue
+
+            # Find closest source chunk
+            best_sim = 0.0
+            best_idx = 0
+            for idx, chunk_emb in enumerate(chunk_embeddings):
+                sim = _cosine_similarity(sent_embedding[0], chunk_emb)
+                if sim > best_sim:
+                    best_sim = sim
+                    best_idx = idx
+
+            level = self._classify(best_sim)
+            scored.append(
+                SentenceConfidence(
+                    sentence=sentence,
+                    confidence=best_sim,
+                    level=level,
+                    nearest_chunk_id=chunk_ids[best_idx],
+                )
+            )
+
+        # Compute aggregate metrics
+        if scored:
+            overall = sum(s.confidence for s in scored) / len(scored)
+            low_count = sum(1 for s in scored if s.level == ConfidenceLevel.LOW)
+            low_ratio = low_count / len(scored)
+        else:
+            overall = 0.0
+            low_ratio = 1.0
+
+        # Quality gate: block if too many low-confidence sentences
+        is_valid = low_ratio <= self._config.max_low_ratio
+        warning = None
+        if not is_valid:
+            warning = (
+                f"Briefing-Qualität eingeschränkt: {low_ratio:.0%} der Aussagen "
+                f"haben niedrige Quellen-Konfidenz (Schwellenwert: "
+                f"{self._config.max_low_ratio:.0%})."
+            )
+
+        content = briefing if is_valid else self._config.fallback_message
+
+        return ValidationResult(
+            is_valid=is_valid,
+            content=content,
+            sentence_scores=scored,
+            overall_confidence=overall,
+            low_confidence_ratio=low_ratio,
+            has_source_references=has_refs,
+            quality_warning=warning,
+        )
+
+    def _classify(self, similarity: float) -> ConfidenceLevel:
+        """Classify a cosine similarity score into a confidence level."""
+        if similarity > self._config.high_threshold:
+            return ConfidenceLevel.HIGH
+        if similarity >= self._config.medium_threshold:
+            return ConfidenceLevel.MEDIUM
+        return ConfidenceLevel.LOW
+
+    async def _embed_texts(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts using the embedding service."""
+        results: list[list[float]] = []
+        for t in texts:
+            emb = await self._embedding.embed_text(t)
+            results.append(emb)
+        return results
