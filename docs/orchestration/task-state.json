@@ -2350,13 +2350,15 @@
       "priority": "P3",
       "effort": "XL",
       "area": "Backend",
-      "status": "in-progress",
+      "status": "done",
       "claimed_by": "ORCH-L",
       "claimed_at": "2026-03-14T22:10:25.081238+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T10:15:00.000000+00:00",
       "blocked_by": [
         "TASK-150"
-      ]
+      ],
+      "commit": "4cf297a",
+      "notes": "ORCH-L: Marketplace - Plugin SDK, Registry, Service, ORM Models, Migration, API Routes, 65 tests."
     },
     "TASK-152": {
       "stream": "STREAM-PHASE5",
