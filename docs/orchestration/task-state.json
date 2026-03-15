@@ -2426,13 +2426,14 @@
       "priority": "P1",
       "effort": "M",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-M",
       "claimed_at": "2026-03-15T10:10:20.686605+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-15T10:16:38.208132+00:00",
       "blocked_by": [
         "TASK-150"
-      ]
+      ],
+      "notes": "Plugin-SDK vollstaendig: Lifecycle-Hooks (install/activate/deactivate/uninstall), JSON-Schema fuer manifest.json, CLI (scaffold/validate/package), Notion-Referenz-Plugin. TASK-157 (Sandbox) und TASK-165 (Marketplace) jetzt entblockt."
     },
     "TASK-157": {
       "stream": "STREAM-PHASE6",
