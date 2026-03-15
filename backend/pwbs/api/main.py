@@ -204,6 +204,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.feature_flags import router as feature_flags_router
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
+    from pwbs.api.v1.routes.marketplace import router as marketplace_router
     from pwbs.api.v1.routes.organizations import (
         router as organizations_router,
     )
@@ -216,6 +217,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.search import router as search_router
     from pwbs.api.v1.routes.slack import router as slack_router
     from pwbs.api.v1.routes.user import router as user_router
+    from pwbs.api.v1.routes.waitlist import router as waitlist_router
     from pwbs.api.v1.routes.webhooks import router as webhooks_router
 
     application.include_router(auth_router)
@@ -227,6 +229,7 @@ def create_app() -> FastAPI:
     application.include_router(connectors_router)
     application.include_router(documents_router)
     application.include_router(knowledge_router)
+    application.include_router(marketplace_router)
     application.include_router(organizations_router)
     application.include_router(visibility_router)
     application.include_router(reminders_router)
@@ -238,6 +241,7 @@ def create_app() -> FastAPI:
     application.include_router(rbac_router)
     application.include_router(developer_router)
     application.include_router(public_api_router)
+    application.include_router(waitlist_router)
 
     # Prometheus metrics (TASK-116) -- must be after all routers are mounted
     setup_metrics(application)
