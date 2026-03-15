@@ -11,7 +11,6 @@ from pwbs.verticals.profiles import (
     get_vertical_config,
 )
 
-
 # ------------------------------------------------------------------
 # Registry completeness
 # ------------------------------------------------------------------

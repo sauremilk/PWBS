@@ -66,8 +66,7 @@ _RESEARCHER = VerticalConfig(
     profile=VerticalProfile.RESEARCHER,
     label="Forscher",
     description=(
-        "Optimiert fuer Literaturarbeit, Hypothesen-Tracking "
-        "und Experiment-Verknuepfung."
+        "Optimiert fuer Literaturarbeit, Hypothesen-Tracking und Experiment-Verknuepfung."
     ),
     entity_priorities=(
         EntityType.HYPOTHESIS,
@@ -98,10 +97,7 @@ _RESEARCHER = VerticalConfig(
 _CONSULTANT = VerticalConfig(
     profile=VerticalProfile.CONSULTANT,
     label="Berater",
-    description=(
-        "Optimiert fuer Kundenprojekte, Lessons Learned "
-        "und Cross-Projekt-Muster."
-    ),
+    description=("Optimiert fuer Kundenprojekte, Lessons Learned und Cross-Projekt-Muster."),
     entity_priorities=(
         EntityType.PROJECT,
         EntityType.PERSON,

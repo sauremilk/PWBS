@@ -523,8 +523,6 @@ class TestQuarterlyBriefingIntegration:
         gateway = _make_gateway()
         gen = BriefingGenerator(gateway, registry)
 
-        result = await gen.generate(
-            BriefingType.QUARTERLY, _make_context(), USER_ID
-        )
+        result = await gen.generate(BriefingType.QUARTERLY, _make_context(), USER_ID)
 
         assert result.briefing_type == BriefingType.QUARTERLY
