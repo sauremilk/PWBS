@@ -4,7 +4,7 @@ Middleware order (outside → inside, last added = outermost in Starlette):
   1. CORSMiddleware        – CORS headers
   2. TrustedHostMiddleware – reject unknown hosts
   3. SecurityHeaders       – X-Content-Type-Options, X-Frame-Options, HSTS
-  4. RequestIDMiddleware   – unique X-Request-ID per response
+  4. CorrelationIdMiddleware – correlation ID (X-Request-ID) per response
   5. RateLimitMiddleware   – per-user/per-IP rate limiting (Redis)
   6. AuthMiddleware        – passive JWT extraction → request.state.user_id
   7. AuditMiddleware       – log mutating operations (innermost)
@@ -30,7 +30,7 @@ from pwbs.api.middleware.access_log import AccessLogMiddleware
 from pwbs.api.middleware.audit import AuditMiddleware
 from pwbs.api.middleware.auth import AuthMiddleware
 from pwbs.api.middleware.rate_limit import RateLimitMiddleware
-from pwbs.api.middleware.request_id import RequestIDMiddleware
+from pwbs.api.middleware.correlation import CorrelationIdMiddleware
 from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
@@ -172,8 +172,8 @@ def create_app() -> FastAPI:
     # 4b. AccessLog -- logs method, path, status, duration_ms (TASK-113)
     application.add_middleware(AccessLogMiddleware)
 
-    # 4. RequestID
-    application.add_middleware(RequestIDMiddleware)
+    # 4. CorrelationId (TASK-196) – replaces RequestIDMiddleware
+    application.add_middleware(CorrelationIdMiddleware)
 
     # 3. SecurityHeaders
     application.add_middleware(SecurityHeadersMiddleware)

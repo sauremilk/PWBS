@@ -176,7 +176,7 @@ class TestMiddlewareStackRegistration:
         assert "CORSMiddleware" in names
         assert "TrustedHostMiddleware" in names
         assert "SecurityHeadersMiddleware" in names
-        assert "RequestIDMiddleware" in names
+        assert "CorrelationIdMiddleware" in names
         assert "RateLimitMiddleware" in names
         assert "AuthMiddleware" in names
         assert "AuditMiddleware" in names

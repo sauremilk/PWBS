@@ -35,7 +35,7 @@ class TestAppFactory:
     def test_request_id_middleware_present(self) -> None:
         app = create_app()
         middleware_classes = [m.cls.__name__ for m in app.user_middleware]
-        assert "RequestIDMiddleware" in middleware_classes
+        assert "CorrelationIdMiddleware" in middleware_classes
 
     def test_docs_enabled_in_development(self) -> None:
         app = create_app()
@@ -45,8 +45,8 @@ class TestAppFactory:
             assert app.redoc_url == "/redoc"
 
 
-class TestRequestIDMiddleware:
-    """Verify the RequestID middleware injects X-Request-ID."""
+class TestCorrelationIdMiddleware:
+    """Verify the CorrelationId middleware injects X-Request-ID."""
 
     @pytest.mark.anyio
     async def test_response_has_request_id(self) -> None:

@@ -17,6 +17,7 @@ from pwbs.core.logging import (
     _add_request_context,
     _rename_event_to_message,
     _sanitize_pii,
+    correlation_id_var,
     request_id_var,
     setup_logging,
     user_id_var,
@@ -365,55 +366,59 @@ class TestAccessLogMiddleware:
 
 
 # ---------------------------------------------------------------------------
-# RequestIDMiddleware sets contextvar
+# CorrelationIdMiddleware sets contextvar (TASK-196)
 # ---------------------------------------------------------------------------
 
 
-class TestRequestIDMiddlewareContextVar:
+class TestCorrelationIdMiddlewareContextVar:
     @pytest.mark.asyncio
-    async def test_sets_request_id_contextvar(self) -> None:
-        from pwbs.api.middleware.request_id import RequestIDMiddleware
+    async def test_sets_correlation_id_contextvar(self) -> None:
+        from pwbs.api.middleware.correlation import CorrelationIdMiddleware
 
-        mw = RequestIDMiddleware(AsyncMock())
+        mw = CorrelationIdMiddleware(AsyncMock())
         req = MagicMock()
         req.headers = {"x-request-id": "custom-req-id"}
         req.state = MagicMock()
 
-        captured_id = None
+        captured_cid = None
+        captured_rid = None
 
         async def capture_next(r: Any) -> MagicMock:
-            nonlocal captured_id
-            captured_id = request_id_var.get()
+            nonlocal captured_cid, captured_rid
+            captured_cid = correlation_id_var.get()
+            captured_rid = request_id_var.get()
             resp = MagicMock()
             resp.headers = {}
             return resp
 
         await mw.dispatch(req, capture_next)
-        assert captured_id == "custom-req-id"
+        assert captured_cid == "custom-req-id"
+        assert captured_rid == "custom-req-id"
+        assert req.state.correlation_id == "custom-req-id"
         assert req.state.request_id == "custom-req-id"
 
     @pytest.mark.asyncio
     async def test_generates_uuid_when_no_header(self) -> None:
-        from pwbs.api.middleware.request_id import RequestIDMiddleware
+        from pwbs.api.middleware.correlation import CorrelationIdMiddleware
 
-        mw = RequestIDMiddleware(AsyncMock())
+        mw = CorrelationIdMiddleware(AsyncMock())
         req = MagicMock()
         req.headers = {}
         req.state = MagicMock()
 
-        captured_id = None
+        captured_cid = None
 
         async def capture_next(r: Any) -> MagicMock:
-            nonlocal captured_id
-            captured_id = request_id_var.get()
+            nonlocal captured_cid
+            captured_cid = correlation_id_var.get()
             resp = MagicMock()
             resp.headers = {}
             return resp
 
         await mw.dispatch(req, capture_next)
-        assert captured_id is not None
+        assert captured_cid is not None
         # Should be a valid UUID
-        uuid.UUID(captured_id)
+        uuid.UUID(captured_cid)
 
 
 # ---------------------------------------------------------------------------

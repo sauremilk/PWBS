@@ -1,4 +1,4 @@
-﻿"""Structured JSON-Logging configuration (TASK-113).
+"""Structured JSON-Logging configuration (TASK-113).
 
 Configures stdlib logging to emit JSON-formatted log entries via structlog's
 ProcessorFormatter. Each entry contains: timestamp, level, logger (module),
@@ -24,6 +24,10 @@ import structlog
 
 request_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id",
+    default=None,
+)
+correlation_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "correlation_id",
     default=None,
 )
 user_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
@@ -69,8 +73,11 @@ def _add_request_context(
     method_name: str,
     event_dict: dict[str, Any],
 ) -> dict[str, Any]:
-    """Inject request_id and user_id from context vars into every log entry."""
-    event_dict.setdefault("request_id", request_id_var.get())
+    """Inject correlation_id, request_id and user_id from context vars."""
+    cid = correlation_id_var.get()
+    rid = request_id_var.get()
+    event_dict.setdefault("correlation_id", cid or rid)
+    event_dict.setdefault("request_id", rid or cid)
     event_dict.setdefault("user_id", user_id_var.get())
     return event_dict
 
