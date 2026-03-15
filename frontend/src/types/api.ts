@@ -510,6 +510,9 @@ export interface UserSettingsResponse {
   language: string;
   briefing_auto_generate: boolean;
   reminder_frequency: ReminderFrequency;
+  email_briefing_enabled: boolean;
+  briefing_email_time: string;
+  vertical_profile: string;
 }
 
 export interface UserSettingsUpdate {
@@ -518,6 +521,9 @@ export interface UserSettingsUpdate {
   briefing_auto_generate?: boolean;
   display_name?: string;
   reminder_frequency?: ReminderFrequency;
+  email_briefing_enabled?: boolean;
+  briefing_email_time?: string;
+  vertical_profile?: string;
 }
 
 export interface ExportStartResponse {

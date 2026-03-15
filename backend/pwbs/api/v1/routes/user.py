@@ -163,10 +163,10 @@ async def get_settings_endpoint(
         user_id=user.id,
         email=user.email,
         display_name=user.display_name,
-        timezone="UTC",
-        language="de",
-        briefing_auto_generate=True,
-        reminder_frequency="daily",
+        timezone=user.timezone,
+        language=user.language,
+        briefing_auto_generate=user.briefing_auto_generate,
+        reminder_frequency=user.reminder_frequency,
         email_briefing_enabled=user.email_briefing_enabled,
         briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
         vertical_profile=user.vertical_profile,
@@ -195,6 +195,7 @@ async def update_settings(
                     "message": f"Invalid timezone: {update.timezone}",
                 },
             )
+        user.timezone = update.timezone
 
     if update.language is not None:
         if update.language not in _VALID_LANGUAGES:
@@ -205,6 +206,7 @@ async def update_settings(
                     "message": f"Unsupported language: {update.language}",
                 },
             )
+        user.language = update.language
 
     if update.reminder_frequency is not None:
         if update.reminder_frequency not in ("daily", "weekly", "off"):
@@ -215,6 +217,10 @@ async def update_settings(
                     "message": f"Invalid reminder frequency: {update.reminder_frequency}. Must be daily, weekly, or off.",
                 },
             )
+        user.reminder_frequency = update.reminder_frequency
+
+    if update.briefing_auto_generate is not None:
+        user.briefing_auto_generate = update.briefing_auto_generate
 
     # Validate and update vertical_profile (TASK-154)
     if update.vertical_profile is not None:
@@ -267,18 +273,15 @@ async def update_settings(
     await db.commit()
     await db.refresh(user)
 
-    # Settings columns (timezone, language, briefing_auto_generate) are not
-    # yet in the User model. Return current values with applied defaults.
+    # Settings columns are now persisted in the User model.
     return UserSettingsResponse(
         user_id=user.id,
         email=user.email,
         display_name=user.display_name,
-        timezone=update.timezone or "UTC",
-        language=update.language or "de",
-        briefing_auto_generate=(
-            update.briefing_auto_generate if update.briefing_auto_generate is not None else True
-        ),
-        reminder_frequency=update.reminder_frequency or "daily",
+        timezone=user.timezone,
+        language=user.language,
+        briefing_auto_generate=user.briefing_auto_generate,
+        reminder_frequency=user.reminder_frequency,
         email_briefing_enabled=user.email_briefing_enabled,
         briefing_email_time=user.briefing_email_time.strftime("%H:%M"),
         vertical_profile=user.vertical_profile,

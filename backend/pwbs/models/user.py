@@ -44,6 +44,30 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default="general",
         server_default="general",
     )
+    timezone: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="Europe/Berlin",
+        server_default="Europe/Berlin",
+    )
+    language: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="de",
+        server_default="de",
+    )
+    briefing_auto_generate: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
+    )
+    reminder_frequency: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="daily",
+        server_default="daily",
+    )
 
     # Relationships
     connections: Mapped[list["Connection"]] = relationship(  # noqa: F821

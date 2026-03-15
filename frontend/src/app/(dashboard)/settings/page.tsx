@@ -248,16 +248,22 @@ function NotificationsTab() {
   const { data, isLoading } = useUserSettings();
   const update = useUpdateSettings();
   const [frequency, setFrequency] = useState("daily");
+  const [emailEnabled, setEmailEnabled] = useState(true);
+  const [briefingTime, setBriefingTime] = useState("06:30");
 
   useEffect(() => {
     if (data) {
       setFrequency(data.reminder_frequency);
+      setEmailEnabled(data.email_briefing_enabled);
+      setBriefingTime(data.briefing_email_time);
     }
   }, [data]);
 
   function handleSave() {
     update.mutate({
       reminder_frequency: frequency as "daily" | "weekly" | "off",
+      email_briefing_enabled: emailEnabled,
+      briefing_email_time: briefingTime,
     });
   }
 
@@ -271,6 +277,45 @@ function NotificationsTab() {
 
   return (
     <div className="space-y-6 max-w-md">
+      {/* E-Mail Briefing */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">
+          E-Mail Briefings
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Erhalte tägliche Briefings per E-Mail zu deinem gewünschten Zeitpunkt.
+        </p>
+      </div>
+
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={emailEnabled}
+          onChange={(e) => setEmailEnabled(e.target.checked)}
+          className="rounded border-gray-300"
+        />
+        E-Mail-Briefings aktiviert
+      </label>
+
+      {emailEnabled && (
+        <div>
+          <label
+            htmlFor="briefing-time"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Briefing-Zeitpunkt
+          </label>
+          <input
+            id="briefing-time"
+            type="time"
+            value={briefingTime}
+            onChange={(e) => setBriefingTime(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+      )}
+
+      {/* Erinnerungsfrequenz */}
       <div>
         <h3 className="text-sm font-semibold text-gray-900">
           Erinnerungsfrequenz
