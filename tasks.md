@@ -3202,6 +3202,8 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ## Phase 3 – Private Beta & Produktreife (Monate 10–15)
 
+> **⚠️ MVP-Scope (ADR-016):** Tasks für deaktivierte Module und Phase-3-Konnektoren (Gmail, Slack, Google Docs, Outlook) sind mit `⏸️ DEFERRED` markiert und werden vom Orchestrator übersprungen.
+
 ---
 
 #### TASK-121: Celery + Redis Queue-Infrastruktur einrichten
@@ -3256,7 +3258,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-123: Gmail-Konnektor – OAuth2 und Google Pub/Sub Push Notifications
+#### TASK-123: Gmail-Konnektor – OAuth2 und Google Pub/Sub Push Notifications ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                             |
 | ---------------- | -------------------------------- |
@@ -3282,7 +3284,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-124: Gmail-Konnektor – History API, Thread-Resolution und UDF-Normalisierung
+#### TASK-124: Gmail-Konnektor – History API, Thread-Resolution und UDF-Normalisierung ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                             |
 | ---------------- | -------------------------------- |
@@ -3307,7 +3309,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-125: Slack-Konnektor – OAuth2 und Events API
+#### TASK-125: Slack-Konnektor – OAuth2 und Events API ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                             |
 | ---------------- | -------------------------------- |
@@ -3333,7 +3335,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-126: Slack-Konnektor – Cursor-basiertes Backfill und Thread-Auflösung
+#### TASK-126: Slack-Konnektor – Cursor-basiertes Backfill und Thread-Auflösung ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                             |
 | ---------------- | -------------------------------- |
@@ -3358,7 +3360,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-127: Google Docs-Konnektor implementieren
+#### TASK-127: Google Docs-Konnektor implementieren ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                         |
 | ---------------- | ---------------------------- |
@@ -3384,7 +3386,7 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 
 ---
 
-#### TASK-128: Outlook-Mail-Konnektor implementieren
+#### TASK-128: Outlook-Mail-Konnektor implementieren ⏸️ DEFERRED (ADR-016)
 
 | Feld             | Wert                         |
 | ---------------- | ---------------------------- |
@@ -4961,6 +4963,311 @@ Phase 1: 8 Tasks | Phase 2 Infra/DB: 32 Tasks | Gesamt: 40 Tasks
 - [ ] Gelesen-Status in localStorage (kein Server-Roundtrip)
 
 **Technische Hinweise:** Datei frontend/public/changelog.json. Komponente frontend/src/components/layout/changelog.tsx. Badge via localStorage lastReadDate.
+
+---
+
+## Phase 2.5  MVP-Abschluss & Early-Adopter-Readiness
+
+---
+
+#### TASK-191: E2E-Integration-Test: IngestionProcessingSearch Pipeline End-to-End
+
+| Feld             | Wert                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Kritischer Pfad: Ohne Pipeline-Validierung kein Vertrauen in MVP-Qualität)                                            |
+| **Bereich**      | Testing                                                                                                                   |
+| **Aufwand**      | M (23 Tage)                                                                                                              |
+| **Status**       |  Offen                                                                                                                  |
+| **Quelle**       | PRD-SPEC NF-001 Semantische Suche < 2 Sekunden", ARCHITECTURE.md Pipeline-Architektur                                    |
+| **Abhängig von** |                                                                                                                          |
+| **Blockiert**    | TASK-192                                                                                                                  |
+
+**Beschreibung:** Vollständiger End-to-End-Integrationstest der Kern-Pipeline: Ein Konnektor (Google Calendar Mock) liefert Rohdaten  IngestionAgent normalisiert zu UDF  ProcessingAgent chunked, erzeugt Embeddings und extrahiert Entitäten  Weaviate-Index wird befüllt  SearchAgent liefert relevante Ergebnisse für eine Testquery. Alle externen Services (Weaviate, PostgreSQL) werden per Docker-Compose-Teststack bereitgestellt.
+
+**Acceptance Criteria:**
+
+- [ ] Pipeline-Test in `tests/integration/test_pipeline_e2e.py` testet den Pfad ConnectorIngestionProcessingSearch mit gemocktem OAuth und echtem Weaviate/PostgreSQL
+- [ ] Test verifiziert: mindestens 1 Suchergebnis mit Relevanz-Score > 0.5 für eine zum Testdokument passende Query
+- [ ] Test verifiziert: Entitäten (Person, Projekt) wurden extrahiert und in PostgreSQL persistiert
+- [ ] Test läuft in CI mit `--profile integration` und ist idempotent (wiederholbar ohne Seiteneffekte)
+
+**Technische Hinweise:** Nutze `docker-compose.test.yml` mit Weaviate und PostgreSQL. Fixtures in `tests/integration/conftest.py`. Google-Calendar-Daten als JSON-Fixture. Prüfe `owner_id`-Isolation zwischen Test-Läufen.
+
+---
+
+#### TASK-192: E2E-Integration-Test: Briefing-Generierung mit realistischen Testdaten
+
+| Feld             | Wert                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Briefings sind das Kernprodukt  Qualität muss validiert sein)                            |
+| **Bereich**      | Testing                                                                                      |
+| **Aufwand**      | M (23 Tage)                                                                                 |
+| **Status**       |  Offen                                                                                     |
+| **Quelle**       | PRD-SPEC US-3.1 Morgenbriefing, US-3.3 Quellenreferenzen, NF-002 < 10 Sekunden"            |
+| **Abhängig von** | TASK-191                                                                                     |
+| **Blockiert**    |                                                                                             |
+
+**Beschreibung:** Integrationstest für die Briefing-Generierung: Auf Basis der in TASK-191 aufgesetzten Pipeline-Testdaten wird ein Morgenbriefing generiert. Der LLM-Aufruf wird mit einem deterministischen Mock (festes JSON-Response) ersetzt. Geprüft wird, dass das Briefing Quellenreferenzen enthält, das korrekte Format hat und innerhalb des Zeitlimits generiert wird.
+
+**Acceptance Criteria:**
+
+- [ ] Test in `tests/integration/test_briefing_e2e.py` generiert ein Morgenbriefing auf Basis von mindestens 3 indexierten Testdokumenten
+- [ ] Generiertes Briefing enthält mindestens 2 Quellenreferenzen mit gültigen `source_id`-Verweisen
+- [ ] Briefing wird in PostgreSQL persistiert mit korrektem `owner_id` und `briefing_type`
+- [ ] Test misst Generierungsdauer und schlägt fehl bei > 15 Sekunden (mit Mock-LLM)
+
+**Technische Hinweise:** LLM-Mock via `unittest.mock.patch` auf `LLMGateway.generate()`. Briefing-Template aus `pwbs/briefing/templates/`. Testdaten aus TASK-191 Pipeline-Fixtures wiederverwenden.
+
+---
+
+#### TASK-193: OpenAPI-Spezifikation vervollständigen und Postman-Collection generieren
+
+| Feld             | Wert                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Dokumentation für Early Adopters und interne Entwicklung)                             |
+| **Bereich**      | Docs                                                                                     |
+| **Aufwand**      | S (0.51 Tag)                                                                            |
+| **Status**       |  Offen                                                                                 |
+| **Quelle**       | PRD-SPEC Epic 1 F-008 Konnektorübersicht, ARCHITECTURE.md API-Schicht                    |
+| **Abhängig von** |                                                                                         |
+| **Blockiert**    |                                                                                         |
+
+**Beschreibung:** Alle API-Endpunkte auf vollständige OpenAPI-Dokumentation prüfen: Request/Response-Schemas, Fehler-Codes (401, 403, 404, 422, 429), Beschreibungen und Beispiele. Aus der validierten OpenAPI-Spec eine Postman-Collection generieren und unter `docs/api/` versionieren. CI-Check: OpenAPI-Schema-Diff bei PRs.
+
+**Acceptance Criteria:**
+
+- [ ] Alle API-Endpunkte haben vollständige `response_model`, `summary` und `description` in FastAPI-Dekoratoren
+- [ ] Postman-Collection `docs/api/pwbs-collection.json` generiert und importierbar mit allen Endpunkten
+- [ ] CI-Job validiert OpenAPI-Schema mit `openapi-spec-validator`  Build schlägt fehl bei ungültigem Schema
+- [ ] Mindestens 1 Beispiel-Request/Response pro Endpunkt in der OpenAPI-Spec
+
+**Technische Hinweise:** FastAPI generiert OpenAPI automatisch unter `/openapi.json`. Postman-Collection via `openapi-to-postmanv2`-Tool oder manuell. Fehler-Responses als `responses={404: {"model": ErrorResponse}}` in Route-Dekoratoren.
+
+---
+
+#### TASK-194: Early-Adopter-Onboarding-Dokumentation und Getting-Started-Guide
+
+| Feld             | Wert                                                                              |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Voraussetzung für die ersten 1020 Nutzer)                                    |
+| **Bereich**      | Docs                                                                              |
+| **Aufwand**      | M (23 Tage)                                                                      |
+| **Status**       |  Offen                                                                          |
+| **Quelle**       | ROADMAP.md Phase 2 1020 aktive Early Adopters", PRD-SPEC §Produkthypothese      |
+| **Abhängig von** |                                                                                  |
+| **Blockiert**    |                                                                                  |
+
+**Beschreibung:** Erstellung einer nutzerorientierten Dokumentation unter `docs/getting-started/`: Schritt-für-Schritt-Anleitung zur Ersteinrichtung (Account erstellen, ersten Konnektor verbinden, erstes Briefing generieren), FAQ zu häufigen Problemen, Troubleshooting-Guide für OAuth-Fehler, und ein Glossar der PWBS-Konzepte (Briefing, Konnektor, Entität, Knowledge Graph).
+
+**Acceptance Criteria:**
+
+- [ ] `docs/getting-started/README.md` mit Inhaltsverzeichnis und 4 Kapiteln: Setup, Konnektoren, Briefings, Suche
+- [ ] Jedes Kapitel enthält Screenshots oder ASCII-Diagramme der UI-Schritte
+- [ ] FAQ-Sektion mit mindestens 10 Fragen, abgeleitet aus erwarteten Early-Adopter-Problemen
+- [ ] Troubleshooting-Guide deckt OAuth-Token-Ablauf, Sync-Fehler und leere Briefings ab
+
+**Technische Hinweise:** Struktur an GitHub-README-Konventionen orientieren. Screenshots mit Platzhaltern markieren bis finales UI steht. Links auf API-Doku (TASK-193) und Datenschutz-Seite.
+
+---
+
+#### TASK-195: Connector-Resilience: Circuit-Breaker und Retry-Policies für OAuth-APIs
+
+| Feld             | Wert                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Ohne Resilience bricht die Ingestion bei jedem API-Timeout ab)                                    |
+| **Bereich**      | Backend                                                                                              |
+| **Aufwand**      | M (23 Tage)                                                                                         |
+| **Status**       |  Offen                                                                                             |
+| **Quelle**       | AGENTS.md SchedulerAgent Max. 3 Retries mit Exponential Backoff", ARCHITECTURE.md Idempotenz-Prinzip |
+| **Abhängig von** |                                                                                                     |
+| **Blockiert**    |                                                                                                     |
+
+**Beschreibung:** Implementierung eines Circuit-Breaker-Patterns für alle Konnektor-OAuth-API-Aufrufe. Bei wiederholten Fehlern (3x) wird der Circuit geöffnet und der Konnektor temporär deaktiviert (Backoff: 1min  5min  25min). Partial-Failure-Handling: Wenn ein Batch teilweise fehlschlägt, werden erfolgreiche Dokumente trotzdem persistiert und der Cursor entsprechend aktualisiert.
+
+**Acceptance Criteria:**
+
+- [ ] `CircuitBreaker`-Klasse in `pwbs/connectors/resilience.py` mit States: closed, open, half-open
+- [ ] Exponential Backoff: 1min  5min  25min nach 1., 2., 3. Fehler; nach 3 Fehlern Circuit open für 30min
+- [ ] Partial-Failure-Test: Bei 10 Dokumenten und Fehler bei Dokument 7 werden Dokumente 16 persistiert und Cursor auf Position 6 gesetzt
+- [ ] Unit-Tests mit mindestens 8 Szenarien (success, retry-success, circuit-open, half-open-success, partial-failure)
+
+**Technische Hinweise:** Circuit-Breaker als Decorator oder Context-Manager für `BaseConnector.fetch_batch()`. State in Redis persistieren (optional: in-memory für MVP). `tenacity`-Library evaluieren oder eigene Implementierung (< 100 LOC).
+
+---
+
+#### TASK-196: Structured Logging mit Request-Correlation-IDs und Trace-Kontext
+
+| Feld             | Wert                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Essentiell für Debugging in Produktion)                                                    |
+| **Bereich**      | Backend                                                                                       |
+| **Aufwand**      | S (0.51 Tag)                                                                                 |
+| **Status**       |  Offen                                                                                      |
+| **Quelle**       | PRD-SPEC NF-001 Backend-Logging der Request-Duration", ARCHITECTURE.md Observability          |
+| **Abhängig von** |                                                                                              |
+| **Blockiert**    |                                                                                              |
+
+**Beschreibung:** FastAPI-Middleware, die für jeden eingehenden Request eine Correlation-ID generiert (UUID4) oder aus dem `X-Request-ID`-Header übernimmt. Die ID wird über `contextvars` in alle Service-Aufrufe propagiert und in jedem Log-Eintrag als strukturiertes Feld ausgegeben (JSON-Format). Ermöglicht End-to-End-Tracing eines Requests durch alle Schichten.
+
+**Acceptance Criteria:**
+
+- [ ] Middleware `CorrelationIdMiddleware` in `pwbs/api/middleware/correlation.py` setzt `X-Request-ID`-Header in Response
+- [ ] Alle Log-Einträge enthalten Feld `correlation_id` im JSON-Format
+- [ ] Correlation-ID wird über `contextvars.ContextVar` in async Service-Calls propagiert
+- [ ] Test: Request mit gesetztem `X-Request-ID`-Header  gleiche ID in Response und Logs
+
+**Technische Hinweise:** `structlog` oder `python-json-logger` für JSON-Logging. `contextvars.ContextVar` für async-sichere Propagation. Middleware vor Auth-Middleware registrieren.
+
+---
+
+#### TASK-197: Frontend Error Boundaries und Skeleton-Loading-States für alle Hauptansichten
+
+| Feld             | Wert                                                                             |
+| ---------------- | -------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (UX-Qualität: Nutzer sehen statt Whitescreen informative Fehlermeldungen)      |
+| **Bereich**      | Frontend                                                                         |
+| **Aufwand**      | M (23 Tage)                                                                     |
+| **Status**       |  Offen                                                                         |
+| **Quelle**       | PRD-SPEC NF-004 Time-to-Interactive < 3 Sekunden", ROADMAP.md Phase 2 UX        |
+| **Abhängig von** |                                                                                 |
+| **Blockiert**    |                                                                                 |
+
+**Beschreibung:** React Error Boundaries für alle Hauptsektionen (Dashboard, Briefing, Search, Connectors, Settings), sodass ein Fehler in einer Komponente nicht die gesamte App crashed. Skeleton-Loading-States (Shimmer-Animationen) für Dashboard-Widgets, Briefing-Ansicht und Suchergebnisse, die während des Ladens angezeigt werden statt Spinner oder Leerseite.
+
+**Acceptance Criteria:**
+
+- [ ] `ErrorBoundary`-Komponente in `frontend/src/components/ui/error-boundary.tsx` mit Retry-Button und Fehler-Meldung
+- [ ] Error Boundaries um Dashboard, Briefing, Search und Connectors-Sektion gewrapped
+- [ ] Skeleton-Komponenten für: Briefing-Card, Search-Result-List, Connector-Status-Card, Dashboard-Widget
+- [ ] Visueller Test: Erzwungener Render-Error in Briefing-Komponente zeigt Error Boundary statt Whitescreen
+
+**Technische Hinweise:** React `ErrorBoundary`-Klasse (Class Component erforderlich). Skeleton via Tailwind `animate-pulse` auf `div`-Elementen. Suspense-Boundaries für Server Components nutzen wo möglich.
+
+---
+
+#### TASK-198: Seed-Data-Generator: CLI-Befehl für realistische Demo- und Testdaten
+
+| Feld             | Wert                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Beschleunigt Entwicklung, QA und Demos für Early Adopters)                                   |
+| **Bereich**      | Backend                                                                                         |
+| **Aufwand**      | S (0.51 Tag)                                                                                   |
+| **Status**       |  Offen                                                                                        |
+| **Quelle**       | ROADMAP.md Phase 2 1020 Early Adopters benötigen Beispieldaten", poc/generate_sample_data.py   |
+| **Abhängig von** |                                                                                                |
+| **Blockiert**    |                                                                                                |
+
+**Beschreibung:** CLI-Befehl `python -m pwbs.cli seed --user demo@pwbs.dev --documents 50`, der einen Demo-Nutzer mit realistischen Daten aller 4 Kern-Konnektoren erstellt: Kalendereinträge, Notion-Seiten, Obsidian-Notizen und Zoom-Transkripte. Die Daten durchlaufen die vollständige Pipeline (Chunking, Embedding, NER) und sind sofort über Suche und Briefing abrufbar. Basiert auf `poc/generate_sample_data.py`.
+
+**Acceptance Criteria:**
+
+- [ ] CLI-Befehl `python -m pwbs.cli seed` erzeugt Demo-Nutzer mit 50 Dokumenten über alle 4 Konnektoren
+- [ ] Generierte Daten sind in Weaviate indexiert und über Suche abrufbar
+- [ ] Idempotent: Wiederholter Aufruf überschreibt bestehende Demo-Daten (kein Duplikat)
+- [ ] `--clean`-Flag löscht alle Demo-Daten (Nutzer, Dokumente, Chunks, Embeddings)
+
+**Technische Hinweise:** `typer`-CLI in `pwbs/cli/seed.py`. Datenvorlagen aus `poc/generate_sample_data.py` übernehmen und erweitern. Demo-Nutzer mit fester UUID für Wiederholbarkeit.
+
+---
+
+#### TASK-199: Dependency-Health-Dashboard: Statusübersicht aller externen Services
+
+| Feld             | Wert                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| **Priorität**    | P2 (Sofortige Erkennung ausgefallener Abhängigkeiten)                                  |
+| **Bereich**      | Backend                                                                               |
+| **Aufwand**      | S (0.51 Tag)                                                                         |
+| **Status**       |  Offen                                                                              |
+| **Quelle**       | PRD-SPEC NF-006 System-Verfügbarkeit 99,5%", ARCHITECTURE.md Health-Check-Architektur |
+| **Abhängig von** |                                                                                      |
+| **Blockiert**    |                                                                                      |
+
+**Beschreibung:** Erweiterung des bestehenden `/health`-Endpunkts um detaillierte Dependency-Checks: PostgreSQL (Connection-Pool-Status), Weaviate (Cluster-Health), Redis (Ping), Neo4j (optional, graceful wenn unavailable). Neuer `/health/detailed`-Endpunkt mit JSON-Response pro Service und Latenz-Messung. Admin-only Zugriff.
+
+**Acceptance Criteria:**
+
+- [ ] `GET /health/detailed` liefert JSON mit Status pro Dependency: `postgres`, `weaviate`, `redis`, `neo4j` (jeweils: `status`, `latency_ms`, `details`)
+- [ ] Neo4j-Check gibt `status: "unavailable"` zurück wenn `get_neo4j_driver()` `None` liefert (kein Fehler)
+- [ ] Endpunkt erfordert Admin-JWT oder internes Service-Token
+- [ ] Gesamt-Status ist `degraded` wenn optionale Services fehlen, `unhealthy` nur wenn PostgreSQL oder Weaviate fehlen
+
+**Technische Hinweise:** Implementierung in `pwbs/api/v1/routes/health.py`. Nutze `asyncio.wait_for()` mit 5s Timeout pro Check. Existing `get_db()`, `get_weaviate_client()`, `get_redis()` Dependency-Funktionen wiederverwenden.
+
+---
+
+#### TASK-200: Briefing-Qualitätsvalidierung: Quellen-Abdeckung und Konfidenz-Scoring
+
+| Feld             | Wert                                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Erklärbarkeits-Prinzip: Keine Briefings ohne validierte Quellen)                                         |
+| **Bereich**      | Backend / LLM                                                                                               |
+| **Aufwand**      | M (23 Tage)                                                                                                |
+| **Status**       |  Offen                                                                                                    |
+| **Quelle**       | PRD-SPEC US-3.3 Quellenreferenz anklicken", AGENTS.md BriefingAgent Niemals ohne Quellenreferenzen"        |
+| **Abhängig von** |                                                                                                            |
+| **Blockiert**    |                                                                                                            |
+
+**Beschreibung:** Post-Generation-Validierung für Briefings: Jede Aussage im Briefing wird gegen die verwendeten Source-Chunks geprüft (Grounding-Check). Konfidenz-Score pro Aussage (high/medium/low) basierend auf Embedding-Ähnlichkeit zwischen Aussage und Quell-Chunk. Briefings mit > 30% low-confidence Aussagen werden als eingeschränkte Qualität" markiert. Keine Auslieferung von Briefings ohne mindestens 1 Quellenreferenz.
+
+**Acceptance Criteria:**
+
+- [ ] `BriefingValidator`-Klasse in `pwbs/briefing/validation.py` mit Methode `validate(briefing, source_chunks) -> ValidationResult`
+- [ ] Konfidenz-Scoring: Embedding-Cosine-Similarity zwischen Briefing-Satz und nächstem Source-Chunk; > 0.7 = high, 0.50.7 = medium, < 0.5 = low
+- [ ] Briefings ohne Quellenreferenzen werden blockiert und ein Fallback-Briefing mit Hinweis Nicht genügend Quelldaten" erzeugt
+- [ ] Test: Briefing mit erfundenen Aussagen (keine Quellenübereinstimmung) erhält Konfidenz-Score < 0.3
+
+**Technische Hinweise:** Validierung nach LLM-Response, vor Persistierung. Embedding-Vergleich mit bestehender `EmbeddingService.embed()`-Methode. Schwellenwerte konfigurierbar über `pwbs/config.py`.
+
+---
+
+#### TASK-201: Suchrelevanz-Tuning: Hybrid-Search-Gewichtung und Reranking-Stufe
+
+| Feld             | Wert                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (Suchqualität ist direkter Early-Adopter-Wert  schlechte Suche = Churn)                     |
+| **Bereich**      | Backend                                                                                        |
+| **Aufwand**      | M (23 Tage)                                                                                   |
+| **Status**       |  Offen                                                                                       |
+| **Quelle**       | PRD-SPEC F-011 75% semantisch, 25% Keyword via BM25", NF-001 < 2 Sekunden"                   |
+| **Abhängig von** |                                                                                               |
+| **Blockiert**    |                                                                                               |
+
+**Beschreibung:** Optimierung der Hybrid-Search-Pipeline: (1) RRF-Gewichtungsparameter (semantic vs. keyword) konfigurierbar machen und Baseline-Werte empirisch bestimmen, (2) Reranking-Stufe einführen, die Top-K-Ergebnisse nach Relevanz zum Query neu sortiert (Cross-Encoder oder einfaches Scoring-Modell), (3) Recency-Boost: Neuere Dokumente erhalten einen konfigurierbaren Score-Bonus.
+
+**Acceptance Criteria:**
+
+- [ ] Hybrid-Search-Gewichtung konfigurierbar über `SEARCH_SEMANTIC_WEIGHT` (Default: 0.75) und `SEARCH_KEYWORD_WEIGHT` (Default: 0.25)
+- [ ] Reranking-Stufe in `pwbs/search/reranker.py` sortiert Top-50 auf Top-10 mit Cross-Encoder oder Cosine-Rescore
+- [ ] Recency-Boost: Dokumente der letzten 7 Tage erhalten +10% Score-Bonus (konfigurierbar)
+- [ ] Benchmark: Relevanztest mit 20 Query-Document-Paaren; Precision@10  0.6
+
+**Technische Hinweise:** RRF-Fusion in `pwbs/search/hybrid.py`. Cross-Encoder: `cross-encoder/ms-marco-MiniLM-L-6-v2` (klein, schnell). Recency-Decay als Sigmoid-Funktion. Benchmark-Daten in `tests/fixtures/search_relevance/`.
+
+---
+
+#### TASK-202: DSGVO-Datenexport: Vollständiger Nutzer-Datenexport als ZIP (Art. 20)
+
+| Feld             | Wert                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **Priorität**    | P1 (DSGVO-Pflicht: Art. 20 Datenportabilität muss vor Early-Adopter-Launch stehen)   |
+| **Bereich**      | Backend                                                                             |
+| **Aufwand**      | L (1 Woche)                                                                         |
+| **Status**       |  Offen                                                                            |
+| **Quelle**       | PRD-SPEC US-5.2 Daten exportieren", DSGVO Art. 20 Recht auf Datenportabilität      |
+| **Abhängig von** |                                                                                    |
+| **Blockiert**    |                                                                                    |
+
+**Beschreibung:** Implementierung eines asynchronen Datenexport-Jobs: Nutzer klickt Daten exportieren"  Backend sammelt alle Daten des Nutzers (Dokumente, Chunks, extrahierte Entitäten, generierte Briefings, Audit-Log, Konnektor-Konfigurationen) und paketiert sie als ZIP mit JSON-Dateien (maschinenlesbar) und Markdown-Dateien (menschenlesbar). Download-Link per E-Mail nach Fertigstellung (gültig 24h). Fortschrittsanzeige im Frontend.
+
+**Acceptance Criteria:**
+
+- [ ] API-Endpunkt `POST /api/v1/user/export` startet asynchronen Export-Job, `GET /api/v1/user/export/{job_id}` liefert Status
+- [ ] Export-ZIP enthält: `documents.json`, `entities.json`, `briefings.json`, `audit_log.json`, `README.md` mit Erklärung der Datenstruktur
+- [ ] Bei Export-Dauer > 60 Sekunden wird Download-Link per E-Mail versendet (TASK-176 Email-Service nutzen)
+- [ ] Export enthält ausschließlich Daten mit passendem `owner_id`  kein Cross-User-Data-Leak
+- [ ] Test: Export eines Nutzers mit 100 Dokumenten erzeugt valide ZIP < 50 MB
+
+**Technische Hinweise:** Export-Job als async Task (im MVP direkt, in Phase 3 via Celery). ZIP-Erstellung mit `zipfile`-Modul. Temporäre Dateien in `/tmp/pwbs-exports/` mit auto-cleanup nach 24h. Streaming-Response für große Exports evaluieren.
 
 ---
 
