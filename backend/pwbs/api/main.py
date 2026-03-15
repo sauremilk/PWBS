@@ -213,6 +213,7 @@ def create_app() -> FastAPI:
     )
     from pwbs.api.v1.routes.public_api import router as public_api_router
     from pwbs.api.v1.routes.rbac import router as rbac_router
+    from pwbs.api.v1.routes.referrals import router as referrals_router
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
     from pwbs.api.v1.routes.slack import router as slack_router
@@ -239,6 +240,7 @@ def create_app() -> FastAPI:
     application.include_router(webhooks_router)
     application.include_router(billing_router)
     application.include_router(rbac_router)
+    application.include_router(referrals_router)
     application.include_router(developer_router)
     application.include_router(public_api_router)
     application.include_router(waitlist_router)
