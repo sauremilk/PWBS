@@ -41,8 +41,9 @@ from pwbs.schemas.search import (
     SearchResult,
 )
 from pwbs.search.enrichment import EnrichedSearchResult, SearchResultEnricher
-from pwbs.search.hybrid import HybridSearchService
+from pwbs.search.hybrid import HybridSearchConfig, HybridSearchService
 from pwbs.search.keyword import KeywordSearchService
+from pwbs.search.reranker import RerankerConfig, SearchReranker
 from pwbs.search.service import SemanticSearchService
 
 logger = logging.getLogger(__name__)
@@ -75,12 +76,22 @@ def _build_semantic_service() -> SemanticSearchService:
 def _build_hybrid_service(
     session: AsyncSession,
 ) -> HybridSearchService:
-    """Create a HybridSearchService wiring semantic + keyword backends."""
+    """Create a HybridSearchService wiring semantic + keyword backends.
+
+    Reads ``SEARCH_SEMANTIC_WEIGHT`` and ``SEARCH_KEYWORD_WEIGHT`` from
+    environment configuration (TASK-201).
+    """
+    settings = get_settings()
+    config = HybridSearchConfig(
+        semantic_weight=settings.search_semantic_weight,
+        keyword_weight=settings.search_keyword_weight,
+    )
     semantic = _build_semantic_service()
     keyword = KeywordSearchService(session=session)
     return HybridSearchService(
         semantic_service=semantic,
         keyword_service=keyword,
+        config=config,
     )
 
 
@@ -151,18 +162,29 @@ async def search(
     user_id: uuid.UUID = user.id
 
     # Build the service chain (request-scoped)
+    settings = get_settings()
     hybrid = _build_hybrid_service(session)
+    reranker = SearchReranker(
+        config=RerankerConfig(
+            recency_boost_pct=settings.search_recency_boost_pct,
+            recency_boost_days=settings.search_recency_boost_days,
+        ),
+    )
     enricher = SearchResultEnricher(session=session)
 
-    # Execute hybrid search — candidate_k is handled internally
+    # Step 1: Over-fetch candidates for reranking (TASK-201)
+    rerank_candidates = min(50, max(body.limit, 10))
     hybrid_results = await hybrid.search(
         query=body.query,
         user_id=user_id,
-        top_k=body.limit,
+        top_k=rerank_candidates,
     )
 
+    # Step 2: Rerank and cut to requested limit
+    reranked = reranker.rerank(hybrid_results, top_k=body.limit)
+
     # Enrich with SourceRef and original URL
-    enriched = await enricher.enrich(results=hybrid_results, user_id=user_id)
+    enriched = await enricher.enrich(results=reranked, user_id=user_id)
 
     # Apply optional filters (post-filtering)
     enriched = _apply_filters(enriched, body.filters)

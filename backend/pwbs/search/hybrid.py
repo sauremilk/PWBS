@@ -1,4 +1,4 @@
-﻿"""Hybrid-Suche mit RRF-Fusion (TASK-074).
+"""Hybrid-Suche mit RRF-Fusion (TASK-074).
 
 Combines semantic results (Weaviate nearVector) with keyword results
 (PostgreSQL tsvector) using Reciprocal Rank Fusion (RRF).
@@ -65,6 +65,7 @@ class HybridSearchResult:
     keyword_score: float | None = None
     semantic_rank: int | None = None
     keyword_rank: int | None = None
+    created_at: str | None = None
 
 
 # ------------------------------------------------------------------
@@ -216,6 +217,7 @@ class HybridSearchService:
                     keyword_score=None,
                     semantic_rank=rank,
                     keyword_rank=None,
+                    created_at=sr.created_at,
                 )
 
         # Process keyword results (1-based ranking)
@@ -237,6 +239,7 @@ class HybridSearchService:
                     keyword_score=kr.score,
                     semantic_rank=None,
                     keyword_rank=rank,
+                    created_at=None,
                 )
 
         # Sort by fused RRF score descending, take top_k
@@ -257,6 +260,7 @@ class HybridSearchService:
                 keyword_score=c.keyword_score,
                 semantic_rank=c.semantic_rank,
                 keyword_rank=c.keyword_rank,
+                created_at=c.created_at,
             )
             for c in sorted_candidates
         ]
@@ -280,6 +284,7 @@ class _FusionCandidate:
         "keyword_score",
         "semantic_rank",
         "keyword_rank",
+        "created_at",
     )
 
     def __init__(
@@ -293,6 +298,7 @@ class _FusionCandidate:
         keyword_score: float | None,
         semantic_rank: int | None,
         keyword_rank: int | None,
+        created_at: str | None = None,
     ) -> None:
         self.chunk_id = chunk_id
         self.content = content
@@ -303,3 +309,4 @@ class _FusionCandidate:
         self.keyword_score = keyword_score
         self.semantic_rank = semantic_rank
         self.keyword_rank = keyword_rank
+        self.created_at = created_at

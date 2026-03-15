@@ -1,0 +1,102 @@
+[
+  {
+    "query": "Projektfortschritt letzte Woche",
+    "relevant_titles": ["Sprint Review Protokoll", "Projekt Phoenix Update"],
+    "description": "Suche nach wöchentlichem Projektfortschritt"
+  },
+  {
+    "query": "Meeting-Notizen Architektur",
+    "relevant_titles": ["Architektur-Decision Meeting", "System Design Review"],
+    "description": "Architektur-Meetings finden"
+  },
+  {
+    "query": "Entscheidungen Q1 2026",
+    "relevant_titles": ["Q1 Decision Log", "Sprint Retro Entscheidungen"],
+    "description": "Entscheidungsdokumente aus Q1"
+  },
+  {
+    "query": "Budget Planung nächstes Quartal",
+    "relevant_titles": ["Q2 Budget Planning", "Finanzübersicht Q2"],
+    "description": "Budgetplanung für Q2"
+  },
+  {
+    "query": "Kundenfeedback Produkt",
+    "relevant_titles": ["User Research Report", "Kundenfeedback Sprint 12"],
+    "description": "Produktfeedback von Kunden"
+  },
+  {
+    "query": "Onboarding neuer Mitarbeiter",
+    "relevant_titles": ["Onboarding Checklist", "Team Wiki Onboarding"],
+    "description": "Onboarding-Materialien"
+  },
+  {
+    "query": "API Dokumentation Endpunkte",
+    "relevant_titles": ["API Reference v2", "OpenAPI Spezifikation"],
+    "description": "Technische API-Docs"
+  },
+  {
+    "query": "DSGVO Compliance Status",
+    "relevant_titles": ["DSGVO Audit Report", "Datenschutz Impact Assessment"],
+    "description": "Datenschutz-Compliance-Dokumente"
+  },
+  {
+    "query": "Performance Review Gespräch",
+    "relevant_titles": ["Performance Review Template", "1on1 Gesprächsnotizen"],
+    "description": "Performance-Reviews"
+  },
+  {
+    "query": "Release Notes Version 3",
+    "relevant_titles": ["Release Notes v3.0", "Changelog März 2026"],
+    "description": "Release-Dokumentation"
+  },
+  {
+    "query": "Wettbewerberanalyse Markt",
+    "relevant_titles": ["Competitive Analysis Q1", "Marktübersicht 2026"],
+    "description": "Wettbewerber-Research"
+  },
+  {
+    "query": "Zoom Meeting Transkript Strategie",
+    "relevant_titles": ["Strategiemeeting Transkript", "Zoom Call Leadership"],
+    "description": "Strategie-Meetings suchen"
+  },
+  {
+    "query": "Obsidian Notizen Projektideen",
+    "relevant_titles": ["Projektideen Brainstorm", "Innovationsworkshop Notes"],
+    "description": "Kreative Projektideen"
+  },
+  {
+    "query": "Sicherheitsvorfall Analyse",
+    "relevant_titles": ["Security Incident Report", "Vulnerability Assessment"],
+    "description": "Sicherheitsvorfälle"
+  },
+  {
+    "query": "Sprint Planning Aufgaben",
+    "relevant_titles": ["Sprint 14 Planning", "Backlog Refinement Notes"],
+    "description": "Sprint-Planung"
+  },
+  {
+    "query": "Team Retrospektive Verbesserungen",
+    "relevant_titles": ["Sprint Retro Entscheidungen", "Team Feedback Session"],
+    "description": "Retro-Ergebnisse"
+  },
+  {
+    "query": "Infrastruktur Migration Cloud",
+    "relevant_titles": ["Cloud Migration Plan", "AWS Infrastructure Setup"],
+    "description": "Cloud-Migrations-Docs"
+  },
+  {
+    "query": "Kalender nächste Woche Termine",
+    "relevant_titles": ["Wochenkalender KW13", "Team Sync Kalender"],
+    "description": "Terminplanung"
+  },
+  {
+    "query": "Design System Komponenten",
+    "relevant_titles": ["Design System Docs", "UI Component Library"],
+    "description": "Design-System-Dokumentation"
+  },
+  {
+    "query": "Hiring Pipeline Kandidaten",
+    "relevant_titles": ["Recruiting Status Board", "Kandidaten Pipeline Q1"],
+    "description": "Recruiting-Status"
+  }
+]

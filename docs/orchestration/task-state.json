@@ -3016,9 +3016,10 @@
       "blocked_by": []
     },
     "TASK-201": {
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-P",
-      "started_at": "2025-01-27T18:00:00Z"
+      "started_at": "2025-01-27T18:00:00Z",
+      "completed_at": "2025-01-27T18:30:00Z"
     },
     "TASK-202": {
       "stream": "STREAM-MVP-FINISH",

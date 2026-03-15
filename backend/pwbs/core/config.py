@@ -135,6 +135,12 @@ class Settings(BaseSettings):
     email_unsubscribe_url: str = "http://localhost:3000/settings/notifications"
     email_impressum_url: str = "http://localhost:3000/impressum"
 
+    #  Search Tuning (TASK-201)
+    search_semantic_weight: float = 0.75
+    search_keyword_weight: float = 0.25
+    search_recency_boost_pct: float = 0.10  # +10% score bonus for recent docs
+    search_recency_boost_days: int = 7
+
     #  Feature Flags (TASK-174)
     feature_flags_override: str = ""  # e.g. "flag1:true,flag2:false"
 
