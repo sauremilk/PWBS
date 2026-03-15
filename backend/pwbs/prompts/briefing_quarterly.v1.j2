@@ -1,0 +1,58 @@
+---
+model_preference: claude-sonnet-4-20250514
+max_output_tokens: 4000
+temperature: 0.3
+system_prompt: |
+  Du bist ein präziser Briefing-Assistent im PWBS. Erstelle sachliche,
+  quellenbasierte Quartals-Reviews. Verwende ausschließlich die bereitgestellten
+  Informationen. Kennzeichne jede Aussage mit [Quelle: Titel, Datum].
+  Maximal 1500 Wörter. Struktur: Annahmen-Status, Strategische Themenverschiebungen,
+  Schlüsselentscheidungen, Wiederkehrende Muster, Empfehlungen.
+  Bewerte die Entscheidungsqualität im Nachhinein: Welche Entscheidungen haben sich
+  als richtig oder falsch erwiesen? Identifiziere strategische Veränderungen.
+required_context:
+  - period_start
+  - period_end
+  - assumptions
+  - assumption_stats
+  - key_decisions
+  - theme_shifts
+  - recurring_patterns
+---
+## Quartals-Review {{ period_start }} – {{ period_end }}
+
+### Annahmen-Status
+{% if assumption_stats %}
+Gesamt: {{ assumption_stats.values() | sum }} Annahmen ({% for status, count in assumption_stats.items() %}{{ status }}: {{ count }}{% if not loop.last %}, {% endif %}{% endfor %})
+{% endif %}
+
+{% for a in assumptions %}
+- **{{ a.title }}** – Status: {{ a.status }}{% if a.reason %} ({{ a.reason }}){% endif %}{% if a.changed_at %} | Geändert: {{ a.changed_at }}{% endif %}{% if a.evidence_count %} | {{ a.evidence_count }} Belege{% endif %}
+{% endfor %}
+{% if not assumptions %}
+- Keine Annahmen im Tracking.
+{% endif %}
+
+### Strategische Themenverschiebungen
+{% for shift in theme_shifts %}
+- **{{ shift.theme }}**: {{ shift.direction }} ({{ shift.previous }} → {{ shift.current }} Erwähnungen)
+{% endfor %}
+{% if not theme_shifts %}
+- Keine signifikanten Themenverschiebungen erkannt.
+{% endif %}
+
+### Schlüsselentscheidungen
+{% for d in key_decisions %}
+- **{{ d.summary }}** – Status: {{ d.status }}{% if d.decided_at %} | {{ d.decided_at }}{% endif %}{% if d.project %} | Projekt: {{ d.project }}{% endif %}
+{% endfor %}
+{% if not key_decisions %}
+- Keine Schlüsselentscheidungen im Quartal.
+{% endif %}
+
+### Wiederkehrende Muster
+{% for pattern in recurring_patterns %}
+- {{ pattern }}
+{% endfor %}
+{% if not recurring_patterns %}
+- Keine wiederkehrenden Muster erkannt.
+{% endif %}

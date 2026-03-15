@@ -5,8 +5,8 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -16,9 +16,8 @@ from pwbs.briefing.generator import (
     BriefingLLMResult,
     BriefingType,
 )
-from pwbs.core.grounding import GroundingResult, GroundedStatement, SourceReference, Confidence
+from pwbs.core.grounding import Confidence, GroundedStatement, GroundingResult, SourceReference
 from pwbs.core.llm_gateway import LLMProvider, LLMResponse, LLMUsage
-
 
 # ------------------------------------------------------------------
 # Fixtures
@@ -63,14 +62,18 @@ def _make_registry(template: MagicMock | None = None) -> MagicMock:
     return registry
 
 
-def _make_gateway(content: str = "# Fakten\n\nDie Planung wurde besprochen. [Quelle: Sprint Notes, 2026-03-14]") -> AsyncMock:
+def _make_gateway(
+    content: str = "# Fakten\n\nDie Planung wurde besprochen. [Quelle: Sprint Notes, 2026-03-14]",
+) -> AsyncMock:
     gw = AsyncMock()
-    gw.generate = AsyncMock(return_value=LLMResponse(
-        content=content,
-        usage=MOCK_USAGE,
-        provider=LLMProvider.CLAUDE,
-        model="claude-sonnet-4-20250514",
-    ))
+    gw.generate = AsyncMock(
+        return_value=LLMResponse(
+            content=content,
+            usage=MOCK_USAGE,
+            provider=LLMProvider.CLAUDE,
+            model="claude-sonnet-4-20250514",
+        )
+    )
     return gw
 
 
@@ -185,7 +188,11 @@ class TestLLMCall:
         await gen.generate(BriefingType.MORNING, _make_context(), USER_ID)
 
         request = gateway.generate.call_args[0][0]
-        assert "bereitgestellten Quellen" in request.system_prompt.lower() or "grounding" in request.system_prompt.lower() or "Quelle" in request.system_prompt
+        assert (
+            "bereitgestellten Quellen" in request.system_prompt.lower()
+            or "grounding" in request.system_prompt.lower()
+            or "Quelle" in request.system_prompt
+        )
 
     @pytest.mark.asyncio
     async def test_system_prompt_includes_word_limit(self) -> None:
@@ -469,3 +476,55 @@ class TestVerticalProfileIntegration:
         request = gateway.generate.call_args[0][0]
         # Should not crash, should fall back to general
         assert "Forscher" not in request.system_prompt
+
+
+# ------------------------------------------------------------------
+# Quarterly briefing integration (TASK-155)
+# ------------------------------------------------------------------
+
+
+class TestQuarterlyBriefingIntegration:
+    @pytest.mark.asyncio
+    async def test_quarterly_uses_correct_template(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(BriefingType.QUARTERLY, _make_context(), USER_ID)
+        registry.get.assert_called_once_with("briefing_quarterly")
+
+    @pytest.mark.asyncio
+    async def test_quarterly_word_limit_1500(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        await gen.generate(BriefingType.QUARTERLY, _make_context(), USER_ID)
+
+        request = gateway.generate.call_args[0][0]
+        assert "1500" in request.system_prompt
+
+    @pytest.mark.asyncio
+    async def test_quarterly_max_tokens_from_config(self) -> None:
+        tpl = _make_template(max_output_tokens=0)
+        registry = _make_registry(tpl)
+        gateway = _make_gateway()
+        config = BriefingGeneratorConfig(quarterly_max_output_tokens=5000)
+        gen = BriefingGenerator(gateway, registry, config)
+
+        await gen.generate(BriefingType.QUARTERLY, _make_context(), USER_ID)
+
+        request = gateway.generate.call_args[0][0]
+        assert request.max_tokens == 5000
+
+    @pytest.mark.asyncio
+    async def test_quarterly_result_type(self) -> None:
+        registry = _make_registry()
+        gateway = _make_gateway()
+        gen = BriefingGenerator(gateway, registry)
+
+        result = await gen.generate(
+            BriefingType.QUARTERLY, _make_context(), USER_ID
+        )
+
+        assert result.briefing_type == BriefingType.QUARTERLY

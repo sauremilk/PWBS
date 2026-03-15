@@ -51,6 +51,7 @@ class BriefingType(str, Enum):
     MEETING_PREP = "meeting_prep"
     PROJECT = "project"
     WEEKLY = "weekly"
+    QUARTERLY = "quarterly"
 
 
 # Template use_case mapping for each briefing type
@@ -59,6 +60,7 @@ _TEMPLATE_USE_CASES: dict[BriefingType, str] = {
     BriefingType.MEETING_PREP: "briefing_meeting_prep",
     BriefingType.PROJECT: "briefing_project",
     BriefingType.WEEKLY: "briefing_weekly",
+    BriefingType.QUARTERLY: "briefing_quarterly",
 }
 
 # Max words per briefing type (D4 F-017, F-018)
@@ -67,6 +69,7 @@ _MAX_WORDS: dict[BriefingType, int] = {
     BriefingType.MEETING_PREP: 400,
     BriefingType.PROJECT: 1200,
     BriefingType.WEEKLY: 600,
+    BriefingType.QUARTERLY: 1500,
 }
 
 
@@ -79,6 +82,7 @@ class BriefingGeneratorConfig:
     meeting_max_output_tokens: int = 1000
     project_max_output_tokens: int = 3000
     weekly_max_output_tokens: int = 1500
+    quarterly_max_output_tokens: int = 4000
     enable_grounding: bool = True
 
 
@@ -249,4 +253,6 @@ class BriefingGenerator:
             return self._config.project_max_output_tokens
         if briefing_type == BriefingType.WEEKLY:
             return self._config.weekly_max_output_tokens
+        if briefing_type == BriefingType.QUARTERLY:
+            return self._config.quarterly_max_output_tokens
         return self._config.meeting_max_output_tokens
