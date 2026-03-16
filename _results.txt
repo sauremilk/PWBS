@@ -1,0 +1,18 @@
+tests/test_multimodal/ RC=1
+FAILED tests/test_multimodal/test_multimodal.py::TestSourceTypeEnum::test_ocr_source_type_exists
+FAILED tests/test_multimodal/test_multimodal.py::TestSourceTypeEnum::test_audio_transcript_source_type_exists
+FAILED tests/test_multimodal/test_multimodal.py::TestCeleryTask::test_multimodal_route_configured
+3 failed, 47 passed in 0.15s
+tests/test_vertical_profiles/ RC=1
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestGetSettingsVerticalProfile::test_returns_default_general
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestGetSettingsVerticalProfile::test_returns_researcher
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestGetSettingsVerticalProfile::test_returns_consultant
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestGetSettingsVerticalProfile::test_returns_developer
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_update_to_researcher
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_update_to_consultant
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_update_to_developer
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_update_to_general
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_none_profile_skips_update
+FAILED tests/test_vertical_profiles/test_user_vertical_api.py::TestUpdateSettingsVerticalProfile::test_profile_combined_with_other_updates
+10 failed, 36 passed, 2 warnings in 0.42s
+tests/integration/ RC=0

@@ -1173,9 +1173,7 @@ async def get_sync_history(
     limit = max(1, min(limit, 50))
 
     # Count
-    count_stmt = select(func.count()).where(
-        SyncRun.connection_id == connection.id
-    )
+    count_stmt = select(func.count()).where(SyncRun.connection_id == connection.id)
     total = (await db.execute(count_stmt)).scalar_one()
 
     # Paginated runs
@@ -1193,9 +1191,7 @@ async def get_sync_history(
     for run in runs:
         duration: float | None = None
         if run.started_at and run.completed_at:
-            duration = (
-                run.completed_at - run.started_at
-            ).total_seconds()
+            duration = (run.completed_at - run.started_at).total_seconds()
         items.append(
             SyncRunItem(
                 id=run.id,

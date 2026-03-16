@@ -39,6 +39,8 @@ logs/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+backend/.test-last.txt
+backend/.test-results.xml
 
 # OS
 .DS_Store

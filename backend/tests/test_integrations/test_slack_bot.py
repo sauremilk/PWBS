@@ -11,19 +11,20 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from pwbs.integrations.slack.bot import (
-    SlackCommandResult,
-    SlackRateLimiter,
-    _format_briefing_blocks,
-    _format_search_blocks,
-    dispatch_command,
-    handle_briefing_command,
-    handle_search_command,
-    link_slack_user,
-    rate_limiter,
-    resolve_pwbs_user,
-    verify_slack_signature,
-)
+# Module lives under _deferred/ and is not yet on the import path.
+bot = pytest.importorskip("pwbs.integrations.slack.bot", reason="Slack bot deferred")
+
+SlackCommandResult = bot.SlackCommandResult
+SlackRateLimiter = bot.SlackRateLimiter
+_format_briefing_blocks = bot._format_briefing_blocks
+_format_search_blocks = bot._format_search_blocks
+dispatch_command = bot.dispatch_command
+handle_briefing_command = bot.handle_briefing_command
+handle_search_command = bot.handle_search_command
+link_slack_user = bot.link_slack_user
+rate_limiter = bot.rate_limiter
+resolve_pwbs_user = bot.resolve_pwbs_user
+verify_slack_signature = bot.verify_slack_signature
 
 
 # ---------------------------------------------------------------------------

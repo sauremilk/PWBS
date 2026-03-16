@@ -255,18 +255,14 @@ class TestShareBriefing:
         db.get.return_value = _make_briefing()
 
         with pytest.raises(ValueError, match="NOT_OWNER"):
-            await service.share_briefing(
-                db, BRIEFING_ID, RECIPIENT_A, [RECIPIENT_B]
-            )
+            await service.share_briefing(db, BRIEFING_ID, RECIPIENT_A, [RECIPIENT_B])
 
     @pytest.mark.asyncio
     async def test_self_share_filtered(self) -> None:
         db = AsyncMock()
         db.get.return_value = _make_briefing()
 
-        result = await service.share_briefing(
-            db, BRIEFING_ID, OWNER_ID, [OWNER_ID]
-        )
+        result = await service.share_briefing(db, BRIEFING_ID, OWNER_ID, [OWNER_ID])
         assert result == []
         db.execute.assert_not_called()
 
@@ -280,9 +276,7 @@ class TestShareBriefing:
         mock_result.scalars.return_value.all.return_value = [share]
         db.execute.return_value = mock_result
 
-        result = await service.share_briefing(
-            db, BRIEFING_ID, OWNER_ID, [RECIPIENT_A]
-        )
+        result = await service.share_briefing(db, BRIEFING_ID, OWNER_ID, [RECIPIENT_A])
         assert len(result) == 1
         assert result[0].recipient_id == RECIPIENT_A
 
@@ -292,9 +286,7 @@ class TestShareBriefing:
         db.get.return_value = None
 
         with pytest.raises(ValueError, match="BRIEFING_NOT_FOUND"):
-            await service.share_briefing(
-                db, BRIEFING_ID, OWNER_ID, [RECIPIENT_A]
-            )
+            await service.share_briefing(db, BRIEFING_ID, OWNER_ID, [RECIPIENT_A])
 
 
 class TestListShares:
@@ -356,9 +348,7 @@ class TestAddComment:
         db = AsyncMock()
         db.get.return_value = _make_briefing()
 
-        result = await service.add_comment(
-            db, BRIEFING_ID, OWNER_ID, "summary", "Great briefing"
-        )
+        result = await service.add_comment(db, BRIEFING_ID, OWNER_ID, "summary", "Great briefing")
         db.add.assert_called_once()
         assert db.flush.called
         assert db.refresh.called
@@ -373,9 +363,7 @@ class TestAddComment:
         db.execute.return_value = mock_result
 
         with pytest.raises(ValueError, match="ACCESS_DENIED"):
-            await service.add_comment(
-                db, BRIEFING_ID, RECIPIENT_A, "summary", "test"
-            )
+            await service.add_comment(db, BRIEFING_ID, RECIPIENT_A, "summary", "test")
 
 
 class TestListComments:
@@ -392,9 +380,7 @@ class TestListComments:
 
         db.execute.side_effect = [mock_count, mock_data]
 
-        comments, total = await service.list_comments(
-            db, BRIEFING_ID, OWNER_ID, offset=0, limit=10
-        )
+        comments, total = await service.list_comments(db, BRIEFING_ID, OWNER_ID, offset=0, limit=10)
         assert total == 3
         assert len(comments) == 1
 
@@ -410,9 +396,7 @@ class TestListComments:
 
         db.execute.side_effect = [mock_count, mock_data]
 
-        comments, total = await service.list_comments(
-            db, BRIEFING_ID, OWNER_ID
-        )
+        comments, total = await service.list_comments(db, BRIEFING_ID, OWNER_ID)
         assert total == 0
         assert comments == []
 

@@ -333,20 +333,50 @@ class TestComputeDiff:
 
         # Theme shifts come from common entity IDs with changed mention_count
         entities_a = [
-            {"id": "e1", "entity_type": "Topic", "name": "AI",
-             "normalized_name": "ai", "mention_count": 10},
-            {"id": "e2", "entity_type": "Topic", "name": "Cloud",
-             "normalized_name": "cloud", "mention_count": 20},
-            {"id": "e3", "entity_type": "Topic", "name": "Security",
-             "normalized_name": "security", "mention_count": 5},
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "AI",
+                "normalized_name": "ai",
+                "mention_count": 10,
+            },
+            {
+                "id": "e2",
+                "entity_type": "Topic",
+                "name": "Cloud",
+                "normalized_name": "cloud",
+                "mention_count": 20,
+            },
+            {
+                "id": "e3",
+                "entity_type": "Topic",
+                "name": "Security",
+                "normalized_name": "security",
+                "mention_count": 5,
+            },
         ]
         entities_b = [
-            {"id": "e1", "entity_type": "Topic", "name": "AI",
-             "normalized_name": "ai", "mention_count": 25},  # +15
-            {"id": "e2", "entity_type": "Topic", "name": "Cloud",
-             "normalized_name": "cloud", "mention_count": 18},  # -2
-            {"id": "e3", "entity_type": "Topic", "name": "Security",
-             "normalized_name": "security", "mention_count": 5},  # 0
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "AI",
+                "normalized_name": "ai",
+                "mention_count": 25,
+            },  # +15
+            {
+                "id": "e2",
+                "entity_type": "Topic",
+                "name": "Cloud",
+                "normalized_name": "cloud",
+                "mention_count": 18,
+            },  # -2
+            {
+                "id": "e3",
+                "entity_type": "Topic",
+                "name": "Security",
+                "normalized_name": "security",
+                "mention_count": 5,
+            },  # 0
         ]
         a = self._make_snapshot(entities=entities_a)
         b = self._make_snapshot(entities=entities_b)
@@ -388,12 +418,22 @@ class TestComputeDiff:
 
         # Theme shifts come from common entities with changed mention_count
         entities_a = [
-            {"id": "e1", "entity_type": "Topic", "name": "NewTopic",
-             "normalized_name": "newtopic", "mention_count": 2},
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "NewTopic",
+                "normalized_name": "newtopic",
+                "mention_count": 2,
+            },
         ]
         entities_b = [
-            {"id": "e1", "entity_type": "Topic", "name": "NewTopic",
-             "normalized_name": "newtopic", "mention_count": 12},
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "NewTopic",
+                "normalized_name": "newtopic",
+                "mention_count": 12,
+            },
         ]
         a = self._make_snapshot(entities=entities_a)
         b = self._make_snapshot(entities=entities_b)
@@ -409,12 +449,22 @@ class TestComputeDiff:
         from pwbs.snapshots.service import compute_diff
 
         entities_a = [
-            {"id": "e1", "entity_type": "Topic", "name": "OldTopic",
-             "normalized_name": "oldtopic", "mention_count": 15},
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "OldTopic",
+                "normalized_name": "oldtopic",
+                "mention_count": 15,
+            },
         ]
         entities_b = [
-            {"id": "e1", "entity_type": "Topic", "name": "OldTopic",
-             "normalized_name": "oldtopic", "mention_count": 7},
+            {
+                "id": "e1",
+                "entity_type": "Topic",
+                "name": "OldTopic",
+                "normalized_name": "oldtopic",
+                "mention_count": 7,
+            },
         ]
         a = self._make_snapshot(entities=entities_a)
         b = self._make_snapshot(entities=entities_b)
@@ -461,9 +511,7 @@ class TestCaptureSnapshot:
             mock_count_result,
         ]
 
-        snapshot = await capture_snapshot(
-            mock_db, user_id=user_id, label="test", trigger="manual"
-        )
+        snapshot = await capture_snapshot(mock_db, user_id=user_id, label="test", trigger="manual")
 
         assert snapshot.user_id == user_id
         assert snapshot.label == "test"

@@ -1,17 +1,23 @@
 ﻿"""Rule-based Named Entity Recognition for the PWBS Processing Pipeline (TASK-061).
 
-First stage of the two-stage NER pipeline. Extracts entities from document
+First stage of the NER pipeline. Extracts entities from document
 chunks using deterministic regex patterns:
 
 - **E-Mail addresses** -> Person entities
 - **@-Mentions** -> Person entities
 - **Calendar participants** (from metadata `participants` field) -> Person entities
 - **Notion links** (from metadata) -> diverse entities
+- **Dates / deadlines** -> Date entities (ADR-017)
+- **Decisions** -> Decision entities (ADR-017)
+- **Open questions** -> OpenQuestion entities (ADR-017)
+- **Goals** -> Goal entities (ADR-017)
+- **Risks** -> Risk entities (ADR-017)
 
-All rule-based extractions carry `confidence=1.0` and
-`extraction_method='rule'`.
+All rule-based extractions carry ``confidence=1.0`` for exact structural
+matches and ``confidence=0.85`` for keyword heuristics.
+``extraction_method='rule'`` throughout.
 
-D1 Section 3.2, AGENTS.md ProcessingAgent.
+D1 Section 3.2, AGENTS.md ProcessingAgent, ADR-017.
 """
 
 from __future__ import annotations
@@ -46,6 +52,76 @@ _AT_MENTION_RE = re.compile(
     r"(?<!\w)@([a-zA-Z][a-zA-Z0-9._\-]{0,63})",
 )
 
+# ---------------------------------------------------------------------------
+# Date / deadline patterns (ADR-017)
+# ---------------------------------------------------------------------------
+
+# ISO dates: 2026-03-16, 16.03.2026, 03/16/2026
+_ISO_DATE_RE = re.compile(
+    r"\b(\d{4}-\d{2}-\d{2})\b"
+    r"|\b(\d{1,2}\.\d{1,2}\.\d{4})\b"
+    r"|\b(\d{1,2}/\d{1,2}/\d{4})\b",
+)
+
+# Deadline keywords (DE + EN) followed by a date-like or day reference.
+_DEADLINE_RE = re.compile(
+    r"(?:deadline|frist|bis zum|bis|due by|due|faellig|fällig)"
+    r"\s*:?\s*"
+    r"(\d{4}-\d{2}-\d{2}"
+    r"|\d{1,2}\.\d{1,2}\.\d{4}"
+    r"|(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag"
+    r"|monday|tuesday|wednesday|thursday|friday|saturday|sunday"
+    r"|morgen|tomorrow|heute|today"
+    r"|next\s+week|nächste\s+woche|naechste\s+woche"
+    r"|end\s+of\s+(?:week|month|quarter|year)"
+    r"|ende\s+(?:der\s+woche|des\s+monats|des\s+quartals|des\s+jahres))"
+    r")",
+    re.IGNORECASE,
+)
+
+# ---------------------------------------------------------------------------
+# Decision patterns (ADR-017)
+# ---------------------------------------------------------------------------
+
+_DECISION_RE = re.compile(
+    r"(?:"
+    r"(?:entscheidung|beschluss|decision|action\s*item|ergebnis)\s*:\s*(.{5,120})"
+    r"|(?:wir\s+haben\s+(?:uns\s+)?entschieden|we\s+(?:have\s+)?decided|decision\s+was\s+made)\s*[,:.]?\s*(.{5,120})"
+    r")",
+    re.IGNORECASE,
+)
+
+# ---------------------------------------------------------------------------
+# Open-question patterns (ADR-017)
+# ---------------------------------------------------------------------------
+
+_OPEN_QUESTION_RE = re.compile(
+    r"(?:"
+    r"(?:offene\s+frage|open\s+question|ungeklaert|ungeklärt"
+    r"|noch\s+zu\s+(?:klaeren|klären)"
+    r"|to\s+be\s+determined|tbd|open\s+item|ausstehend)\s*:?\s*(.{5,200})"
+    r")",
+    re.IGNORECASE,
+)
+
+# ---------------------------------------------------------------------------
+# Goal patterns (ADR-017)
+# ---------------------------------------------------------------------------
+
+_GOAL_RE = re.compile(
+    r"(?:ziel|goal|objective|milestone|target)\s*:\s*(.{5,200})",
+    re.IGNORECASE,
+)
+
+# ---------------------------------------------------------------------------
+# Risk patterns (ADR-017)
+# ---------------------------------------------------------------------------
+
+_RISK_RE = re.compile(
+    r"(?:risiko|risk|gefahr|blocker)\s*:\s*(.{5,200})",
+    re.IGNORECASE,
+)
+
 
 # ---------------------------------------------------------------------------
 # Data classes
@@ -60,6 +136,11 @@ class NERConfig:
     extract_mentions: bool = True
     extract_participants: bool = True
     extract_notion_links: bool = True
+    extract_dates: bool = True
+    extract_decisions: bool = True
+    extract_questions: bool = True
+    extract_goals: bool = True
+    extract_risks: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +222,21 @@ class RuleBasedNER:
 
         if self._config.extract_notion_links:
             mentions.extend(self._extract_notion_links(metadata))
+
+        if self._config.extract_dates:
+            mentions.extend(self._extract_dates(content))
+
+        if self._config.extract_decisions:
+            mentions.extend(self._extract_decisions(content))
+
+        if self._config.extract_questions:
+            mentions.extend(self._extract_questions(content))
+
+        if self._config.extract_goals:
+            mentions.extend(self._extract_goals(content))
+
+        if self._config.extract_risks:
+            mentions.extend(self._extract_risks(content))
 
         return self._deduplicate(mentions)
 
@@ -253,6 +349,124 @@ class RuleBasedNER:
         return results
 
     # ------------------------------------------------------------------
+    # ADR-017: Date, Decision, Question, Goal, Risk extraction
+    # ------------------------------------------------------------------
+
+    def _extract_dates(self, content: str) -> list[ExtractedMention]:
+        """Extract date references and deadlines."""
+        results: list[ExtractedMention] = []
+        seen: set[str] = set()
+
+        for match in _ISO_DATE_RE.finditer(content):
+            date_str = match.group(1) or match.group(2) or match.group(3)
+            if date_str in seen:
+                continue
+            seen.add(date_str)
+            results.append(
+                ExtractedMention(
+                    entity_name=date_str,
+                    entity_type=EntityType.DATE_REF,
+                    normalized_name=self._normalize(date_str),
+                    confidence=1.0,
+                    source_pattern="date_iso",
+                ),
+            )
+
+        for match in _DEADLINE_RE.finditer(content):
+            date_ref = match.group(1).strip()
+            norm = self._normalize(date_ref)
+            if norm in seen:
+                continue
+            seen.add(norm)
+            results.append(
+                ExtractedMention(
+                    entity_name=date_ref,
+                    entity_type=EntityType.DATE_REF,
+                    normalized_name=norm,
+                    confidence=0.85,
+                    source_pattern="deadline_keyword",
+                ),
+            )
+
+        return results
+
+    def _extract_decisions(self, content: str) -> list[ExtractedMention]:
+        """Extract decision statements from keyword patterns."""
+        results: list[ExtractedMention] = []
+        for match in _DECISION_RE.finditer(content):
+            text = (match.group(1) or match.group(2) or "").strip()
+            text = self._trim_to_sentence(text)
+            if not text:
+                continue
+            results.append(
+                ExtractedMention(
+                    entity_name=text,
+                    entity_type=EntityType.DECISION,
+                    normalized_name=self._normalize(text),
+                    confidence=0.85,
+                    source_pattern="decision_keyword",
+                ),
+            )
+        return results
+
+    def _extract_questions(self, content: str) -> list[ExtractedMention]:
+        """Extract open questions from keyword patterns."""
+        results: list[ExtractedMention] = []
+        for match in _OPEN_QUESTION_RE.finditer(content):
+            text = match.group(1).strip()
+            text = self._trim_to_sentence(text)
+            if not text:
+                continue
+            results.append(
+                ExtractedMention(
+                    entity_name=text,
+                    entity_type=EntityType.OPEN_QUESTION,
+                    normalized_name=self._normalize(text),
+                    confidence=0.85,
+                    source_pattern="question_keyword",
+                ),
+            )
+        return results
+
+    def _extract_goals(self, content: str) -> list[ExtractedMention]:
+        """Extract goal statements from keyword patterns."""
+        results: list[ExtractedMention] = []
+        for match in _GOAL_RE.finditer(content):
+            text = match.group(1).strip()
+            text = self._trim_to_sentence(text)
+            if not text:
+                continue
+            results.append(
+                ExtractedMention(
+                    entity_name=text,
+                    entity_type=EntityType.GOAL,
+                    normalized_name=self._normalize(text),
+                    confidence=0.85,
+                    source_pattern="goal_keyword",
+                ),
+            )
+        return results
+
+    def _extract_risks(self, content: str) -> list[ExtractedMention]:
+        """Extract risk statements from keyword patterns."""
+        results: list[ExtractedMention] = []
+        for match in _RISK_RE.finditer(content):
+            text = match.group(1).strip()
+            text = self._trim_to_sentence(text)
+            if not text:
+                continue
+            results.append(
+                ExtractedMention(
+                    entity_name=text,
+                    entity_type=EntityType.RISK,
+                    normalized_name=self._normalize(text),
+                    confidence=0.85,
+                    source_pattern="risk_keyword",
+                ),
+            )
+        return results
+
+    # ------------------------------------------------------------------
     # Deduplication
     # ------------------------------------------------------------------
 
@@ -310,3 +524,18 @@ class RuleBasedNER:
             "decision": EntityType.DECISION,
         }
         return mapping.get(raw_type.lower().strip(), EntityType.TOPIC)
+
+    @staticmethod
+    def _trim_to_sentence(text: str) -> str:
+        """Trim *text* at the first sentence boundary (., !, or newline).
+
+        Returns the trimmed string (may be empty if nothing usable).
+        """
+        # Stop at the first full stop, exclamation mark, or newline
+        end = len(text)
+        for ch in (".\n", ".\r", ". ", ".\t", "!\n", "! ", "\n"):
+            idx = text.find(ch)
+            if idx != -1 and idx < end:
+                end = idx
+        result = text[:end].strip().rstrip(".!,;:")
+        return result

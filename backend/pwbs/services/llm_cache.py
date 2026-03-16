@@ -59,8 +59,8 @@ LLM_CACHE_REQUESTS = Counter(
 # ---------------------------------------------------------------------------
 
 DEFAULT_TTLS: dict[str, int] = {
-    "search": 600,       # 10 min
-    "briefing": 3600,    # 1 hour
+    "search": 600,  # 10 min
+    "briefing": 3600,  # 1 hour
     "extraction": 86400,  # 24 hours
 }
 
@@ -277,7 +277,9 @@ async def llm_cache_invalidate_owner(owner_id: UUID) -> int:
         cursor: int | bytes = 0
         while True:
             cursor, keys = await redis.scan(
-                cursor=cursor, match=pattern, count=200,
+                cursor=cursor,
+                match=pattern,
+                count=200,
             )
             if keys:
                 deleted += await redis.delete(*keys)
@@ -285,7 +287,9 @@ async def llm_cache_invalidate_owner(owner_id: UUID) -> int:
                 break
     except Exception:
         logger.warning(
-            "llm_cache_invalidate_owner failed for %s", owner_id, exc_info=True,
+            "llm_cache_invalidate_owner failed for %s",
+            owner_id,
+            exc_info=True,
         )
     return deleted
 
@@ -306,7 +310,9 @@ async def llm_cache_invalidate_type(
         cursor: int | bytes = 0
         while True:
             cursor, keys = await redis.scan(
-                cursor=cursor, match=pattern, count=200,
+                cursor=cursor,
+                match=pattern,
+                count=200,
             )
             if keys:
                 deleted += await redis.delete(*keys)

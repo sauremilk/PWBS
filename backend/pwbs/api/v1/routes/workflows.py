@@ -52,9 +52,7 @@ def _check_rule_ownership(rule: WorkflowRule, user_id: uuid.UUID) -> None:
         )
 
 
-async def _get_rule_or_404(
-    rule_id: uuid.UUID, db: AsyncSession
-) -> WorkflowRule:
+async def _get_rule_or_404(rule_id: uuid.UUID, db: AsyncSession) -> WorkflowRule:
     """Fetch a rule by ID or raise 404."""
     stmt = select(WorkflowRule).where(WorkflowRule.id == rule_id)
     result = await db.execute(stmt)
@@ -127,9 +125,7 @@ async def list_workflow_rules(
 ) -> WorkflowRuleListResponse:
     """List all workflow rules for the authenticated user."""
     count_stmt = (
-        select(func.count())
-        .select_from(WorkflowRule)
-        .where(WorkflowRule.user_id == user.id)
+        select(func.count()).select_from(WorkflowRule).where(WorkflowRule.user_id == user.id)
     )
     total = (await db.execute(count_stmt)).scalar_one()
 

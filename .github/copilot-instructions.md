@@ -40,6 +40,56 @@ Das **Persönliche Wissens-Betriebssystem (PWBS)** ist eine kognitive Infrastruk
 
 ---
 
+## MVP-Fokussierung (ADR-016 – aktiv seit März 2026)
+
+Die folgenden Entscheidungen reduzieren die aktive Codebasis auf das MVP-Minimum. **Alle Agenten und Entwickler müssen diese Constraints einhalten.**
+
+### Deaktivierte Module (`backend/_deferred/`)
+
+Folgende Module sind **nicht Teil des MVP** und liegen in `backend/_deferred/`. Code in diesen Modulen NICHT referenzieren, importieren oder weiterentwickeln:
+
+- `billing` – Zahlungen/Subscriptions (Phase 4)
+- `teams` – Multi-User-Organisationen (Phase 4)
+- `rbac` – Rollenbasierte Zugriffskontrolle (Phase 4)
+- `marketplace` – Plugin-Marketplace (Phase 5)
+- `developer` – Öffentliche API / API-Keys (Phase 5)
+- `sso` – Enterprise SSO/SAML (Phase 4)
+
+**Router in `main.py`:** Die zugehörigen Router-Includes sind kommentiert mit `# DEFERRED: Phase 3+`.
+**ORM-Models:** Bleiben in `models/__init__.py` für Alembic-Migrationskonsistenz (nicht entfernen).
+
+### Aktive Konnektoren (nur Kern-4)
+
+| Aktiv (MVP)        | Deaktiviert (Phase 3)           |
+| ------------------ | ------------------------------- |
+| Google Calendar    | Gmail (TASK-123/124)            |
+| Notion             | Slack (TASK-125/126)            |
+| Zoom               | Outlook Mail (TASK-128)         |
+| Obsidian           | Google Docs (TASK-127)          |
+
+Phase-3-Konnektoren liegen in `backend/_deferred/connectors/`. Einträge in `connectors.py` Route sind kommentiert.
+**Neue Konnektoren:** Nur implementieren wenn sie in der Kern-4-Liste stehen oder explizit beauftragt werden.
+
+### Neo4j ist optional
+
+- `get_neo4j_driver()` gibt `None` zurück wenn Neo4j nicht erreichbar ist
+- Docker Compose: Neo4j hinter `profiles: ["graph"]` – nur mit `--profile graph` gestartet
+- GraphAgent/GraphBuilder: Nutze `NullGraphService`-Fallbacks; keine harte Abhängigkeit
+- **Beim Implementieren:** Jeder Code der Neo4j nutzt, MUSS mit `driver is None` umgehen können
+
+### Feature Flags & Vertikale Profile
+
+- Feature-Flags-Service ist beibehalten (bereits MVP-tauglich mit ENV-Overrides)
+- Vertikale Profile: Standard "general" ist aktiv; keine vertikalspezifische Logik implementieren
+
+### Test-Konfiguration
+
+- `pytest-timeout` mit Default 30s pro Test (`pyproject.toml`)
+- DB-Singletons werden automatisch durch `_isolate_db_singletons` Fixture gemockt
+- Kein realer Netzwerkzugriff in Unit-Tests (Redis, Weaviate, Neo4j, PostgreSQL alle gemockt)
+
+---
+
 ## Tech-Stack
 
 | Schicht       | Technologie                                                              |

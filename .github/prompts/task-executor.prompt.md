@@ -41,6 +41,7 @@ Lese ergänzend:
 
 - `ARCHITECTURE.md` (Abschnitt zum betreffenden Modul)
 - `AGENTS.md` (welche Agenten-Rolle ist zuständig)
+- `docs/adr/016-mvp-fokussierung-refactoring.md` (MVP-Scope: deaktivierte Module, Kern-4-Konnektoren, Neo4j optional)
 - `.github/instructions/backend.instructions.md` (für Python-Dateien)
 - `.github/instructions/frontend.instructions.md` (für TypeScript/TSX-Dateien)
 - `.github/instructions/security.instructions.md` (immer)
@@ -50,6 +51,7 @@ Lese ergänzend:
 
 **Pflichtregeln:**
 
+- **MVP-Scope (ADR-016):** Keine Imports aus `backend/_deferred/`. Module `billing`, `teams`, `rbac`, `marketplace`, `developer`, `sso` sind deaktiviert. Nur Kern-4-Konnektoren (Google Calendar, Notion, Zoom, Obsidian) bearbeiten. Neo4j-Code muss `driver is None` handhaben (`NullGraphService`-Fallback).
 - Vollständige Type Annotations (Python: PEP 484/526, TypeScript: strict)
 - Keine `# TODO: implement` Platzhalter – vollständig oder `raise NotImplementedError("${input:task_id}: [Beschreibung]")`
 - Jede neue Datenstruktur mit `owner_id: UUID` und `expires_at: datetime | None`
@@ -104,6 +106,8 @@ Vor dem Commit, prüfe intern:
 - [ ] Keine Secrets im Code?
 - [ ] Input-Validierung an allen Systemgrenzen?
 - [ ] Acceptance Criteria vollständig erfüllt?
+- [ ] **MVP-Scope:** Keine Imports aus `backend/_deferred/`? Keine Abhängigkeit auf deaktivierte Module?
+- [ ] **Neo4j optional:** Falls Neo4j-Code vorhanden – funktioniert der Code auch mit `driver is None`?
 
 ### Phase 5 – Tests ausführen
 

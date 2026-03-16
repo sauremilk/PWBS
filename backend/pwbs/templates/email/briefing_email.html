@@ -2,7 +2,7 @@
 {% block content %}
 <h2>{{ briefing_type }}: {{ briefing_title }}</h2>
 <div style="color: #475569; font-size: 14px; line-height: 1.7;">
-  {{ briefing_content }}
+  {{ briefing_content | safe }}
 </div>
 {% if sources %}
 <h3 style="margin-top: 24px; font-size: 15px; color: #1e293b;">Quellen</h3>

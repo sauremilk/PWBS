@@ -52,9 +52,7 @@ class WorkflowRule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     execution_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
     # DSGVO: expiration
-    expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship()  # noqa: F821

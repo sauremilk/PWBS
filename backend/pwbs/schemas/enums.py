@@ -20,6 +20,8 @@ class SourceType(str, Enum):
     SLACK = "slack"
     ZOOM = "zoom"
     API_UPLOAD = "api_upload"
+    OCR = "ocr"
+    AUDIO_TRANSCRIPT = "audio_transcript"
 
 
 class ContentType(str, Enum):
@@ -41,6 +43,7 @@ class EntityType(str, Enum):
     RISK = "risk"
     HYPOTHESIS = "hypothesis"
     OPEN_QUESTION = "open_question"
+    DATE_REF = "date_ref"
 
 
 class BriefingType(str, Enum):

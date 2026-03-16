@@ -186,6 +186,7 @@ class TestUserSettingsEmailFields:
             reminder_frequency="daily",
             email_briefing_enabled=True,
             briefing_email_time="07:00",
+            vertical_profile="general",
         )
         assert resp.email_briefing_enabled is True
         assert resp.briefing_email_time == "07:00"

@@ -1,0 +1,13 @@
+STDOUT:
+st_feedback.py::TestSubmitFeedback::test_creates_feedback
+  C:\Users\mickg\PWBS\backend\pwbs\api\v1\routes\feedback.py:102: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(feedback)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+19 passed, 1 warning in 5.85s
+
+STDERR:
+
+RC:0

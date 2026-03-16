@@ -9,13 +9,14 @@ tools:
 
 # Fundament-Dokumente vertiefen (autonom)
 
-Du vertiefst und erweiterst bereits generierte Fundament-Dokumente – vollständig autonom, ohne Rückfragen. Dieser Prompt wird **nach** `gen-tasks.prompt.md`, `gen-prd-spec.prompt.md` und den anderen gen-* Prompts ausgeführt und hebt die Dokumentqualität von "Grundstruktur vorhanden" auf "voll ausgearbeitetes Planungsdokument".
+Du vertiefst und erweiterst bereits generierte Fundament-Dokumente – vollständig autonom, ohne Rückfragen. Dieser Prompt wird **nach** `gen-tasks.prompt.md`, `gen-prd-spec.prompt.md` und den anderen gen-\* Prompts ausgeführt und hebt die Dokumentqualität von "Grundstruktur vorhanden" auf "voll ausgearbeitetes Planungsdokument".
 
 > **Worum es geht:** Automatisch generierte Dokumente enthalten oft korrekte Struktur, aber zu wenig Tiefe. tasks.md hat 10 Tasks statt 80+. Personas haben einen Satz pro Schmerzpunkt statt einer konkreten Konsequenz. Architecture-Prinzipien fehlen die Implikations-Spalte. Dieser Prompt schließt genau diese Lücken.
 
 > **Nicht anfassen:** Korrekte, bereits tiefe Abschnitte werden NICHT verändert. Nur ergänzen und vertiefen, nicht ersetzen oder umstrukturieren.
 
 > **Robustheitsregeln:**
+>
 > 1. Prüfe vor jedem Dateizugriff, ob die Datei existiert.
 > 2. Falls kein Fundament vorhanden (keine tasks.md, keine PRD-SPEC): Abbruch. "Keine generierten Fundament-Dokumente gefunden. Führe zuerst `bootstrap-foundation.prompt.md` aus."
 > 3. Arbeite inkrementell: Lies → Analysiere Lücken → Erweitere → Schreibe zurück.
@@ -26,15 +27,16 @@ Du vertiefst und erweiterst bereits generierte Fundament-Dokumente – vollstän
 
 Lies alle existierenden Fundament-Dokumente und bewerte die Tiefe:
 
-| Dokument | Pfad | Tiefe | Hauptlücken |
-|----------|------|-------|-------------|
-| Vision | `vision*.md` / `VISION.md` | ? | ? |
-| Roadmap | `ROADMAP.md` | ? | ? |
-| Architecture | `ARCHITECTURE.md` | ? | ? |
-| PRD-SPEC | `PRD-SPEC.md` | ? | ? |
-| Tasks | `tasks.md` | ? | ? |
+| Dokument     | Pfad                       | Tiefe | Hauptlücken |
+| ------------ | -------------------------- | ----- | ----------- |
+| Vision       | `vision*.md` / `VISION.md` | ?     | ?           |
+| Roadmap      | `ROADMAP.md`               | ?     | ?           |
+| Architecture | `ARCHITECTURE.md`          | ?     | ?           |
+| PRD-SPEC     | `PRD-SPEC.md`              | ?     | ?           |
+| Tasks        | `tasks.md`                 | ?     | ?           |
 
 **Tiefenbewertung (intern):**
+
 - **Flach:** Tabellen ohne Fließtext, < 3 Acceptance Criteria pro Task, Personas ohne Zeitangaben, < 30 Tasks
 - **Mittel:** Struktur vorhanden, einige Abschnitte ausgearbeitet, 30–60 Tasks
 - **Tief:** Vollständige Paragrafen, 5+ Acceptance Criteria, stundengenauer Tagesablauf, 80+ Tasks
@@ -50,18 +52,19 @@ Lies alle existierenden Fundament-Dokumente und bewerte die Tiefe:
 Prüfe das Format aller existierenden Tasks in tasks.md:
 
 **Das korrekte vollständige Task-Format ist:**
+
 ```markdown
 #### TASK-[NNN]: [Präziser Titel – konkrete Aktion, nicht abstrakt]
 
-| Feld             | Wert                                                              |
-| ---------------- | ----------------------------------------------------------------- |
+| Feld             | Wert                                                                    |
+| ---------------- | ----------------------------------------------------------------------- |
 | **Priorität**    | P0 (kritisch) / P1 (Must-Have MVP) / P2 (Should-Have) / P3 (Could-Have) |
-| **Bereich**      | Backend / Frontend / Infra / Auth / DB / LLM / Testing / Docs / DevOps |
-| **Aufwand**      | XS (<2h) / S (0.5–1 Tag) / M (2–3 Tage) / L (1 Woche) / XL (>1 Woche) |
-| **Status**       | 🔴 Offen / 🟡 In Arbeit / 🟢 Fertig / ⛔ Blockiert               |
-| **Quelle**       | [Exakte Quellenangabe: Dokument + Abschnitt/Heading]              |
-| **Abhängig von** | [TASK-NNN, TASK-NNN] oder –                                       |
-| **Blockiert**    | [TASK-NNN, TASK-NNN] oder –                                       |
+| **Bereich**      | Backend / Frontend / Infra / Auth / DB / LLM / Testing / Docs / DevOps  |
+| **Aufwand**      | XS (<2h) / S (0.5–1 Tag) / M (2–3 Tage) / L (1 Woche) / XL (>1 Woche)   |
+| **Status**       | 🔴 Offen / 🟡 In Arbeit / 🟢 Fertig / ⛔ Blockiert                      |
+| **Quelle**       | [Exakte Quellenangabe: Dokument + Abschnitt/Heading]                    |
+| **Abhängig von** | [TASK-NNN, TASK-NNN] oder –                                             |
+| **Blockiert**    | [TASK-NNN, TASK-NNN] oder –                                             |
 
 **Beschreibung:** [2–4 Sätze. Was genau muss implementiert werden? Welche Randfälle sind relevant? Welche Entscheidungen sind zu treffen? Nicht allgemein – konkret auf dieses Projekt bezogen.]
 
@@ -82,19 +85,23 @@ Für jeden existierenden Task ohne `Beschreibung`-Paragraph, `Acceptance Criteri
 **Ziel:** Jede implementierbare Arbeitseinheit hat einen Task. Prüfe systematisch alle folgenden Kategorien und erstelle fehlende Tasks:
 
 #### Kategorie A: Features & Module (aus Architecture + PRD-SPEC)
+
 Für jedes Architektur-Modul und jedes FR:
+
 - [ ] Gibt es einen Task für die **Grundstruktur** des Moduls? (Ordner, Interfaces, Basisklassen)
 - [ ] Gibt es einen Task für die **Kern-Implementierung**?
 - [ ] Gibt es einen Task für **Tests** (Unit + Integration)?
 - [ ] Gibt es einen Task für **API-Exposition** (falls zutreffend)?
 
 #### Kategorie B: Datenbank & Schema
+
 - [ ] **Migration** für jede neue Tabelle/Entität
 - [ ] **Indizes** für häufig abgefragte Felder
 - [ ] **Seed-Daten** für Entwicklungsumgebung
 - [ ] **Schema-Validierung** (Pydantic-Schemas, DTO-Klassen)
 
 #### Kategorie C: Auth & Sicherheit
+
 - [ ] **Authentifizierung** (Login, Token-Ausstellung)
 - [ ] **Autorisierung** (Middleware, Owner-Filter)
 - [ ] **OAuth-Flow** (falls externe Services)
@@ -103,6 +110,7 @@ Für jedes Architektur-Modul und jedes FR:
 - [ ] **Input-Validierung** für alle Endpunkte
 
 #### Kategorie D: Infrastruktur & DevOps
+
 - [ ] **Docker-Compose** für Entwicklungsumgebung
 - [ ] **Dockerfile** für Production-Build
 - [ ] **CI/CD-Pipeline** (Lint, Test, Build, Deploy)
@@ -111,13 +119,16 @@ Für jedes Architektur-Modul und jedes FR:
 - [ ] **Logging-Infrastruktur**
 
 #### Kategorie E: Dokumentation & Planung
+
 - [ ] **ADRs** für jede signifikante Tech-Entscheidung
 - [ ] **API-Dokumentation** (OpenAPI, README)
 - [ ] **Setup-Guide** (lokale Entwicklung)
 - [ ] **Deployment-Dokumentation**
 
 #### Kategorie F: Externe Integrationen (aus Connectors/API-Clients)
+
 Für jeden externen Service/Konnektor:
+
 - [ ] **OAuth-Setup** (Credentials, Scopes)
 - [ ] **Client-Implementierung** mit Retry-Logik
 - [ ] **Rate-Limit-Handling**
@@ -125,6 +136,7 @@ Für jeden externen Service/Konnektor:
 - [ ] **Tests mit gemockter API**
 
 #### Kategorie G: Qualitätssicherung
+
 - [ ] **Test-Fixtures und Factories** für Testdaten
 - [ ] **Integration-Test-Setup** (Test-DBs, Container)
 - [ ] **Performance-Tests** für kritische Pfade (falls NF definiert)
@@ -133,6 +145,7 @@ Für jeden externen Service/Konnektor:
 ### 2c – Neue Tasks generieren
 
 Für jede identifizierte Lücke aus 2b: Erstelle einen vollständigen Task im Format aus 2a. Mit:
+
 - Präzisem Titel (Verb + konkretes Objekt + Kontext)
 - Exakter Quellenangabe (welcher Roadmap-Abschnitt / welches FR / welche Architecture-Komponente)
 - `Abhängig von` basierend auf logischer Reihenfolge
@@ -145,8 +158,9 @@ Für jede identifizierte Lücke aus 2b: Erstelle einen vollständigen Task im Fo
 ### 2d – Source-Referenzen präzisieren
 
 Vage `Quelle`-Felder wie "Roadmap" oder "PRD FR-003" → Ersetzen durch spezifische Referenzen:
+
 - ✗ `Roadmap Phase 2`
-- ✓ `ROADMAP.md §Phase 2 Kern-Deliverables: "Authentifizierung"` 
+- ✓ `ROADMAP.md §Phase 2 Kern-Deliverables: "Authentifizierung"`
 - ✗ `PRD FR-003`
 - ✓ `PRD-SPEC.md FR-003 §Acceptance Criteria: "API-Tokens rotieren nach 30 Tagen"`
 
@@ -158,10 +172,12 @@ Falls noch nicht vorhanden oder unvollständig: Füge nach allen Tasks einen Abs
 ## Abhängigkeitsgraph
 
 ### Kritischer Pfad
+
 [Längste Abhängigkeitskette – TASK-NNN → TASK-NNN → ...]
 Gesamtaufwand kritischer Pfad: [Schätzung]
 
 ### Parallelisierbare Tracks
+
 - **Track A** (Backend-Grundstruktur): TASK-NNN, TASK-NNN, ...
 - **Track B** (Frontend): TASK-NNN, TASK-NNN, ...
 - **Track C** (Infrastruktur): TASK-NNN, TASK-NNN, ...
@@ -176,6 +192,7 @@ Prüfe und ergänze nur wenn nötig:
 ### 3a – Persona-Tiefe
 
 Für jede Persona prüfen:
+
 - **Tagesablauf:** Enthält er ≥ 6 Zeitpunkte mit Stunden (07:00, 09:30, ...)? Falls nicht: Erweitern
 - **Schmerzpunkte:** Hat jeder Schmerzpunkt eine konkrete Konsequenz (Zeitverlust / Business-Auswirkung)?
   - ✗ "Verbringt viel Zeit mit der Suche nach Informationen"
@@ -185,10 +202,11 @@ Für jede Persona prüfen:
 ### 3b – NF-Zahlen
 
 Für jede NF ohne konkrete Zahl: Leite eine aus dem Tech-Stack ab oder schätze nach Projekttyp:
+
 - REST-API: p95 ≤ 200ms, 99.5% Uptime
 - Semantische Suche: p95 ≤ 1000ms
 - LLM-Aufruf: p95 ≤ 10s (mit timeout 30s)
-Markiere Schätzungen mit `<!-- REVIEW: geschätzt, zu validieren -->`
+  Markiere Schätzungen mit `<!-- REVIEW: geschätzt, zu validieren -->`
 
 ### 3c – FR-Vollständigkeit
 
@@ -203,15 +221,18 @@ Prüfe und ergänze nur wenn nötig:
 ### 4a – Prinzipien-Tabelle
 
 Die Designprinzipien-Tabelle muss eine **Implikations-Spalte** haben:
+
 ```
 | Prinzip | Bedeutung | Implikation für Entwickler |
 |---------|-----------|---------------------------|
 ```
+
 Falls die Spalte fehlt: Hinzufügen. Für jedes Prinzip ableiten, was das konkret bedeutet (z.B. "Idempotenz → alle DB-Writes als UPSERT, nie blind INSERT").
 
 ### 4b – Verworfene Alternativen
 
 Für jede Tech-Entscheidung (PostgreSQL, FastAPI, etc.): Falls kein "Warum nicht X?" dokumentiert ist, ergänze:
+
 ```markdown
 **Verworfene Alternative:** [Name]
 **Grund:** [1–2 Sätze warum abgelehnt]

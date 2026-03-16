@@ -25,6 +25,10 @@ def _make_user(
     u.id = user_id
     u.email = "alice@example.com"
     u.display_name = "Alice"
+    u.timezone = "UTC"
+    u.language = "de"
+    u.briefing_auto_generate = True
+    u.reminder_frequency = "daily"
     u.email_briefing_enabled = False
     u.briefing_email_time = time(6, 30)
     u.vertical_profile = vertical_profile

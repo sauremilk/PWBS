@@ -102,7 +102,10 @@ async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
     description="Prüft PostgreSQL, Weaviate, Neo4j, Redis und LLM-API parallel "
     "mit 5s Timeout pro Service. HTTP 200 wenn PostgreSQL und mindestens eine "
     "Such-Komponente erreichbar sind, HTTP 503 bei PostgreSQL-Ausfall.",
-    responses={200: {"description": "System healthy oder degraded"}, 503: {"description": "PostgreSQL nicht erreichbar"}},
+    responses={
+        200: {"description": "System healthy oder degraded"},
+        503: {"description": "PostgreSQL nicht erreichbar"},
+    },
 )
 async def health_check() -> JSONResponse:
     checks = [
@@ -259,9 +262,7 @@ async def health_check_detailed(
 
     if not critical_ok:
         overall = "unhealthy"
-    elif all(
-        d["status"] in ("up", "unavailable") for d in dependencies.values()
-    ):
+    elif all(d["status"] in ("up", "unavailable") for d in dependencies.values()):
         overall = "healthy"
     else:
         overall = "degraded"

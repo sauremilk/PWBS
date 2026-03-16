@@ -61,24 +61,25 @@ services-down: ## Docker-Services stoppen
 test: test-backend test-frontend ## Alle Tests ausführen
 
 .PHONY: test-backend
-test-backend: ## Backend Unit-Tests
-	cd backend && .venv/bin/pytest tests/unit/ -v
+test-backend: ## Backend Unit-Tests (Output → backend/.test-last.txt)
+	cd backend && .venv/bin/pytest tests/unit/ 2>&1 | tee .test-last.txt; \
+	  grep -E "passed|failed|error" .test-last.txt | tail -3
 
 .PHONY: test-integration
 test-integration: ## Backend Integration-Tests (Docker-Services erforderlich)
-	cd backend && .venv/bin/pytest tests/integration/ -v --docker
+	cd backend && .venv/bin/pytest tests/integration/ --docker
 
 .PHONY: test-e2e
 test-e2e: ## End-to-End-Tests
-	cd backend && .venv/bin/pytest tests/e2e/ -v
+	cd backend && .venv/bin/pytest tests/e2e/
 
 .PHONY: test-frontend
 test-frontend: ## Frontend-Tests
 	cd frontend && npm test 2>/dev/null || echo "$(CYAN)Frontend-Tests noch nicht konfiguriert$(RESET)"
 
 .PHONY: test-coverage
-test-coverage: ## Backend-Tests mit Coverage-Report
-	cd backend && .venv/bin/pytest tests/ -v --cov=pwbs --cov-report=term-missing --cov-report=html
+test-coverage: ## Backend-Tests mit Coverage-Report (Output → backend/.test-last.txt)
+	cd backend && .venv/bin/pytest tests/ --cov=pwbs --cov-report=term-missing --cov-report=html 2>&1 | tee .test-last.txt
 
 # ── Code-Qualität ─────────────────────────────────────────
 

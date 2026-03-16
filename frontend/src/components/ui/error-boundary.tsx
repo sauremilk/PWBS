@@ -32,7 +32,10 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div data-testid="error-boundary" className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+        <div
+          data-testid="error-boundary"
+          className="rounded-lg border border-red-200 bg-red-50 p-6 text-center"
+        >
           <AlertTriangle
             aria-hidden="true"
             className="mx-auto mb-3 h-8 w-8 text-red-400"

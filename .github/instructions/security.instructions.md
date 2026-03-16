@@ -4,6 +4,8 @@ applyTo: "**/*.{py,ts,tsx}"
 
 # Sicherheits- & DSGVO-Instruktionen
 
+> **MVP-Kontext (ADR-016):** Diese Richtlinien gelten für alle aktiven Module. Deaktivierte Module in `backend/_deferred/` (billing, teams, rbac, marketplace, developer, sso) NICHT importieren oder bearbeiten. MVP-Scope-Details siehe `backend.instructions.md` und `copilot-instructions.md`.
+
 ## DSGVO – Datenschutzgrundverordnung
 
 ### Grundprinzipien (nicht verhandelbar)

@@ -9,9 +9,9 @@ import pytest
 
 from pwbs.cli.seed import (
     DEMO_USER_ID,
+    _content_hash,
     _doc_id,
     generate_documents,
-    _content_hash,
     run_seed,
 )
 
@@ -41,9 +41,17 @@ class TestBuildDocuments:
     def test_documents_have_required_fields(self) -> None:
         docs = generate_documents(DEMO_USER_ID, 4)
         required = {
-            "id", "user_id", "source_type", "source_id",
-            "title", "content", "content_hash", "language",
-            "processing_status", "created_at", "updated_at",
+            "id",
+            "user_id",
+            "source_type",
+            "source_id",
+            "title",
+            "content",
+            "content_hash",
+            "language",
+            "processing_status",
+            "created_at",
+            "updated_at",
         }
         for doc in docs:
             assert required.issubset(doc.keys()), f"Missing: {required - doc.keys()}"
@@ -118,9 +126,7 @@ class TestRunSeedEntryPoint:
 
     @patch("pwbs.core.config.get_settings")
     @patch("pwbs.cli.seed.asyncio")
-    def test_seed_calls_seed_async(
-        self, mock_asyncio: MagicMock, mock_settings: MagicMock
-    ) -> None:
+    def test_seed_calls_seed_async(self, mock_asyncio: MagicMock, mock_settings: MagicMock) -> None:
         mock_settings.return_value.database_url = "postgresql+asyncpg://test/db"
         run_seed(user_email="test@test.dev", document_count=10, clean=False)
         mock_asyncio.run.assert_called_once()
@@ -129,8 +135,9 @@ class TestRunSeedEntryPoint:
 class TestCLIArgparse:
     def test_main_seed_subcommand(self) -> None:
         """Verify __main__.py parses seed args correctly."""
-        from pwbs.cli.__main__ import main
         import sys
+
+        from pwbs.cli.__main__ import main
 
         with patch.object(sys, "argv", ["pwbs.cli", "seed", "--documents", "10", "--clean"]):
             with patch("pwbs.cli.seed.run_seed") as mock_run:

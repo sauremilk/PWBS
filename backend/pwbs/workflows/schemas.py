@@ -9,7 +9,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
 # ── Trigger types ─────────────────────────────────────────────────
 
 
@@ -38,9 +37,7 @@ class KeywordMatchTrigger(BaseModel):
     keywords: list[str] = Field(
         ..., min_length=1, description="Keywords to match (case-insensitive)."
     )
-    match_all: bool = Field(
-        default=False, description="If true, ALL keywords must match."
-    )
+    match_all: bool = Field(default=False, description="If true, ALL keywords must match.")
 
 
 class ScheduleTrigger(BaseModel):

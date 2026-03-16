@@ -1,55 +1,58 @@
-"""Obsidian Vault connector with filesystem watcher (TASK-051) and
+"""Obsidian Vault connector with upload-based ingestion (ADR-018) and
 Markdown parser (TASK-052).
 
-Implements ``BaseConnector`` for local Obsidian vaults.  Unlike the OAuth-based
-connectors, Obsidian uses direct filesystem access:
+Implements ``BaseConnector`` for Obsidian vaults.  Unlike the OAuth-based
+connectors, Obsidian uses **upload-based ingestion** (cloud-compatible):
 
-- The user configures a local vault path (stored in ``config.extra["vault_path"]``).
-- ``fetch_since(None)`` performs a **full scan** of all ``.md`` files.
-- ``fetch_since(cursor)`` performs an **incremental scan** (files modified after
-  the cursor timestamp).
-- ``ObsidianWatcher`` uses the ``watchdog`` library to monitor the vault for
-  real-time create/modify/delete events on ``.md`` files.
-- ``.obsidian/``, ``.git/``, ``.trash/`` and similar configuration directories
-  are excluded from scanning and watching.
+- Users upload a ZIP archive or individual ``.md`` files via API.
+- ``process_upload()`` extracts, parses, and normalises all Markdown files.
+- Content-hash deduplication prevents re-processing of unchanged files.
+- Deleted-file detection: files absent from a new upload are marked deleted.
 
-TASK-051 provides:
-- Vault path validation and recursive ``.md`` file scanning
-- ``ObsidianWatcher`` for real-time filesystem monitoring
-- ``fetch_since()`` for polling-based sync
+The filesystem watcher (``watchdog``) is available as an **optional** local-only
+mode for the Tauri desktop app (Phase 3). It is NOT used in the cloud deployment.
 
-TASK-052 adds:
-- ``normalize()`` implementation with YAML-Frontmatter parsing
-- Wikilink extraction ``[[Page Name]]`` and ``[[Page Name|Display Text]]``
-- Tag extraction ``#tag`` and nested ``#parent/child``
-- Content-Type is ``MARKDOWN`` (Frontmatter stripped from content)
+TASK-051 (original): Filesystem watcher — now optional, behind try/except import.
+TASK-052: ``normalize()`` with YAML-Frontmatter, wikilinks, tags.
+ADR-018: Upload-based ingestion replacing filesystem-only approach.
 
 References:
-- Architecture: D1 §3.1 (Connector table: File-System-Watcher via watchdog)
+- ADR-018: Obsidian Upload statt Filesystem
+- Architecture: D1 §3.1 (Connector table)
 - PRD: D4 US-1.4 / F-006
 """
 
 from __future__ import annotations
 
+import io
 import logging
 import os
 import re
-import threading
+import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 import frontmatter
-from watchdog.events import FileSystemEvent, FileSystemEventHandler
-from watchdog.observers import Observer
 
 from pwbs.connectors.base import BaseConnector, ConnectorConfig, SyncError, SyncResult
 from pwbs.connectors.normalizer import normalize_document
 from pwbs.core.exceptions import ConnectorError
 from pwbs.schemas.enums import ContentType, SourceType
 
+# Watchdog is optional — only needed for local desktop-app mode (Phase 3).
+# In cloud deployments (ECS Fargate), watchdog is NOT used.
+try:
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler
+    from watchdog.observers import Observer
+
+    _HAS_WATCHDOG = True
+except ImportError:  # pragma: no cover
+    _HAS_WATCHDOG = False
+
 if TYPE_CHECKING:
+    import threading
     from uuid import UUID
 
     from pwbs.schemas.document import UnifiedDocument
@@ -72,6 +75,14 @@ _EXCLUDE_DIRS: frozenset[str] = frozenset(
 )
 
 _MD_SUFFIX = ".md"
+
+# ---------------------------------------------------------------------------
+# Upload security limits (ADR-018)
+# ---------------------------------------------------------------------------
+
+MAX_UPLOAD_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB compressed
+MAX_UNCOMPRESSED_SIZE_BYTES = 200 * 1024 * 1024  # 200 MB uncompressed
+MAX_FILE_COUNT = 5_000
 
 
 # ---------------------------------------------------------------------------
@@ -225,123 +236,220 @@ class FileEvent:
 
 
 # ---------------------------------------------------------------------------
-# Watchdog event handler
+# Watchdog event handler (OPTIONAL — only for local/desktop mode)
 # ---------------------------------------------------------------------------
 
+if _HAS_WATCHDOG:
+    import threading as _threading
 
-class ObsidianFileHandler(FileSystemEventHandler):
-    """Watchdog handler that queues events for ``.md`` files.
+    class ObsidianFileHandler(FileSystemEventHandler):  # type: ignore[misc]
+        """Watchdog handler that queues events for ``.md`` files.
 
-    Filters out events in excluded directories and non-Markdown files.
-    """
+        Filters out events in excluded directories and non-Markdown files.
 
-    def __init__(self, vault_root: Path) -> None:
-        super().__init__()
-        self._vault_root = vault_root
-        self._lock = threading.Lock()
-        self._events: list[FileEvent] = []
+        .. note:: Only available when ``watchdog`` is installed. Not used in
+           cloud deployments (ADR-018).
+        """
+
+        def __init__(self, vault_root: Path) -> None:
+            super().__init__()
+            self._vault_root = vault_root
+            self._lock = _threading.Lock()
+            self._events: list[FileEvent] = []
 
     # -- event callbacks ---------------------------------------------------
 
-    def on_created(self, event: FileSystemEvent) -> None:
-        self._handle(event, "created")
+        def on_created(self, event: FileSystemEvent) -> None:
+            self._handle(event, "created")
 
-    def on_modified(self, event: FileSystemEvent) -> None:
-        self._handle(event, "modified")
+        def on_modified(self, event: FileSystemEvent) -> None:
+            self._handle(event, "modified")
 
-    def on_deleted(self, event: FileSystemEvent) -> None:
-        self._handle(event, "deleted")
+        def on_deleted(self, event: FileSystemEvent) -> None:
+            self._handle(event, "deleted")
 
-    def on_moved(self, event: FileSystemEvent) -> None:
-        # Treat a move as delete (old path) + create (new path)
-        if hasattr(event, "src_path"):
-            self._handle_path(str(event.src_path), "deleted")
-        if hasattr(event, "dest_path"):
-            self._handle_path(str(event.dest_path), "created")
+        def on_moved(self, event: FileSystemEvent) -> None:
+            # Treat a move as delete (old path) + create (new path)
+            if hasattr(event, "src_path"):
+                self._handle_path(str(event.src_path), "deleted")
+            if hasattr(event, "dest_path"):
+                self._handle_path(str(event.dest_path), "created")
 
-    # -- internal ----------------------------------------------------------
+        # -- internal ----------------------------------------------------------
 
-    def _handle(self, event: FileSystemEvent, event_type: str) -> None:
-        if event.is_directory:
-            return
-        self._handle_path(str(event.src_path), event_type)
+        def _handle(self, event: FileSystemEvent, event_type: str) -> None:
+            if event.is_directory:
+                return
+            self._handle_path(str(event.src_path), event_type)
 
-    def _handle_path(self, path_str: str, event_type: str) -> None:
-        path = Path(path_str)
-        if path.suffix.lower() != _MD_SUFFIX:
-            return
-        if _is_excluded(path, self._vault_root):
-            return
+        def _handle_path(self, path_str: str, event_type: str) -> None:
+            path = Path(path_str)
+            if path.suffix.lower() != _MD_SUFFIX:
+                return
+            if _is_excluded(path, self._vault_root):
+                return
 
-        try:
-            relative = str(path.relative_to(self._vault_root)).replace(os.sep, "/")
-        except ValueError:
-            return
+            try:
+                relative = str(path.relative_to(self._vault_root)).replace(os.sep, "/")
+            except ValueError:
+                return
 
-        fe = FileEvent(path=relative, event_type=event_type)
-        with self._lock:
-            self._events.append(fe)
+            fe = FileEvent(path=relative, event_type=event_type)
+            with self._lock:
+                self._events.append(fe)
 
-        logger.debug("Obsidian FS event: %s %s", event_type, relative)
+            logger.debug("Obsidian FS event: %s %s", event_type, relative)
 
-    def drain_events(self) -> list[FileEvent]:
-        """Return and clear all pending events (thread-safe)."""
-        with self._lock:
-            events = list(self._events)
-            self._events.clear()
-        return events
+        def drain_events(self) -> list[FileEvent]:
+            """Return and clear all pending events (thread-safe)."""
+            with self._lock:
+                events = list(self._events)
+                self._events.clear()
+            return events
+
+    # -----------------------------------------------------------------------
+    # Watcher (manages Observer lifecycle) — local/desktop only
+    # -----------------------------------------------------------------------
+
+    class ObsidianWatcher:
+        """Background filesystem watcher for an Obsidian vault.
+
+        .. note:: Only available when ``watchdog`` is installed. Not used in
+           cloud deployments (ADR-018).
+
+        Usage::
+
+            watcher = ObsidianWatcher(vault_path)
+            watcher.start()
+            ...
+            events = watcher.get_pending_events()
+            ...
+            watcher.stop()
+        """
+
+        def __init__(self, vault_path: Path) -> None:
+            self._vault_path = vault_path
+            self._handler = ObsidianFileHandler(vault_path)
+            self._observer: Observer | None = None  # type: ignore[assignment]
+
+        @property
+        def is_running(self) -> bool:
+            return self._observer is not None and self._observer.is_alive()
+
+        def start(self) -> None:
+            """Start watching the vault directory (non-blocking, daemon thread)."""
+            if self.is_running:
+                logger.warning("Watcher already running for %s", self._vault_path)
+                return
+
+            self._observer = Observer()
+            self._observer.schedule(self._handler, str(self._vault_path), recursive=True)
+            self._observer.daemon = True
+            self._observer.start()
+            logger.info("Obsidian watcher started: %s", self._vault_path)
+
+        def stop(self) -> None:
+            """Stop the watcher and wait for the thread to finish."""
+            if self._observer is not None:
+                self._observer.stop()
+                self._observer.join(timeout=5.0)
+                self._observer = None
+                logger.info("Obsidian watcher stopped: %s", self._vault_path)
+
+        def get_pending_events(self) -> list[FileEvent]:
+            """Return and clear all pending filesystem events."""
+            return self._handler.drain_events()
 
 
 # ---------------------------------------------------------------------------
-# Watcher (manages Observer lifecycle)
+# Upload processing (ADR-018)
 # ---------------------------------------------------------------------------
 
 
-class ObsidianWatcher:
-    """Background filesystem watcher for an Obsidian vault.
+def _sanitize_zip_path(name: str) -> str | None:
+    """Sanitize a path from a ZIP archive.
 
-    Usage::
-
-        watcher = ObsidianWatcher(vault_path)
-        watcher.start()
-        ...
-        events = watcher.get_pending_events()
-        ...
-        watcher.stop()
+    Returns the cleaned POSIX path, or ``None`` if the entry should be
+    skipped (directory, non-.md file, path traversal attempt, excluded dir).
     """
+    # Normalise to POSIX path and strip leading slashes / dots
+    p = PurePosixPath(name)
+    parts = [part for part in p.parts if part not in {".", "..", "/", "\\"}]
+    if not parts:
+        return None
 
-    def __init__(self, vault_path: Path) -> None:
-        self._vault_path = vault_path
-        self._handler = ObsidianFileHandler(vault_path)
-        self._observer: Observer | None = None
+    cleaned = "/".join(parts)
 
-    @property
-    def is_running(self) -> bool:
-        return self._observer is not None and self._observer.is_alive()
+    # Must be a Markdown file
+    if not cleaned.lower().endswith(_MD_SUFFIX):
+        return None
 
-    def start(self) -> None:
-        """Start watching the vault directory (non-blocking, daemon thread)."""
-        if self.is_running:
-            logger.warning("Watcher already running for %s", self._vault_path)
-            return
+    # Skip excluded directories
+    if any(part in _EXCLUDE_DIRS for part in parts[:-1]):
+        return None
 
-        self._observer = Observer()
-        self._observer.schedule(self._handler, str(self._vault_path), recursive=True)
-        self._observer.daemon = True
-        self._observer.start()
-        logger.info("Obsidian watcher started: %s", self._vault_path)
+    return cleaned
 
-    def stop(self) -> None:
-        """Stop the watcher and wait for the thread to finish."""
-        if self._observer is not None:
-            self._observer.stop()
-            self._observer.join(timeout=5.0)
-            self._observer = None
-            logger.info("Obsidian watcher stopped: %s", self._vault_path)
 
-    def get_pending_events(self) -> list[FileEvent]:
-        """Return and clear all pending filesystem events."""
-        return self._handler.drain_events()
+def extract_markdown_from_zip(
+    data: bytes,
+    *,
+    max_files: int = MAX_FILE_COUNT,
+    max_uncompressed: int = MAX_UNCOMPRESSED_SIZE_BYTES,
+) -> list[tuple[str, str]]:
+    """Extract ``.md`` files from a ZIP archive with security checks.
+
+    Returns a list of ``(relative_path, content)`` tuples.
+
+    Raises ``ConnectorError`` on:
+    - Invalid / corrupt ZIP
+    - Exceeding file-count limit
+    - Exceeding uncompressed-size limit (zip-bomb protection)
+    - Path-traversal attempts (logged and skipped, not raised)
+    """
+    try:
+        zf = zipfile.ZipFile(io.BytesIO(data))
+    except (zipfile.BadZipFile, Exception) as exc:
+        raise ConnectorError(
+            f"Ungültiges ZIP-Archiv: {exc}",
+            code="OBSIDIAN_INVALID_ZIP",
+        ) from exc
+
+    results: list[tuple[str, str]] = []
+    total_size = 0
+
+    with zf:
+        for info in zf.infolist():
+            if info.is_dir():
+                continue
+
+            safe_path = _sanitize_zip_path(info.filename)
+            if safe_path is None:
+                continue
+
+            # Zip-bomb protection: check uncompressed size
+            total_size += info.file_size
+            if total_size > max_uncompressed:
+                raise ConnectorError(
+                    f"ZIP überschreitet maximale entpackte Größe ({max_uncompressed // (1024 * 1024)} MB)",
+                    code="OBSIDIAN_ZIP_TOO_LARGE",
+                )
+
+            if len(results) >= max_files:
+                raise ConnectorError(
+                    f"ZIP enthält mehr als {max_files} Markdown-Dateien",
+                    code="OBSIDIAN_TOO_MANY_FILES",
+                )
+
+            try:
+                content = zf.read(info.filename).decode("utf-8", errors="replace")
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Skipping unreadable ZIP entry %r: %s", info.filename, exc)
+                continue
+
+            results.append((safe_path, content))
+
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -350,21 +458,18 @@ class ObsidianWatcher:
 
 
 class ObsidianConnector(BaseConnector):
-    """Obsidian vault connector with filesystem monitoring.
+    """Obsidian vault connector with upload-based ingestion (ADR-018).
+
+    **Primary mode (cloud):** Upload-based ingestion via ``process_upload()``.
+    Users upload ZIP archives or individual ``.md`` files through the API.
+    Content-hash deduplication prevents reprocessing of unchanged files.
+
+    **Secondary mode (desktop-app, Phase 3):** Filesystem monitoring via
+    ``start_watcher()`` / ``stop_watcher()``.  Only available when
+    ``watchdog`` is installed and ``config.extra["vault_path"]`` is set.
 
     Configuration (via ``config.extra``):
-    - ``vault_path`` (str, required): Absolute path to the Obsidian vault.
-
-    The connector supports two sync strategies:
-
-    1. **Polling** via ``fetch_since(cursor)``:
-       - ``cursor=None`` → full scan of all ``.md`` files.
-       - ``cursor=<ISO timestamp>`` → incremental scan (files with
-         ``mtime > cursor``).
-
-    2. **Real-time** via ``start_watcher()`` / ``stop_watcher()``:
-       Uses ``watchdog`` to detect create/modify/delete events.
-       Accumulated events are available via ``get_watcher_events()``.
+    - ``vault_path`` (str, optional): For local/desktop mode only.
     """
 
     source_type = SourceType.OBSIDIAN  # type: ignore[assignment]
@@ -377,7 +482,7 @@ class ObsidianConnector(BaseConnector):
         config: ConnectorConfig,
     ) -> None:
         super().__init__(owner_id=owner_id, connection_id=connection_id, config=config)
-        self._watcher: ObsidianWatcher | None = None
+        self._watcher: ObsidianWatcher | None = None if _HAS_WATCHDOG else None
         self._deleted_paths: set[str] = set()
 
     # ------------------------------------------------------------------
@@ -395,11 +500,20 @@ class ObsidianConnector(BaseConnector):
         return Path(vault_path_str)
 
     # ------------------------------------------------------------------
-    # Watcher lifecycle
+    # Watcher lifecycle (local/desktop only — requires watchdog)
     # ------------------------------------------------------------------
 
     def start_watcher(self) -> None:
-        """Start background filesystem monitoring."""
+        """Start background filesystem monitoring.
+
+        Requires ``watchdog`` to be installed and ``vault_path`` in config.
+        Raises ``ConnectorError`` if watchdog is unavailable.
+        """
+        if not _HAS_WATCHDOG:
+            raise ConnectorError(
+                "Filesystem watcher not available (watchdog not installed)",
+                code="OBSIDIAN_WATCHER_UNAVAILABLE",
+            )
         vault_path = self._get_vault_path()
         valid, error = validate_vault_path(str(vault_path))
         if not valid:
@@ -428,18 +542,23 @@ class ObsidianConnector(BaseConnector):
     # ------------------------------------------------------------------
 
     async def fetch_since(self, cursor: str | None) -> SyncResult:
-        """Scan the Obsidian vault for files changed since *cursor*.
+        """Fetch documents since cursor.
 
-        - ``cursor=None`` → **full scan**: all ``.md`` files.
-        - ``cursor=<ISO timestamp>`` → **incremental scan**: only files
-          whose ``mtime`` is after the cursor timestamp.
-
-        Deleted files (tracked by the watcher) are reported with empty
-        content and ``metadata["deleted"] = True``.
-
-        Returns a ``SyncResult`` with raw file dicts (normalised by
-        TASK-052), errors, and the new cursor.
+        - **Upload mode** (no vault_path): Returns empty result. Use
+          ``process_upload()`` instead.
+        - **Local mode** (vault_path set): Scans the filesystem for files
+          changed since *cursor*.
         """
+        vault_path_str = self.config.extra.get("vault_path")
+        if not vault_path_str:
+            # Upload mode — polling is a no-op, uploads push data
+            return SyncResult(
+                documents=[],
+                new_cursor=cursor,
+                errors=[],
+                has_more=False,
+            )
+
         vault_path = self._get_vault_path()
         valid, error = validate_vault_path(str(vault_path))
         if not valid:
@@ -625,13 +744,93 @@ class ObsidianConnector(BaseConnector):
         )
 
     async def health_check(self) -> bool:
-        """Verify the vault path is valid and accessible."""
+        """Check connector health.
+
+        - **Upload mode** (no vault_path in config): always healthy (connection exists).
+        - **Local mode** (vault_path set): verify the vault path is accessible.
+        """
+        vault_path_str = self.config.extra.get("vault_path")
+        if not vault_path_str:
+            # Upload mode — healthy if connector is configured
+            return True
         try:
-            vault_path = self._get_vault_path()
+            vault_path = Path(str(vault_path_str))
             valid, _ = validate_vault_path(str(vault_path))
             return valid
         except ConnectorError:
             return False
+
+    # ------------------------------------------------------------------
+    # Upload-based ingestion (ADR-018)
+    # ------------------------------------------------------------------
+
+    def process_upload(
+        self,
+        files: list[tuple[str, str]],
+        *,
+        previous_source_ids: set[str] | None = None,
+    ) -> SyncResult:
+        """Process uploaded Markdown files into UnifiedDocuments.
+
+        This is the primary ingestion path for cloud deployments (ADR-018).
+
+        Args:
+            files: List of ``(relative_path, content)`` tuples, as returned
+                by ``extract_markdown_from_zip()`` or built from individual
+                ``.md`` uploads.
+            previous_source_ids: Source IDs from the previous upload. Files
+                in this set that are **not** in the current upload are marked
+                as deleted (deletion detection).
+
+        Returns:
+            ``SyncResult`` with normalised documents and errors.
+        """
+        documents: list[UnifiedDocument] = []
+        errors: list[SyncError] = []
+        current_source_ids: set[str] = set()
+        now = datetime.now(tz=timezone.utc)
+
+        for relative_path, content in files:
+            current_source_ids.add(relative_path)
+            try:
+                raw: dict[str, object] = {
+                    "relative_path": relative_path,
+                    "content": content,
+                    "modified_at": now.isoformat(),
+                    "created_at": now.isoformat(),
+                    "size_bytes": len(content.encode("utf-8")),
+                    "filename": PurePosixPath(relative_path).stem,
+                }
+                doc = self.normalize(raw)
+                documents.append(doc)
+            except Exception as exc:  # noqa: BLE001
+                errors.append(SyncError(source_id=relative_path, error=str(exc)))
+
+        # Deletion detection: mark files from previous upload that are absent
+        if previous_source_ids:
+            deleted_paths = previous_source_ids - current_source_ids
+            for deleted_path in sorted(deleted_paths):
+                try:
+                    raw_deleted: dict[str, object] = {
+                        "relative_path": deleted_path,
+                        "content": "",
+                        "modified_at": now.isoformat(),
+                        "created_at": "",
+                        "size_bytes": 0,
+                        "filename": PurePosixPath(deleted_path).stem,
+                        "deleted": True,
+                    }
+                    doc = self.normalize(raw_deleted)
+                    documents.append(doc)
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(SyncError(source_id=deleted_path, error=str(exc)))
+
+        return SyncResult(
+            documents=documents,
+            new_cursor=now.isoformat(),
+            errors=errors,
+            has_more=False,
+        )
 
     # ------------------------------------------------------------------
     # Watcher event processing

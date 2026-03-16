@@ -117,18 +117,12 @@ class PdfExportStrategy(ExportStrategy):
         escaped_title = html.escape(title)
         escaped_content = html.escape(content)
         # Convert newlines to <br> for basic formatting
-        formatted_content = escaped_content.replace("\n\n", "</p><p>").replace(
-            "\n", "<br>"
-        )
+        formatted_content = escaped_content.replace("\n\n", "</p><p>").replace("\n", "<br>")
 
         sources_html = ""
         if sources:
-            items = "".join(
-                f"<li>{html.escape(s)}</li>" for s in sources
-            )
-            sources_html = (
-                f'<hr><h2>Quellenverzeichnis</h2><ol>{items}</ol>'
-            )
+            items = "".join(f"<li>{html.escape(s)}</li>" for s in sources)
+            sources_html = f"<hr><h2>Quellenverzeichnis</h2><ol>{items}</ol>"
 
         return f"""<!DOCTYPE html>
 <html lang="de">
@@ -158,8 +152,7 @@ class PdfExportStrategy(ExportStrategy):
             from weasyprint import HTML  # type: ignore[import-untyped]
         except ImportError:
             raise ImportError(
-                "PDF export requires 'weasyprint'. "
-                "Install it with: pip install weasyprint"
+                "PDF export requires 'weasyprint'. Install it with: pip install weasyprint"
             )
         buf = io.BytesIO()
         HTML(string=html_content).write_pdf(buf)
@@ -185,9 +178,9 @@ class ConfluenceExportStrategy(ExportStrategy):
         escaped_content = html.escape(content)
         body_parts: list[str] = [
             f"<h1>{html.escape(title)}</h1>",
-            f'<p><em>Generiert: {metadata.generated_at.isoformat()} | '
-            f'PWBS {metadata.pwbs_version} | '
-            f'Typ: {metadata.briefing_type}</em></p>',
+            f"<p><em>Generiert: {metadata.generated_at.isoformat()} | "
+            f"PWBS {metadata.pwbs_version} | "
+            f"Typ: {metadata.briefing_type}</em></p>",
             "<hr/>",
         ]
 
@@ -232,10 +225,7 @@ def get_strategy(format_name: str) -> ExportStrategy:
     cls = _STRATEGIES.get(format_name.lower())
     if cls is None:
         supported = ", ".join(sorted(_STRATEGIES.keys()))
-        raise ValueError(
-            f"Unsupported export format: '{format_name}'. "
-            f"Supported: {supported}"
-        )
+        raise ValueError(f"Unsupported export format: '{format_name}'. Supported: {supported}")
     return cls()
 
 

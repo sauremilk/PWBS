@@ -142,7 +142,11 @@ class TestEnums:
     """Verify enum values match specification."""
 
     def test_source_type_values(self) -> None:
-        expected = {"google_calendar", "notion", "obsidian", "zoom", "gmail"}
+        expected = {
+            "google_calendar", "google_docs", "gmail", "notion",
+            "obsidian", "outlook_mail", "slack", "zoom", "api_upload",
+            "ocr", "audio_transcript",
+        }
         actual = {st.value for st in SourceType}
         assert actual == expected
 

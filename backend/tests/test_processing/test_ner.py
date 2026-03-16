@@ -12,13 +12,14 @@ from pwbs.processing.ner import (
 )
 from pwbs.schemas.enums import EntityType
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 
-def _extract(content: str, metadata: dict | None = None, config: NERConfig | None = None) -> list[ExtractedEntity]:
+def _extract(
+    content: str, metadata: dict | None = None, config: NERConfig | None = None
+) -> list[ExtractedEntity]:
     ner = RuleBasedNER(config=config)
     return ner.extract(content, metadata)
 
@@ -311,6 +312,11 @@ class TestConfig:
         assert ner.config.extract_mentions is True
         assert ner.config.extract_participants is True
         assert ner.config.extract_notion_links is True
+        assert ner.config.extract_dates is True
+        assert ner.config.extract_decisions is True
+        assert ner.config.extract_questions is True
+        assert ner.config.extract_goals is True
+        assert ner.config.extract_risks is True
 
     def test_custom_config(self) -> None:
         cfg = NERConfig(extract_emails=False, extract_mentions=False)
@@ -325,7 +331,12 @@ class TestConfig:
 
 class TestCombined:
     def test_all_sources(self) -> None:
-        content = "Email john@example.com, cc @alice"
+        content = (
+            "Email john@example.com, cc @alice. "
+            "Entscheidung: Wir nutzen PostgreSQL als Datenbank. "
+            "Ziel: MVP bis 2026-03-31 fertig. "
+            "Risiko: Vendor Lock-in bei AWS."
+        )
         metadata = {
             "participants": [{"name": "Bob Jones"}],
             "notion_links": [{"title": "PWBS", "type": "project"}],
@@ -336,6 +347,12 @@ class TestCombined:
         assert "alice" in names
         assert "bob jones" in names
         assert "pwbs" in names
+        # ADR-017 additions
+        types = {e.entity_type for e in result}
+        assert EntityType.DATE_REF in types
+        assert EntityType.DECISION in types
+        assert EntityType.GOAL in types
+        assert EntityType.RISK in types
 
     def test_empty_content_no_metadata(self) -> None:
         result = _extract("")
@@ -344,3 +361,238 @@ class TestCombined:
     def test_none_metadata(self) -> None:
         result = _extract("@alice", metadata=None)
         assert len(result) == 1
+
+
+# ---------------------------------------------------------------------------
+# Date extraction (ADR-017)
+# ---------------------------------------------------------------------------
+
+
+class TestDateExtraction:
+    def test_iso_date(self) -> None:
+        result = _extract("Termin am 2026-03-16 festgelegt.")
+        entity = _by_name(result, "2026-03-16")
+        assert entity is not None
+        assert entity.entity_type == EntityType.DATE_REF
+        assert entity.mentions[0].source_pattern == "date_iso"
+        assert entity.mentions[0].confidence == 1.0
+
+    def test_german_date(self) -> None:
+        result = _extract("Abgabe am 16.03.2026.")
+        entity = _by_name(result, "16.03.2026")
+        assert entity is not None
+        assert entity.entity_type == EntityType.DATE_REF
+
+    def test_us_date(self) -> None:
+        result = _extract("Due 03/16/2026.")
+        entity = _by_name(result, "03/16/2026")
+        assert entity is not None
+        assert entity.entity_type == EntityType.DATE_REF
+
+    def test_deadline_with_day(self) -> None:
+        result = _extract("Deadline: Freitag")
+        entity = _by_name(result, "freitag")
+        assert entity is not None
+        assert entity.entity_type == EntityType.DATE_REF
+        assert entity.mentions[0].source_pattern == "deadline_keyword"
+        assert entity.mentions[0].confidence == 0.85
+
+    def test_deadline_tomorrow(self) -> None:
+        result = _extract("Frist: morgen")
+        entity = _by_name(result, "morgen")
+        assert entity is not None
+
+    def test_bis_zum_date(self) -> None:
+        result = _extract("Bitte bis zum 2026-04-01 erledigen.")
+        entity = _by_name(result, "2026-04-01")
+        assert entity is not None
+
+    def test_due_by_english(self) -> None:
+        result = _extract("Due by Friday")
+        entity = _by_name(result, "friday")
+        assert entity is not None
+
+    def test_duplicate_dates_dedup(self) -> None:
+        result = _extract("2026-03-16 und nochmal 2026-03-16.")
+        date_entities = [e for e in result if e.entity_type == EntityType.DATE_REF]
+        assert len(date_entities) == 1
+
+    def test_date_extraction_disabled(self) -> None:
+        config = NERConfig(extract_dates=False)
+        result = _extract("Termin am 2026-03-16.", config=config)
+        date_entities = [e for e in result if e.entity_type == EntityType.DATE_REF]
+        assert len(date_entities) == 0
+
+
+# ---------------------------------------------------------------------------
+# Decision extraction (ADR-017)
+# ---------------------------------------------------------------------------
+
+
+class TestDecisionExtraction:
+    def test_decision_keyword_de(self) -> None:
+        result = _extract("Entscheidung: Wir nutzen PostgreSQL statt MySQL.")
+        entity = _by_name(result, "wir nutzen postgresql statt mysql")
+        assert entity is not None
+        assert entity.entity_type == EntityType.DECISION
+        assert entity.mentions[0].source_pattern == "decision_keyword"
+        assert entity.mentions[0].confidence == 0.85
+
+    def test_beschluss_keyword(self) -> None:
+        result = _extract("Beschluss: Budget wird um 20% erhoeht")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 1
+
+    def test_decision_keyword_en(self) -> None:
+        result = _extract("Decision: Switch to Kubernetes for orchestration")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 1
+        assert "kubernetes" in entities[0].normalized_name
+
+    def test_action_item(self) -> None:
+        result = _extract("Action Item: Alice erstellt das Konzept bis Freitag")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 1
+
+    def test_wir_haben_entschieden(self) -> None:
+        result = _extract("Wir haben entschieden, den Release zu verschieben.")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 1
+
+    def test_we_decided(self) -> None:
+        result = _extract("We decided to use React instead of Vue.")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 1
+
+    def test_decision_too_short_ignored(self) -> None:
+        result = _extract("Entscheidung: Ja.")
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 0
+
+    def test_decision_extraction_disabled(self) -> None:
+        config = NERConfig(extract_decisions=False)
+        result = _extract("Entscheidung: PostgreSQL nutzen", config=config)
+        entities = [e for e in result if e.entity_type == EntityType.DECISION]
+        assert len(entities) == 0
+
+
+# ---------------------------------------------------------------------------
+# Open-question extraction (ADR-017)
+# ---------------------------------------------------------------------------
+
+
+class TestOpenQuestionExtraction:
+    def test_offene_frage_de(self) -> None:
+        result = _extract("Offene Frage: Wie skaliert die Datenbank bei 10k Usern?")
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 1
+        assert entities[0].mentions[0].source_pattern == "question_keyword"
+        assert entities[0].mentions[0].confidence == 0.85
+
+    def test_open_question_en(self) -> None:
+        result = _extract("Open question: How do we handle auth token rotation?")
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 1
+
+    def test_tbd_keyword(self) -> None:
+        result = _extract("TBD: Entscheidung ueber Cloud-Provider steht noch aus")
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 1
+
+    def test_noch_zu_klaeren(self) -> None:
+        result = _extract("Noch zu klaeren: Budget fuer Q2-Kampagne")
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 1
+
+    def test_open_item(self) -> None:
+        result = _extract("Open Item: API rate limiting strategy")
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 1
+
+    def test_question_extraction_disabled(self) -> None:
+        config = NERConfig(extract_questions=False)
+        result = _extract("Offene Frage: Wie geht es weiter?", config=config)
+        entities = [e for e in result if e.entity_type == EntityType.OPEN_QUESTION]
+        assert len(entities) == 0
+
+
+# ---------------------------------------------------------------------------
+# Goal extraction (ADR-017)
+# ---------------------------------------------------------------------------
+
+
+class TestGoalExtraction:
+    def test_ziel_keyword(self) -> None:
+        result = _extract("Ziel: MVP bis Ende Q1 2026 launchen")
+        entities = [e for e in result if e.entity_type == EntityType.GOAL]
+        assert len(entities) == 1
+        assert entities[0].mentions[0].source_pattern == "goal_keyword"
+
+    def test_goal_keyword_en(self) -> None:
+        result = _extract("Goal: Achieve 100 active beta users by April")
+        entities = [e for e in result if e.entity_type == EntityType.GOAL]
+        assert len(entities) == 1
+
+    def test_objective_keyword(self) -> None:
+        result = _extract("Objective: Reduce API latency below 200ms")
+        entities = [e for e in result if e.entity_type == EntityType.GOAL]
+        assert len(entities) == 1
+
+    def test_milestone_keyword(self) -> None:
+        result = _extract("Milestone: Database migration abgeschlossen")
+        entities = [e for e in result if e.entity_type == EntityType.GOAL]
+        assert len(entities) == 1
+
+    def test_goal_extraction_disabled(self) -> None:
+        config = NERConfig(extract_goals=False)
+        result = _extract("Ziel: MVP launchen", config=config)
+        entities = [e for e in result if e.entity_type == EntityType.GOAL]
+        assert len(entities) == 0
+
+
+# ---------------------------------------------------------------------------
+# Risk extraction (ADR-017)
+# ---------------------------------------------------------------------------
+
+
+class TestRiskExtraction:
+    def test_risiko_keyword(self) -> None:
+        result = _extract("Risiko: Vendor Lock-in bei AWS Lambda")
+        entities = [e for e in result if e.entity_type == EntityType.RISK]
+        assert len(entities) == 1
+        assert entities[0].mentions[0].source_pattern == "risk_keyword"
+
+    def test_risk_keyword_en(self) -> None:
+        result = _extract("Risk: Data loss during migration phase")
+        entities = [e for e in result if e.entity_type == EntityType.RISK]
+        assert len(entities) == 1
+
+    def test_blocker_keyword(self) -> None:
+        result = _extract("Blocker: CI Pipeline ist seit 2 Tagen rot")
+        entities = [e for e in result if e.entity_type == EntityType.RISK]
+        assert len(entities) == 1
+
+    def test_risk_extraction_disabled(self) -> None:
+        config = NERConfig(extract_risks=False)
+        result = _extract("Risiko: Datenverlust", config=config)
+        entities = [e for e in result if e.entity_type == EntityType.RISK]
+        assert len(entities) == 0
+
+
+# ---------------------------------------------------------------------------
+# Trim-to-sentence helper
+# ---------------------------------------------------------------------------
+
+
+class TestTrimToSentence:
+    def test_trims_at_period(self) -> None:
+        assert RuleBasedNER._trim_to_sentence("Use PostgreSQL. Then migrate.") == "Use PostgreSQL"
+
+    def test_trims_at_newline(self) -> None:
+        assert RuleBasedNER._trim_to_sentence("First line\nSecond line") == "First line"
+
+    def test_no_trim_needed(self) -> None:
+        assert RuleBasedNER._trim_to_sentence("Short text") == "Short text"
+
+    def test_strips_trailing_punctuation(self) -> None:
+        assert RuleBasedNER._trim_to_sentence("Text here,") == "Text here"

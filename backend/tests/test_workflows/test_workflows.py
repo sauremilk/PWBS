@@ -18,7 +18,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from pydantic import ValidationError
 
-
 # ── Section 1: Schema Validation ─────────────────────────────────────────────
 
 
@@ -147,7 +146,7 @@ class TestCRUDSchemas:
     """Pydantic schema validation for CRUD request/response schemas."""
 
     def test_workflow_rule_create_minimal(self) -> None:
-        from pwbs.workflows.schemas import NewDocumentTrigger, EmailAction, WorkflowRuleCreate
+        from pwbs.workflows.schemas import EmailAction, NewDocumentTrigger, WorkflowRuleCreate
 
         rule = WorkflowRuleCreate(
             name="Test Rule",
@@ -159,7 +158,7 @@ class TestCRUDSchemas:
         assert rule.description == ""
 
     def test_workflow_rule_create_name_required(self) -> None:
-        from pwbs.workflows.schemas import NewDocumentTrigger, EmailAction, WorkflowRuleCreate
+        from pwbs.workflows.schemas import EmailAction, NewDocumentTrigger, WorkflowRuleCreate
 
         with pytest.raises(ValidationError):
             WorkflowRuleCreate(
@@ -215,22 +214,26 @@ class TestCRUDSchemas:
         """WorkflowRuleCreate correctly parses discriminated trigger union."""
         from pwbs.workflows.schemas import EmailAction, WorkflowRuleCreate
 
-        rule = WorkflowRuleCreate.model_validate({
-            "name": "Keyword Rule",
-            "trigger_config": {"type": "keyword_match", "keywords": ["important"]},
-            "action_config": {"type": "email", "subject_template": "S", "body_template": "B"},
-        })
+        rule = WorkflowRuleCreate.model_validate(
+            {
+                "name": "Keyword Rule",
+                "trigger_config": {"type": "keyword_match", "keywords": ["important"]},
+                "action_config": {"type": "email", "subject_template": "S", "body_template": "B"},
+            }
+        )
         assert rule.trigger_config.type == "keyword_match"  # type: ignore[union-attr]
 
     def test_discriminated_union_action_parsing(self) -> None:
         """WorkflowRuleCreate correctly parses discriminated action union."""
         from pwbs.workflows.schemas import WorkflowRuleCreate
 
-        rule = WorkflowRuleCreate.model_validate({
-            "name": "Reminder Rule",
-            "trigger_config": {"type": "new_document"},
-            "action_config": {"type": "create_reminder", "title_template": "Do this"},
-        })
+        rule = WorkflowRuleCreate.model_validate(
+            {
+                "name": "Reminder Rule",
+                "trigger_config": {"type": "new_document"},
+                "action_config": {"type": "create_reminder", "title_template": "Do this"},
+            }
+        )
         assert rule.action_config.type == "create_reminder"  # type: ignore[union-attr]
 
 
@@ -533,7 +536,7 @@ class TestEvaluateRulesForEvent:
 
     @pytest.mark.asyncio
     async def test_action_exception_logged_as_failed(self) -> None:
-        from pwbs.workflows.engine import evaluate_rules_for_event, _ACTION_EXECUTORS
+        from pwbs.workflows.engine import _ACTION_EXECUTORS, evaluate_rules_for_event
 
         user_id = uuid.uuid4()
         rule = self._make_rule(

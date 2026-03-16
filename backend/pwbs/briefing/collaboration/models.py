@@ -49,9 +49,7 @@ class BriefingShare(UUIDPrimaryKeyMixin, Base):
     shared_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    read_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     briefing: Mapped["Briefing"] = relationship()  # noqa: F821
@@ -80,9 +78,7 @@ class BriefingComment(UUIDPrimaryKeyMixin, Base):
         nullable=False,
     )
     # Section reference: e.g. "summary", "section-2", "open-items"
-    section_ref: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default=""
-    )
+    section_ref: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

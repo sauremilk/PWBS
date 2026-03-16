@@ -52,9 +52,7 @@ __all__ = [
 _MIN_FUZZY_RATIO = 0.6
 
 # Regex matching [Quelle: Title, Date]
-_SOURCE_REF_RE = re.compile(
-    r"\[Quelle:\s*([^,\]]+),\s*([^\]]+)\]"
-)
+_SOURCE_REF_RE = re.compile(r"\[Quelle:\s*([^,\]]+),\s*([^\]]+)\]")
 
 
 # ------------------------------------------------------------------
@@ -206,11 +204,13 @@ class BriefingSourceValidator:
         """Extract all [Quelle: Title, Date] references from text."""
         refs: list[dict[str, str]] = []
         for match in _SOURCE_REF_RE.finditer(text):
-            refs.append({
-                "title": match.group(1).strip(),
-                "date": match.group(2).strip(),
-                "raw": match.group(0),
-            })
+            refs.append(
+                {
+                    "title": match.group(1).strip(),
+                    "date": match.group(2).strip(),
+                    "raw": match.group(0),
+                }
+            )
         return refs
 
     # ------------------------------------------------------------------
@@ -246,14 +246,14 @@ class BriefingSourceValidator:
         docs: list[dict] = []
         for row in result.fetchall():
             chunk_ids_raw = row.chunk_ids if row.chunk_ids else []
-            docs.append({
-                "doc_id": uuid.UUID(str(row.doc_id)),
-                "title": row.title or "",
-                "created_at": row.created_at,
-                "chunk_ids": [
-                    uuid.UUID(str(cid)) for cid in chunk_ids_raw if cid
-                ],
-            })
+            docs.append(
+                {
+                    "doc_id": uuid.UUID(str(row.doc_id)),
+                    "title": row.title or "",
+                    "created_at": row.created_at,
+                    "chunk_ids": [uuid.UUID(str(cid)) for cid in chunk_ids_raw if cid],
+                }
+            )
         return docs
 
     # ------------------------------------------------------------------

@@ -17,8 +17,8 @@ from pwbs.services.llm_cache import (
     DEFAULT_TTLS,
     LLM_CACHE_REQUESTS,
     SIMILARITY_THRESHOLD,
-    CacheResult,
     CachedLLMResponse,
+    CacheResult,
     _cosine_similarity,
     _embedding_hash,
     _filter_hash,
@@ -39,14 +39,16 @@ EMB_DIFFERENT = [-0.5, 0.0, 0.5, -0.3, 0.8]
 
 def _make_entry(embedding: list[float] | None = None) -> str:
     """Create a JSON cache entry for mocking."""
-    return json.dumps({
-        "content": "cached answer",
-        "provider": "claude",
-        "model": "claude-sonnet-4-20250514",
-        "embedding": embedding or EMB,
-        "created_at": time.time(),
-        "metadata": {"source": "test"},
-    })
+    return json.dumps(
+        {
+            "content": "cached answer",
+            "provider": "claude",
+            "model": "claude-sonnet-4-20250514",
+            "embedding": embedding or EMB,
+            "created_at": time.time(),
+            "metadata": {"source": "test"},
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -221,7 +223,12 @@ class TestLlmCacheSet:
         mock_redis = AsyncMock()
         with patch("pwbs.services.llm_cache.get_redis_client", return_value=mock_redis):
             await llm_cache_set(
-                OWNER, EMB, "answer", "claude", "claude-sonnet-4-20250514", "search",
+                OWNER,
+                EMB,
+                "answer",
+                "claude",
+                "claude-sonnet-4-20250514",
+                "search",
             )
 
         assert mock_redis.setex.await_count == 1
@@ -234,7 +241,12 @@ class TestLlmCacheSet:
         mock_redis = AsyncMock()
         with patch("pwbs.services.llm_cache.get_redis_client", return_value=mock_redis):
             await llm_cache_set(
-                OWNER, EMB, "answer", "claude", "model", "search",
+                OWNER,
+                EMB,
+                "answer",
+                "claude",
+                "model",
+                "search",
             )
 
         ttl_used = mock_redis.setex.call_args[0][1]
@@ -245,7 +257,12 @@ class TestLlmCacheSet:
         mock_redis = AsyncMock()
         with patch("pwbs.services.llm_cache.get_redis_client", return_value=mock_redis):
             await llm_cache_set(
-                OWNER, EMB, "answer", "claude", "model", "briefing",
+                OWNER,
+                EMB,
+                "answer",
+                "claude",
+                "model",
+                "briefing",
             )
 
         ttl_used = mock_redis.setex.call_args[0][1]
@@ -256,7 +273,13 @@ class TestLlmCacheSet:
         mock_redis = AsyncMock()
         with patch("pwbs.services.llm_cache.get_redis_client", return_value=mock_redis):
             await llm_cache_set(
-                OWNER, EMB, "answer", "claude", "model", "search", ttl=42,
+                OWNER,
+                EMB,
+                "answer",
+                "claude",
+                "model",
+                "search",
+                ttl=42,
             )
 
         ttl_used = mock_redis.setex.call_args[0][1]
@@ -267,7 +290,11 @@ class TestLlmCacheSet:
         mock_redis = AsyncMock()
         with patch("pwbs.services.llm_cache.get_redis_client", return_value=mock_redis):
             await llm_cache_set(
-                OWNER, EMB, "answer", "claude", "model",
+                OWNER,
+                EMB,
+                "answer",
+                "claude",
+                "model",
                 filters={"source": "notion"},
             )
 

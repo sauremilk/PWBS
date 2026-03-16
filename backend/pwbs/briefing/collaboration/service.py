@@ -202,8 +202,12 @@ async def list_comments(
     """Paginated comments for a briefing. Accessible to owner or recipient."""
     await _assert_access(db, briefing_id, user_id)
 
-    count_q = select(func.count()).select_from(BriefingComment).where(
-        BriefingComment.briefing_id == briefing_id,
+    count_q = (
+        select(func.count())
+        .select_from(BriefingComment)
+        .where(
+            BriefingComment.briefing_id == briefing_id,
+        )
     )
     total_result = await db.execute(count_q)
     total = total_result.scalar_one()

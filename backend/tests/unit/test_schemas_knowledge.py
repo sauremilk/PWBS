@@ -226,7 +226,17 @@ class TestEntityMentionInvalid:
 
 class TestEntityTypeEnum:
     def test_values(self) -> None:
-        expected = {"person", "project", "topic", "decision"}
+        expected = {
+            "person",
+            "project",
+            "topic",
+            "decision",
+            "goal",
+            "risk",
+            "hypothesis",
+            "open_question",
+            "date_ref",
+        }
         actual = {et.value for et in EntityType}
         assert actual == expected
 

@@ -35,5 +35,8 @@ class Briefing(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    email_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
 
     user: Mapped["User"] = relationship(back_populates="briefings")  # noqa: F821

@@ -18,6 +18,8 @@ BriefingAgent  ←  SearchAgent  ←  [Weaviate, Neo4j, PostgreSQL]
 
 **Zuständigkeit:** Datenquellen anbinden, Rohdaten abrufen, ins UDF normalisieren.
 
+> **⚠️ MVP-Scope (ADR-016):** Im MVP nur die **Kern-4-Konnektoren** aktiv: Google Calendar, Notion, Zoom, Obsidian. Phase-3-Konnektoren (Gmail, Slack, Google Docs, Outlook) liegen in `backend/_deferred/connectors/` und werden NICHT importiert oder weiterentwickelt.
+
 ```python
 class BaseAgent:
     """Basisklasse für alle PWBS-Agenten."""
@@ -77,7 +79,7 @@ class BaseAgent:
 1. **Semantic:** Weaviate-Nearest-Neighbor über Embeddings.
 2. **Keyword:** PostgreSQL Full-Text-Search mit `tsvector`.
 3. **Hybrid:** Kombination aus 1+2 mit RRF-Fusion (Reciprocal Rank Fusion).
-4. **Graph-Traversal:** Neo4j-Abfragen über Entitäts-Beziehungen.
+4. **Graph-Traversal:** Neo4j-Abfragen über Entitäts-Beziehungen (⚠️ MVP: optional, Fallback auf leere Resultmenge wenn Neo4j unavailable).
 
 **Regeln:**
 
@@ -89,6 +91,8 @@ class BaseAgent:
 ## GraphAgent
 
 **Zuständigkeit:** Knowledge-Graph-Abfragen, Beziehungsanalysen, Mustererkennung.
+
+> **⚠️ MVP-Scope (ADR-016):** Neo4j ist im MVP **optional**. `get_neo4j_driver()` gibt `None` zurück, wenn Neo4j nicht erreichbar ist. Alle GraphAgent-Operationen MÜSSEN mit `driver is None` umgehen können und `NullGraphService`-Fallbacks nutzen. Docker Compose startet Neo4j nur mit `--profile graph`.
 
 **Graph-Schema (Neo4j):**
 

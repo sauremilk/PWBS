@@ -9,13 +9,14 @@ tools:
 
 # Task-Backlog generieren (autonom)
 
-Du generierst das **Task-Backlog** (`tasks.md`) für diesen Workspace – vollständig autonom, ohne Rückfragen. Das Task-Backlog ist die fünfte und letzte Schicht der semantischen Kette und beantwortet: *Was muss konkret in welcher Reihenfolge implementiert werden – und warum?*
+Du generierst das **Task-Backlog** (`tasks.md`) für diesen Workspace – vollständig autonom, ohne Rückfragen. Das Task-Backlog ist die fünfte und letzte Schicht der semantischen Kette und beantwortet: _Was muss konkret in welcher Reihenfolge implementiert werden – und warum?_
 
 > **Autonomie-Prinzip:** Tasks werden systematisch aus existierenden Dokumenten und Code abgeleitet. Jeder Task hat ein `Quelle`-Feld, das auf das Ursprungsdokument verweist. Du stellst keine Fragen. Falls etwas nicht ableitbar ist: `<!-- REVIEW: ... -->`.
 
 > **Kernregel:** Jeder Task muss atomar sein (1 Entwickler, ≤ 1 Tag), ein klares Akzeptanzkriterium haben und eine Quellenreferenz auf ein Roadmap-Deliverable, ein PRD-FR oder eine Architektur-Komponente enthalten. "API bauen" ist kein Task – "POST /api/connectors/{id}/sync Endpunkt implementieren" ist einer.
 
 > **Robustheitsregeln:**
+>
 > 1. Prüfe vor jedem Dateizugriff, ob die Datei existiert.
 > 2. Verwende plattformgerechte Shell-Befehle.
 > 3. Falls tasks.md bereits existiert: Lies sie, identifiziere neue Tasks aus aktuellen Dokumenten, ergänze sie.
@@ -26,15 +27,18 @@ Du generierst das **Task-Backlog** (`tasks.md`) für diesen Workspace – vollst
 ## Schritt 1: Quelldokumente laden
 
 ### Pflichtquellen (mindestens eine muss vorhanden sein)
+
 1. **Roadmap** → Phasen, Deliverables pro Phase, aktuelle Phase
 2. **PRD-SPEC** → FRs mit Acceptance Criteria, NFs
 
 ### Erweiterte Quellen (falls vorhanden)
+
 3. **Architecture** → Komponenten, Module, Schnittstellen, Tech-Stack
 4. **Vision** → Kernfunktionen, "Was es nicht ist"
 5. **Existierende tasks.md** → Bereits definierte Tasks (Status prüfen)
 
 ### Code-Analyse (für Ist-Stand)
+
 6. **Implementierte Module** → Welche Komponenten existieren bereits?
 7. **Tests** → Welche FRs sind bereits getestet?
 8. **Migrations** → Welche DB-Schemas sind bereits definiert?
@@ -85,6 +89,7 @@ Vergleiche Soll (Dokumente) vs. Ist (Code):
 ### 3a – Atomarität prüfen
 
 Für jeden Task prüfen:
+
 - Kann ein Entwickler das in ≤ 1 Tag abschließen?
 - Falls nein → In Sub-Tasks zerlegen
 - Hat der Task ein einzelnes, messbares Akzeptanzkriterium?
@@ -93,6 +98,7 @@ Für jeden Task prüfen:
 ### 3b – Abhängigkeiten bestimmen
 
 Für jeden Task:
+
 - Welche anderen Tasks müssen vorher abgeschlossen sein?
 - `depends_on` als Task-ID-Liste setzen
 
@@ -110,6 +116,7 @@ Verwende diese Heuristik:
 ### 3d – Phasen-Zuordnung
 
 Jeder Task gehört zu einer Roadmap-Phase. Falls keine Roadmap existiert, verwende:
+
 - Phase 1: Setup + Grundstruktur
 - Phase 2: Kernfunktionalität
 - Phase 3: Erweiterung + Optimierung
@@ -119,6 +126,7 @@ Jeder Task gehört zu einer Roadmap-Phase. Falls keine Roadmap existiert, verwen
 ## Schritt 4: DAG-Validierung (intern)
 
 Prüfe die Abhängigkeitskette:
+
 1. **Keine Zyklen:** Kein Task darf transitiv von sich selbst abhängen
 2. **Keine verwaisten Abhängigkeiten:** Jede Task-ID in `depends_on` muss existieren
 3. **Kritischer Pfad:** Identifiziere die längste Abhängigkeitskette → Das ist der Mindest-Implementierungszeitraum
@@ -135,26 +143,26 @@ Erstelle `tasks.md` im Wurzelverzeichnis (oder aktualisiere existierende):
 ```markdown
 # Task-Backlog: [Projekt]
 
-| Feld | Wert |
-|------|------|
-| Generiert | [Datum] |
-| Aktuelle Phase | [Phase aus Roadmap] |
-| Tasks gesamt | [N] |
-| Davon offen | [N] |
+| Feld            | Wert                        |
+| --------------- | --------------------------- |
+| Generiert       | [Datum]                     |
+| Aktuelle Phase  | [Phase aus Roadmap]         |
+| Tasks gesamt    | [N]                         |
+| Davon offen     | [N]                         |
 | Kritischer Pfad | [N Tasks, geschätzte Dauer] |
 
 ---
 
 ## Legende
 
-| Feld | Beschreibung |
-|------|-------------|
-| **ID** | Eindeutiger Task-Identifier (z.B. T-042) |
-| **Status** | `done` / `in-progress` / `open` / `blocked` |
-| **Priorität** | `critical` / `high` / `medium` / `low` |
-| **Quelle** | Referenz auf Ursprungsdokument (z.B. "Roadmap §Phase2, Deliverable 3" oder "PRD FR-007") |
-| **Depends** | Task-IDs, die vorher abgeschlossen sein müssen |
-| **Akzeptanzkriterium** | Messbares Kriterium – wann ist dieser Task "done"? |
+| Feld                   | Beschreibung                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| **ID**                 | Eindeutiger Task-Identifier (z.B. T-042)                                                 |
+| **Status**             | `done` / `in-progress` / `open` / `blocked`                                              |
+| **Priorität**          | `critical` / `high` / `medium` / `low`                                                   |
+| **Quelle**             | Referenz auf Ursprungsdokument (z.B. "Roadmap §Phase2, Deliverable 3" oder "PRD FR-007") |
+| **Depends**            | Task-IDs, die vorher abgeschlossen sein müssen                                           |
+| **Akzeptanzkriterium** | Messbares Kriterium – wann ist dieser Task "done"?                                       |
 
 ---
 
@@ -163,13 +171,14 @@ Erstelle `tasks.md` im Wurzelverzeichnis (oder aktualisiere existierende):
 ### [Themengruppe]
 
 #### T-[NNN]: [Kurzer, präziser Task-Titel]
-| Feld | Wert |
-|------|------|
-| **Status** | open |
-| **Priorität** | high |
-| **Quelle** | [Roadmap §X / PRD FR-NNN / Architecture §Y] |
-| **Depends** | [T-NNN, T-NNN] oder – |
-| **Akzeptanzkriterium** | [Konkretes, testbares Kriterium] |
+
+| Feld                   | Wert                                        |
+| ---------------------- | ------------------------------------------- |
+| **Status**             | open                                        |
+| **Priorität**          | high                                        |
+| **Quelle**             | [Roadmap §X / PRD FR-NNN / Architecture §Y] |
+| **Depends**            | [T-NNN, T-NNN] oder –                       |
+| **Akzeptanzkriterium** | [Konkretes, testbares Kriterium]            |
 
 [Wiederhole für jeden Task, gruppiert nach Thema innerhalb der Phase]
 
@@ -178,12 +187,14 @@ Erstelle `tasks.md` im Wurzelverzeichnis (oder aktualisiere existierende):
 ## Abhängigkeitsgraph (Zusammenfassung)
 
 [Nur kritischer Pfad + wichtige Parallelisierungsmöglichkeiten]
-
 ```
+
 T-001 → T-003 → T-007 → T-012 (Kritischer Pfad: 4 Tasks)
 T-002 ──┤
 T-004 → T-008 ──┤ (Parallel zu T-003..T-007)
+
 ```
+
 ```
 
 ---
@@ -207,6 +218,7 @@ Prüfe und **korrigiere sofort**:
 ## Schritt 7: Datei schreiben und abschließen
 
 Schreibe die finale Datei. Gib abschließend aus:
+
 - Tasks gesamt (davon: done / open / blocked)
 - Anzahl Phasen abgedeckt
 - Länge des kritischen Pfads

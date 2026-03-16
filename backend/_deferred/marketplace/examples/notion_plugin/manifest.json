@@ -1,0 +1,21 @@
+{
+  "name": "Notion Connector",
+  "slug": "notion-connector",
+  "version": "1.0.0",
+  "plugin_type": "connector",
+  "description": "Official PWBS connector for Notion workspaces. Imports pages and databases via OAuth2.",
+  "author": "PWBS Team",
+  "entry_point": "plugin:create_plugin",
+  "permissions": [
+    "read_documents",
+    "write_documents"
+  ],
+  "config_schema": {
+    "workspace_name": {
+      "type": "string",
+      "required": false,
+      "description": "Optional display name for the connected Notion workspace"
+    }
+  },
+  "min_pwbs_version": "0.1.0"
+}

@@ -16,7 +16,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 OWNER_ID = uuid.uuid4()

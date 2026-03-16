@@ -11,7 +11,6 @@ from pwbs.api.middleware.audit import AuditMiddleware
 from pwbs.api.middleware.auth import AuthMiddleware
 from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 
-
 # ---------------------------------------------------------------------------
 # SecurityHeadersMiddleware
 # ---------------------------------------------------------------------------
@@ -66,6 +65,7 @@ class TestAuthMiddleware:
         call_next = AsyncMock(return_value=resp)
 
         import uuid
+
         uid = uuid.uuid4()
         with patch(
             "pwbs.api.middleware.auth.validate_access_token",
@@ -199,13 +199,16 @@ class TestMiddlewareStackRegistration:
 
     def test_swagger_disabled_in_production(self) -> None:
         import os
+
         os.environ["ENVIRONMENT"] = "production"
         os.environ["CORS_ORIGINS"] = '["https://app.example.com"]'
         os.environ["TRUSTED_HOSTS"] = '["app.example.com"]'
         from pwbs.core.config import get_settings
+
         get_settings.cache_clear()
         try:
             from pwbs.api.main import create_app
+
             app = create_app()
             assert app.docs_url is None
             assert app.redoc_url is None

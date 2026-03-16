@@ -3,6 +3,7 @@
 Ensures every active API endpoint has summary, description and responses
 documented in the generated OpenAPI schema.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -56,7 +57,5 @@ class TestOpenAPICompleteness:
     def test_minimum_endpoint_count(self, app) -> None:
         """Ensure we haven't accidentally removed routes."""
         schema = app.openapi()
-        total = sum(
-            len(methods) for methods in schema["paths"].values()
-        )
+        total = sum(len(methods) for methods in schema["paths"].values())
         assert total >= 70, f"Expected >=70 operations, got {total}"

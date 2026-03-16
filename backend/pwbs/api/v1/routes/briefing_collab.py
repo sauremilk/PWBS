@@ -62,9 +62,7 @@ async def share_briefing(
     db: AsyncSession = Depends(get_db_session),
 ) -> schemas.ShareListResponse:
     try:
-        shares = await service.share_briefing(
-            db, briefing_id, user.id, body.recipient_ids
-        )
+        shares = await service.share_briefing(db, briefing_id, user.id, body.recipient_ids)
     except ValueError as exc:
         raise _map_value_error(exc) from exc
 
@@ -179,9 +177,7 @@ async def get_comments(
     db: AsyncSession = Depends(get_db_session),
 ) -> schemas.CommentListResponse:
     try:
-        comments, total = await service.list_comments(
-            db, briefing_id, user.id, offset, limit
-        )
+        comments, total = await service.list_comments(db, briefing_id, user.id, offset, limit)
     except ValueError as exc:
         raise _map_value_error(exc) from exc
 

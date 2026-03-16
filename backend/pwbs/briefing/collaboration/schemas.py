@@ -7,7 +7,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-
 # ── Share Schemas ─────────────────────────────────────────────────────────────
 
 
@@ -56,9 +55,7 @@ class CreateCommentRequest(BaseModel):
         max_length=200,
         description="Section anchor, e.g. 'summary', 'open-items'.",
     )
-    content: str = Field(
-        ..., min_length=1, max_length=5000, description="Comment text."
-    )
+    content: str = Field(..., min_length=1, max_length=5000, description="Comment text.")
 
 
 class CommentResponse(BaseModel):

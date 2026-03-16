@@ -30,8 +30,8 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     email_briefing_enabled: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
-        default=False,
-        server_default="false",
+        default=True,
+        server_default="true",
     )
     briefing_email_time: Mapped[time] = mapped_column(
         Time,

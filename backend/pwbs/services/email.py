@@ -25,6 +25,7 @@ from typing import Any, Protocol
 import aiosmtplib
 import httpx
 import jinja2
+import markdown as _markdown
 
 from pwbs.core.config import Settings, get_settings
 
@@ -312,6 +313,12 @@ class EmailService:
         sources:
             List of dicts with keys ``title``, optional ``url``, optional ``source_type``.
         """
+        # Convert Markdown briefing content to HTML for email rendering.
+        # Raw HTML in Markdown is disabled to prevent XSS.
+        html_content = _markdown.markdown(
+            briefing_content,
+            extensions=["tables", "fenced_code"],
+        )
         return await self._send(
             to=to,
             subject=f"PWBS - {briefing_title}",
@@ -319,7 +326,7 @@ class EmailService:
             context={
                 "briefing_type": briefing_type,
                 "briefing_title": briefing_title,
-                "briefing_content": briefing_content,
+                "briefing_content": html_content,
                 "briefing_url": briefing_url,
                 "sources": sources or [],
             },

@@ -244,17 +244,22 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
 
     Loads the most recent briefing of the given type for each user and
     dispatches it via EmailService.send_briefing_email().
+    Idempotency: skips briefings where email_sent_at is already set.
     """
-    from sqlalchemy import select
+    from datetime import datetime, timezone
+
+    from sqlalchemy import select, update
 
     from pwbs.db.postgres import get_session_factory
     from pwbs.models.briefing import Briefing
+    from pwbs.models.document import Document
     from pwbs.models.user import User
     from pwbs.schemas.enums import BriefingType
     from pwbs.services.email import create_email_service
 
     bt_map: dict[str, BriefingType] = {
         "morning": BriefingType.MORNING,
+        "meeting_prep": BriefingType.MEETING_PREP,
         "weekly": BriefingType.WEEKLY,
     }
     schema_bt = bt_map.get(briefing_type)
@@ -287,6 +292,7 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
                     .where(
                         Briefing.user_id == user.id,
                         Briefing.briefing_type == schema_bt,
+                        Briefing.email_sent_at.is_(None),
                     )
                     .order_by(Briefing.generated_at.desc())
                     .limit(1)
@@ -295,12 +301,34 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
                 briefing = res.scalar_one_or_none()
 
             if briefing is None:
-                logger.warning(
-                    "No %s briefing found for user_id=%s – skipping email",
+                logger.info(
+                    "No unsent %s briefing for user_id=%s – skipping",
                     briefing_type,
                     user.id,
                 )
                 continue
+
+            # Load source references from source_chunks
+            sources: list[dict[str, str]] = []
+            if briefing.source_chunks:
+                async with factory() as db:
+                    from pwbs.models.chunk import Chunk
+
+                    chunk_stmt = (
+                        select(
+                            Document.title,
+                            Document.source_type,
+                        )
+                        .join(Chunk, Chunk.document_id == Document.id)
+                        .where(Chunk.id.in_(briefing.source_chunks))
+                        .distinct()
+                    )
+                    src_result = await db.execute(chunk_stmt)
+                    for row in src_result.all():
+                        sources.append({
+                            "title": row.title or "Unbekannt",
+                            "source_type": row.source_type or "",
+                        })
 
             briefing_url = f"/briefings/{briefing.id}"
             email_result = await email_service.send_briefing_email(
@@ -309,11 +337,19 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
                 briefing_title=briefing.title,
                 briefing_content=briefing.content,
                 briefing_url=briefing_url,
-                sources=[],
+                sources=sources,
             )
 
             if email_result.success:
                 sent += 1
+                # Mark as sent (idempotency guard)
+                async with factory() as db:
+                    await db.execute(
+                        update(Briefing)
+                        .where(Briefing.id == briefing.id)
+                        .values(email_sent_at=datetime.now(timezone.utc))
+                    )
+                    await db.commit()
                 logger.info(
                     "Briefing email sent: user_id=%s type=%s",
                     user.id,

@@ -35,6 +35,7 @@ pytestmark = pytest.mark.asyncio
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_embedding_service(embed_map: dict[str, list[float]] | None = None) -> AsyncMock:
     """Create a mock EmbeddingService that returns deterministic embeddings."""
     svc = AsyncMock()
@@ -78,6 +79,7 @@ _ORTHOGONAL_VEC = [x / _norm_o for x in _ORTHOGONAL_VEC] if _norm_o > 0 else _OR
 # Test: Cosine similarity helper
 # ---------------------------------------------------------------------------
 
+
 class TestCosineSimilarity:
     def test_identical_vectors(self) -> None:
         vec = [1.0, 0.0, 0.0]
@@ -105,6 +107,7 @@ class TestCosineSimilarity:
 # Test: Sentence splitting
 # ---------------------------------------------------------------------------
 
+
 class TestSplitSentences:
     def test_basic_split(self) -> None:
         text = "Satz eins. Satz zwei. Satz drei."
@@ -123,6 +126,7 @@ class TestSplitSentences:
 # ---------------------------------------------------------------------------
 # 1. Valid briefing with high-confidence matches
 # ---------------------------------------------------------------------------
+
 
 class TestValidBriefing:
     async def test_high_confidence_briefing(self) -> None:
@@ -167,6 +171,7 @@ class TestValidBriefing:
 # 2. Briefing without source references -> blocked
 # ---------------------------------------------------------------------------
 
+
 class TestNoSourceReferences:
     async def test_no_refs_blocked(self) -> None:
         svc = _make_embedding_service()
@@ -185,6 +190,7 @@ class TestNoSourceReferences:
 # ---------------------------------------------------------------------------
 # 3. Fabricated claims -> low confidence (< 0.3)
 # ---------------------------------------------------------------------------
+
 
 class TestFabricatedClaims:
     async def test_fabricated_claims_low_confidence(self) -> None:
@@ -219,6 +225,7 @@ class TestFabricatedClaims:
 # 4. Mixed quality briefing
 # ---------------------------------------------------------------------------
 
+
 class TestMixedQuality:
     async def test_mixed_quality_partial_low(self) -> None:
         source_text = "Sprint Review fuer Project Phoenix am 16. Maerz."
@@ -251,16 +258,14 @@ class TestMixedQuality:
         assert result.has_source_references is True
         assert 0.0 < result.overall_confidence < 1.0
         # At least one low-confidence sentence (the fabricated one)
-        low_sentences = [
-            s for s in result.sentence_scores
-            if s.level == ConfidenceLevel.LOW
-        ]
+        low_sentences = [s for s in result.sentence_scores if s.level == ConfidenceLevel.LOW]
         assert len(low_sentences) >= 1
 
 
 # ---------------------------------------------------------------------------
 # 5. Empty source chunks -> blocked
 # ---------------------------------------------------------------------------
+
 
 class TestEmptySourceChunks:
     async def test_empty_chunks_blocked(self) -> None:
@@ -279,13 +284,11 @@ class TestEmptySourceChunks:
 # 6. Custom threshold configuration
 # ---------------------------------------------------------------------------
 
+
 class TestCustomThresholds:
     async def test_strict_thresholds(self) -> None:
         source_text = "Sprint Review fuer Project Phoenix."
-        briefing = (
-            "Sprint Review findet statt. "
-            "[Quelle: Sprint Review, 2026-03-16]"
-        )
+        briefing = "Sprint Review findet statt. [Quelle: Sprint Review, 2026-03-16]"
 
         async def _embed(text: str) -> list[float]:
             if text == source_text:
@@ -314,6 +317,7 @@ class TestCustomThresholds:
 # 7. Confidence level classification
 # ---------------------------------------------------------------------------
 
+
 class TestConfidenceClassification:
     async def test_levels_from_validator(self) -> None:
         validator = BriefingValidator(
@@ -336,6 +340,7 @@ class TestConfidenceClassification:
 # ---------------------------------------------------------------------------
 # 8. Fallback message on blocked briefing
 # ---------------------------------------------------------------------------
+
 
 class TestFallbackMessage:
     async def test_custom_fallback(self) -> None:

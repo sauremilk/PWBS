@@ -33,6 +33,8 @@ Lese die folgenden Dateien. **Prüfe jeweils, ob die Datei existiert** – fehlt
 3. `.github/copilot-instructions.md` – Projekt-Konventionen und Architekturprinzipien
 4. `AGENTS.md` – Agenten-Rollen und Modul-Zuständigkeiten
 5. `ARCHITECTURE.md` – Systemarchitektur (für Implementierungs-Kontext)
+6. `docs/adr/016-mvp-fokussierung-refactoring.md` – MVP-Scope: deaktivierte Module, Kern-4-Konnektoren, Neo4j optional
+7. `backend/_deferred/README.md` – Übersicht deaktivierter Module (falls vorhanden)
 
 ### Schritt 2 – Stream-Status analysieren
 
@@ -40,8 +42,9 @@ Analysiere `docs/orchestration/task-state.json` und `tasks.md`:
 
 1. Identifiziere alle Tasks des Streams `${input:stream}` mit Status `open`.
 2. Filtere auf Tasks, deren `blocked_by`-Abhängigkeiten **alle** auf `done` stehen.
-3. Sortiere nach Priorität: P0 > P1 > P2 > P3. Bei gleicher Priorität: niedrigere TASK-Nummer zuerst.
-4. Ausgabe: **"Nächster Task: TASK-XXX – [Titel]"**
+3. **MVP-Filter (ADR-016):** Tasks die mit `⏸️ DEFERRED (ADR-016)` markiert sind, überspringen – diese gehören zu deaktivierten Modulen oder Phase-3-Konnektoren.
+4. Sortiere nach Priorität: P0 > P1 > P2 > P3. Bei gleicher Priorität: niedrigere TASK-Nummer zuerst.
+5. Ausgabe: **"Nächster Task: TASK-XXX – [Titel]"**
 
 **Falls kein Task verfügbar ist** (alle offenen Tasks haben unerfüllte Abhängigkeiten):
 → Identifiziere den konkreten Blocker und den zuständigen Stream/Orchestrator.
@@ -84,6 +87,7 @@ Analysiere `docs/orchestration/task-state.json` und `tasks.md`:
 
 ## Verhaltensregeln während der Session
 
+- **MVP-Scope (ADR-016):** Keine Imports aus `backend/_deferred/`. Module `billing`, `teams`, `rbac`, `marketplace`, `developer`, `sso` sind deaktiviert. Nur Kern-4-Konnektoren (Google Calendar, Notion, Zoom, Obsidian) aktiv. Neo4j-Code muss `driver is None` handhaben.
 - **DSGVO first:** Jede neue Datenstruktur braucht `owner_id` und `expires_at`
 - **Idempotenz:** Alle DB-Writes als UPSERT, niemals blindes INSERT
 - **Keine Platzhalter:** Methoden sind vollständig oder `raise NotImplementedError("TASK-XXX: Implementierung ausstehend")`

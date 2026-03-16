@@ -164,7 +164,6 @@ async def export_to_confluence(
         "title": body.title or briefing.title,
         "body_storage_format": result.data.decode("utf-8"),
         "message": (
-            "Confluence-Seite vorbereitet. "
-            "Direkter API-Push wird in Phase 4 implementiert."
+            "Confluence-Seite vorbereitet. Direkter API-Push wird in Phase 4 implementiert."
         ),
     }

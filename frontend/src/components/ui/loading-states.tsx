@@ -15,9 +15,7 @@ export function PageLoader() {
 }
 
 export function SkeletonLine({ className = "" }: { className?: string }) {
-  return (
-    <div className={`animate-pulse rounded bg-gray-200 ${className}`} />
-  );
+  return <div className={`animate-pulse rounded bg-gray-200 ${className}`} />;
 }
 
 export function SkeletonCard() {

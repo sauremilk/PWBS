@@ -225,6 +225,58 @@ def mock_redis_client() -> AsyncMock:
 
 
 # ---------------------------------------------------------------------------
+# Autouse: isolate DB singletons – prevent real network connections
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _isolate_db_singletons() -> Any:
+    """Pre-fill all DB singletons with mocks so tests never connect to real services.
+
+    Without this, any test that triggers the FastAPI lifespan (e.g. via
+    ``create_app()`` + ``AsyncClient``) would try to connect to Weaviate,
+    Redis and PostgreSQL on localhost – leading to hangs/timeouts when
+    those services are not running.
+
+    Individual tests can still apply their own ``patch()`` on top of this.
+    Integration tests override singletons via their own conftest fixtures.
+    """
+    import pwbs.db.redis_client as _rc
+    import pwbs.db.weaviate_client as _wc
+
+    # -- Redis mock (used by rate-limit middleware, cache, etc.) --
+    mock_redis = AsyncMock()
+    mock_redis.ping = AsyncMock(return_value=True)
+    mock_redis.get = AsyncMock(return_value=None)
+    mock_redis.set = AsyncMock(return_value=True)
+    mock_redis.delete = AsyncMock(return_value=1)
+    mock_redis.scan_iter = AsyncMock(return_value=iter([]))
+    mock_pipe = AsyncMock()
+    mock_pipe.incr = MagicMock()
+    mock_pipe.expire = MagicMock()
+    mock_pipe.execute = AsyncMock(return_value=[1, True])
+    mock_redis.pipeline.return_value = mock_pipe
+
+    # -- Weaviate mock (needs is_connected=True to skip reconnect) --
+    mock_weaviate = MagicMock()
+    mock_weaviate.is_connected.return_value = True
+    mock_weaviate.is_ready.return_value = True
+    mock_weaviate.collections.exists.return_value = True
+
+    # Store originals and inject mocks
+    orig_redis = _rc._client
+    orig_weaviate = _wc._client
+    _rc._client = mock_redis
+    _wc._client = mock_weaviate
+
+    yield
+
+    # Restore originals / reset singletons
+    _rc._client = None
+    _wc._client = None
+
+
+# ---------------------------------------------------------------------------
 # Session-scoped PostgreSQL fixture for integration tests
 # ---------------------------------------------------------------------------
 

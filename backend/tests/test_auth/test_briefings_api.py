@@ -350,13 +350,15 @@ class TestLatestBriefings:
         morning_row = _make_briefing_orm(briefing_type="morning", title="AM")
         meeting_row = _make_briefing_orm(briefing_type="meeting_prep", title="MP")
 
-        # Two queries, one per BriefingType
+        # One query per BriefingType (4 total: morning, meeting_prep, project, weekly)
         morning_result = MagicMock()
         morning_result.scalar_one_or_none.return_value = morning_row
         meeting_result = MagicMock()
         meeting_result.scalar_one_or_none.return_value = meeting_row
+        empty_result = MagicMock()
+        empty_result.scalar_one_or_none.return_value = None
 
-        db.execute.side_effect = [morning_result, meeting_result]
+        db.execute.side_effect = [morning_result, meeting_result, empty_result, empty_result]
 
         from pwbs.api.v1.routes.briefings import latest_briefings
 
@@ -381,7 +383,8 @@ class TestLatestBriefings:
         empty_result = MagicMock()
         empty_result.scalar_one_or_none.return_value = None
 
-        db.execute.side_effect = [empty_result, empty_result]
+        # 4 BriefingType values, all empty
+        db.execute.side_effect = [empty_result, empty_result, empty_result, empty_result]
 
         from pwbs.api.v1.routes.briefings import latest_briefings
 
@@ -573,12 +576,13 @@ class TestSubmitFeedback:
 
         bid = uuid.uuid4()
         user = _make_user()
-        row = _make_briefing_orm(briefing_id=bid, user_id=USER_ID, trigger_context=None)
+        row = _make_briefing_orm(briefing_id=bid, user_id=USER_ID)
 
         db = AsyncMock()
         select_result = MagicMock()
         select_result.scalar_one_or_none.return_value = row
-        db.execute.return_value = select_result
+        # First call: SELECT briefing; second call: upsert feedback
+        db.execute.side_effect = [select_result, AsyncMock()]
 
         body = FeedbackRequest(rating="positive", comment="Great!")
 
@@ -594,8 +598,6 @@ class TestSubmitFeedback:
 
         assert result.briefing_id == bid
         assert result.rating == "positive"
-        assert row.trigger_context["feedback"]["rating"] == "positive"
-        assert row.trigger_context["feedback"]["comment"] == "Great!"
         db.flush.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -607,13 +609,13 @@ class TestSubmitFeedback:
         row = _make_briefing_orm(
             briefing_id=bid,
             user_id=USER_ID,
-            trigger_context={"existing_key": "value"},
         )
 
         db = AsyncMock()
         select_result = MagicMock()
         select_result.scalar_one_or_none.return_value = row
-        db.execute.return_value = select_result
+        # First call: SELECT briefing; second call: upsert feedback
+        db.execute.side_effect = [select_result, AsyncMock()]
 
         body = FeedbackRequest(rating="negative")
 
@@ -628,9 +630,8 @@ class TestSubmitFeedback:
         )
 
         assert result.rating == "negative"
-        assert row.trigger_context["feedback"]["comment"] is None
-        # Existing context preserved
-        assert row.trigger_context["existing_key"] == "value"
+        # Verify upsert was executed (2 db.execute calls: SELECT + INSERT)
+        assert db.execute.await_count == 2
 
     @pytest.mark.asyncio
     async def test_raises_404_for_missing_briefing(self) -> None:

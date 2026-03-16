@@ -15,6 +15,8 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 5. **Erklärbarkeit.** Jede LLM-Ausgabe im System braucht `sources: list[SourceRef]`.
 6. **Denken vor Implementieren.** Bei komplexen Aufgaben erst Implikationen und Alternativen durchdenken (Extended Thinking), dann implementieren.
 7. **Vollständigkeit.** Keine Platzhalter-Implementierungen – Methoden sind vollständig oder mit `raise NotImplementedError("...")` explizit markiert.
+8. **MVP-Scope einhalten.** Nur aktive Module und Kern-4-Konnektoren bearbeiten. Deaktivierte Module in `_deferred/` NICHT importieren, referenzieren oder weiterentwickeln. Siehe `copilot-instructions.md` → "MVP-Fokussierung (ADR-016)".
+9. **Neo4j ist optional.** `get_neo4j_driver()` kann `None` zurückgeben. Jeder Code der Neo4j nutzt, MUSS mit `driver is None` umgehen können. `NullGraphService`-Fallbacks verwenden.
 
 ---
 
@@ -23,6 +25,8 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 ### IngestionAgent
 
 **Primäres Modul:** `pwbs/connectors/`, `pwbs/ingestion/`
+
+> **⚠️ MVP-Scope (ADR-016):** Im MVP nur die **Kern-4-Konnektoren** aktiv: Google Calendar, Notion, Zoom, Obsidian. Phase-3-Konnektoren (Gmail, Slack, Google Docs, Outlook) liegen in `backend/_deferred/connectors/` und werden NICHT importiert oder weiterentwickelt.
 
 ```
 Aufgaben:
@@ -72,7 +76,7 @@ Briefing-Typen:
 
 Prozess:
   1. SearchAgent aufrufen (relevante Dokumente abrufen)
-  2. GraphAgent aufrufen (Beziehungen und Kontext)
+  2. GraphAgent aufrufen (Beziehungen und Kontext) – ⚠️ MVP: gibt leere Ergebnisse zurück wenn Neo4j unavailable
   3. LLM-Aufruf via LLMGateway (Structured Output)
   4. Quellenreferenzen aus Suchergebnissen verknüpfen
   5. Briefing persistieren + an Frontend ausliefern
@@ -92,7 +96,7 @@ Such-Modi:
   1. Semantic    → Weaviate Nearest-Neighbor
   2. Keyword     → PostgreSQL tsvector
   3. Hybrid      → RRF-Fusion (Reciprocal Rank Fusion)
-  4. Graph       → Neo4j Traversal
+  4. Graph       → Neo4j Traversal (⚠️ MVP: optional, Fallback auf leere Resultmenge)
 
 API:
   search(
@@ -111,6 +115,8 @@ Sicherheit:
 
 **Primäres Modul:** `pwbs/graph/`
 
+> **⚠️ MVP-Scope (ADR-016):** Neo4j ist im MVP **optional**. `get_neo4j_driver()` gibt `None` zurück, wenn Neo4j nicht erreichbar ist. Alle GraphAgent-Operationen MÜSSEN mit `driver is None` umgehen können und `NullGraphService`-Fallbacks nutzen. Docker Compose startet Neo4j nur mit `--profile graph`.
+
 ```
 Graph-Schema (Neo4j):
   Nodes:    Person, Project, Decision, Document, Topic, Entity
@@ -124,6 +130,7 @@ Operationen:
 Pflicht:
   - Alle Queries mit WHERE n.owner_id = $owner_id
   - MERGE statt CREATE (Idempotenz)
+  - Graceful Degradation: Operationen geben leere Ergebnisse zurück wenn Neo4j unavailable
 ```
 
 ### SchedulerAgent

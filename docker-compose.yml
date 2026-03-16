@@ -32,8 +32,7 @@ services:
         condition: service_healthy
       weaviate:
         condition: service_healthy
-      neo4j:
-        condition: service_healthy
+      # Neo4j is optional in MVP – app starts without it
       redis:
         condition: service_healthy
     command: uvicorn pwbs.api.main:app --host 0.0.0.0 --port 8000 --reload
@@ -77,9 +76,11 @@ services:
       retries: 5
     restart: unless-stopped
 
-  #  Neo4j (Knowledge Graph)
+  # DEFERRED: Phase 3 – Neo4j (Knowledge Graph)
+  # Activate with: docker compose --profile graph up -d
   neo4j:
     image: neo4j:5.26-community
+    profiles: ["graph"]
     ports:
       - "7474:7474"
       - "7687:7687"

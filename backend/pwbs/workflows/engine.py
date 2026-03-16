@@ -51,10 +51,7 @@ def evaluate_keyword_trigger(
     search_text = f"{title} {content}"
 
     match_all = bool(trigger_config.get("match_all", False))
-    matches = [
-        bool(re.search(re.escape(kw.lower()), search_text))
-        for kw in keywords
-    ]
+    matches = [bool(re.search(re.escape(kw.lower()), search_text)) for kw in keywords]
 
     if match_all:
         return all(matches)
@@ -89,9 +86,7 @@ async def execute_email_action(
     subject = str(action_config.get("subject_template", ""))
     body = str(action_config.get("body_template", ""))
 
-    logger.info(
-        "Workflow email action: user=%s subject=%s", user_id, subject
-    )
+    logger.info("Workflow email action: user=%s subject=%s", user_id, subject)
     return {
         "action": "email",
         "subject": subject,
@@ -141,9 +136,7 @@ async def execute_generate_briefing_action(
     """Queue a briefing generation (logs intent)."""
     briefing_type = str(action_config.get("briefing_type", "project"))
 
-    logger.info(
-        "Workflow briefing action: user=%s type=%s", user_id, briefing_type
-    )
+    logger.info("Workflow briefing action: user=%s type=%s", user_id, briefing_type)
     return {
         "action": "generate_briefing",
         "briefing_type": briefing_type,
@@ -215,9 +208,7 @@ async def evaluate_rules_for_event(
             action_data: dict[str, object] = {"error": f"Unknown action type: {action_type}"}
         else:
             try:
-                action_data = await executor(
-                    rule.action_config, enriched_event, user_id, db
-                )
+                action_data = await executor(rule.action_config, enriched_event, user_id, db)
                 action_result = "success"
             except Exception as exc:
                 logger.exception(

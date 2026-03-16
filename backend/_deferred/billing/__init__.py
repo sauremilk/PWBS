@@ -1,0 +1,1 @@
+"""Billing module (TASK-137): Stripe integration and subscription management."""

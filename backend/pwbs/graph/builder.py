@@ -71,6 +71,7 @@ class NodeLabel(str, Enum):
     RISK = "Risk"
     HYPOTHESIS = "Hypothesis"
     OPEN_QUESTION = "OpenQuestion"
+    DATE_REF = "DateRef"
 
 
 class EdgeType(str, Enum):

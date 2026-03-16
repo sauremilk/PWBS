@@ -21,6 +21,29 @@ pwbs/
 └── core/           # Shared: Config, Exceptions, Basisklassen
 ```
 
+## MVP-Fokussierung (ADR-016)
+
+### Deaktivierte Module
+
+Folgende Module liegen in `backend/_deferred/` und sind **nicht Teil des MVP**. Code in diesen Modulen NICHT importieren, referenzieren oder weiterentwickeln:
+
+- `billing` – Zahlungen/Subscriptions (Phase 4)
+- `teams` – Multi-User-Organisationen (Phase 4)
+- `rbac` – Rollenbasierte Zugriffskontrolle (Phase 4)
+- `marketplace` – Plugin-Marketplace (Phase 5)
+- `developer` – Öffentliche API / API-Keys (Phase 5)
+- `sso` – Enterprise SSO/SAML (Phase 4)
+
+### Aktive Konnektoren (nur Kern-4)
+
+Im MVP nur **Google Calendar, Notion, Zoom, Obsidian** aktiv. Phase-3-Konnektoren (Gmail, Slack, Google Docs, Outlook) liegen in `backend/_deferred/connectors/` – NICHT importieren oder weiterentwickeln.
+
+### Neo4j ist optional
+
+- `get_neo4j_driver()` gibt `None` zurück wenn Neo4j nicht erreichbar ist.
+- Jeder Code der Neo4j nutzt, MUSS mit `driver is None` umgehen können.
+- `NullGraphService`-Fallbacks verwenden; keine harte Abhängigkeit.
+
 ## Pflichtregeln
 
 ### Typing

@@ -13,6 +13,7 @@ Du erweiterst den Entwicklungs-Backlog des PWBS-Projekts um neue atomare Tasks. 
 > 2. Verwende plattformgerechte Shell-Befehle (PowerShell auf Windows, Bash auf Linux/macOS).
 > 3. Schreibe niemals einen Task als Platzhalter – Tasks sind entweder vollständig definiert oder werden nicht geschrieben.
 > 4. Committe atomar nach dem Schreiben beider Dateien.
+> 5. **MVP-Scope (ADR-016):** Keine Tasks für deaktivierte Module (`billing`, `teams`, `rbac`, `marketplace`, `developer`, `sso`) oder deaktivierte Konnektoren (Gmail, Slack, Google Docs, Outlook) erstellen – es sei denn, das Thema bezieht sich explizit auf eine Phase ≥ 3. In diesem Fall Tasks mit `⏸️ DEFERRED (ADR-016)` markieren.
 
 ---
 
@@ -42,6 +43,7 @@ Lese folgende Dateien in dieser Reihenfolge (überspringe fehlende):
 3. `ARCHITECTURE.md` → Systemkomponenten, Module, Schnittstellen
 4. `AGENTS.md` → Agenten-Rollen (welche Module sind zuständig?)
 5. `.github/copilot-instructions.md` → Architekturprinzipien und Code-Konventionen
+6. `docs/adr/016-mvp-fokussierung-refactoring.md` → MVP-Scope: deaktivierte Module, Kern-4-Konnektoren, Neo4j optional
 
 ### 1b – Bestehenden Backlog analysieren
 
@@ -67,6 +69,12 @@ Existierende Streams: STREAM-FOUNDATION, STREAM-INFRA, ..., STREAM-PHASE5
 Leite aus dem angegebenen **Thema** und den Quelldokumenten konkrete atomare Tasks ab.
 
 ### Ableitung-Regeln
+
+**MVP-Scope (ADR-016):**
+- Im MVP (Phase 2) sind nur **Kern-4-Konnektoren** aktiv: Google Calendar, Notion, Zoom, Obsidian.
+- Deaktivierte Module: `billing`, `teams`, `rbac`, `marketplace`, `developer`, `sso` (in `backend/_deferred/`).
+- Neo4j ist optional – Tasks die Neo4j betreffen, müssen `NullGraphService`-Fallback vorsehen.
+- Tasks für Phase-3-Konnektoren (Gmail, Slack, Google Docs, Outlook) oder deaktivierte Module: Titel mit `⏸️ DEFERRED (ADR-016)` suffixen und in task-state.json `"status": "deferred"` setzen.
 
 **Atomarität:**
 - Jeder Task = 1 Entwickler, ≤ 1 Woche (Aufwand max. L)
@@ -210,6 +218,7 @@ Führe folgende Prüfungen aus und korrigiere Fehler sofort:
 ✅  Anzahl neuer Einträge in tasks.md == Anzahl neuer Einträge in task-state.json
 ✅  meta.total_tasks == Anzahl Einträge in "tasks"-Dict
 ✅  Jeder Task hat alle Pflichtfelder (stream, title, priority, effort, area, status, blocked_by)
+✅  Tasks für deaktivierte Module/Konnektoren sind mit ⏸️ DEFERRED (ADR-016) markiert
 ```
 
 Falls ein Check fehlschlägt: Korrigiere, dann weiter.
@@ -223,7 +232,7 @@ git add tasks.md docs/orchestration/task-state.json
 git commit -m "feat(backlog): [N] neue Tasks fuer [Thema] (TASK-[FIRST]..TASK-[LAST])
 
 - Stream: [STREAM-NAME]
-- Neue Tasks: TASK-[FIRST] bis TASK-[LAST]  
+- Neue Tasks: TASK-[FIRST] bis TASK-[LAST]
 - Prioritäten: [z.B. 3x P1, 5x P2, 2x P3]
 - Bereiche: [z.B. Backend, LLM, Frontend]
 - meta.total_tasks: [ALTER WERT] → [NEUER WERT]"
@@ -243,7 +252,7 @@ Stream: [STREAM-NAME] ([ORCH-SLOT])
 
 Übersicht:
   P0: [N] Tasks
-  P1: [N] Tasks  
+  P1: [N] Tasks
   P2: [N] Tasks
   P3: [N] Tasks
 
