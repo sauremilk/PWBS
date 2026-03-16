@@ -203,6 +203,7 @@ def create_app() -> FastAPI:
 
     # DEFERRED: Phase 3 – billing
     # from pwbs.api.v1.routes.billing import router as billing_router
+    from pwbs.api.v1.routes.briefing_collab import router as briefing_collab_router
     from pwbs.api.v1.routes.briefings import router as briefings_router
     from pwbs.api.v1.routes.connectors import router as connectors_router
 
@@ -254,6 +255,7 @@ def create_app() -> FastAPI:
     application.include_router(feature_flags_router)
     application.include_router(feedback_router)
     application.include_router(briefings_router)
+    application.include_router(briefing_collab_router)
     application.include_router(connectors_router)
     application.include_router(documents_router)
     application.include_router(knowledge_router)
