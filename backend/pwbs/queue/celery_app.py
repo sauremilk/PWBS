@@ -19,7 +19,7 @@ import os
 from celery import Celery
 from kombu import Exchange, Queue
 
-from pwbs.queue.config import ALL_QUEUE_NAMES, PRIORITY_MAP, QUEUE_TOPOLOGY
+from pwbs.queue.config import QUEUE_TOPOLOGY
 
 # Broker URL: prefer CELERY_BROKER_URL, fall back to REDIS_URL
 _broker_url = os.environ.get(

@@ -14,8 +14,6 @@ from typing import Any
 
 from pwbs.processing.multimodal.audio import AudioTranscriber
 from pwbs.processing.multimodal.models import (
-    AUDIO_MEDIA_TYPES,
-    IMAGE_MEDIA_TYPES,
     JobStatus,
     MediaType,
     ProcessingJob,

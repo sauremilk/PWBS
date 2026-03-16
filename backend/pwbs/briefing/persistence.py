@@ -15,12 +15,11 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from sqlalchemy import delete, select, text
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.models.briefing import Briefing as BriefingORM

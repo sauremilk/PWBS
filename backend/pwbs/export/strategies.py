@@ -9,7 +9,7 @@ import html
 import io
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime
 
 from pwbs.export.schemas import ExportMetadata, ExportResult
 

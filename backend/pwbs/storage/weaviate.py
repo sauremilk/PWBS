@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 import weaviate
@@ -21,11 +21,7 @@ from weaviate.classes.config import (
     DataType,
     Property,
 )
-from weaviate.classes.data import DataObject
 from weaviate.classes.tenants import Tenant, TenantActivityStatus
-
-from pwbs.processing.chunking import TextChunk
-from pwbs.processing.embedding import EmbeddingResult
 
 logger = logging.getLogger(__name__)
 

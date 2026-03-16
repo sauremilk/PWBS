@@ -14,9 +14,7 @@ from pwbs.models.base import Base, UUIDPrimaryKeyMixin
 
 class Briefing(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "briefings"
-    __table_args__ = (
-        Index("idx_briefings_user_type", "user_id", "briefing_type", "generated_at"),
-    )
+    __table_args__ = (Index("idx_briefings_user_type", "user_id", "briefing_type", "generated_at"),)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False

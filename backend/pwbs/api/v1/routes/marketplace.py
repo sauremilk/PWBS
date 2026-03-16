@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.db.postgres import get_db_session
 from pwbs.marketplace import marketplace_service
-from pwbs.marketplace.plugin_sdk import PluginType
 from pwbs.models.user import User
 
 router = APIRouter(prefix="/api/v1/marketplace", tags=["marketplace"])

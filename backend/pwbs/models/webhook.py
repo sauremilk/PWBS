@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, Text
+from sqlalchemy import ForeignKey, Index, Integer, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

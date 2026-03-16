@@ -9,21 +9,18 @@ POST   /api/v1/billing/webhooks/stripe -- Stripe webhook handler (no auth)
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.billing.service import (
-    check_feature_access,
     create_checkout_session,
     create_portal_session,
     get_or_create_free_subscription,
     get_plan_limits,
     get_user_plan,
-    get_user_subscription,
     handle_webhook_event,
     verify_stripe_signature,
 )

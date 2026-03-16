@@ -20,7 +20,6 @@ from pwbs.marketplace.plugin_sdk import (
     PluginContext,
     PluginManifest,
     PluginResult,
-    PluginStatus,
     PluginType,
 )
 

@@ -21,7 +21,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import PyJWTError
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select, update
 
@@ -130,9 +131,9 @@ def validate_access_token(token: str) -> TokenPayload:
             token,
             _get_verification_key(),
             algorithms=[_get_algorithm()],
-            options={"require_exp": True, "require_iat": True},
+            options={"require": ["exp", "iat"]},
         )
-    except JWTError as exc:
+    except PyJWTError as exc:
         raise AuthenticationError(
             "Invalid or expired access token",
             code="INVALID_ACCESS_TOKEN",

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, time
 
 from sqlalchemy import Boolean, DateTime, Text, Time

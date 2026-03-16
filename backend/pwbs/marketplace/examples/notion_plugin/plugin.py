@@ -14,7 +14,6 @@ from pwbs.marketplace.plugin_sdk import (
     ConnectorPlugin,
     PluginContext,
     PluginManifest,
-    PluginResult,
     PluginType,
 )
 
@@ -63,8 +62,8 @@ class NotionConnectorPlugin(ConnectorPlugin):
         with the user's stored OAuth tokens and delegate to ``fetch_since``.
         """
         # Import deferred to avoid hard dependency at module load
-        from pwbs.connectors.notion import NotionConnector  # noqa: F811
         from pwbs.connectors.base import ConnectorConfig
+        from pwbs.connectors.notion import NotionConnector  # noqa: F811
         from pwbs.schemas.enums import SourceType
 
         config = ConnectorConfig(

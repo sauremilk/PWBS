@@ -5,6 +5,7 @@ GET    /api/v1/connectors/status        -- Status of all connected sources
 GET    /api/v1/connectors/{type}/auth-url  -- Generate OAuth2 auth URL
 POST   /api/v1/connectors/{type}/callback  -- OAuth2 callback
 POST   /api/v1/connectors/{type}/config    -- Configure connector (e.g. Obsidian vault)
+POST   /api/v1/connectors/obsidian/upload  -- Upload Obsidian vault (ZIP/.md)
 DELETE /api/v1/connectors/{type}           -- Disconnect + cascade delete
 POST   /api/v1/connectors/{type}/sync      -- Trigger manual sync
 GET    /api/v1/connectors/{type}/consent   -- Get consent status
@@ -20,7 +21,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,7 +29,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.connectors.oauth import OAuthTokens, encrypt_tokens
-from pwbs.connectors.registry import list_registered_types
 from pwbs.core.config import get_settings
 from pwbs.db.postgres import get_db_session
 from pwbs.models.connection import Connection
@@ -65,13 +65,13 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
     },
     SourceType.OBSIDIAN.value: {
         "name": "Obsidian",
-        "description": "Markdown-Dateien aus einem Obsidian-Vault",
-        "auth_method": "local_path",
+        "description": "Markdown-Dateien aus einem Obsidian-Vault (ZIP-Upload)",
+        "auth_method": "upload",
     },
     SourceType.ZOOM.value: {
         "name": "Zoom",
-        "description": "Meeting-Transkripte und Aufzeichnungen aus Zoom",
-        "auth_method": "oauth2",
+        "description": "Meeting-Transkripte als Upload (VTT/SRT/TXT). OAuth-Sync nach Marketplace-Approval.",
+        "auth_method": "upload",  # DEFERRED: oauth2 nach Zoom Marketplace Approval (ADR-019)
     },
     # DEFERRED: Phase 3 – Gmail, Google Docs, Slack, Outlook
     # SourceType.GMAIL.value: {
@@ -103,7 +103,8 @@ _AUTH_URLS: dict[SourceType, str] = {
     # SourceType.GMAIL: "https://accounts.google.com/o/oauth2/v2/auth",
     # SourceType.GOOGLE_DOCS: "https://accounts.google.com/o/oauth2/v2/auth",
     SourceType.NOTION: "https://api.notion.com/v1/oauth/authorize",
-    SourceType.ZOOM: "https://zoom.us/oauth/authorize",
+    # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+    # SourceType.ZOOM: "https://zoom.us/oauth/authorize",
     # DEFERRED: Phase 3
     # SourceType.SLACK: "https://slack.com/oauth/v2/authorize",
     # SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
@@ -115,7 +116,8 @@ _SCOPES: dict[SourceType, str] = {
     # SourceType.GMAIL: "https://www.googleapis.com/auth/gmail.readonly",
     # SourceType.GOOGLE_DOCS: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents.readonly",
     SourceType.NOTION: "",
-    SourceType.ZOOM: "recording:read",
+    # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+    # SourceType.ZOOM: "recording:read",
     # DEFERRED: Phase 3
     # SourceType.SLACK: "channels:history,channels:read,users:read",
     # SourceType.OUTLOOK_MAIL: "https://graph.microsoft.com/Mail.Read offline_access",
@@ -182,6 +184,29 @@ class ConfigResponse(BaseModel):
     connection_id: uuid.UUID
     status: str
     file_count: int
+
+
+class UploadResponse(BaseModel):
+    """Response for Obsidian vault upload (ADR-018)."""
+
+    model_config = ConfigDict(frozen=True)
+    connection_id: uuid.UUID
+    document_count: int
+    error_count: int
+    deleted_count: int
+    errors: list[dict[str, str]] = Field(default_factory=list)
+
+
+class ZoomTranscriptUploadResponse(BaseModel):
+    """Response for Zoom transcript upload (ADR-019)."""
+
+    model_config = ConfigDict(frozen=True)
+    document_id: uuid.UUID
+    title: str
+    speakers: list[str] = Field(default_factory=list)
+    content_length: int
+    format_detected: str
+    processing_status: str = "pending"
 
 
 class DisconnectResponse(BaseModel):
@@ -392,7 +417,8 @@ async def get_auth_url(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
-        SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
         # DEFERRED: Phase 3
         # SourceType.SLACK: settings.slack_oauth_redirect_uri,
         # SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
@@ -405,7 +431,8 @@ async def get_auth_url(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
-        SourceType.ZOOM: settings.zoom_client_id,
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: settings.zoom_client_id,
         # DEFERRED: Phase 3
         # SourceType.SLACK: settings.slack_client_id,
         # SourceType.OUTLOOK_MAIL: settings.ms_client_id,
@@ -544,7 +571,8 @@ async def _exchange_code_for_tokens(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: "https://oauth2.googleapis.com/token",
         SourceType.NOTION: "https://api.notion.com/v1/oauth/token",
-        SourceType.ZOOM: "https://zoom.us/oauth/token",
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: "https://zoom.us/oauth/token",
         # DEFERRED: Phase 3
         # SourceType.SLACK: "https://slack.com/api/oauth.v2.access",
         # SourceType.OUTLOOK_MAIL: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
@@ -565,7 +593,8 @@ async def _exchange_code_for_tokens(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: settings.gmail_oauth_redirect_uri,
         SourceType.NOTION: settings.notion_oauth_redirect_uri,
-        SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: getattr(settings, "zoom_oauth_redirect_uri", ""),
         # DEFERRED: Phase 3
         # SourceType.SLACK: settings.slack_oauth_redirect_uri,
         # SourceType.OUTLOOK_MAIL: settings.ms_oauth_redirect_uri,
@@ -576,7 +605,8 @@ async def _exchange_code_for_tokens(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: settings.google_client_id,
         SourceType.NOTION: settings.notion_client_id,
-        SourceType.ZOOM: settings.zoom_client_id,
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: settings.zoom_client_id,
         # DEFERRED: Phase 3
         # SourceType.SLACK: settings.slack_client_id,
         # SourceType.OUTLOOK_MAIL: settings.ms_client_id,
@@ -586,7 +616,8 @@ async def _exchange_code_for_tokens(
         # DEFERRED: Phase 3
         # SourceType.GMAIL: settings.google_client_secret,
         SourceType.NOTION: settings.notion_client_secret,
-        SourceType.ZOOM: settings.zoom_client_secret,
+        # DEFERRED: Zoom OAuth nach Marketplace Approval (ADR-019)
+        # SourceType.ZOOM: settings.zoom_client_secret,
         # DEFERRED: Phase 3
         # SourceType.SLACK: settings.slack_client_secret,
         # SourceType.OUTLOOK_MAIL: settings.ms_client_secret,
@@ -721,6 +752,439 @@ async def configure_connector(
         connection_id=connection.id,
         status=ConnectionStatus.ACTIVE.value,
         file_count=0,
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /connectors/obsidian/upload  (ADR-018)
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/obsidian/upload",
+    response_model=UploadResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Upload Obsidian vault (ZIP or .md files)",
+    description=(
+        "Upload eines Obsidian-Vaults als ZIP-Archiv oder einzelner .md-Datei. "
+        "Idempotent: unveränderte Dateien werden per Content-Hash übersprungen. "
+        "Dateien, die im neuen Upload fehlen, werden als gelöscht markiert."
+    ),
+)
+async def upload_obsidian(
+    file: UploadFile,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> UploadResponse:
+    from pwbs.connectors.base import ConnectorConfig
+    from pwbs.connectors.obsidian import (
+        MAX_UPLOAD_SIZE_BYTES,
+        ObsidianConnector,
+        extract_markdown_from_zip,
+    )
+    from pwbs.models.document import Document as DocumentModel
+
+    # --- Validate filename --------------------------------------------------
+    filename = (file.filename or "").strip()
+    if not filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "MISSING_FILENAME", "message": "Dateiname fehlt"},
+        )
+
+    is_zip = filename.lower().endswith(".zip")
+    is_md = filename.lower().endswith(".md")
+    if not is_zip and not is_md:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "INVALID_FILE_TYPE",
+                "message": "Nur .zip oder .md Dateien erlaubt",
+            },
+        )
+
+    # --- Read + validate size -----------------------------------------------
+    data = await file.read()
+    if len(data) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail={
+                "code": "FILE_TOO_LARGE",
+                "message": f"Datei überschreitet {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB",
+            },
+        )
+
+    # --- Extract Markdown files ---------------------------------------------
+    if is_zip:
+        files = extract_markdown_from_zip(data)
+    else:
+        content = data.decode("utf-8", errors="replace")
+        files = [(filename, content)]
+
+    if not files:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "NO_MARKDOWN_FILES",
+                "message": "Keine .md-Dateien im Upload gefunden",
+            },
+        )
+
+    # --- Find or create Connection ------------------------------------------
+    conn_stmt = select(Connection).where(
+        Connection.user_id == current_user.id,
+        Connection.source_type == SourceType.OBSIDIAN.value,
+    )
+    conn_result = await db.execute(conn_stmt)
+    connection = conn_result.scalar_one_or_none()
+
+    if connection is None:
+        connection = Connection(
+            id=uuid.uuid4(),
+            user_id=current_user.id,
+            source_type=SourceType.OBSIDIAN.value,
+            status=ConnectionStatus.ACTIVE.value,
+            credentials_enc="upload",
+            config={},
+        )
+        db.add(connection)
+        await db.flush()
+
+    # --- Get previous source_ids for deletion detection ---------------------
+    prev_stmt = select(DocumentModel.source_id).where(
+        DocumentModel.user_id == current_user.id,
+        DocumentModel.source_type == SourceType.OBSIDIAN.value,
+    )
+    prev_result = await db.execute(prev_stmt)
+    previous_source_ids = {row[0] for row in prev_result.all()}
+
+    # --- Process upload -----------------------------------------------------
+    config = ConnectorConfig(
+        source_type=SourceType.OBSIDIAN,
+        extra={},
+    )
+    connector = ObsidianConnector(
+        owner_id=current_user.id,
+        connection_id=connection.id,
+        config=config,
+    )
+
+    sync_result = connector.process_upload(
+        files,
+        previous_source_ids=previous_source_ids if previous_source_ids else None,
+    )
+
+    # --- Persist documents (upsert by source_id + user_id) ------------------
+    doc_ids: list[str] = []
+    deleted_count = 0
+
+    for doc in sync_result.documents:
+        is_deleted = doc.metadata.get("deleted", False)
+
+        if is_deleted:
+            # Delete documents that are no longer present in the upload
+            await db.execute(
+                delete(DocumentModel).where(
+                    DocumentModel.user_id == current_user.id,
+                    DocumentModel.source_type == SourceType.OBSIDIAN.value,
+                    DocumentModel.source_id == doc.source_id,
+                )
+            )
+            deleted_count += 1
+            continue
+
+        existing = await db.execute(
+            select(DocumentModel).where(
+                DocumentModel.user_id == current_user.id,
+                DocumentModel.source_type == SourceType.OBSIDIAN.value,
+                DocumentModel.source_id == doc.source_id,
+            )
+        )
+        existing_doc = existing.scalar_one_or_none()
+
+        if existing_doc is not None:
+            if existing_doc.content_hash != doc.raw_hash:
+                existing_doc.content_hash = doc.raw_hash
+                existing_doc.processing_status = "pending"
+                doc_ids.append(str(existing_doc.id))
+        else:
+            new_doc = DocumentModel(
+                user_id=current_user.id,
+                source_type=SourceType.OBSIDIAN.value,
+                source_id=doc.source_id,
+                title=doc.title,
+                content_hash=doc.raw_hash,
+                language=doc.language or "de",
+                processing_status="pending",
+            )
+            db.add(new_doc)
+            await db.flush()
+            doc_ids.append(str(new_doc.id))
+
+    # Update watermark
+    connection.watermark = datetime.now(timezone.utc)
+
+    # Create SyncRun record
+    sync_run = SyncRun(
+        id=uuid.uuid4(),
+        connection_id=connection.id,
+        status="success" if not sync_result.errors else "partial",
+        started_at=datetime.now(timezone.utc),
+        completed_at=datetime.now(timezone.utc),
+        document_count=len(doc_ids),
+        error_count=sync_result.error_count,
+        errors_json=[{"source_id": e.source_id, "error": e.error} for e in sync_result.errors]
+        or None,
+    )
+    db.add(sync_run)
+
+    await db.commit()
+
+    # Dispatch processing pipeline for new/updated documents
+    if doc_ids:
+        try:
+            from pwbs.queue.tasks.pipeline import process_documents
+
+            process_documents.delay(doc_ids, str(current_user.id))
+        except Exception:  # noqa: BLE001
+            logger.warning("Failed to dispatch processing pipeline (queue unavailable)")
+
+    await log_event(
+        db,
+        action=AuditAction.CONNECTION_CREATED,
+        user_id=current_user.id,
+        resource_type="connection",
+        resource_id=connection.id,
+        ip_address=get_client_ip(request),
+        metadata={
+            "source_type": SourceType.OBSIDIAN.value,
+            "method": "upload",
+            "document_count": len(doc_ids),
+            "deleted_count": deleted_count,
+        },
+    )
+    await db.commit()
+
+    logger.info(
+        "Obsidian upload: user_id=%s docs=%d deleted=%d errors=%d",
+        current_user.id,
+        len(doc_ids),
+        deleted_count,
+        sync_result.error_count,
+    )
+
+    return UploadResponse(
+        connection_id=connection.id,
+        document_count=len(doc_ids),
+        error_count=sync_result.error_count,
+        deleted_count=deleted_count,
+        errors=[{"source_id": e.source_id, "error": e.error} for e in sync_result.errors],
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /connectors/zoom/upload  (ADR-019)
+# ---------------------------------------------------------------------------
+
+_ZOOM_UPLOAD_ALLOWED_EXTENSIONS = {".vtt", ".srt", ".txt"}
+_ZOOM_UPLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+@router.post(
+    "/zoom/upload",
+    response_model=ZoomTranscriptUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload Zoom transcript (VTT/SRT/TXT)",
+    description=(
+        "Lädt ein Zoom-Meeting-Transkript hoch (VTT, SRT oder TXT). "
+        "Idempotent: identische Inhalte werden per Content-Hash erkannt. "
+        "Speaker-Extraktion aus VTT/SRT-Formaten. "
+        "ADR-019: Upload-basiert im MVP, OAuth nach Zoom Marketplace Approval."
+    ),
+)
+async def upload_zoom_transcript(
+    file: UploadFile,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    title: str | None = None,
+    meeting_date: str | None = None,
+) -> ZoomTranscriptUploadResponse:
+    """Upload a Zoom meeting transcript (VTT, SRT, or TXT).
+
+    Auto-creates a Zoom Connection record on first upload.
+    Content-hash based deduplication prevents duplicate documents.
+    VTT and SRT transcripts are parsed for speaker attribution.
+    """
+    from pwbs.connectors.normalizer import compute_content_hash, normalize_document
+    from pwbs.connectors.zoom import detect_transcript_format, parse_transcript
+    from pwbs.models.document import Document as DocumentModel
+    from pwbs.schemas.enums import ContentType
+
+    # --- Validate filename --------------------------------------------------
+    filename = (file.filename or "").strip()
+    if not filename:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": "MISSING_FILENAME", "message": "Dateiname fehlt"},
+        )
+
+    ext = ""
+    dot_idx = filename.rfind(".")
+    if dot_idx >= 0:
+        ext = filename[dot_idx:].lower()
+
+    if ext not in _ZOOM_UPLOAD_ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "INVALID_FILE_TYPE",
+                "message": f"Nur {', '.join(sorted(_ZOOM_UPLOAD_ALLOWED_EXTENSIONS))} erlaubt",
+            },
+        )
+
+    # --- Read and validate content ------------------------------------------
+    content_bytes = await file.read()
+    if len(content_bytes) > _ZOOM_UPLOAD_MAX_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail={
+                "code": "FILE_TOO_LARGE",
+                "message": f"Maximale Dateigröße: {_ZOOM_UPLOAD_MAX_SIZE // (1024 * 1024)} MB",
+            },
+        )
+
+    try:
+        content_str = content_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": "INVALID_ENCODING", "message": "Datei muss UTF-8-kodiert sein"},
+        )
+
+    # --- Parse transcript ---------------------------------------------------
+    plaintext, speakers = parse_transcript(content_str, filename)
+    if not plaintext.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": "EMPTY_TRANSCRIPT", "message": "Transkript enthält keinen Text"},
+        )
+
+    fmt = detect_transcript_format(content_str, filename)
+
+    # --- Idempotency: content-hash-based source_id --------------------------
+    content_hash = compute_content_hash(plaintext)
+    source_id = f"upload:{content_hash[:16]}"
+
+    existing_stmt = select(DocumentModel).where(
+        DocumentModel.user_id == current_user.id,
+        DocumentModel.source_type == SourceType.ZOOM.value,
+        DocumentModel.source_id == source_id,
+    )
+    existing_result = await db.execute(existing_stmt)
+    if existing_result.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "DOCUMENT_EXISTS",
+                "message": "Transkript bereits hochgeladen (identischer Inhalt)",
+            },
+        )
+
+    # --- Ensure Zoom Connection exists (auto-create) ------------------------
+    conn_stmt = select(Connection).where(
+        Connection.user_id == current_user.id,
+        Connection.source_type == SourceType.ZOOM.value,
+    )
+    conn_result = await db.execute(conn_stmt)
+    connection = conn_result.scalar_one_or_none()
+
+    if connection is None:
+        connection = Connection(
+            id=uuid.uuid4(),
+            user_id=current_user.id,
+            source_type=SourceType.ZOOM.value,
+            status=ConnectionStatus.ACTIVE.value,
+            credentials_enc="upload",
+            config={"auth_method": "upload"},
+        )
+        db.add(connection)
+        await db.flush()
+
+    # --- Parse optional meeting date ----------------------------------------
+    created_at = None
+    if meeting_date:
+        try:
+            created_at = datetime.fromisoformat(meeting_date.replace("Z", "+00:00"))
+        except ValueError:
+            pass
+
+    # --- Normalize to UDF ---------------------------------------------------
+    doc_title = title or filename
+    unified = normalize_document(
+        owner_id=current_user.id,
+        source_type=SourceType.ZOOM,
+        source_id=source_id,
+        title=doc_title,
+        content=plaintext,
+        content_type=ContentType.PLAINTEXT,
+        metadata={
+            "speakers": speakers,
+            "participant_count": len(speakers),
+            "upload_filename": filename,
+            "upload_format": fmt,
+        },
+        participants=speakers,
+        created_at=created_at,
+    )
+
+    # --- Persist Document ---------------------------------------------------
+    doc = DocumentModel(
+        id=unified.id,
+        user_id=current_user.id,
+        source_type=SourceType.ZOOM.value,
+        source_id=source_id,
+        title=doc_title,
+        content_hash=unified.raw_hash,
+        language=unified.language,
+        processing_status="pending",
+    )
+    db.add(doc)
+    await db.commit()
+    await db.refresh(doc)
+
+    await log_event(
+        db,
+        action=AuditAction.CONNECTION_CREATED,
+        user_id=current_user.id,
+        resource_type="document",
+        resource_id=doc.id,
+        ip_address=get_client_ip(request),
+        metadata={
+            "source_type": SourceType.ZOOM.value,
+            "method": "upload",
+            "format": fmt,
+            "filename": filename,
+        },
+    )
+    await db.commit()
+
+    logger.info(
+        "Zoom transcript uploaded: user_id=%s doc_id=%s format=%s speakers=%d",
+        current_user.id,
+        doc.id,
+        fmt,
+        len(speakers),
+    )
+
+    return ZoomTranscriptUploadResponse(
+        document_id=doc.id,
+        title=doc_title,
+        speakers=speakers,
+        content_length=len(plaintext),
+        format_detected=fmt,
+        processing_status="pending",
     )
 
 

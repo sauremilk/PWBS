@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -20,9 +20,6 @@ from pwbs.snapshots.schemas import (
     EntityChange,
     RelationshipChange,
     SnapshotDiffResponse,
-    SnapshotEntity,
-    SnapshotRelationship,
-    SnapshotTheme,
     ThemeShift,
 )
 

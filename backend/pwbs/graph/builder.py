@@ -19,7 +19,6 @@ D1 §3.3.3, D1 §3.2, AGENTS.md GraphAgent.
 from __future__ import annotations
 
 import logging
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum

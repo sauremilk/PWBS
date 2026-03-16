@@ -19,7 +19,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.core.exceptions import NotFoundError, PWBSError, ValidationError
 from pwbs.marketplace.plugin_registry import (
-    PluginError,
     validate_plugin_config,
 )
 from pwbs.marketplace.plugin_sdk import PluginStatus, PluginType

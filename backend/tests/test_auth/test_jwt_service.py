@@ -114,7 +114,7 @@ class TestAccessToken:
 
     def test_expired_token_raises(self, user_id: uuid.UUID) -> None:
         """Manually craft an expired token to test rejection."""
-        from jose import jwt as jose_jwt
+        import jwt as jose_jwt
 
         settings = get_settings()
         now = datetime.now(timezone.utc)
@@ -137,25 +137,19 @@ class TestAccessToken:
 
 class TestRefreshToken:
     @pytest.mark.asyncio
-    async def test_create_returns_string(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_create_returns_string(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         token = await create_refresh_token(user_id, mock_db)
         assert isinstance(token, str)
         assert len(token) > 32  # token_urlsafe(48) produces ~64 chars
 
     @pytest.mark.asyncio
-    async def test_create_adds_to_db(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_create_adds_to_db(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         await create_refresh_token(user_id, mock_db)
         mock_db.add.assert_called_once()
         mock_db.flush.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_stored_token_is_hashed(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_stored_token_is_hashed(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         raw = await create_refresh_token(user_id, mock_db)
         saved = mock_db.add.call_args[0][0]
         assert isinstance(saved, RefreshToken)
@@ -163,26 +157,20 @@ class TestRefreshToken:
         assert saved.token_hash != raw  # not stored as plaintext
 
     @pytest.mark.asyncio
-    async def test_new_family_generated(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_new_family_generated(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         await create_refresh_token(user_id, mock_db)
         saved = mock_db.add.call_args[0][0]
         assert saved.family_id is not None
 
     @pytest.mark.asyncio
-    async def test_custom_family_id(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_custom_family_id(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         family = uuid.uuid4()
         await create_refresh_token(user_id, mock_db, family_id=family)
         saved = mock_db.add.call_args[0][0]
         assert saved.family_id == family
 
     @pytest.mark.asyncio
-    async def test_unique_tokens_per_call(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_unique_tokens_per_call(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         t1 = await create_refresh_token(user_id, mock_db)
         t2 = await create_refresh_token(user_id, mock_db)
         assert t1 != t2
@@ -221,9 +209,7 @@ class TestValidateRefreshToken:
             await validate_refresh_token("nonexistent", mock_db)
 
     @pytest.mark.asyncio
-    async def test_revoked_token_raises(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_revoked_token_raises(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         db_token = RefreshToken(
             id=uuid.uuid4(),
             user_id=user_id,
@@ -240,9 +226,7 @@ class TestValidateRefreshToken:
             await validate_refresh_token("revoked-token", mock_db)
 
     @pytest.mark.asyncio
-    async def test_expired_token_raises(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_expired_token_raises(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         db_token = RefreshToken(
             id=uuid.uuid4(),
             user_id=user_id,
@@ -266,9 +250,7 @@ class TestValidateRefreshToken:
 
 class TestTokenPair:
     @pytest.mark.asyncio
-    async def test_creates_both_tokens(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_creates_both_tokens(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         pair = await create_token_pair(user_id, mock_db)
         assert isinstance(pair, TokenPair)
         assert pair.access_token
@@ -277,17 +259,13 @@ class TestTokenPair:
         assert pair.expires_in > 0
 
     @pytest.mark.asyncio
-    async def test_access_token_is_valid(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_access_token_is_valid(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         pair = await create_token_pair(user_id, mock_db)
         payload = validate_access_token(pair.access_token)
         assert payload.user_id == user_id
 
     @pytest.mark.asyncio
-    async def test_expires_in_matches_config(
-        self, user_id: uuid.UUID, mock_db: AsyncMock
-    ) -> None:
+    async def test_expires_in_matches_config(self, user_id: uuid.UUID, mock_db: AsyncMock) -> None:
         settings = get_settings()
         pair = await create_token_pair(user_id, mock_db)
         assert pair.expires_in == settings.jwt_access_token_expire_minutes * 60

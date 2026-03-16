@@ -111,7 +111,6 @@ async def _process_and_persist(
     from pwbs.models.document import Document
     from pwbs.processing.multimodal.audio import AudioTranscriber
     from pwbs.processing.multimodal.models import (
-        IMAGE_MEDIA_TYPES,
         MediaType,
     )
     from pwbs.processing.multimodal.ocr import OCRProcessor

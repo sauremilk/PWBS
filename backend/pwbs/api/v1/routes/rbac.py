@@ -19,10 +19,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.db.postgres import get_db_session
 from pwbs.models.audit_log import AuditLog
-from pwbs.models.organization import OrganizationMember
 from pwbs.models.user import User
 from pwbs.rbac.checker import get_user_permissions, get_user_role, require_permission
-from pwbs.rbac.permissions import ROLE_PERMISSIONS, ROLE_RANK, get_all_permissions_for_role
+from pwbs.rbac.permissions import ROLE_RANK, get_all_permissions_for_role
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.enums import OrgRole, Permission
 

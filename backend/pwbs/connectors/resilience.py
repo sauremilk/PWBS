@@ -25,7 +25,7 @@ from collections.abc import Awaitable, Callable
 from enum import Enum
 from typing import TypeVar
 
-from pwbs.core.exceptions import CircuitOpenError, ConnectorError
+from pwbs.core.exceptions import CircuitOpenError
 
 logger = logging.getLogger(__name__)
 

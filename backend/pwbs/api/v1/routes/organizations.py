@@ -29,7 +29,6 @@ from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 from pwbs.schemas.enums import DocumentVisibility, OrgRole, Permission
 from pwbs.teams.service import (
     add_member,
-    can_access_document,
     change_member_role,
     create_organization,
     get_organization,

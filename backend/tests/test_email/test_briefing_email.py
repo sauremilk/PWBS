@@ -25,7 +25,6 @@ from pwbs.services.email import (
     EmailService,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -230,21 +229,23 @@ class TestSendBriefingEmailsTask:
         briefing.title = "Morning Briefing"
         briefing.content = "Today you have 2 meetings."
         briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.source_chunks = []
+        briefing.email_sent_at = None
 
         # Mock DB session
         mock_session = AsyncMock()
 
-        # First call: select users → returns alice
+        # First call: select users, second: select briefing, third: UPDATE email_sent_at
         users_result = MagicMock()
         users_result.scalars.return_value.all.return_value = [user]
 
-        # Second call: select briefing → returns briefing
         briefing_result = MagicMock()
         briefing_result.scalar_one_or_none.return_value = briefing
 
-        mock_session.execute = AsyncMock(
-            side_effect=[users_result, briefing_result]
-        )
+        update_result = MagicMock()
+
+        mock_session.execute = AsyncMock(side_effect=[users_result, briefing_result, update_result])
+        mock_session.commit = AsyncMock()
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=False)
 
@@ -252,9 +253,7 @@ class TestSendBriefingEmailsTask:
 
         mock_email_result = EmailResult(success=True, message_id="msg-1")
         mock_email_service = MagicMock()
-        mock_email_service.send_briefing_email = AsyncMock(
-            return_value=mock_email_result
-        )
+        mock_email_service.send_briefing_email = AsyncMock(return_value=mock_email_result)
 
         with (
             patch(
@@ -315,9 +314,7 @@ class TestSendBriefingEmailsTask:
         briefing_result = MagicMock()
         briefing_result.scalar_one_or_none.return_value = None
 
-        mock_session.execute = AsyncMock(
-            side_effect=[users_result, briefing_result]
-        )
+        mock_session.execute = AsyncMock(side_effect=[users_result, briefing_result])
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=False)
 
@@ -366,6 +363,8 @@ class TestSendBriefingEmailsTask:
         briefing.title = "Briefing"
         briefing.content = "Content"
         briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.source_chunks = []
+        briefing.email_sent_at = None
 
         mock_session = AsyncMock()
         users_result = MagicMock()
@@ -373,9 +372,7 @@ class TestSendBriefingEmailsTask:
         briefing_result = MagicMock()
         briefing_result.scalar_one_or_none.return_value = briefing
 
-        mock_session.execute = AsyncMock(
-            side_effect=[users_result, briefing_result]
-        )
+        mock_session.execute = AsyncMock(side_effect=[users_result, briefing_result])
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=False)
 
@@ -416,6 +413,8 @@ class TestSendBriefingEmailsTask:
         briefing.title = "Briefing"
         briefing.content = "Content"
         briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.source_chunks = []
+        briefing.email_sent_at = None
 
         mock_session = AsyncMock()
         users_result = MagicMock()
@@ -423,9 +422,7 @@ class TestSendBriefingEmailsTask:
         briefing_result = MagicMock()
         briefing_result.scalar_one_or_none.return_value = briefing
 
-        mock_session.execute = AsyncMock(
-            side_effect=[users_result, briefing_result]
-        )
+        mock_session.execute = AsyncMock(side_effect=[users_result, briefing_result])
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=False)
 

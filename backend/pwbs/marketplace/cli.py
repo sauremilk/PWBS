@@ -10,7 +10,6 @@ Usage::
 from __future__ import annotations
 
 import json
-import shutil
 import zipfile
 from pathlib import Path
 from textwrap import dedent
@@ -20,7 +19,6 @@ import click
 
 from pwbs.marketplace.plugin_sdk import (
     MANIFEST_JSON_SCHEMA,
-    PluginManifestModel,
     PluginType,
     validate_manifest_file,
 )
@@ -220,9 +218,9 @@ def scaffold(name: str, output_dir: str, plugin_type: str) -> None:
     )
 
     click.echo(f"Plugin skeleton created at {target}/")
-    click.echo(f"  manifest.json  – edit metadata and permissions")
+    click.echo("  manifest.json  – edit metadata and permissions")
     click.echo(f"  plugin.py      – implement {class_name}.fetch_data()")
-    click.echo(f"  tests/         – add your tests here")
+    click.echo("  tests/         – add your tests here")
 
 
 @cli.command()

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import weaviate
-from weaviate.classes.init import Auth
 
 from pwbs.core.config import get_settings
 

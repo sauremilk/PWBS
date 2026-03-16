@@ -20,14 +20,12 @@ import base64
 import logging
 import os
 import re
-import uuid
 from typing import TYPE_CHECKING
 
 from argon2 import PasswordHasher
 from argon2.exceptions import HashingError, VerifyMismatchError
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, ConfigDict, field_validator
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from pwbs.core.config import get_settings

@@ -276,8 +276,8 @@ class LLMRateLimiter:
         if usage.estimated_cost_usd >= self._config.max_daily_cost_usd:
             raise RateLimitExceededError(
                 user_id,
-                f"Daily cost limit reached (/day). "
-                f"Current: .",
+                "Daily cost limit reached (/day). "
+                "Current: .",
             )
 
         # 3. Token budget for use-case

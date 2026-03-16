@@ -15,7 +15,6 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import Enum
 from typing import Any, Protocol
 
 from pwbs.processing.chunking import TextChunk

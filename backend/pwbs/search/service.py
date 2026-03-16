@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
 
 import weaviate
 from weaviate.classes.query import MetadataQuery

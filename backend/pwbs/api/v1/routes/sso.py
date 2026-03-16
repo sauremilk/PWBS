@@ -22,12 +22,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.core.exceptions import (
     AuthenticationError,
-    ExternalServiceError,
     NotFoundError,
     ValidationError,
 )
 from pwbs.db.postgres import get_db_session
-from pwbs.models.organization import Organization, OrganizationMember
+from pwbs.models.organization import Organization
 from pwbs.models.user import User
 from pwbs.rbac.checker import require_permission
 from pwbs.schemas.enums import Permission

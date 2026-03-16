@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Protocol, runtime_checkable
 
@@ -23,7 +23,7 @@ import tiktoken
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pwbs.search.service import SemanticSearchResult, SemanticSearchService
+from pwbs.search.service import SemanticSearchService
 
 logger = logging.getLogger(__name__)
 

@@ -15,8 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
@@ -24,7 +23,6 @@ from pwbs.core.llm_gateway import LLMGateway, LLMRequest, LLMResponse
 from pwbs.graph.pattern_recognition import (
     DetectedPattern,
     PatternRecognitionService,
-    PatternSourceRef,
     PatternType,
 )
 

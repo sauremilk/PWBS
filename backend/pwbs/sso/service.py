@@ -9,18 +9,14 @@ Coordinates:
 
 from __future__ import annotations
 
-import json
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Any
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.core.exceptions import (
     AuthenticationError,
-    ExternalServiceError,
     NotFoundError,
     ValidationError,
 )
@@ -146,7 +142,7 @@ class SSOService:
         4. Ensure org membership
         5. Return SSOLoginResult
         """
-        from pwbs.models.organization import Organization, OrganizationMember
+        from pwbs.models.organization import OrganizationMember
         from pwbs.models.user import User
 
         # Domain restriction

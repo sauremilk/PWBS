@@ -125,6 +125,7 @@ class SmtpBackend:
             )
             return EmailResult(success=False, error=str(exc))
 
+
 # ---------------------------------------------------------------------------
 # SendGrid backend (HTTP API, no SDK dependency)
 # ---------------------------------------------------------------------------
@@ -159,9 +160,7 @@ class SendGridBackend:
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.post(
-                    self._API_URL, json=payload, headers=headers
-                )
+                resp = await client.post(self._API_URL, json=payload, headers=headers)
                 resp.raise_for_status()
 
             msg_id = resp.headers.get("X-Message-Id", "")
@@ -187,6 +186,7 @@ class SendGridBackend:
                 str(exc),
             )
             return EmailResult(success=False, error=str(exc))
+
 
 # ---------------------------------------------------------------------------
 # Email Service (template rendering + dispatch)
@@ -376,9 +376,7 @@ def create_email_service(
         if s.email_provider == "sendgrid":
             api_key = s.sendgrid_api_key.get_secret_value()
             if not api_key:
-                raise ValueError(
-                    "SENDGRID_API_KEY must be set when email_provider='sendgrid'"
-                )
+                raise ValueError("SENDGRID_API_KEY must be set when email_provider='sendgrid'")
             backend = SendGridBackend(api_key=api_key)
         else:
             backend = SmtpBackend(

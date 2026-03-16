@@ -25,7 +25,7 @@ import tiktoken
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pwbs.search.service import SemanticSearchResult, SemanticSearchService
+from pwbs.search.service import SemanticSearchService
 
 logger = logging.getLogger(__name__)
 

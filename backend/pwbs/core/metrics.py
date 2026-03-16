@@ -15,7 +15,6 @@ prefix) to protect PII (DSGVO compliance).
 
 from __future__ import annotations
 
-import hashlib
 import logging
 
 from prometheus_client import Counter, Gauge, Histogram

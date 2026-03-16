@@ -25,10 +25,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from sqlalchemy import delete, select, text
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker  # type: ignore[attr-defined]
 
 logger = logging.getLogger(__name__)
 

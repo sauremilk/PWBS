@@ -9,14 +9,13 @@ from __future__ import annotations
 import logging
 import tempfile
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from pydantic import BaseModel, Field
 
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.models.user import User
-from pwbs.processing.multimodal.models import MIME_TO_MEDIA_TYPE, JobStatus, MediaType
+from pwbs.processing.multimodal.models import MIME_TO_MEDIA_TYPE, MediaType
 from pwbs.schemas.common import AUTH_RESPONSES, COMMON_RESPONSES
 
 logger = logging.getLogger(__name__)

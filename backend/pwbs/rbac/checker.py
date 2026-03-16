@@ -13,7 +13,7 @@ from sqlalchemy import select
 
 from pwbs.models.audit_log import AuditLog
 from pwbs.models.organization import OrganizationMember
-from pwbs.rbac.permissions import ROLE_RANK, can_assign_role, role_has_permission
+from pwbs.rbac.permissions import role_has_permission
 from pwbs.schemas.enums import OrgRole, Permission
 
 if TYPE_CHECKING:

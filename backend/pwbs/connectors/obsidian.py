@@ -52,7 +52,6 @@ except ImportError:  # pragma: no cover
     _HAS_WATCHDOG = False
 
 if TYPE_CHECKING:
-    import threading
     from uuid import UUID
 
     from pwbs.schemas.document import UnifiedDocument
@@ -257,7 +256,7 @@ if _HAS_WATCHDOG:
             self._lock = _threading.Lock()
             self._events: list[FileEvent] = []
 
-    # -- event callbacks ---------------------------------------------------
+        # -- event callbacks ---------------------------------------------------
 
         def on_created(self, event: FileSystemEvent) -> None:
             self._handle(event, "created")

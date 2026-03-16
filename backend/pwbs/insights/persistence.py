@@ -16,7 +16,7 @@ from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pwbs.insights.generator import InsightResult, SourceRef
+from pwbs.insights.generator import InsightResult
 from pwbs.models.proactive_insight import InsightPreferences, ProactiveInsight
 
 logger = logging.getLogger(__name__)

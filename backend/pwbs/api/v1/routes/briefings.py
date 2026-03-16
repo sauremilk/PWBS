@@ -403,20 +403,33 @@ async def _run_briefing_generation(
             # Load user's briefing preferences (TASK-186)
             from pwbs.models.user import User as UserModel
 
-            user_result = await session.execute(
-                select(UserModel).where(UserModel.id == user_id)
-            )
+            user_result = await session.execute(select(UserModel).where(UserModel.id == user_id))
             user_row = user_result.scalar_one_or_none()
-            briefing_preferences = (
-                user_row.briefing_preferences if user_row else None
-            )
-            vertical_profile = (
-                user_row.vertical_profile if user_row else "general"
-            )
+            briefing_preferences = user_row.briefing_preferences if user_row else None
+            vertical_profile = user_row.vertical_profile if user_row else "general"
 
-            # For morning briefings, assemble context
+            # For morning briefings, assemble context via MorningContextAssembler
             if briefing_type == BriefingType.MORNING:
-                context: dict[str, Any] = trigger_context or {}
+                from pwbs.briefing.context import NullGraphService
+                from pwbs.search.service import SemanticSearchService as _MornSearchSvc
+
+                morn_search_svc = _MornSearchSvc(session)
+                morn_assembler = MorningContextAssembler(
+                    session=session,
+                    search_service=morn_search_svc,
+                    graph_service=NullGraphService(),
+                )
+                morn_ctx = await morn_assembler.assemble(
+                    user_id=user_id,
+                    briefing_preferences=briefing_preferences,
+                )
+                context: dict[str, Any] = {
+                    "date": morn_ctx.date,
+                    "calendar_events": morn_ctx.calendar_events,
+                    "recent_documents": morn_ctx.recent_documents,
+                    "pending_decisions": morn_ctx.pending_decisions,
+                    "patterns": morn_ctx.patterns,
+                }
             elif briefing_type == BriefingType.PROJECT:
                 from pwbs.briefing.project_context import (
                     NullProjectGraphService,
@@ -502,6 +515,12 @@ async def _run_briefing_generation(
                 briefing_id=briefing_id,
             )
             await session.commit()
+
+            # Chain email delivery for the generated briefing (ADR-019)
+            if user_row and user_row.email_briefing_enabled:
+                from pwbs.queue.tasks.briefing import send_briefing_emails
+
+                send_briefing_emails.delay(briefing_type.value)
 
         logger.info(
             "Briefing generation completed: id=%s type=%s user=%s",

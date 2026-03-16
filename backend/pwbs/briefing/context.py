@@ -435,7 +435,6 @@ class MorningContextAssembler:
     ) -> list[str]:
         """Load top theme names from the latest UserProfile (best-effort)."""
         try:
-            from pwbs.models.user_profile import UserProfile
 
             stmt = text("""
                 SELECT top_themes

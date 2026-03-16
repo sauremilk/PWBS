@@ -34,11 +34,11 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from pwbs.core.llm_gateway import LLMGateway, LLMRequest, LLMResponse, LLMUsage
+from pwbs.core.llm_gateway import LLMGateway, LLMRequest, LLMUsage
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,6 @@ header and returns the corresponding `User` ORM instance.
 
 from __future__ import annotations
 
-import uuid
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select

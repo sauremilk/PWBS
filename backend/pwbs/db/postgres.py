@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy import text
 
 from pwbs.core.config import get_settings
 

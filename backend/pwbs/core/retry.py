@@ -307,9 +307,15 @@ class RetryHandler:
         try:
             from anthropic import (
                 APITimeoutError as AnthropicTimeout,
-                RateLimitError as AnthropicRateLimit,
+            )
+            from anthropic import (
                 AuthenticationError as AnthropicAuth,
+            )
+            from anthropic import (
                 PermissionDeniedError as AnthropicPermission,
+            )
+            from anthropic import (
+                RateLimitError as AnthropicRateLimit,
             )
             if isinstance(exc, (AnthropicTimeout, AnthropicRateLimit)):
                 return ErrorCategory.TRANSIENT
@@ -322,9 +328,15 @@ class RetryHandler:
         try:
             from openai import (
                 APITimeoutError as OpenAITimeout,
-                RateLimitError as OpenAIRateLimit,
+            )
+            from openai import (
                 AuthenticationError as OpenAIAuth,
+            )
+            from openai import (
                 PermissionDeniedError as OpenAIPermission,
+            )
+            from openai import (
+                RateLimitError as OpenAIRateLimit,
             )
             if isinstance(exc, (OpenAITimeout, OpenAIRateLimit)):
                 return ErrorCategory.TRANSIENT

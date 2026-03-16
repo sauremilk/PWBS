@@ -30,8 +30,6 @@ from typing import TYPE_CHECKING
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pwbs.core.grounding import GroundingService, SourceReference
-
 if TYPE_CHECKING:
     from pwbs.processing.embedding import EmbeddingService
 

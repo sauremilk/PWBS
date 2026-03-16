@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pwbs.search.keyword import KeywordSearchResult, KeywordSearchService
 from pwbs.search.service import SemanticSearchResult, SemanticSearchService

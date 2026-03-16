@@ -10,7 +10,7 @@ import hashlib
 import logging
 import secrets
 from base64 import urlsafe_b64encode
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode, urljoin
 

@@ -13,13 +13,12 @@ D3 Alleinstellungsmerkmal: Persoenliches Lernmodell.
 from __future__ import annotations
 
 import logging
-from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Float, Integer, Select, case, cast, func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.models.decision import Decision

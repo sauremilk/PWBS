@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from uuid import UUID
 
 from pwbs.queue.celery_app import app
 
@@ -325,10 +324,12 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
                     )
                     src_result = await db.execute(chunk_stmt)
                     for row in src_result.all():
-                        sources.append({
-                            "title": row.title or "Unbekannt",
-                            "source_type": row.source_type or "",
-                        })
+                        sources.append(
+                            {
+                                "title": row.title or "Unbekannt",
+                                "source_type": row.source_type or "",
+                            }
+                        )
 
             briefing_url = f"/briefings/{briefing.id}"
             email_result = await email_service.send_briefing_email(

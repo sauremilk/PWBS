@@ -14,8 +14,7 @@ import time
 from datetime import datetime, timezone
 from uuid import UUID
 
-from celery import chain
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 
 from pwbs.queue.celery_app import app
 

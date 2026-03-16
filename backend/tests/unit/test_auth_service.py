@@ -80,7 +80,7 @@ class TestValidateAccessToken:
             validate_access_token("not-a-jwt")
 
     def test_expired_token_raises(self) -> None:
-        from jose import jwt as _jwt
+        import jwt as _jwt
 
         from pwbs.core.config import get_settings
 
@@ -100,7 +100,7 @@ class TestValidateAccessToken:
             validate_access_token(token)
 
     def test_missing_sub_raises(self) -> None:
-        from jose import jwt as _jwt
+        import jwt as _jwt
 
         from pwbs.core.config import get_settings
 

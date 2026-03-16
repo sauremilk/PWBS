@@ -53,7 +53,6 @@ from pwbs.schemas.enums import ContentType, SourceType
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from pwbs.connectors.base import JsonValue
     from pwbs.schemas.document import UnifiedDocument
 
 logger = logging.getLogger(__name__)
@@ -252,6 +251,16 @@ _VTT_TIMESTAMP_RE = re.compile(
     r"^\d{2}:\d{2}:\d{2}\.\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}\.\d{3}",
 )
 
+# Matches an SRT timestamp line: "00:00:01,000 --> 00:00:05,000"
+_SRT_TIMESTAMP_RE = re.compile(
+    r"^\d{2}:\d{2}:\d{2},\d{3}\s*-->\s*\d{2}:\d{2}:\d{2},\d{3}",
+)
+
+# Same pattern without ^ anchor, for content sniffing via re.search
+_SRT_TIMESTAMP_SEARCH_RE = re.compile(
+    r"\d{2}:\d{2}:\d{2},\d{3}\s*-->\s*\d{2}:\d{2}:\d{2},\d{3}",
+)
+
 
 def _parse_vtt(vtt_content: str) -> tuple[str, list[str]]:
     """Parse a VTT transcript into plaintext with speaker labels.
@@ -313,6 +322,112 @@ def _parse_vtt(vtt_content: str) -> tuple[str, list[str]]:
     plaintext = "\n".join(lines)
     # Sort speakers for deterministic output
     return plaintext, sorted(speakers)
+
+
+def _parse_srt(srt_content: str) -> tuple[str, list[str]]:
+    """Parse an SRT transcript into plaintext with speaker labels.
+
+    SRT transcripts have the format::
+
+        1
+        00:00:01,000 --> 00:00:05,000
+        Speaker Name: Hello everyone.
+
+        2
+        00:00:05,000 --> 00:00:10,000
+        Another Speaker: Thanks for joining.
+
+    Parameters
+    ----------
+    srt_content:
+        Raw SRT file content.
+
+    Returns
+    -------
+    tuple[str, list[str]]
+        - Cleaned plaintext (speaker labels preserved for attribution).
+        - List of unique speaker names extracted from the transcript.
+    """
+    lines: list[str] = []
+    speakers: set[str] = set()
+
+    for line in srt_content.splitlines():
+        stripped = line.strip()
+
+        if not stripped:
+            continue
+        if stripped.isdigit():
+            continue
+        if _SRT_TIMESTAMP_RE.match(stripped):
+            continue
+
+        colon_idx = stripped.find(": ")
+        if colon_idx > 0:
+            potential_speaker = stripped[:colon_idx].strip()
+            if (
+                len(potential_speaker) < 100  # noqa: PLR2004
+                and not _SRT_TIMESTAMP_RE.match(potential_speaker)
+                and not potential_speaker.isdigit()
+            ):
+                speakers.add(potential_speaker)
+
+        lines.append(stripped)
+
+    plaintext = "\n".join(lines)
+    return plaintext, sorted(speakers)
+
+
+def detect_transcript_format(content: str, filename: str) -> str:
+    """Detect transcript format from filename extension or content sniffing.
+
+    Returns ``"vtt"``, ``"srt"``, or ``"txt"``.
+    """
+    lower_name = filename.lower() if filename else ""
+
+    if lower_name.endswith(".vtt"):
+        return "vtt"
+    if lower_name.endswith(".srt"):
+        return "srt"
+    if lower_name.endswith(".txt"):
+        # Content sniffing for .txt files that are actually VTT/SRT
+        if content.strip().startswith("WEBVTT"):
+            return "vtt"
+        if _SRT_TIMESTAMP_SEARCH_RE.search(content[:500]):
+            return "srt"
+        return "txt"
+
+    # Fallback: content sniffing
+    if content.strip().startswith("WEBVTT"):
+        return "vtt"
+    if _SRT_TIMESTAMP_SEARCH_RE.search(content[:500]):
+        return "srt"
+    return "txt"
+
+
+def parse_transcript(content: str, filename: str) -> tuple[str, list[str]]:
+    """Parse a transcript file, auto-detecting format.
+
+    Supports VTT, SRT, and plain text formats.
+
+    Parameters
+    ----------
+    content:
+        Raw file content as string.
+    filename:
+        Original filename (used for format detection via extension).
+
+    Returns
+    -------
+    tuple[str, list[str]]
+        - Cleaned plaintext content.
+        - List of unique speaker names (empty for plain text).
+    """
+    fmt = detect_transcript_format(content, filename)
+    if fmt == "vtt":
+        return _parse_vtt(content)
+    if fmt == "srt":
+        return _parse_srt(content)
+    return content.strip(), []
 
 
 def _extract_participants_from_files(

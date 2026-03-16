@@ -23,7 +23,7 @@ from urllib.parse import urlencode
 import httpx
 from pydantic import SecretStr
 
-from pwbs.connectors.base import BaseConnector, ConnectorConfig, JsonValue, SyncError, SyncResult
+from pwbs.connectors.base import BaseConnector, JsonValue, SyncError, SyncResult
 from pwbs.connectors.normalizer import normalize_document
 from pwbs.connectors.oauth import OAuthTokens
 from pwbs.core.config import get_settings
@@ -31,7 +31,6 @@ from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import ContentType, SourceType
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from pwbs.schemas.document import UnifiedDocument
 
