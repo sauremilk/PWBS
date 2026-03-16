@@ -1,0 +1,31 @@
+{
+  "name": "obsidian-pwbs-sync",
+  "version": "0.1.0",
+  "description": "Obsidian plugin: Sync vault to PWBS for AI briefings and meeting prep",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "pwbs",
+    "briefing",
+    "sync",
+    "pkm",
+    "meeting-prep"
+  ],
+  "author": "PWBS",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "obsidian": "latest",
+    "tslib": "2.6.2",
+    "typescript": "5.3.3"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}
