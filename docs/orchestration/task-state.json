@@ -2566,10 +2566,10 @@
       "priority": "P2",
       "effort": "L",
       "area": "Frontend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-M",
       "claimed_at": "2026-03-16T09:35:20.439715+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-16T10:59:16.573822+00:00",
       "blocked_by": [
         "TASK-151",
         "TASK-157"
