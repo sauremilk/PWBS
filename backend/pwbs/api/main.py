@@ -210,6 +210,7 @@ def create_app() -> FastAPI:
     # DEFERRED: Phase 3 – developer
     # from pwbs.api.v1.routes.developer import router as developer_router
     from pwbs.api.v1.routes.documents import router as documents_router
+    from pwbs.api.v1.routes.export import router as export_router
     from pwbs.api.v1.routes.feature_flags import router as feature_flags_router
     from pwbs.api.v1.routes.feedback import router as feedback_router
     from pwbs.api.v1.routes.health import router as health_router
@@ -258,6 +259,7 @@ def create_app() -> FastAPI:
     application.include_router(briefing_collab_router)
     application.include_router(connectors_router)
     application.include_router(documents_router)
+    application.include_router(export_router)
     application.include_router(knowledge_router)
     application.include_router(multimodal_router)
     application.include_router(workflows_router)
