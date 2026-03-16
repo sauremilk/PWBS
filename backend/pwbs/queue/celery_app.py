@@ -68,6 +68,8 @@ app.conf.task_routes = {
     "pwbs.queue.tasks.extraction.*": {"queue": "processing.extract"},
     "pwbs.queue.tasks.briefing.*": {"queue": "briefing.generate"},
     "pwbs.queue.tasks.insights.*": {"queue": "briefing.generate"},
+    "pwbs.queue.tasks.multimodal.*": {"queue": "processing.embed"},
+    "pwbs.queue.tasks.snapshots.*": {"queue": "briefing.generate"},
 }
 
 # -- Retry defaults (Exponential Backoff: 60s -> 300s -> 1500s) --
@@ -146,6 +148,16 @@ app.conf.beat_schedule = {
             "__type__": "crontab",
             "minute": "0",
             "hour": "8",
+        },
+        "options": {"queue": "briefing.generate"},
+    },
+    "weekly-snapshots": {
+        "task": "pwbs.queue.tasks.snapshots.create_weekly_snapshots",
+        "schedule": {
+            "__type__": "crontab",
+            "minute": "0",
+            "hour": "2",
+            "day_of_week": "0",
         },
         "options": {"queue": "briefing.generate"},
     },

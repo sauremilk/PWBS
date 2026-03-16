@@ -214,7 +214,6 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.multimodal import router as multimodal_router
-    from pwbs.api.v1.routes.workflows import router as workflows_router
 
     # DEFERRED: Phase 3 – marketplace
     # from pwbs.api.v1.routes.marketplace import router as marketplace_router
@@ -232,6 +231,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.referrals import router as referrals_router
     from pwbs.api.v1.routes.reminders import router as reminders_router
     from pwbs.api.v1.routes.search import router as search_router
+    from pwbs.api.v1.routes.snapshots import router as snapshots_router
 
     # DEFERRED: Phase 3 – slack
     # from pwbs.api.v1.routes.slack import router as slack_router
@@ -243,6 +243,7 @@ def create_app() -> FastAPI:
     # DEFERRED: Phase 3 – webhooks (Gmail + Slack only)
     # from pwbs.api.v1.routes.webhooks import router as webhooks_router
     from pwbs.api.v1.routes.webhook_outbound import router as webhook_outbound_router
+    from pwbs.api.v1.routes.workflows import router as workflows_router
 
     application.include_router(auth_router)
     application.include_router(auth_google_router)
@@ -258,6 +259,7 @@ def create_app() -> FastAPI:
     application.include_router(knowledge_router)
     application.include_router(multimodal_router)
     application.include_router(workflows_router)
+    application.include_router(snapshots_router)
     # DEFERRED: Phase 3
     # application.include_router(marketplace_router)
     # application.include_router(organizations_router)

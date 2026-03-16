@@ -2523,10 +2523,10 @@
       "priority": "P2",
       "effort": "M",
       "area": "DB",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-M",
       "claimed_at": "2026-03-16T07:16:30+00:00",
-      "completed_at": null,
+      "completed_at": "2026-03-16T06:47:39",
       "blocked_by": [
         "TASK-155"
       ]
