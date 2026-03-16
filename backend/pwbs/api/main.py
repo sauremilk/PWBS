@@ -29,8 +29,8 @@ from starlette.responses import JSONResponse
 from pwbs.api.middleware.access_log import AccessLogMiddleware
 from pwbs.api.middleware.audit import AuditMiddleware
 from pwbs.api.middleware.auth import AuthMiddleware
-from pwbs.api.middleware.rate_limit import RateLimitMiddleware
 from pwbs.api.middleware.correlation import CorrelationIdMiddleware
+from pwbs.api.middleware.rate_limit import RateLimitMiddleware
 from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
@@ -213,6 +213,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.feedback import router as feedback_router
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
+    from pwbs.api.v1.routes.multimodal import router as multimodal_router
 
     # DEFERRED: Phase 3 – marketplace
     # from pwbs.api.v1.routes.marketplace import router as marketplace_router
@@ -254,6 +255,7 @@ def create_app() -> FastAPI:
     application.include_router(connectors_router)
     application.include_router(documents_router)
     application.include_router(knowledge_router)
+    application.include_router(multimodal_router)
     # DEFERRED: Phase 3
     # application.include_router(marketplace_router)
     # application.include_router(organizations_router)

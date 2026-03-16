@@ -2484,11 +2484,12 @@
       "priority": "P2",
       "effort": "L",
       "area": "Backend",
-      "status": "in_progress",
+      "status": "done",
       "claimed_by": "ORCH-M",
       "claimed_at": "2026-03-15T10:40:14.211725+00:00",
-      "completed_at": null,
-      "blocked_by": []
+      "completed_at": "2026-03-16T06:19:32.051959+00:00",
+      "blocked_by": [],
+      "notes": "ORCH-M: Celery-Task vervollstaendigt (Pipeline+DB-Persist), API-Endpunkt /api/v1/multimodal/upload + /jobs/{id} hinzugefuegt, 62 Tests (61 passed, 1 skipped)."
     },
     "TASK-160": {
       "stream": "STREAM-PHASE6",
