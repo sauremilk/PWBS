@@ -214,6 +214,7 @@ def create_app() -> FastAPI:
     from pwbs.api.v1.routes.health import router as health_router
     from pwbs.api.v1.routes.knowledge import router as knowledge_router
     from pwbs.api.v1.routes.multimodal import router as multimodal_router
+    from pwbs.api.v1.routes.workflows import router as workflows_router
 
     # DEFERRED: Phase 3 – marketplace
     # from pwbs.api.v1.routes.marketplace import router as marketplace_router
@@ -256,6 +257,7 @@ def create_app() -> FastAPI:
     application.include_router(documents_router)
     application.include_router(knowledge_router)
     application.include_router(multimodal_router)
+    application.include_router(workflows_router)
     # DEFERRED: Phase 3
     # application.include_router(marketplace_router)
     # application.include_router(organizations_router)
