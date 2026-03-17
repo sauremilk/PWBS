@@ -23,6 +23,10 @@ from pwbs.db.redis_client import get_redis_client
 
 logger = logging.getLogger(__name__)
 
+# Circuit breaker: skip Redis for _CB_COOLDOWN seconds after a failure.
+_redis_last_failure: float = 0.0
+_CB_COOLDOWN = 60  # seconds
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -48,9 +52,7 @@ def _classify_request(
     method = request.method.upper()
 
     # --- Auth endpoints (login / register): per-IP ---
-    if method == "POST" and (
-        path.endswith("/auth/login") or path.endswith("/auth/register")
-    ):
+    if method == "POST" and (path.endswith("/auth/login") or path.endswith("/auth/register")):
         ip = _get_client_ip(request)
         return (
             "auth",
@@ -95,12 +97,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     where *window_id* is `floor(now / window_seconds)`.
     """
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
-        category, identifier, max_requests, window_seconds = _classify_request(
-            request
-        )
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        category, identifier, max_requests, window_seconds = _classify_request(request)
 
         now = time.time()
         window_id = int(now // window_seconds)
@@ -110,41 +108,45 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         remaining = max_requests
 
         try:
-            redis = get_redis_client()
-            pipe = redis.pipeline()
-            pipe.incr(redis_key)
-            pipe.expire(redis_key, window_seconds + 1)
-            results = await pipe.execute()
-            current_count: int = results[0]
+            global _redis_last_failure
+            if time.time() - _redis_last_failure < _CB_COOLDOWN:
+                pass  # skip Redis – circuit breaker open
+            else:
+                redis = get_redis_client()
+                pipe = redis.pipeline()
+                pipe.incr(redis_key)
+                pipe.expire(redis_key, window_seconds + 1)
+                results = await pipe.execute()
+                current_count: int = results[0]
 
-            remaining = max(0, max_requests - current_count)
+                remaining = max(0, max_requests - current_count)
 
-            if current_count > max_requests:
-                retry_after = max(1, int(reset_at - now))
-                return JSONResponse(
-                    status_code=429,
-                    content={
-                        "code": "RATE_LIMIT_EXCEEDED",
-                        "message": "Too many requests",
-                        "detail": {
-                            "limit": max_requests,
-                            "window_seconds": window_seconds,
-                            "retry_after": retry_after,
+                if current_count > max_requests:
+                    retry_after = max(1, int(reset_at - now))
+                    return JSONResponse(
+                        status_code=429,
+                        content={
+                            "code": "RATE_LIMIT_EXCEEDED",
+                            "message": "Too many requests",
+                            "detail": {
+                                "limit": max_requests,
+                                "window_seconds": window_seconds,
+                                "retry_after": retry_after,
+                            },
                         },
-                    },
-                    headers={
-                        "X-RateLimit-Limit": str(max_requests),
-                        "X-RateLimit-Remaining": "0",
-                        "X-RateLimit-Reset": str(int(reset_at)),
-                        "Retry-After": str(retry_after),
-                    },
-                )
+                        headers={
+                            "X-RateLimit-Limit": str(max_requests),
+                            "X-RateLimit-Remaining": "0",
+                            "X-RateLimit-Reset": str(int(reset_at)),
+                            "Retry-After": str(retry_after),
+                        },
+                    )
         except Exception:
+            _redis_last_failure = time.time()
             logger.warning(
                 "Rate limiting unavailable (Redis error); failing open for %s:%s",
                 category,
                 identifier,
-                exc_info=True,
             )
 
         response = await call_next(request)

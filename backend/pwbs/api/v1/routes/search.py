@@ -60,10 +60,15 @@ router = APIRouter(
 # ---------------------------------------------------------------------------
 
 
-def _build_semantic_service() -> SemanticSearchService:
-    """Create a SemanticSearchService from current singletons."""
-    settings = get_settings()
+def _build_semantic_service() -> SemanticSearchService | None:
+    """Create a SemanticSearchService from current singletons.
+
+    Returns ``None`` when Weaviate is unavailable.
+    """
     weaviate_client = get_weaviate_client()
+    if weaviate_client is None:
+        return None
+    settings = get_settings()
     embedding_service = EmbeddingService(
         api_key=settings.openai_api_key.get_secret_value(),
     )
@@ -75,18 +80,23 @@ def _build_semantic_service() -> SemanticSearchService:
 
 def _build_hybrid_service(
     session: AsyncSession,
-) -> HybridSearchService:
+) -> HybridSearchService | None:
     """Create a HybridSearchService wiring semantic + keyword backends.
+
+    Returns ``None`` when Weaviate is unavailable (semantic search
+    is a required component of hybrid search).
 
     Reads ``SEARCH_SEMANTIC_WEIGHT`` and ``SEARCH_KEYWORD_WEIGHT`` from
     environment configuration (TASK-201).
     """
+    semantic = _build_semantic_service()
+    if semantic is None:
+        return None
     settings = get_settings()
     config = HybridSearchConfig(
         semantic_weight=settings.search_semantic_weight,
         keyword_weight=settings.search_keyword_weight,
     )
-    semantic = _build_semantic_service()
     keyword = KeywordSearchService(session=session)
     return HybridSearchService(
         semantic_service=semantic,
@@ -164,6 +174,12 @@ async def search(
     # Build the service chain (request-scoped)
     settings = get_settings()
     hybrid = _build_hybrid_service(session)
+
+    # When Weaviate is unavailable, return empty results instead of crashing
+    if hybrid is None:
+        logger.warning("Search unavailable – Weaviate not connected")
+        return SearchResponse(results=[], answer=None, sources=[], confidence=None)
+
     reranker = SearchReranker(
         config=RerankerConfig(
             recency_boost_pct=settings.search_recency_boost_pct,

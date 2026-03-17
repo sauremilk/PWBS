@@ -102,6 +102,29 @@ class ReviewPluginRequest(BaseModel):
     notes: str | None = None
 
 
+class RatePluginRequest(BaseModel):
+    score: int = Field(..., ge=1, le=5)
+    review_text: str | None = Field(default=None, max_length=2000)
+
+
+class PluginRatingResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    user_id: uuid.UUID
+    plugin_id: uuid.UUID
+    score: int
+    review_text: str | None
+    rated_at: datetime
+
+
+class PluginRatingListResponse(BaseModel):
+    ratings: list[PluginRatingResponse]
+    total: int
+    offset: int
+    limit: int
+
+
 # ---------------------------------------------------------------------------
 # Browse endpoints
 # ---------------------------------------------------------------------------
@@ -199,7 +222,10 @@ async def install_plugin(
     db: AsyncSession = Depends(get_db_session),
 ) -> InstalledPluginResponse:
     installation = await marketplace_service.install_plugin(
-        db, user_id=current_user.id, plugin_id=plugin_id, config=body.config,
+        db,
+        user_id=current_user.id,
+        plugin_id=plugin_id,
+        config=body.config,
     )
     await db.commit()
     return InstalledPluginResponse.model_validate(installation)
@@ -216,7 +242,9 @@ async def uninstall_plugin(
     db: AsyncSession = Depends(get_db_session),
 ) -> None:
     await marketplace_service.uninstall_plugin(
-        db, user_id=current_user.id, plugin_id=plugin_id,
+        db,
+        user_id=current_user.id,
+        plugin_id=plugin_id,
     )
     await db.commit()
 
@@ -233,7 +261,10 @@ async def update_config(
     db: AsyncSession = Depends(get_db_session),
 ) -> InstalledPluginResponse:
     installation = await marketplace_service.update_plugin_config(
-        db, user_id=current_user.id, plugin_id=plugin_id, config=body.config,
+        db,
+        user_id=current_user.id,
+        plugin_id=plugin_id,
+        config=body.config,
     )
     await db.commit()
     return InstalledPluginResponse.model_validate(installation)
@@ -251,7 +282,10 @@ async def toggle_plugin(
     db: AsyncSession = Depends(get_db_session),
 ) -> InstalledPluginResponse:
     installation = await marketplace_service.toggle_plugin(
-        db, user_id=current_user.id, plugin_id=plugin_id, enabled=body.enabled,
+        db,
+        user_id=current_user.id,
+        plugin_id=plugin_id,
+        enabled=body.enabled,
     )
     await db.commit()
     return InstalledPluginResponse.model_validate(installation)
@@ -267,7 +301,8 @@ async def list_installed(
     db: AsyncSession = Depends(get_db_session),
 ) -> list[InstalledPluginResponse]:
     installations = await marketplace_service.list_installed_plugins(
-        db, user_id=current_user.id,
+        db,
+        user_id=current_user.id,
     )
     return [InstalledPluginResponse.model_validate(i) for i in installations]
 
@@ -296,3 +331,56 @@ async def review_plugin(
     )
     await db.commit()
     return PluginDetail.model_validate(plugin)
+
+
+# ---------------------------------------------------------------------------
+# Ratings (TASK-165)
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/plugins/{plugin_id}/rate",
+    response_model=PluginRatingResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Rate a plugin (1-5 stars + optional review text)",
+)
+async def rate_plugin(
+    plugin_id: uuid.UUID,
+    body: RatePluginRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> PluginRatingResponse:
+    rating = await marketplace_service.rate_plugin(
+        db,
+        user_id=current_user.id,
+        plugin_id=plugin_id,
+        score=body.score,
+        review_text=body.review_text,
+    )
+    await db.commit()
+    return PluginRatingResponse.model_validate(rating)
+
+
+@router.get(
+    "/plugins/{plugin_id}/ratings",
+    response_model=PluginRatingListResponse,
+    summary="List ratings for a plugin",
+)
+async def list_ratings(
+    plugin_id: uuid.UUID,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db_session),
+) -> PluginRatingListResponse:
+    ratings, total = await marketplace_service.get_plugin_ratings(
+        db,
+        plugin_id=plugin_id,
+        offset=offset,
+        limit=limit,
+    )
+    return PluginRatingListResponse(
+        ratings=[PluginRatingResponse.model_validate(r) for r in ratings],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )

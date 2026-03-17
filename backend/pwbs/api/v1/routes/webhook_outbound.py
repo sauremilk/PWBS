@@ -124,7 +124,10 @@ def _validate_events(events: list[str]) -> None:
     response_model=WebhookOut,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new outbound webhook",
-    description="Registriert einen neuen Outbound-Webhook mit URL, Event-Typen und HMAC-SHA256-Secret. Max. 10 Webhooks pro Nutzer.",
+    description=(
+        "Registriert einen neuen Outbound-Webhook mit URL, Event-Typen"
+        " und HMAC-SHA256-Secret. Max. 10 Webhooks pro Nutzer."
+    ),
 )
 async def create_webhook(
     body: WebhookCreate,
@@ -264,7 +267,9 @@ async def delete_webhook(
     "/{webhook_id}/deliveries",
     response_model=DeliveryListOut,
     summary="List recent delivery attempts",
-    description="Gibt die letzten Zustellversuche für einen Webhook zurück inkl. HTTP-Status und Payload.",
+    description=(
+        "Gibt die letzten Zustellversuche für einen Webhook zurück inkl. HTTP-Status und Payload."
+    ),
 )
 async def list_deliveries(
     webhook_id: uuid.UUID,

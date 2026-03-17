@@ -276,8 +276,7 @@ class LLMRateLimiter:
         if usage.estimated_cost_usd >= self._config.max_daily_cost_usd:
             raise RateLimitExceededError(
                 user_id,
-                "Daily cost limit reached (/day). "
-                "Current: .",
+                "Daily cost limit reached (/day). Current: .",
             )
 
         # 3. Token budget for use-case
@@ -322,7 +321,11 @@ class LLMRateLimiter:
         """
         today = datetime.now(timezone.utc).date()
         usage = await self._store.increment_usage(
-            user_id, today, input_tokens, output_tokens, estimated_cost_usd,
+            user_id,
+            today,
+            input_tokens,
+            output_tokens,
+            estimated_cost_usd,
         )
 
         record = CostRecord(
@@ -336,7 +339,8 @@ class LLMRateLimiter:
         )
 
         logger.info(
-            "LLM usage recorded: user=%s case=%s model=%s in=%d out=%d cost=$%.4f daily_total=$%.4f calls=%d",
+            "LLM usage recorded: user=%s case=%s model=%s"
+            " in=%d out=%d cost=$%.4f daily_total=$%.4f calls=%d",
             user_id,
             use_case,
             model,
@@ -365,7 +369,10 @@ class LLMRateLimiter:
 
         return {
             "calls_remaining": max(0, self._config.max_daily_calls - usage.call_count),
-            "cost_remaining_usd": max(0.0, self._config.max_daily_cost_usd - usage.estimated_cost_usd),
+            "cost_remaining_usd": max(
+                0.0,
+                self._config.max_daily_cost_usd - usage.estimated_cost_usd,
+            ),
             "calls_used": usage.call_count,
             "cost_used_usd": round(usage.estimated_cost_usd, 4),
         }

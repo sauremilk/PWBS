@@ -88,7 +88,10 @@ async def list_roles(
     """List all roles with their permissions. Requires ORG_VIEW."""
     try:
         await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.ORG_VIEW,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.ORG_VIEW,
         )
     except PermissionError as exc:
         raise HTTPException(
@@ -99,16 +102,21 @@ async def list_roles(
     roles = []
     for role in OrgRole:
         perms = get_all_permissions_for_role(role)
-        roles.append(RolePermissionsResponse(
-            role=role.value,
-            rank=ROLE_RANK[role],
-            permissions=[p.value for p in perms],
-        ))
+        roles.append(
+            RolePermissionsResponse(
+                role=role.value,
+                rank=ROLE_RANK[role],
+                permissions=[p.value for p in perms],
+            )
+        )
     roles.sort(key=lambda r: r.rank, reverse=True)
     return AllRolesResponse(roles=roles)
 
 
-@router.get("/{org_id}/members/{member_user_id}/permissions", response_model=UserPermissionsResponse)
+@router.get(
+    "/{org_id}/members/{member_user_id}/permissions",
+    response_model=UserPermissionsResponse,
+)
 async def get_member_permissions(
     org_id: uuid.UUID,
     member_user_id: uuid.UUID,
@@ -119,7 +127,10 @@ async def get_member_permissions(
     """Get permissions for a specific member. Requires MEMBERS_VIEW."""
     try:
         await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.MEMBERS_VIEW,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.MEMBERS_VIEW,
         )
     except PermissionError as exc:
         raise HTTPException(
@@ -149,7 +160,10 @@ async def get_role_audit_log(
     """Get role-change audit log for an organization. Requires AUDIT_VIEW."""
     try:
         await require_permission(
-            db, org_id=org_id, user_id=user.id, permission=Permission.AUDIT_VIEW,
+            db,
+            org_id=org_id,
+            user_id=user.id,
+            permission=Permission.AUDIT_VIEW,
         )
     except PermissionError as exc:
         raise HTTPException(

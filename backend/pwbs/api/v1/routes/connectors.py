@@ -70,7 +70,9 @@ _CONNECTOR_META: dict[str, dict[str, str]] = {
     },
     SourceType.ZOOM.value: {
         "name": "Zoom",
-        "description": "Meeting-Transkripte als Upload (VTT/SRT/TXT). OAuth-Sync nach Marketplace-Approval.",
+        "description": (
+            "Meeting-Transkripte als Upload (VTT/SRT/TXT). OAuth-Sync nach Marketplace-Approval."
+        ),
         "auth_method": "upload",  # DEFERRED: oauth2 nach Zoom Marketplace Approval (ADR-019)
     },
     # DEFERRED: Phase 3 – Gmail, Google Docs, Slack, Outlook
@@ -271,7 +273,9 @@ _CONSENT_INFO: dict[str, dict[str, list[str] | str]] = {
     },
     SourceType.ZOOM.value: {
         "data_types": ["Meeting-Transkripte", "Aufnahme-Metadaten", "Teilnehmerlisten"],
-        "processing_purpose": "Automatische Zusammenfassung und Entscheidungsextraktion aus Meetings",
+        "processing_purpose": (
+            "Automatische Zusammenfassung und Entscheidungsextraktion aus Meetings"
+        ),
         "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
     },
 }
@@ -306,7 +310,9 @@ def _resolve_source_type(type_str: str) -> SourceType:
     response_model=ConnectorListResponse,
     status_code=status.HTTP_200_OK,
     summary="List available connector types",
-    description="Gibt alle verfügbaren Konnektor-Typen mit Name, Beschreibung und Auth-Methode zurück.",
+    description=(
+        "Gibt alle verfügbaren Konnektor-Typen mit Name, Beschreibung und Auth-Methode zurück."
+    ),
 )
 async def list_connectors(
     current_user: User = Depends(get_current_user),
@@ -344,7 +350,10 @@ async def list_connectors(
     response_model=ConnectionStatusResponse,
     status_code=status.HTTP_200_OK,
     summary="Status of all connected sources",
-    description="Zeigt den Verbindungsstatus aller konfigurierten Datenquellen inkl. letztem Sync-Zeitpunkt und Dokumentanzahl.",
+    description=(
+        "Zeigt den Verbindungsstatus aller konfigurierten Datenquellen"
+        " inkl. letztem Sync-Zeitpunkt und Dokumentanzahl."
+    ),
 )
 async def connection_status(
     current_user: User = Depends(get_current_user),
@@ -392,7 +401,10 @@ async def connection_status(
     response_model=AuthUrlResponse,
     status_code=status.HTTP_200_OK,
     summary="Generate OAuth2 authorization URL",
-    description="Generiert eine OAuth2-Autorisierungs-URL für den angegebenen Konnektor-Typ mit CSRF-State-Parameter.",
+    description=(
+        "Generiert eine OAuth2-Autorisierungs-URL für den angegebenen"
+        " Konnektor-Typ mit CSRF-State-Parameter."
+    ),
 )
 async def get_auth_url(
     type: str,
@@ -473,7 +485,10 @@ async def get_auth_url(
     response_model=CallbackResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Process OAuth2 callback",
-    description="Verarbeitet den OAuth2-Callback, tauscht den Authorization-Code gegen Tokens und speichert die Verbindung.",
+    description=(
+        "Verarbeitet den OAuth2-Callback, tauscht den Authorization-Code"
+        " gegen Tokens und speichert die Verbindung."
+    ),
 )
 async def oauth_callback(
     type: str,
@@ -680,7 +695,10 @@ async def _exchange_code_for_tokens(
     response_model=ConfigResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Configure connector (e.g. Obsidian vault path)",
-    description="Konfiguriert einen Konnektor, der keine OAuth2-Autorisierung benötigt (z.B. lokaler Obsidian-Vault-Pfad).",
+    description=(
+        "Konfiguriert einen Konnektor, der keine OAuth2-Autorisierung"
+        " benötigt (z.B. lokaler Obsidian-Vault-Pfad)."
+    ),
 )
 async def configure_connector(
     type: str,
@@ -1198,7 +1216,10 @@ async def upload_zoom_transcript(
     response_model=DisconnectResponse,
     status_code=status.HTTP_200_OK,
     summary="Disconnect source and cascade-delete data",
-    description="Trennt eine Datenquelle und löscht kaskadierend alle importierten Dokumente, Chunks und Entitäten.",
+    description=(
+        "Trennt eine Datenquelle und löscht kaskadierend alle"
+        " importierten Dokumente, Chunks und Entitäten."
+    ),
 )
 async def disconnect(
     type: str,
@@ -1286,7 +1307,10 @@ async def disconnect(
     response_model=SyncResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger manual sync",
-    description="Löst einen manuellen Sync-Vorgang für die angegebene Datenquelle aus. Cursor-basierte inkrementelle Synchronisation.",
+    description=(
+        "Löst einen manuellen Sync-Vorgang für die angegebene Datenquelle aus."
+        " Cursor-basierte inkrementelle Synchronisation."
+    ),
 )
 async def trigger_sync(
     type: str,
@@ -1362,7 +1386,9 @@ async def trigger_sync(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_200_OK,
     summary="Get consent status for a connector type",
-    description="Gibt den Einwilligungsstatus (DSGVO-Consent) für einen bestimmten Konnektor-Typ zurück.",
+    description=(
+        "Gibt den Einwilligungsstatus (DSGVO-Consent) für einen bestimmten Konnektor-Typ zurück."
+    ),
 )
 async def get_consent(
     type: str,
@@ -1411,7 +1437,9 @@ async def get_consent(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Grant consent for a connector type",
-    description="Erteilt die DSGVO-Einwilligung für die Datenverarbeitung eines bestimmten Konnektor-Typs.",
+    description=(
+        "Erteilt die DSGVO-Einwilligung für die Datenverarbeitung eines bestimmten Konnektor-Typs."
+    ),
 )
 async def grant_consent(
     type: str,
@@ -1485,7 +1513,10 @@ async def grant_consent(
     response_model=ConsentRevokeResponse,
     status_code=status.HTTP_200_OK,
     summary="Revoke consent and cascade-delete all data for this source",
-    description="Widerruft die DSGVO-Einwilligung und löscht kaskadierend alle Daten dieser Quelle (Dokumente, Chunks, Entitäten).",
+    description=(
+        "Widerruft die DSGVO-Einwilligung und löscht kaskadierend"
+        " alle Daten dieser Quelle (Dokumente, Chunks, Entitäten)."
+    ),
 )
 async def revoke_consent(
     type: str,
@@ -1605,7 +1636,10 @@ class SyncHistoryResponse(BaseModel):
     "/{type}/history",
     response_model=SyncHistoryResponse,
     summary="Sync history for a connector",
-    description="Gibt die paginierte Sync-Historie für einen Konnektor-Typ zurück inkl. Status, Dauer und Dokumentanzahl pro Sync.",
+    description=(
+        "Gibt die paginierte Sync-Historie für einen Konnektor-Typ"
+        " zurück inkl. Status, Dauer und Dokumentanzahl pro Sync."
+    ),
 )
 async def get_sync_history(
     type: str,

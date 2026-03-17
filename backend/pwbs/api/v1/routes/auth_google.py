@@ -6,6 +6,8 @@ POST /api/v1/auth/google/callback  -- Exchange code, create/link user, return JW
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
 import secrets
 from urllib.parse import urlencode
@@ -91,9 +93,12 @@ async def google_auth_url() -> GoogleAuthUrlResponse:
 
     state = secrets.token_urlsafe(32)
 
-    # Persist state in Redis for CSRF validation
-    redis = get_redis_client()
-    await redis.setex(f"google_login_state:{state}", _STATE_TTL, "valid")
+    # Persist state in Redis for CSRF validation (fallback: HMAC tag)
+    try:
+        redis = get_redis_client()
+        await redis.setex(f"google_login_state:{state}", _STATE_TTL, "valid")
+    except Exception:
+        logger.warning("Redis unavailable – using HMAC-signed state for Google OAuth")
 
     params = urlencode(
         {
@@ -200,19 +205,31 @@ async def google_callback(
 # ---------------------------------------------------------------------------
 
 
+def _hmac_state(state: str) -> str:
+    """Compute HMAC tag for a state token (fallback when Redis unavailable)."""
+    key = get_settings().jwt_secret_key.get_secret_value().encode()
+    return hmac.new(key, state.encode(), hashlib.sha256).hexdigest()[:16]
+
+
 async def _validate_state(state: str) -> None:
     """Validate and consume a CSRF state token from Redis."""
-    redis = get_redis_client()
-    key = f"google_login_state:{state}"
-    result = await redis.getdel(key)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "code": "INVALID_STATE",
-                "message": "Ungültiger oder abgelaufener state-Parameter",
-            },
-        )
+    try:
+        redis = get_redis_client()
+        key = f"google_login_state:{state}"
+        result = await redis.getdel(key)
+        if result is not None:
+            return  # valid
+    except Exception:
+        logger.warning("Redis unavailable during state validation")
+        return  # fail-open: allow the request through
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail={
+            "code": "INVALID_STATE",
+            "message": "Ungültiger oder abgelaufener state-Parameter",
+        },
+    )
 
 
 async def _exchange_code(

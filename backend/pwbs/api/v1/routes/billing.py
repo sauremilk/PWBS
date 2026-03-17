@@ -95,8 +95,12 @@ async def get_subscription(
     return SubscriptionResponse(
         plan=sub.plan,
         status=sub.status,
-        stripe_customer_id=sub.stripe_customer_id if not sub.stripe_customer_id.startswith("cus_free_") else None,
-        current_period_start=sub.current_period_start.isoformat() if sub.current_period_start else None,
+        stripe_customer_id=(
+            sub.stripe_customer_id if not sub.stripe_customer_id.startswith("cus_free_") else None
+        ),
+        current_period_start=(
+            sub.current_period_start.isoformat() if sub.current_period_start else None
+        ),
         current_period_end=sub.current_period_end.isoformat() if sub.current_period_end else None,
         cancel_at_period_end=sub.cancel_at_period_end,
         cohort=sub.cohort,

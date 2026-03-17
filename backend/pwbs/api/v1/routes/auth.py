@@ -206,7 +206,9 @@ async def login(
     response_model=LogoutResponse,
     status_code=status.HTTP_200_OK,
     summary="Logout (invalidate refresh token)",
-    description="Invalidiert das übergebene Refresh-Token. Das Access-Token bleibt bis zum Ablauf gültig.",
+    description=(
+        "Invalidiert das übergebene Refresh-Token. Das Access-Token bleibt bis zum Ablauf gültig."
+    ),
 )
 async def logout(
     body: LogoutRequest,
@@ -231,7 +233,10 @@ async def logout(
     response_model=MeResponse,
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
-    description="Gibt das Profil des aktuell authentifizierten Benutzers zurück (ID, E-Mail, Anzeigename, Erstelldatum).",
+    description=(
+        "Gibt das Profil des aktuell authentifizierten Benutzers zurück"
+        " (ID, E-Mail, Anzeigename, Erstelldatum)."
+    ),
 )
 async def me(
     current_user: User = Depends(get_current_user),

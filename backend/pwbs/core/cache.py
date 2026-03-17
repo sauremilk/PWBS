@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 # Default TTL per cache namespace (seconds)
 _DEFAULT_TTLS: dict[str, int] = {
-    "search": 300,       # 5 min  search results
-    "briefing": 900,     # 15 min  briefing responses
-    "embedding": 3600,   # 1 h  embedding vectors
-    "api": 60,           # 1 min  generic API responses
+    "search": 300,  # 5 min  search results
+    "briefing": 900,  # 15 min  briefing responses
+    "embedding": 3600,  # 1 h  embedding vectors
+    "api": 60,  # 1 min  generic API responses
 }
 
 
@@ -101,4 +101,9 @@ async def cache_invalidate_namespace(namespace: str, owner_id: str) -> None:
             if cursor == 0:
                 break
     except Exception:
-        logger.warning("cache namespace invalidation failed for %s:%s", namespace, owner_id, exc_info=True)
+        logger.warning(
+            "cache namespace invalidation failed for %s:%s",
+            namespace,
+            owner_id,
+            exc_info=True,
+        )

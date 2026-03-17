@@ -242,7 +242,10 @@ async def update_settings(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={
                     "code": "INVALID_REMINDER_FREQUENCY",
-                    "message": f"Invalid reminder frequency: {update.reminder_frequency}. Must be daily, weekly, or off.",
+                    "message": (
+                        f"Invalid reminder frequency: {update.reminder_frequency}."
+                        " Must be daily, weekly, or off."
+                    ),
                 },
             )
         user.reminder_frequency = update.reminder_frequency

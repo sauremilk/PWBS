@@ -253,12 +253,11 @@ async def health_check_detailed(
         }
 
     # Overall status per AC:
-    # - unhealthy: PostgreSQL OR Weaviate down
-    # - degraded: optional services (Redis, Neo4j) down
-    # - healthy: all critical up and optionals either up or unavailable
+    # - unhealthy: PostgreSQL down
+    # - degraded: optional services (Weaviate, Redis, Neo4j) down
+    # - healthy: all services up or unavailable
     pg_up = dependencies["postgres"]["status"] == "up"
-    weaviate_up = dependencies["weaviate"]["status"] == "up"
-    critical_ok = pg_up and weaviate_up
+    critical_ok = pg_up
 
     if not critical_ok:
         overall = "unhealthy"

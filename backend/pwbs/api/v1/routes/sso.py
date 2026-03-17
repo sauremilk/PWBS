@@ -297,7 +297,10 @@ async def oidc_callback(
             status_code=502,
             detail={
                 "error": "sso_provider_error",
-                "detail": "SSO provider authentication failed. Please try again or use email/password login.",
+                "detail": (
+                    "SSO provider authentication failed."
+                    " Please try again or use email/password login."
+                ),
                 "fallback_available": True,
                 "retry_url": f"/api/v1/sso/{org_slug}/login",
             },

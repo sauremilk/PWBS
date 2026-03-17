@@ -191,6 +191,8 @@ async def _cascade_delete_weaviate(chunks: list[ChunkORM]) -> int:
         from pwbs.db.weaviate_client import get_weaviate_client
 
         client = get_weaviate_client()
+        if client is None:
+            return 0
         collection = client.collections.get("DocumentChunk")
         for wid in weaviate_ids:
             try:
@@ -210,6 +212,8 @@ async def _cascade_delete_neo4j(document_id: uuid.UUID, user_id: uuid.UUID) -> N
         from pwbs.db.neo4j_client import get_neo4j_driver
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return
         async with driver.session() as session:
             await session.run(
                 "MATCH (d:Document {id: $doc_id, owner_id: $owner_id}) DETACH DELETE d",

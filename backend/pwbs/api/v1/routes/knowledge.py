@@ -4,8 +4,8 @@ GET    /api/v1/knowledge/entities              -- Paginated entity list (filtera
 GET    /api/v1/knowledge/entities/{id}         -- Entity detail with connections
 GET    /api/v1/knowledge/entities/{id}/related -- Related entities up to depth 2
 GET    /api/v1/knowledge/entities/{id}/documents -- Documents mentioning an entity
-GET    /api/v1/knowledge/graph                 -- Subgraph for D3.js visualisation (max 50 nodes)
-GET    /api/v1/knowledge/patterns              -- Detected patterns (recurring themes, assumptions, questions)
+GET    /api/v1/knowledge/graph                 -- Subgraph for D3.js visualisation
+GET    /api/v1/knowledge/patterns              -- Detected patterns (recurring themes)
 GET    /api/v1/knowledge/decisions             -- Paginated decisions list
 POST   /api/v1/knowledge/decisions             -- Create a decision
 PATCH  /api/v1/knowledge/decisions/{id}        -- Update a decision
@@ -215,6 +215,8 @@ async def _get_neo4j_related(
         from pwbs.db.neo4j_client import get_neo4j_driver
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return []
         async with driver.session() as session:
             result = await session.run(
                 "MATCH (e:Entity {id: $entity_id, owner_id: $owner_id})"
@@ -256,6 +258,8 @@ async def _get_neo4j_graph(
         from pwbs.db.neo4j_client import get_neo4j_driver
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return GraphResponse(nodes=[], edges=[])
         async with driver.session() as session:
             # Get top nodes by mention count
             node_result = await session.run(
@@ -558,6 +562,8 @@ async def get_patterns(
         )
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return PatternListResponse(patterns=[], total=0)
         async with driver.session() as neo4j_session:
             service = PatternRecognitionService(neo4j_session)
 
@@ -727,6 +733,8 @@ async def _sync_decision_to_neo4j(decision: DecisionORM) -> str | None:
         from pwbs.db.neo4j_client import get_neo4j_driver
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return None
         async with driver.session() as session:
             result = await session.run(
                 "MERGE (d:Decision {id: $id}) "

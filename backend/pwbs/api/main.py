@@ -59,11 +59,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from pwbs.db.weaviate_client import get_weaviate_client
 
     get_engine()
-    get_weaviate_client()
+
+    # Weaviate is optional in MVP – vector search degrades gracefully
+    weaviate_client = get_weaviate_client()
+    if weaviate_client is None:
+        logger.warning("Weaviate unavailable \u2013 vector search disabled for this session")
+
     # Neo4j is optional in MVP – get_neo4j_driver() returns None when unavailable
     neo4j_driver = get_neo4j_driver()
     if neo4j_driver is None:
-        logger.warning("Neo4j unavailable – graph features disabled for this session")
+        logger.warning("Neo4j unavailable \u2013 graph features disabled for this session")
+
     get_redis_client()
     logger.info("All database connections initialised.")
 
@@ -138,12 +144,22 @@ def create_app() -> FastAPI:
     async def validation_error_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
+        detail = None
+        if settings.debug:
+            raw = exc.errors()
+            safe: list[dict[str, object]] = []
+            for err in raw:
+                entry = dict(err)
+                if "ctx" in entry:
+                    entry["ctx"] = {k: str(v) for k, v in entry["ctx"].items()}
+                safe.append(entry)
+            detail = safe
         return JSONResponse(
             status_code=422,
             content={
                 "code": "VALIDATION_ERROR",
                 "message": "Request validation failed",
-                "detail": exc.errors() if settings.debug else None,
+                "detail": detail,
             },
         )
 
