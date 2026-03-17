@@ -113,7 +113,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | AGB sind unter `/agb` erreichbar und enthalten Beta-Haftungsausschluss |
 | **Abhängigkeit**        | –                                                                      |
 | **Geschätzter Aufwand** | M                                                                      |
-| **Status**              | In Arbeit |
+| **Status**              | Fertig   |
 
 **Beschreibung:** Beta-AGB erstellen mit: Leistungsbeschreibung (Closed-Beta-Umfang), Haftungsausschluss für Beta-Phase, Nutzungsrechte an generierten Inhalten, Kündigungsregelung, anwendbares Recht (deutsches Recht). Empfehlung: Mit IT-Rechtsanwalt erstellen.
 
