@@ -361,7 +361,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Jeder Wizard-Schritt hat einen sichtbaren �Zur�ck"-Button |
 | **Abh�ngigkeit**        | �                                                         |
 | **Gesch�tzter Aufwand** | XS                                                        |
-| **Status**              | Offen                                                     |
+| **Status**              | Fertig                                                     |
 
 **Beschreibung:** Sichtbaren �? Zur�ck"-Button in jedem Wizard-Schritt implementieren. Nielsen-Heuristik #3 (User Control and Freedom). Betreffende Komponente: `OnboardingWizard`.
 

@@ -329,7 +329,7 @@ function StepSync({
 // Step 4: Generate First Briefing
 // ---------------------------------------------------------------------------
 
-function StepBriefing({ onComplete }: { onComplete: () => void }) {
+function StepBriefing({ onComplete, onBack }: { onComplete: () => void; onBack: () => void }) {
   const generate = useGenerateBriefing();
   const router = useRouter();
   const [generated, setGenerated] = useState(false);
@@ -369,6 +369,13 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
       {!generated ? (
         <div className="flex gap-3">
           <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
+          >
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+            Zurueck
+          </button>
+          <button
             onClick={handleGenerate}
             disabled={generate.isPending}
             className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
@@ -393,13 +400,22 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
           </button>
         </div>
       ) : (
-        <button
-          onClick={handleFinish}
-          className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700"
-        >
-          <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
-          Onboarding abschliessen
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
+          >
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+            Zurueck
+          </button>
+          <button
+            onClick={handleFinish}
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+          >
+            <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
+            Onboarding abschliessen
+          </button>
+        </div>
       )}
 
       {generate.isError && (
@@ -484,7 +500,10 @@ export function OnboardingWizard() {
           />
         )}
         {step === "briefing" && (
-          <StepBriefing onComplete={handleComplete} />
+          <StepBriefing
+            onComplete={handleComplete}
+            onBack={() => goTo("sync")}
+          />
         )}
       </div>
     </div>

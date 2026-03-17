@@ -1,34 +1,60 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { getOnboardingState, updateOnboardingState } from "@/lib/api/user";
 
 const STORAGE_KEY = "pwbs_onboarding_completed";
 const STEP_KEY = "pwbs_onboarding_step";
 
 /**
- * Hook zum Verwalten des Onboarding-Status (TASK-181).
- * Persistiert in localStorage, da das User-Model serverseitig
- * noch kein onboarding_completed-Feld hat.
+ * Hook zum Verwalten des Onboarding-Status (TASK-181 / LAUNCH-UX-005).
+ * Primär über Backend-API persistiert, localStorage als Offline-Fallback.
  */
 export function useOnboarding() {
   const [completed, setCompleted] = useState<boolean | null>(null);
   const [lastStep, setLastStep] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    setCompleted(stored === "true");
-    setLastStep(localStorage.getItem(STEP_KEY));
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const state = await getOnboardingState();
+        if (cancelled) return;
+        setCompleted(state.completed);
+        setLastStep(state.step);
+        // Sync localStorage for offline fallback
+        localStorage.setItem(STORAGE_KEY, String(state.completed));
+        if (state.step) {
+          localStorage.setItem(STEP_KEY, state.step);
+        } else {
+          localStorage.removeItem(STEP_KEY);
+        }
+      } catch {
+        // Fallback to localStorage when API unavailable (e.g. not logged in)
+        if (cancelled) return;
+        const stored = localStorage.getItem(STORAGE_KEY);
+        setCompleted(stored === "true");
+        setLastStep(localStorage.getItem(STEP_KEY));
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   const complete = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, "true");
     localStorage.removeItem(STEP_KEY);
     setCompleted(true);
+    setLastStep(null);
+    updateOnboardingState({ completed: true }).catch(() => {});
   }, []);
 
   const saveStep = useCallback((step: string) => {
     localStorage.setItem(STEP_KEY, step);
     setLastStep(step);
+    updateOnboardingState({ step }).catch(() => {});
   }, []);
 
   const reset = useCallback(() => {
