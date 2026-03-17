@@ -44,7 +44,8 @@ export class ErrorBoundary extends Component<Props, State> {
             Unerwarteter Fehler
           </h3>
           <p className="text-sm text-red-700">
-            {this.state.error?.message ?? "Etwas ist schiefgelaufen."}
+            Etwas ist schiefgelaufen. Bitte versuche es erneut oder lade die
+            Seite neu.
           </p>
           <button
             onClick={this.handleRetry}

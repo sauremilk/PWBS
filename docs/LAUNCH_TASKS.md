@@ -213,7 +213,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Automatisierter E2E-Test validiert Register ? Konnektor verbinden ? erstes Briefing generieren |
 | **Abh�ngigkeit**        | LAUNCH-UX-001 (Error-Mapping), LAUNCH-ANA-002 (Core Events zur Messung)                        |
 | **Gesch�tzter Aufwand** | M                                                                                              |
-| **Status**              | Offen                                                                                          |
+| **Status**              | Fertig                                                                                          |
 
 **Beschreibung:** Playwright- oder pytest-basierter E2E-Test, der den kompletten Happy-Path abdeckt: Registrierung ? OAuth-Mock ? Sync ? Briefing-Generierung ? Briefing-Anzeige. Test muss gegen Staging-Umgebung oder Docker-Compose-Stack lauff�hig sein. Critical User Journey aus UX_ONBOARDING_SPEC �4 als Testspezifikation.
 
