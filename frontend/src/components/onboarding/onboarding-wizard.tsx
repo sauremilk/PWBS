@@ -212,6 +212,15 @@ function StepSync({
     (c: ConnectionStatus) => c.status === "active" || c.status === "syncing",
   );
   const isSyncing = activeConnections.some((c: ConnectionStatus) => c.status === "syncing");
+  const totalDocs = activeConnections.reduce((sum, c) => sum + c.doc_count, 0);
+
+  // Animated progress for the indeterminate bar
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!isSyncing) return;
+    const interval = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isSyncing]);
 
   // Auto-advance when sync is complete
   useEffect(() => {
@@ -230,18 +239,49 @@ function StepSync({
     );
   }
 
+  const estimateText = isSyncing
+    ? elapsed < 30
+      ? "Geschätzte Restdauer: ca. 1–2 Minuten"
+      : elapsed < 90
+        ? "Geschätzte Restdauer: weniger als 1 Minute"
+        : "Fast fertig…"
+    : null;
+
   return (
     <div className="flex flex-col items-center text-center">
       <h2 className="mb-2 text-xl font-bold text-text">
         Daten werden synchronisiert
       </h2>
-      <p className="mb-6 max-w-md text-sm text-text-secondary">
+      <p className="mb-4 max-w-md text-sm text-text-secondary">
         {isSyncing
           ? "Deine Daten werden importiert. Das kann einen Moment dauern..."
           : activeConnections.length > 0
             ? "Synchronisierung abgeschlossen! Du kannst jetzt dein erstes Briefing generieren."
             : "Noch keine Datenquelle verbunden. Du kannst trotzdem fortfahren."}
       </p>
+
+      {/* Progress bar */}
+      {isSyncing && (
+        <div className="mb-2 w-full max-w-sm">
+          <div className="h-2 overflow-hidden rounded-full bg-surface-secondary">
+            <div
+              className="h-full rounded-full bg-indigo-500 transition-all duration-1000 ease-out"
+              style={{ width: `${Math.min(95, 10 + elapsed * 0.8)}%` }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-between text-xs text-text-tertiary">
+            <span>{totalDocs} Dokumente importiert</span>
+            <span>{estimateText}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Completed summary */}
+      {!isSyncing && activeConnections.length > 0 && (
+        <p className="mb-4 text-sm font-medium text-green-600">
+          {totalDocs} Dokumente erfolgreich importiert
+        </p>
+      )}
 
       <div className="mb-6 w-full max-w-sm space-y-3">
         {activeConnections.map((c: ConnectionStatus) => (

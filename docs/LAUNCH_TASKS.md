@@ -297,7 +297,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 80 % der Testnutzer erhalten ihr erstes Briefing innerhalb von 20 Minuten nach Registrierung |
 | **Abh�ngigkeit**        | LAUNCH-UX-004 (Sync-Progress), LAUNCH-ANA-002 (Events zur Messung)                           |
 | **Gesch�tzter Aufwand** | M                                                                                            |
-| **Status**              | Blockiert: UX-004 + ANA-002 Offen                                                                                        |
+| **Status**              | Offen                                                                                        |
 
 **Beschreibung:** Den kompletten Flow Register ? Connect ? Sync ? Briefing manuell mit 5+ Testnutzern validieren. Engstellen identifizieren und optimieren gem�� UX_ONBOARDING_SPEC �8 (Ziel-Flow: ~2:30 Min). Messung erfolgt �ber Timestamps in Core Events (`auth_user_registered` ? `briefing_generated`).
 
@@ -329,7 +329,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Sync-Schritt zeigt Fortschrittsbalken, importierte Dokumentenzahl und gesch�tzte Restdauer |
 | **Abh�ngigkeit**        | �                                                                                          |
 | **Gesch�tzter Aufwand** | S                                                                                          |
-| **Status**              | Offen                                                                                      |
+| **Status**              | Fertig                                                                                      |
 
 **Beschreibung:** Den Onboarding-Sync-Schritt (Step 3) erweitern um: Fortschrittsbalken mit %, importierte Dokumentenzahl, gesch�tzte Restdauer, mehrstufige Checkliste (Verbindung ? Abruf ? Analyse ? Wissensmodell), Educational Snippets w�hrend der Wartezeit. Spezifikation: UX_ONBOARDING_SPEC �5 Step 3 Wireframe.
 

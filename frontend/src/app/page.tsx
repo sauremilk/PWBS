@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { WaitlistForm } from "@/components/landing/waitlist-form";
 import { ProductPreview } from "@/components/landing/product-preview";
 
 const FEATURES = [
@@ -66,10 +65,16 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/login"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+            >
+              Anmelden
+            </Link>
+            <Link
+              href="/register"
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white
                 hover:bg-indigo-700 transition-colors"
             >
-              Anmelden
+              Kostenlos starten
             </Link>
           </div>
         </div>
@@ -87,12 +92,25 @@ export default function LandingPage() {
           Entscheidungen treffen.
         </p>
 
-        <div className="mx-auto mt-10 max-w-md">
-          <WaitlistForm />
+        <div className="mx-auto mt-10 flex flex-col items-center gap-4">
+          <Link
+            href="/register"
+            className="rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white
+              hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+              transition-colors shadow-lg shadow-indigo-600/25"
+          >
+            Jetzt kostenlos starten
+          </Link>
+          <Link
+            href="/login"
+            className="text-sm text-text-secondary hover:text-text transition-colors"
+          >
+            Bereits ein Konto? Anmelden
+          </Link>
         </div>
 
         <p className="mt-4 text-sm text-text-tertiary">
-          Kostenlos für Beta-Tester · Keine Kreditkarte nötig
+          Kostenlos · Keine Kreditkarte nötig
         </p>
       </section>
 
@@ -175,11 +193,17 @@ export default function LandingPage() {
             Bereit für intelligenteres Arbeiten?
           </h2>
           <p className="mt-4 text-gray-300">
-            Sichern Sie sich Ihren Platz in der Beta. Begrenzte Plätze
-            verfügbar.
+            Für alle offen. Kostenlos. Keine Warteliste.
           </p>
-          <div className="mx-auto mt-8 max-w-lg">
-            <WaitlistForm />
+          <div className="mx-auto mt-8">
+            <Link
+              href="/register"
+              className="inline-block rounded-xl bg-indigo-600 px-10 py-4 text-base font-semibold
+                text-white hover:bg-indigo-700 focus:outline-none focus:ring-2
+                focus:ring-indigo-500/50 transition-colors shadow-lg shadow-indigo-600/25"
+            >
+              Jetzt kostenlos registrieren
+            </Link>
           </div>
         </div>
       </section>
