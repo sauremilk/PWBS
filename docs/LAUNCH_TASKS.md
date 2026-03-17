@@ -81,7 +81,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Datenschutzerklärung ist unter `/datenschutz` im Frontend erreichbar und deckt alle 8 Datenverarbeitungskategorien aus LEGAL_COMPLIANCE §3 ab |
 | **Abhängigkeit**        | –                                                                                                                                             |
 | **Geschätzter Aufwand** | M                                                                                                                                             |
-| **Status**              | In Arbeit |
+| **Status**              | Fertig   |
 
 **Beschreibung:** DSGVO Art. 13/14-konforme Datenschutzerklärung erstellen. Muss abdecken: alle 8 Datenverarbeitungskategorien (Authentifizierung, Kalender, Notion, Zoom, Obsidian, Embeddings, Briefings, KI-Verarbeitung), Drittanbieter-Datenflüsse (Anthropic, OpenAI, AWS, Vercel), Speicherdauern, Betroffenenrechte und Beschwerderecht bei Aufsichtsbehörde. Empfehlung: Mit Datenschutzanwalt erstellen, Basis: Matrix aus LEGAL_COMPLIANCE §3.
 
