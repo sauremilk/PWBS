@@ -130,7 +130,8 @@ class PdfExportStrategy(ExportStrategy):
 <meta charset="utf-8">
 <title>{escaped_title}</title>
 <style>
-  body {{ font-family: 'Helvetica', 'Arial', sans-serif; margin: 2cm; font-size: 11pt; line-height: 1.5; }}
+  body {{ font-family: 'Helvetica', 'Arial', sans-serif;
+    margin: 2cm; font-size: 11pt; line-height: 1.5; }}
   h1 {{ color: #1a1a2e; border-bottom: 2px solid #0f3460; padding-bottom: 0.3em; }}
   h2 {{ color: #0f3460; }}
   .meta {{ color: #666; font-size: 9pt; margin-bottom: 1.5em; }}
@@ -140,7 +141,8 @@ class PdfExportStrategy(ExportStrategy):
 </head>
 <body>
 <h1>{escaped_title}</h1>
-<div class="meta">Generiert: {metadata.generated_at.isoformat()} | PWBS {metadata.pwbs_version} | Typ: {metadata.briefing_type}</div>
+<div class="meta">Generiert: {metadata.generated_at.isoformat()}
+ | PWBS {metadata.pwbs_version} | Typ: {metadata.briefing_type}</div>
 <p>{formatted_content}</p>
 {sources_html}
 </body>

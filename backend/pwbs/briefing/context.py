@@ -283,10 +283,7 @@ class MorningContextAssembler:
         # Filter out excluded sources (TASK-186)
         excluded_sources = {s.lower() for s in prefs.get("excluded_sources", [])}
         if excluded_sources:
-            recent_docs = [
-                d for d in recent_docs
-                if d.source_type.lower() not in excluded_sources
-            ]
+            recent_docs = [d for d in recent_docs if d.source_type.lower() not in excluded_sources]
 
         # Step 3b: Profile-based re-ranking (TASK-134)
         recent_docs = await self._rerank_by_profile(user_id, recent_docs)
@@ -408,6 +405,8 @@ class MorningContextAssembler:
             from pwbs.graph.pattern_recognition import PatternRecognitionService
 
             driver = get_neo4j_driver()
+            if driver is None:
+                return []
             async with driver.session() as neo4j_session:
                 service = PatternRecognitionService(neo4j_session)
                 detected = await service.detect_all_patterns(user_id)
@@ -435,7 +434,6 @@ class MorningContextAssembler:
     ) -> list[str]:
         """Load top theme names from the latest UserProfile (best-effort)."""
         try:
-
             stmt = text("""
                 SELECT top_themes
                 FROM user_profiles

@@ -65,26 +65,7 @@ async def capture_snapshot(
     # Two entities are "co_mentioned" if they share at least one chunk
     relationships: list[dict[str, Any]] = []
     if entity_ids:
-        co_occur_stmt = (
-            select(
-                EntityMention.entity_id.label("entity_a"),
-                func.min(EntityMention.chunk_id).label("_chunk"),  # for grouping
-            )
-            .where(EntityMention.entity_id.in_([e["id"] for e in entity_list]))
-            .group_by(EntityMention.entity_id, EntityMention.chunk_id)
-        )
-        # Use a simpler approach: find pairs sharing chunks
-        pair_stmt = select(
-            func.least(
-                EntityMention.entity_id,
-                func.min(EntityMention.entity_id),
-            ).label("a"),
-            func.greatest(
-                EntityMention.entity_id,
-                func.max(EntityMention.entity_id),
-            ).label("b"),
-        )
-        # Simplified: just count co-mentions per entity pair via self-join
+        # Find pairs sharing chunks via self-join
         from sqlalchemy import and_
         from sqlalchemy.orm import aliased
 

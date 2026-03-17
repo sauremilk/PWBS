@@ -164,7 +164,6 @@ class ChunkingService:
         while i < len(segments):
             # Greedily accumulate segments starting from i
             current: list[str] = [segments[i]]
-            current_tok = seg_tokens[i]
             j = i + 1
 
             while j < len(segments):
@@ -173,7 +172,6 @@ class ChunkingService:
                 if candidate_tok > self._config.max_tokens:
                     break
                 current.append(segments[j])
-                current_tok = candidate_tok
                 j += 1
 
             # Single segment exceeds max_tokens → fall back to fixed splitting

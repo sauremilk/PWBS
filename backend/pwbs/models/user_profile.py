@@ -28,30 +28,23 @@ class UserProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         index=True,
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    analysis_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    analysis_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Top themes as JSON list: [{"name": "...", "mention_count": N}, ...]
     top_themes: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
     # Average meetings per week (float)
-    avg_meetings_per_week: Mapped[float | None] = mapped_column(
-        Float, nullable=True
-    )
+    avg_meetings_per_week: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    # Preferred work hours as JSON: {"hours": {0: count, 1: count, ...}, "peak_start": 9, "peak_end": 17}
+    # Preferred work hours as JSON:
+    # {"hours": {0: count, ...}, "peak_start": 9, "peak_end": 17}
     preferred_hours: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Average days from decision creation to status=made
-    decision_speed_avg_days: Mapped[float | None] = mapped_column(
-        Float, nullable=True
-    )
+    decision_speed_avg_days: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # DSGVO: expiry
-    expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship
     user: Mapped["User"] = relationship(back_populates="profiles")  # noqa: F821

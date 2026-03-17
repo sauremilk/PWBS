@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 
 from pwbs.models.reminder import Reminder
 from pwbs.schemas.enums import ReminderStatus, ReminderType, Urgency
@@ -136,9 +136,11 @@ async def get_pending_reminders(
     limit: int = 50,
 ) -> list[Reminder]:
     """Return pending reminders for a user, sorted by urgency and due date."""
-    urgency_order = func.array_position(
-        func.cast(["high", "medium", "low"], type_=None),
-        Reminder.urgency,
+    urgency_order = case(
+        (Reminder.urgency == "high", 1),
+        (Reminder.urgency == "medium", 2),
+        (Reminder.urgency == "low", 3),
+        else_=4,
     )
     stmt = (
         select(Reminder)
@@ -164,12 +166,9 @@ async def update_reminder_status(
 
     Returns the updated reminder or None if not found / not owned.
     """
-    stmt = (
-        select(Reminder)
-        .where(
-            Reminder.id == reminder_id,
-            Reminder.user_id == user_id,
-        )
+    stmt = select(Reminder).where(
+        Reminder.id == reminder_id,
+        Reminder.user_id == user_id,
     )
     result = await db.execute(stmt)
     reminder = result.scalar_one_or_none()
@@ -206,14 +205,11 @@ async def run_trigger_engine(
     new_reminders: list[Reminder] = []
 
     # 1. Escalate overdue follow-ups to high urgency
-    overdue_stmt = (
-        select(Reminder)
-        .where(
-            Reminder.user_id == user_id,
-            Reminder.status == ReminderStatus.PENDING.value,
-            Reminder.reminder_type == ReminderType.FOLLOW_UP.value,
-            Reminder.due_at < now,
-        )
+    overdue_stmt = select(Reminder).where(
+        Reminder.user_id == user_id,
+        Reminder.status == ReminderStatus.PENDING.value,
+        Reminder.reminder_type == ReminderType.FOLLOW_UP.value,
+        Reminder.due_at < now,
     )
     overdue_result = await db.execute(overdue_stmt)
     overdue_reminders = list(overdue_result.scalars().all())
@@ -228,28 +224,20 @@ async def run_trigger_engine(
 
     thirty_days_ago = now - timedelta(days=30)
 
-    inactive_stmt = (
-        select(Entity.id, Entity.name, Entity.entity_type)
-        .where(
-            Entity.user_id == user_id,
-            Entity.last_seen < thirty_days_ago,
-            Entity.last_seen.is_not(None),
-        )
+    inactive_stmt = select(Entity.id, Entity.name, Entity.entity_type).where(
+        Entity.user_id == user_id,
+        Entity.last_seen < thirty_days_ago,
+        Entity.last_seen.is_not(None),
     )
     inactive_result = await db.execute(inactive_stmt)
-    inactive_entities = {
-        row.id: (row.name, row.entity_type) for row in inactive_result.all()
-    }
+    inactive_entities = {row.id: (row.name, row.entity_type) for row in inactive_result.all()}
 
     if inactive_entities:
         # Skip entities that already have a pending inactive-topic reminder
-        existing_stmt = (
-            select(Reminder.reminder_metadata["entity_id"].as_string())
-            .where(
-                Reminder.user_id == user_id,
-                Reminder.reminder_type == ReminderType.INACTIVE_TOPIC.value,
-                Reminder.status == ReminderStatus.PENDING.value,
-            )
+        existing_stmt = select(Reminder.reminder_metadata["entity_id"].as_string()).where(
+            Reminder.user_id == user_id,
+            Reminder.reminder_type == ReminderType.INACTIVE_TOPIC.value,
+            Reminder.status == ReminderStatus.PENDING.value,
         )
         existing_result = await db.execute(existing_stmt)
         existing_entity_ids = {row[0] for row in existing_result.all()}
@@ -262,9 +250,7 @@ async def run_trigger_engine(
                 user_id=user_id,
                 reminder_type=ReminderType.INACTIVE_TOPIC,
                 title=f"Inaktives Thema: {name}",
-                description=(
-                    f"{name} ({etype}) wurde seit ueber 30 Tagen nicht erwaehnt."
-                ),
+                description=(f"{name} ({etype}) wurde seit ueber 30 Tagen nicht erwaehnt."),
                 urgency=Urgency.LOW,
                 metadata={"entity_id": str(entity_id), "entity_name": name},
             )

@@ -67,7 +67,11 @@ _ZOOM_API = "https://api.zoom.us/v2"
 _HTTP_TIMEOUT = 30.0
 
 # Scopes for reading cloud recording transcripts and meeting metadata
-ZOOM_SCOPES = "cloud_recording:read:list_user_recordings cloud_recording:read:list_recording_files meeting:read:list_meetings"
+ZOOM_SCOPES = (
+    "cloud_recording:read:list_user_recordings"
+    " cloud_recording:read:list_recording_files"
+    " meeting:read:list_meetings"
+)
 
 
 # ---------------------------------------------------------------------------

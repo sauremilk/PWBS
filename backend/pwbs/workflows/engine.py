@@ -110,7 +110,10 @@ async def execute_create_reminder_action(
         user_id=user_id,
         reminder_type="workflow",
         title=title,
-        description=f"Automatisch erstellt durch Workflow-Regel. Event: {event_data.get('event_type', 'unknown')}",
+        description=(
+            "Automatisch erstellt durch Workflow-Regel."
+            f" Event: {event_data.get('event_type', 'unknown')}"
+        ),
         urgency=urgency,
         status="pending",
         reminder_metadata={"workflow_event": event_data},

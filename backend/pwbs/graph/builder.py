@@ -390,7 +390,7 @@ class GraphBuilder:
         }
         params.update(node.properties)
 
-        result = await self._session.run(query, params)
+        await self._session.run(query, params)
         return node.node_id
 
     async def _merge_single_edge(self, edge: EdgeData) -> bool:

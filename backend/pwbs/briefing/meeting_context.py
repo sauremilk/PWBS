@@ -196,12 +196,15 @@ class MeetingContextAssembler:
 
         # Step 2: Get participant contexts
         participant_contexts = await self._get_participant_contexts(
-            participants, user_id,
+            participants,
+            user_id,
         )
 
         # Step 3: Semantic search for relevant documents
         relevant_docs = await self._search_relevant_documents(
-            title, participants, user_id,
+            title,
+            participants,
+            user_id,
         )
 
         # Step 4: Collect open items across participants
@@ -245,7 +248,8 @@ class MeetingContextAssembler:
             "LIMIT 1"
         )
         result = await self._session.execute(
-            query, {"user_id": str(user_id), "event_id": event_id},
+            query,
+            {"user_id": str(user_id), "event_id": event_id},
         )
         row = result.mappings().first()
         if row is None:
@@ -287,7 +291,8 @@ class MeetingContextAssembler:
 
         for name in participant_names:
             pc = await self._graph.get_participant_context(
-                name, user_id,
+                name,
+                user_id,
             )
 
             context_dict: dict[str, Any] = {
@@ -360,12 +365,16 @@ class MeetingContextAssembler:
             return context
 
         # Trim documents first
-        while context.relevant_documents and self._count_tokens(context) > self._config.token_budget:
+        while (
+            context.relevant_documents and self._count_tokens(context) > self._config.token_budget
+        ):
             context.relevant_documents.pop()
             context.truncated = True
 
         # Trim open items if still over
-        while context.open_items_summary and self._count_tokens(context) > self._config.token_budget:
+        while (
+            context.open_items_summary and self._count_tokens(context) > self._config.token_budget
+        ):
             context.open_items_summary.pop()
             context.truncated = True
 

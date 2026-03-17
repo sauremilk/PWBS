@@ -134,13 +134,21 @@ class KeywordSearchService:
                 COALESCE(d.title, '')           AS title,
                 COALESCE(d.source_type, '')     AS source_type,
                 ts_rank_cd(
-                    to_tsvector(:lang, COALESCE(c.content_preview, '') || ' ' || COALESCE(d.title, '')),
+                    to_tsvector(
+                        :lang,
+                        COALESCE(c.content_preview, '')
+                        || ' ' || COALESCE(d.title, '')
+                    ),
                     to_tsquery(:lang, :query)
                 ) AS score
             FROM chunks c
             JOIN documents d ON c.document_id = d.id
             WHERE c.user_id = :user_id
-              AND to_tsvector(:lang, COALESCE(c.content_preview, '') || ' ' || COALESCE(d.title, ''))
+              AND to_tsvector(
+                    :lang,
+                    COALESCE(c.content_preview, '')
+                    || ' ' || COALESCE(d.title, '')
+                  )
                   @@ to_tsquery(:lang, :query)
             ORDER BY score DESC
             LIMIT :top_k

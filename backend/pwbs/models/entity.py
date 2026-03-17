@@ -15,7 +15,12 @@ from pwbs.models.base import Base, UUIDPrimaryKeyMixin
 class Entity(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "entities"
     __table_args__ = (
-        UniqueConstraint("user_id", "entity_type", "normalized_name", name="uq_entities_user_type_name"),
+        UniqueConstraint(
+            "user_id",
+            "entity_type",
+            "normalized_name",
+            name="uq_entities_user_type_name",
+        ),
         Index("idx_entities_user_type", "user_id", "entity_type"),
     )
 
@@ -35,7 +40,9 @@ class Entity(UUIDPrimaryKeyMixin, Base):
 
     user: Mapped["User"] = relationship(back_populates="entities")  # noqa: F821
     mentions: Mapped[list["EntityMention"]] = relationship(
-        back_populates="entity", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="entity",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
 

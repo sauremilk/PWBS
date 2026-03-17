@@ -100,21 +100,12 @@ def normalize_name(name: str) -> str:
     result = name.lower().strip()
 
     # German Umlaute normalization
-    result = (
-        result
-        .replace("ä", "ae")
-        .replace("ö", "oe")
-        .replace("ü", "ue")
-        .replace("ß", "ss")
-    )
+    result = result.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
 
     # NFD normalization: decompose accented characters
     result = unicodedata.normalize("NFD", result)
     # Remove combining diacritical marks
-    result = "".join(
-        ch for ch in result
-        if unicodedata.category(ch) != "Mn"
-    )
+    result = "".join(ch for ch in result if unicodedata.category(ch) != "Mn")
 
     # Collapse whitespace
     return " ".join(result.split())
@@ -191,7 +182,8 @@ class EntityDeduplicationService:
 
         # Step 1: Fuzzy-match persons to resolve short/long forms
         resolved = await self._resolve_fuzzy_matches(
-            entities, user_id,
+            entities,
+            user_id,
         )
         result.fuzzy_merges = resolved.fuzzy_merges
 
@@ -245,14 +237,17 @@ class EntityDeduplicationService:
 
             norm = normalize_name(entity.name)
             match = await self._find_fuzzy_match(
-                norm, entity.entity_type, user_id,
+                norm,
+                entity.entity_type,
+                user_id,
             )
 
             if match is not None:
                 # Replace normalized_name with the existing one
                 logger.info(
                     "Fuzzy match: '%s'  '%s' (existing)",
-                    entity.name, match,
+                    entity.name,
+                    match,
                 )
                 resolved.append(
                     ExtractedEntity(
@@ -324,7 +319,11 @@ class EntityDeduplicationService:
     ) -> UpsertedEntity:
         """UPSERT entity using ON CONFLICT DO UPDATE."""
         now = datetime.now(tz=timezone.utc)
-        norm = normalize_name(entity.name) if entity.normalized_name == entity.name.lower().strip() else entity.normalized_name
+        norm = (
+            normalize_name(entity.name)
+            if entity.normalized_name == entity.name.lower().strip()
+            else entity.normalized_name
+        )
         # Use the already-resolved normalized_name (may have been fuzzy-matched)
         norm = entity.normalized_name
 
@@ -332,8 +331,14 @@ class EntityDeduplicationService:
         metadata_json = entity.metadata if entity.metadata else {}
 
         upsert_sql = text("""
-            INSERT INTO entities (id, user_id, entity_type, name, normalized_name, metadata, first_seen, last_seen, mention_count)
-            VALUES (:id, :user_id, :entity_type, :name, :normalized_name, :metadata::jsonb, :now, :now, 1)
+            INSERT INTO entities (
+                id, user_id, entity_type, name, normalized_name,
+                metadata, first_seen, last_seen, mention_count
+            )
+            VALUES (
+                :id, :user_id, :entity_type, :name, :normalized_name,
+                :metadata::jsonb, :now, :now, 1
+            )
             ON CONFLICT (user_id, entity_type, normalized_name)
             DO UPDATE SET
                 last_seen = :now,
@@ -343,6 +348,7 @@ class EntityDeduplicationService:
         """)
 
         import json as _json
+
         result = await self._session.execute(
             upsert_sql,
             {

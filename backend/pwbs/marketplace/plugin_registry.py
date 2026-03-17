@@ -63,9 +63,7 @@ def validate_manifest(manifest: PluginManifest) -> list[str]:
     return errors
 
 
-def validate_plugin_config(
-    config: dict[str, Any], config_schema: dict[str, Any]
-) -> list[str]:
+def validate_plugin_config(config: dict[str, Any], config_schema: dict[str, Any]) -> list[str]:
     """Validate user-supplied config against the plugin's declared schema.
 
     The config_schema uses a simplified format:
@@ -87,7 +85,8 @@ def validate_plugin_config(
             expected = type_map.get(field_spec.get("type", "string"), str)
             if not isinstance(config[field_name], expected):
                 errors.append(
-                    f"config field '{field_name}' must be of type {field_spec.get('type', 'string')}"
+                    f"config field '{field_name}' must be of type"
+                    f" {field_spec.get('type', 'string')}"
                 )
 
     return errors
@@ -156,7 +155,9 @@ class PluginRegistry:
         manifest = self._manifests[plugin_id]
         logger.info(
             "Executing plugin %s (%s) for user %s",
-            plugin_id, manifest.slug, context.user_id,
+            plugin_id,
+            manifest.slug,
+            context.user_id,
         )
 
         try:

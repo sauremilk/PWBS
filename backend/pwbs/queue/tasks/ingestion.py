@@ -231,16 +231,8 @@ async def _cleanup_expired_async() -> dict[str, int]:
     from pwbs.models.document import Document
 
     factory = get_session_factory()
-    now = datetime.now(timezone.utc)
 
     async with factory() as db:
-        stmt = (
-            delete(Document)
-            .where(
-                Document.processing_status != "deleted",
-            )
-            .returning(Document.id)
-        )
         # Only delete documents that have an expires_at in the past
         # Note: This requires the model to have expires_at — for models without
         # it, we skip (no documents will match).

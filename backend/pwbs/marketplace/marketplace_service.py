@@ -22,7 +22,7 @@ from pwbs.marketplace.plugin_registry import (
     validate_plugin_config,
 )
 from pwbs.marketplace.plugin_sdk import PluginStatus, PluginType
-from pwbs.models.plugin import InstalledPlugin, Plugin
+from pwbs.models.plugin import InstalledPlugin, Plugin, PluginRating
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +61,7 @@ async def publish_plugin(
         )
 
     # Check for duplicate slug+version
-    existing = await db.scalar(
-        select(Plugin).where(Plugin.slug == slug, Plugin.version == version)
-    )
+    existing = await db.scalar(select(Plugin).where(Plugin.slug == slug, Plugin.version == version))
     if existing is not None:
         raise MarketplaceError(
             f"Plugin {slug} v{version} already exists",
@@ -108,7 +106,10 @@ async def review_plugin(
         raise NotFoundError(f"Plugin {plugin_id} not found", code="PLUGIN_NOT_FOUND")
 
     valid_transitions = {
-        PluginStatus.PENDING_REVIEW.value: {PluginStatus.APPROVED.value, PluginStatus.REJECTED.value},
+        PluginStatus.PENDING_REVIEW.value: {
+            PluginStatus.APPROVED.value,
+            PluginStatus.REJECTED.value,
+        },
         PluginStatus.APPROVED.value: {PluginStatus.SUSPENDED.value},
         PluginStatus.REJECTED.value: {PluginStatus.PENDING_REVIEW.value},
         PluginStatus.SUSPENDED.value: {PluginStatus.APPROVED.value},
@@ -163,9 +164,7 @@ async def list_plugins(
 
     if search_query:
         pattern = f"%{search_query}%"
-        query = query.where(
-            Plugin.name.ilike(pattern) | Plugin.description.ilike(pattern)
-        )
+        query = query.where(Plugin.name.ilike(pattern) | Plugin.description.ilike(pattern))
         count_query = count_query.where(
             Plugin.name.ilike(pattern) | Plugin.description.ilike(pattern)
         )
@@ -219,11 +218,14 @@ async def install_plugin(
         raise MarketplaceError("Plugin already installed", code="PLUGIN_ALREADY_INSTALLED")
 
     # Check install limit
-    count = await db.scalar(
-        select(func.count()).select_from(InstalledPlugin).where(
-            InstalledPlugin.user_id == user_id
+    count = (
+        await db.scalar(
+            select(func.count())
+            .select_from(InstalledPlugin)
+            .where(InstalledPlugin.user_id == user_id)
         )
-    ) or 0
+        or 0
+    )
     if count >= MAX_INSTALLED_PLUGINS_PER_USER:
         raise MarketplaceError(
             f"Maximum {MAX_INSTALLED_PLUGINS_PER_USER} plugins per user",
@@ -250,9 +252,7 @@ async def install_plugin(
 
     # Increment install count
     await db.execute(
-        update(Plugin)
-        .where(Plugin.id == plugin_id)
-        .values(install_count=Plugin.install_count + 1)
+        update(Plugin).where(Plugin.id == plugin_id).values(install_count=Plugin.install_count + 1)
     )
 
     await db.flush()
@@ -364,3 +364,81 @@ async def list_installed_plugins(
         .order_by(InstalledPlugin.installed_at.desc())
     )
     return list(result.scalars().all())
+
+
+# ---------------------------------------------------------------------------
+# Ratings (TASK-165)
+# ---------------------------------------------------------------------------
+
+
+async def rate_plugin(
+    db: AsyncSession,
+    *,
+    user_id: UUID,
+    plugin_id: UUID,
+    score: int,
+    review_text: str | None = None,
+) -> PluginRating:
+    """Submit or update a rating for a plugin (1-5 stars + optional text)."""
+    if not 1 <= score <= 5:
+        raise ValidationError("Score must be between 1 and 5", code="INVALID_SCORE")
+
+    plugin = await db.get(Plugin, plugin_id)
+    if plugin is None:
+        raise NotFoundError(f"Plugin {plugin_id} not found", code="PLUGIN_NOT_FOUND")
+
+    existing = await db.scalar(
+        select(PluginRating).where(
+            PluginRating.user_id == user_id,
+            PluginRating.plugin_id == plugin_id,
+        )
+    )
+
+    if existing is not None:
+        old_score = existing.score
+        existing.score = score
+        existing.review_text = review_text
+        existing.rated_at = datetime.now(timezone.utc)
+        # Adjust aggregates: remove old, add new
+        plugin.rating_sum = plugin.rating_sum - old_score + score
+        await db.flush()
+        logger.info("User %s updated rating for plugin %s: %d", user_id, plugin_id, score)
+        return existing
+
+    rating = PluginRating(
+        user_id=user_id,
+        plugin_id=plugin_id,
+        score=score,
+        review_text=review_text,
+    )
+    db.add(rating)
+    plugin.rating_sum += score
+    plugin.rating_count += 1
+    await db.flush()
+    logger.info("User %s rated plugin %s: %d", user_id, plugin_id, score)
+    return rating
+
+
+async def get_plugin_ratings(
+    db: AsyncSession,
+    *,
+    plugin_id: UUID,
+    offset: int = 0,
+    limit: int = 20,
+) -> tuple[list[PluginRating], int]:
+    """List ratings for a plugin."""
+    count = await db.scalar(
+        select(func.count())
+        .select_from(PluginRating)
+        .where(
+            PluginRating.plugin_id == plugin_id,
+        )
+    )
+    result = await db.execute(
+        select(PluginRating)
+        .where(PluginRating.plugin_id == plugin_id)
+        .order_by(PluginRating.rated_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    return list(result.scalars().all()), count or 0

@@ -8,12 +8,16 @@ No PII stored in metadata – only technical context.
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from pwbs.models.user import User  # noqa: F401
 
 
 class Feedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):

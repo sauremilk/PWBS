@@ -203,8 +203,11 @@ _USER_PROMPT_TEMPLATE = (
     "5. OFFENE FRAGEN: Unbeantwortete Fragen oder ausstehende Klärungen\n"
     "6. TERMINE: Referenzierte Daten oder Deadlines\n"
     "7. ZIELE: Formulierte Ziele oder Objectives, Status (falls erkennbar)\n"
-    "8. RISIKEN: Identifizierte Risiken, Schweregrad (falls erkennbar), Gegenmaßnahmen (falls erkennbar)\n"
-    "9. HYPOTHESEN: Annahmen oder Hypothesen, die getestet oder validiert werden sollen, Status (falls erkennbar)\n\n"
+    "8. RISIKEN: Identifizierte Risiken, Schweregrad"
+    " (falls erkennbar), Gegenmaßnahmen (falls erkennbar)\n"
+    "9. HYPOTHESEN: Annahmen oder Hypothesen, die getestet"
+    " oder validiert werden sollen,"
+    " Status (falls erkennbar)\n\n"
     "TEXT:\n{chunk_text}"
 )
 

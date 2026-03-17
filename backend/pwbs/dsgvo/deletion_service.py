@@ -131,6 +131,9 @@ async def _cleanup_weaviate(user_id: uuid.UUID) -> None:
         from pwbs.storage.weaviate import WeaviateChunkStore
 
         client = get_weaviate_client()
+        if client is None:
+            logger.info("Weaviate unavailable – skipping vector cleanup for user %s", user_id)
+            return
         store = WeaviateChunkStore(client)
         store.delete_user_data(user_id)
     except Exception:
@@ -143,6 +146,8 @@ async def _cleanup_neo4j(user_id: uuid.UUID) -> None:
         from pwbs.db.neo4j_client import get_neo4j_driver
 
         driver = get_neo4j_driver()
+        if driver is None:
+            return
         async with driver.session() as session:
             await session.run(
                 "MATCH (n {userId: $user_id}) DETACH DELETE n",

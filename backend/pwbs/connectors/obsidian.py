@@ -430,7 +430,8 @@ def extract_markdown_from_zip(
             total_size += info.file_size
             if total_size > max_uncompressed:
                 raise ConnectorError(
-                    f"ZIP überschreitet maximale entpackte Größe ({max_uncompressed // (1024 * 1024)} MB)",
+                    "ZIP überschreitet maximale entpackte Größe"
+                    f" ({max_uncompressed // (1024 * 1024)} MB)",
                     code="OBSIDIAN_ZIP_TOO_LARGE",
                 )
 

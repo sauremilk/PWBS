@@ -46,37 +46,57 @@ class Plugin(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     manifest: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
-        JSONB, nullable=False, server_default="{}",
+        JSONB,
+        nullable=False,
+        server_default="{}",
     )
     entry_point: Mapped[str] = mapped_column(Text, nullable=False)
     permissions: Mapped[list] = mapped_column(  # type: ignore[type-arg]
-        JSONB, nullable=False, server_default="[]",
+        JSONB,
+        nullable=False,
+        server_default="[]",
     )
     status: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default="pending_review",
+        Text,
+        nullable=False,
+        server_default="pending_review",
     )
     is_verified: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="false",
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
     )
     install_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     rating_sum: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     rating_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     icon_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     repository_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     # Relationships
     author: Mapped["User"] = relationship(lazy="selectin")  # noqa: F821
     installations: Mapped[list["InstalledPlugin"]] = relationship(
-        back_populates="plugin", cascade="all, delete-orphan",
+        back_populates="plugin",
+        cascade="all, delete-orphan",
     )
 
 
@@ -100,17 +120,57 @@ class InstalledPlugin(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     config: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
-        JSONB, nullable=False, server_default="{}",
+        JSONB,
+        nullable=False,
+        server_default="{}",
     )
     is_enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="true",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
     )
     installed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False,
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
     )
 
     # Relationships
     user: Mapped["User"] = relationship(lazy="selectin")  # noqa: F821
     plugin: Mapped["Plugin"] = relationship(
-        back_populates="installations", lazy="selectin",
+        back_populates="installations",
+        lazy="selectin",
     )
+
+
+class PluginRating(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """A user's rating/review for a marketplace plugin (TASK-165)."""
+
+    __tablename__ = "plugin_ratings"
+    __table_args__ = (
+        UniqueConstraint("user_id", "plugin_id", name="uq_plugin_ratings_user_plugin"),
+        Index("idx_plugin_ratings_plugin", "plugin_id"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    plugin_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plugins.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    review_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(lazy="selectin")  # noqa: F821
+    plugin: Mapped["Plugin"] = relationship(lazy="selectin")  # noqa: F821

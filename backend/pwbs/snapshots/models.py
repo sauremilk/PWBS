@@ -44,7 +44,8 @@ class KnowledgeSnapshot(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     # Snapshot data as JSONB:
     # {
     #   "entities": [{"id": "...", "type": "...", "name": "...", "mention_count": N, ...}],
-    #   "relationships": [{"source_id": "...", "target_id": "...", "type": "co_mentioned", "weight": N}],
+    #   "relationships": [{"source_id": "...", "target_id": "...",
+    #       "type": "co_mentioned", "weight": N}],
     #   "top_themes": [{"name": "...", "mention_count": N}]
     # }
     snapshot_data: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
