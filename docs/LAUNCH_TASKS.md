@@ -297,7 +297,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 80 % der Testnutzer erhalten ihr erstes Briefing innerhalb von 20 Minuten nach Registrierung |
 | **Abh�ngigkeit**        | LAUNCH-UX-004 (Sync-Progress), LAUNCH-ANA-002 (Events zur Messung)                           |
 | **Gesch�tzter Aufwand** | M                                                                                            |
-| **Status**              | Offen                                                                                        |
+| **Status**              | Blockiert: Erfordert reale Nutzertests gegen laufende Infrastruktur                                                                                        |
 
 **Beschreibung:** Den kompletten Flow Register ? Connect ? Sync ? Briefing manuell mit 5+ Testnutzern validieren. Engstellen identifizieren und optimieren gem�� UX_ONBOARDING_SPEC �8 (Ziel-Flow: ~2:30 Min). Messung erfolgt �ber Timestamps in Core Events (`auth_user_registered` ? `briefing_generated`).
 
@@ -577,7 +577,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Activation-Funnel (Register ? Connect ? Briefing) ist in PostHog als Funnel konfiguriert |
 | **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events m�ssen flie�en)                                              |
 | **Gesch�tzter Aufwand** | S                                                                                        |
-| **Status**              | Offen                                                                                    |
+| **Status**              | Blockiert: PostHog-UI-Konfiguration erforderlich (Events vorhanden, Dashboard-Setup manuell)                                                                                    |
 
 **Beschreibung:** Activation-Funnel in PostHog konfigurieren gem�� TRACKING_PLAN �6.1: `auth_user_registered` ? `onboarding_started` ? `connector_connected` ? `briefing_generated` (is_first=true) ? `briefing_viewed`. 30-Tage-Zeitfenster. Erm�glicht Dropout-Analyse pro Schritt.
 
@@ -629,7 +629,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Discord-Server ist live mit Moderationsregeln gem�� `docs/public-beta/community-setup.md` |
 | **Abh�ngigkeit**        | �                                                                                         |
 | **Gesch�tzter Aufwand** | S                                                                                         |
-| **Status**              | Offen                                                                                     |
+| **Status**              | Blockiert: Manuelle Aktion  Discord-Server erstellen und konfigurieren                                                                                     |
 
 **Beschreibung:** Discord-Community-Server einrichten nach `docs/public-beta/community-setup.md`. Kan�le: #ank�ndigungen, #feedback, #bugs, #fragen, #off-topic. Moderationsregeln aktivieren. Ziel: 20 Mitglieder zum Start der Closed Beta. Prim�rer Support-Kanal.
 
