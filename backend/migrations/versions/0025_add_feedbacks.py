@@ -1,7 +1,7 @@
 """Add feedbacks table (TASK-188).
 
-Revision ID: 0019
-Revises: 0018
+Revision ID: 0025
+Revises: 0024_email_primary_briefing_channel
 """
 
 from __future__ import annotations
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "0019"
-down_revision: str = "0018"
+revision: str = "0025"
+down_revision: str = "0024_email_brief_channel"
 branch_labels: None = None
 depends_on: None = None
 
