@@ -429,7 +429,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Sentry DSN ist konfiguriert, Exceptions werden mit Correlation-ID erfasst |
 | **Abhängigkeit**        | –                                                                         |
 | **Geschätzter Aufwand** | S                                                                         |
-| **Status**              | Offen                                                                     |
+| **Status**              | In Arbeit                                                                     |
 
 **Beschreibung:** Sentry-Account einrichten (EU-Datenregion wählen), DSN in ENV-Variablen konfigurieren, Sentry-SDK in FastAPI integrieren. PII-Scrubbing aktivieren (keine E-Mails/Passwörter in Error-Reports). Discord-Integration für Echtzeit-Alerts. Falls Sentry aktiviert: Sentry-AVV abschließen (LEGAL_COMPLIANCE W-9).
 
