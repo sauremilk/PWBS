@@ -135,7 +135,52 @@ bash infra/backup/backup_all.sh --restore
 - [ ] Briefing-Generierung erfolgreich
 - [ ] Konnektoren zeigen korrekten letzten Sync-Zeitpunkt
 
-## 8. Eskalation
+## 8. DR-Testprotokoll
+
+> Dieses Protokoll muss vor jedem Release-Gate praktisch durchgeführt werden.
+> Ziel: RTO < 4 h validieren.
+
+### 8.1 Testumgebung
+
+**Niemals gegen Produktion testen.** Testumgebung via Docker Compose:
+
+```bash
+# Lokalen Stack mit Testdaten starten
+docker compose -f deploy/docker-compose.prod.yml up -d
+
+# Testdaten einspielen (Seed-Script oder manuell)
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dr-test@example.com","password":"TestPass123!"}'
+```
+
+### 8.2 Testprozedur
+
+| Schritt | Aktion                                                 | Erwartetes Ergebnis                  | Gemessene Dauer |
+| :-----: | ------------------------------------------------------ | ------------------------------------ | :-------------: |
+|    1    | PostgreSQL-Backup erstellen                            | `.dump`-Datei in S3/lokal vorhanden  |    __ min       |
+|    2    | PostgreSQL-Datenbank löschen (`DROP DATABASE pwbs`)    | DB nicht mehr erreichbar             |    __ min       |
+|    3    | PostgreSQL aus Backup wiederherstellen                 | Alle Tabellen + Daten vorhanden      |    __ min       |
+|    4    | Weaviate-Backup erstellen                              | Backup-ID bestätigt                  |    __ min       |
+|    5    | Weaviate-Collection löschen                            | Suche liefert keine Ergebnisse       |    __ min       |
+|    6    | Weaviate aus Backup wiederherstellen                   | Suche liefert Ergebnisse             |    __ min       |
+|    7    | Neo4j-Dump erstellen (falls aktiv)                     | Dump-Datei vorhanden                 |    __ min       |
+|    8    | Neo4j wiederherstellen (falls aktiv)                   | Graph-Queries funktionieren          |    __ min       |
+|    9    | API Health-Check                                       | HTTP 200                             |    __ min       |
+|   10    | Vollständige Validierung (Abschnitt 7)                 | Alle Checks bestanden                |    __ min       |
+|         | **Gesamt-RTO**                                         |                                      |  **__ min**     |
+
+### 8.3 Testergebnis-Log
+
+| Datum       | Durchgeführt von | Gesamt-RTO | Ergebnis         | Anmerkungen |
+| ----------- | ---------------- | :--------: | ---------------- | ----------- |
+| _ausfüllen_ | _Name_           | ___ min    | ✅ / ❌ / ⏳     | —           |
+
+**Ziel:** Gesamt-RTO < 240 min (4 h). Bei Überschreitung: Engstellen identifizieren und Prozedur optimieren.
+
+---
+
+## 9. Eskalation
 
 | Szenario                        | Aktion                                    |
 | ------------------------------- | ----------------------------------------- |

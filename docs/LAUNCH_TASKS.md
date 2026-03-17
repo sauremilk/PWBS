@@ -477,7 +477,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | DR-Runbook wurde praktisch durchgef�hrt und RTO ist gemessen (Ziel: < 4 h) |
 | **Abh�ngigkeit**        | �                                                                          |
 | **Gesch�tzter Aufwand** | M                                                                          |
-| **Status**              | In Arbeit                                                                      |
+| **Status**              | Blockiert: Manuelle DR-Testdurchfuehrung gegen Staging erforderlich. Testprotokoll in DR-Runbook ergaenzt                                                                      |
 
 **Beschreibung:** Disaster-Recovery-Runbook (`docs/runbooks/disaster-recovery.md`) praktisch validieren: PostgreSQL-Backup-Restore, Weaviate-Neuaufbau, Redis-AOF-Recovery. RTO messen und gegen Ziel < 4 h pr�fen. Testumgebung verwenden (nicht Produktion).
 
