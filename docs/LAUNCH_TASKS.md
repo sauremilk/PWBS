@@ -461,7 +461,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `docs/runbooks/deployment.md` existiert mit Zero-Downtime-Deploy und Rollback-Verfahren |
 | **Abh�ngigkeit**        | �                                                                                       |
 | **Gesch�tzter Aufwand** | S                                                                                       |
-| **Status**              | In Arbeit                                                                                   |
+| **Status**              | Fertig                                                                                      |
 
 **Beschreibung:** Deployment-Runbook erstellen: ECS Rolling Update (min/max 50 %/200 %), Docker Image Tag Pinning, Task Definition Revisions, Rollback-Verfahren (vorherige Revision aktivieren), Alembic-Migration vor Deploy, Health-Check-Validierung nach Deploy. Kurzskizze in SUPPORT_OPS �6.1.
 
