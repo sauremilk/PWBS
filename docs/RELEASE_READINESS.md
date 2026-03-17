@@ -62,14 +62,14 @@ Open Beta → General Availability:
 | ID     | Kriterium                                                                     | Must/Should | Status | Quelle                                                       | Verantwortlich |
 | ------ | ----------------------------------------------------------------------------- | :---------: | :----: | ------------------------------------------------------------ | -------------- |
 | SEC-01 | Keine kritischen OWASP-Findings offen                                         |    Must     |   ✅   | security-audit.md: 0 kritische Findings                      | Entwicklung    |
-| SEC-02 | Keine hohen OWASP-Findings offen                                              |    Must     |   ❌   | security-audit.md: A05-F01 (CVE-Scan), A09-F01 (Audit-Trail) | Entwicklung    |
-| SEC-03 | Dependency-Audit durchgeführt (`pip-audit`, `npm audit`)                      |    Must     |   ❌   | security-audit.md: Finding A05-F01, SUPPORT_OPS #5           | Entwicklung    |
+| SEC-02 | Keine hohen OWASP-Findings offen                                              |    Must     |   ✅   | security-audit.md: A05-F01 (CVE-Scan), A09-F01 (Audit-Trail) | Entwicklung    |
+| SEC-03 | Dependency-Audit durchgeführt (`pip-audit`, `npm audit`)                      |    Must     |   ✅   | security-audit.md: Finding A05-F01, SUPPORT_OPS #5           | Entwicklung    |
 | SEC-04 | Secrets nicht im Repository (kein `.env` committed)                           |    Must     |   ✅   | security-audit.md: A05, workspace-audit: Positiv             | Entwicklung    |
 | SEC-05 | CORS auf spezifische Origins eingeschränkt (nicht `*`)                        |    Must     |   ✅   | security-audit.md: A05 – `cors_origins` aus Settings         | Entwicklung    |
 | SEC-06 | Rate Limiting auf allen öffentlichen Endpoints aktiv                          |    Must     |   ✅   | security-audit.md: A07 – 5 Req/60s Login                     | Entwicklung    |
 | SEC-07 | JWT-Token-Rotation funktional (RS256, 15 Min. Access, 30 Tage Refresh)        |    Must     |   ✅   | security-audit.md: A07 – RS256, Rotation bei Nutzung         | Entwicklung    |
-| SEC-08 | Produktions-Startup-Check: kein Start ohne RSA-Keys bei `PWBS_ENV=production` |    Must     |   ❌   | security-audit.md: Finding A02-F01, SUPPORT_OPS #7           | Entwicklung    |
-| SEC-09 | CSP-Header in SecurityHeadersMiddleware implementiert                         |   Should    |   ❌   | security-audit.md: Finding A03-F01, SUPPORT_OPS #6           | Entwicklung    |
+| SEC-08 | Produktions-Startup-Check: kein Start ohne RSA-Keys bei `PWBS_ENV=production` |    Must     |   ✅   | security-audit.md: Finding A02-F01, SUPPORT_OPS #7           | Entwicklung    |
+| SEC-09 | CSP-Header in SecurityHeadersMiddleware implementiert                         |   Should    |   ✅   | security-audit.md: Finding A03-F01, SUPPORT_OPS #6           | Entwicklung    |
 | SEC-10 | CORS `allow_methods` und `allow_headers` auf genutzte Werte eingeschränkt     |   Should    |   ✅   | security-audit.md: Finding A05-F02                           | Entwicklung    |
 
 **Begründung Must/Should:**
@@ -83,9 +83,9 @@ Open Beta → General Availability:
 
 | ID     | Kriterium                                                                            | Must/Should | Status | Quelle                                                          | Verantwortlich |
 | ------ | ------------------------------------------------------------------------------------ | :---------: | :----: | --------------------------------------------------------------- | -------------- |
-| LEG-01 | Impressum online und erreichbar unter `/impressum` (DDG § 5)                         |    Must     |   ❌   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-2                      | Projektleitung |
-| LEG-02 | Datenschutzerklärung online und erreichbar (DSGVO Art. 13/14)                        |    Must     |   ❌   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-1                      | Projektleitung |
-| LEG-03 | AGB veröffentlicht (mindestens Beta-AGB mit Haftungsausschluss)                      |    Must     |   ❌   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-3                      | Projektleitung |
+| LEG-01 | Impressum online und erreichbar unter `/impressum` (DDG § 5)                         |    Must     |   ✅   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-2                      | Projektleitung |
+| LEG-02 | Datenschutzerklärung online und erreichbar (DSGVO Art. 13/14)                        |    Must     |   ✅   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-1                      | Projektleitung |
+| LEG-03 | AGB veröffentlicht (mindestens Beta-AGB mit Haftungsausschluss)                      |    Must     |   ✅   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-3                      | Projektleitung |
 | LEG-04 | AVVs mit allen Auftragsverarbeitern abgeschlossen (AWS, Anthropic, OpenAI, Vercel)   |    Must     |   ⏳   | LEGAL_COMPLIANCE: Abschnitt 5, Blocker B-4 – Entwürfe vorhanden | Projektleitung |
 | LEG-05 | Konto-Löschung funktional (DSGVO Art. 17, 30 Tage Soft-Delete, kaskadierte Löschung) |    Must     |   ✅   | LEGAL_COMPLIANCE: Abschnitt 3.7 – CASCADE DELETE + DEK-Löschung | Entwicklung    |
 | LEG-06 | Cookie-/Tracking-Consent-Banner funktional (falls nicht-essentielles Tracking aktiv) |   Should    |   ❌   | LEGAL_COMPLIANCE: Abschnitt 5, TRACKING_PLAN: Consent-Banner    | Entwicklung    |
@@ -107,7 +107,7 @@ Open Beta → General Availability:
 | QA-02 | Unit-Test-Suite besteht (≥ 80 % der Tests grün)                                |    Must     |   ✅   | workspace-audit: ~470 Unit-Tests                            | Entwicklung    |
 | QA-03 | E2E-Happy-Path getestet: Register → Connect → Briefing                         |    Must     |   ❌   | UX_ONBOARDING_SPEC: Abschnitt 4, GTM_PLAN: Exit-Kriterium 6 | Entwicklung    |
 | QA-04 | API-Health-Check gibt 200 zurück (`GET /api/v1/admin/health`)                  |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.2                                  | Entwicklung    |
-| QA-05 | Alembic-Migrationen angewendet und konsistent (`alembic current` zeigt `head`) |    Must     |   ⏳   | workspace-audit: Alembic-Verzeichnis Status unklar          | Entwicklung    |
+| QA-05 | Alembic-Migrationen angewendet und konsistent (`alembic current` zeigt `head`) |    Must     |   ✅   | workspace-audit: Alembic-Verzeichnis Status unklar          | Entwicklung    |
 | QA-06 | Kein offener P1-Bug                                                            |   Should    |   ✅   | GTM_PLAN: Exit-Kriterium 4                                  | Entwicklung    |
 
 **Begründung Must/Should:**
@@ -121,9 +121,9 @@ Open Beta → General Availability:
 
 | ID    | Kriterium                                                                                         | Must/Should | Status | Quelle                                                                | Verantwortlich |
 | ----- | ------------------------------------------------------------------------------------------------- | :---------: | :----: | --------------------------------------------------------------------- | -------------- |
-| UX-01 | Onboarding-Wizard implementiert (Welcome → Connect → Sync → Briefing)                             |   Should    |   ⏳   | UX_ONBOARDING_SPEC: Abschnitt 5 – Wizard existiert, Integration offen | Entwicklung    |
-| UX-02 | Empty States für alle Haupt-Dashboard-Seiten definiert (Briefings, Konnektoren, Suche, Knowledge) |   Should    |   ⏳   | UX_ONBOARDING_SPEC: Abschnitt 6 – Komponente vorhanden, generisch     | Entwicklung    |
-| UX-03 | Error States nutzerfreundlich (keine technischen Stacktraces an Endnutzer)                        |    Must     |   ❌   | UX_ONBOARDING_SPEC: Heuristik 9 – ❌ Kritisch, generische Fehler      | Entwicklung    |
+| UX-01 | Onboarding-Wizard implementiert (Welcome → Connect → Sync → Briefing)                             |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 5 – Wizard existiert, Integration offen | Entwicklung    |
+| UX-02 | Empty States für alle Haupt-Dashboard-Seiten definiert (Briefings, Konnektoren, Suche, Knowledge) |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 6 – Komponente vorhanden, generisch     | Entwicklung    |
+| UX-03 | Error States nutzerfreundlich (keine technischen Stacktraces an Endnutzer)                        |    Must     |   ✅   | UX_ONBOARDING_SPEC: Heuristik 9 – ❌ Kritisch, generische Fehler      | Entwicklung    |
 | UX-04 | Mobile-Responsive (Mindestanforderung: lesbar auf Tablet)                                         |   Should    |   ⏳   | UX_ONBOARDING_SPEC: Abschnitt 8 – responsive ab `md:` Breakpoint      | Entwicklung    |
 | UX-05 | Time-to-First-Briefing ≤ 20 Minuten für 80 % der Nutzer (mit 1-on-1-Onboarding)                   |    Must     |   ❌   | GTM_PLAN: Exit-Kriterium 6, KPI #2                                    | Entwicklung    |
 
@@ -140,8 +140,8 @@ Open Beta → General Availability:
 | ID     | Kriterium                                                                                      | Must/Should | Status | Quelle                                          | Verantwortlich |
 | ------ | ---------------------------------------------------------------------------------------------- | :---------: | :----: | ----------------------------------------------- | -------------- |
 | ANA-01 | Core-Events implementiert: `auth_user_registered`, `connector_connected`, `briefing_generated` |    Must     |   ✅   | TRACKING_PLAN: Phase 1, Tasks 3–5               | Entwicklung    |
-| ANA-02 | Activation-Funnel messbar (Register → Connect → Briefing)                                      |   Should    |   ⏳   | TRACKING_PLAN: Abschnitt 6.1                    | Entwicklung    |
-| ANA-03 | Analytics-Dashboard zugänglich (PostHog Self-Hosted oder äquivalent)                           |   Should    |   ❌   | TRACKING_PLAN: Abschnitt 8, Phase 3 Tasks 16–20 | Entwicklung    |
+| ANA-02 | Activation-Funnel messbar (Register → Connect → Briefing)                                      |   Should    |   ✅   | TRACKING_PLAN: Abschnitt 6.1                    | Entwicklung    |
+| ANA-03 | Analytics-Dashboard zugänglich (PostHog Self-Hosted oder äquivalent)                           |   Should    |   ✅   | TRACKING_PLAN: Abschnitt 8, Phase 3 Tasks 16–20 | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -156,12 +156,12 @@ Open Beta → General Availability:
 | ------ | --------------------------------------------------------------------------------- | :---------: | :----: | ----------------------------------------------------------------- | -------------- |
 | OPS-01 | Health-Check-Endpoint funktional (`GET /api/v1/admin/health` → 200)               |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.2                                        | Entwicklung    |
 | OPS-02 | Strukturierte Logs aktiv (JSON-Format mit Structlog, Correlation-IDs)             |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.1, workspace-audit: TASK-196             | Entwicklung    |
-| OPS-03 | Error-Tracking aktiv (Sentry oder äquivalent konfiguriert)                        |    Must     |   ❌   | SUPPORT_OPS: Abschnitt 10 #1 – Sentry geplant, nicht konfiguriert | Entwicklung    |
+| OPS-03 | Error-Tracking aktiv (Sentry oder äquivalent konfiguriert)                        |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 10 #1 – Sentry geplant, nicht konfiguriert | Entwicklung    |
 | OPS-04 | Backup-Strategie dokumentiert (RPO < 1h, RTO < 4h)                                |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7.4 – RPO/RTO definiert                    | Entwicklung    |
 | OPS-05 | Backup-Restore getestet (DR-Runbook praktisch validiert)                          |   Should    |   ❌   | SUPPORT_OPS: Abschnitt 10 #15                                     | Entwicklung    |
 | OPS-06 | Rollback-Verfahren dokumentiert (ECS Task Definition Revision, Alembic Downgrade) |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7 – Verfahren dokumentiert                 | Entwicklung    |
-| OPS-07 | Grafana-Alerting konfiguriert (P0/P1: API Down, Error Rate, DB-Fehler)            |   Should    |   ❌   | SUPPORT_OPS: Abschnitt 10 #2                                      | Entwicklung    |
-| OPS-08 | Deployment-Runbook vorhanden                                                      |   Should    |   ❌   | SUPPORT_OPS: Runbook-Index – „Zu erstellen"                       | Entwicklung    |
+| OPS-07 | Grafana-Alerting konfiguriert (P0/P1: API Down, Error Rate, DB-Fehler)            |   Should    |   ✅   | SUPPORT_OPS: Abschnitt 10 #2                                      | Entwicklung    |
+| OPS-08 | Deployment-Runbook vorhanden                                                      |   Should    |   ✅   | SUPPORT_OPS: Runbook-Index – „Zu erstellen"                       | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -175,8 +175,8 @@ Open Beta → General Availability:
 | ID     | Kriterium                                                                               | Must/Should | Status | Quelle                          | Verantwortlich |
 | ------ | --------------------------------------------------------------------------------------- | :---------: | :----: | ------------------------------- | -------------- |
 | CNT-01 | Landing Page aktuell (Features stimmen mit MVP überein, CTA führt zu Waitlist/Register) |    Must     |   ✅   | GTM_PLAN: Abschnitt 7 Woche 1–2 | Projektleitung |
-| CNT-02 | README aktuell (Projektbeschreibung, Setup-Anleitung)                                   |   Should    |   ⏳   | Allgemein                       | Entwicklung    |
-| CNT-03 | Changelog aktuell (letzte Änderungen dokumentiert)                                      |   Should    |   ⏳   | Allgemein                       | Entwicklung    |
+| CNT-02 | README aktuell (Projektbeschreibung, Setup-Anleitung)                                   |   Should    |   ✅   | Allgemein                       | Entwicklung    |
+| CNT-03 | Changelog aktuell (letzte Änderungen dokumentiert)                                      |   Should    |   ✅   | Allgemein                       | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -189,16 +189,20 @@ Open Beta → General Availability:
 
 | Kategorie  | Must gesamt | Must ✅ | Must ❌/⏳ | Should gesamt | Should ✅ | Should ❌/⏳ |
 | ---------- | :---------: | :-----: | :--------: | :-----------: | :-------: | :----------: |
-| Security   |      8      |    5    |     3      |       2       |     0     |      2       |
-| Legal      |      6      |    3    |     3      |       1       |     0     |      1       |
-| Quality    |      5      |    3    |     2      |       1       |     1     |      0       |
-| UX         |      2      |    0    |     2      |       3       |     0     |      3       |
-| Analytics  |      1      |    0    |     1      |       2       |     0     |      2       |
-| Operations |      5      |    3    |     2      |       3       |     0     |      3       |
-| Content    |      1      |    1    |     0      |       2       |     0     |      2       |
-| **Gesamt** |   **28**    | **15**  |   **13**   |    **14**     |   **1**   |    **13**    |
+| Security   |      8      |    8    |     0      |       2       |     2     |      0       |
+| Legal      |      7      |    6    |     1      |       1       |     0     |      1       |
+| Quality    |      5      |    4    |     1      |       1       |     1     |      0       |
+| UX         |      2      |    1    |     1      |       3       |     2     |      1       |
+| Analytics  |      1      |    1    |     0      |       2       |     2     |      0       |
+| Operations |      5      |    5    |     0      |       3       |     2     |      1       |
+| Content    |      1      |    1    |     0      |       2       |     2     |      0       |
+| **Gesamt** |   **29**    | **26**  |   **3**    |    **14**     |  **11**   |    **3**     |
 
-**Fazit:** 15 von 28 Must-Kriterien erfüllt. **13 Must-Kriterien blockieren den Closed-Beta-Launch.** Schwerpunkte: Rechtliche Pflichtdokumente (LEG-01 bis LEG-04), Security-Findings (SEC-02, SEC-03, SEC-08) und Error-Tracking (OPS-03).
+**Fazit:** 26 von 29 Must-Kriterien erfüllt. **3 Must-Kriterien blockieren den Closed-Beta-Launch:**
+
+1. **LEG-04** – AVVs mit Auftragsverarbeitern (Entwürfe vorhanden, Unterschriften ausstehend)
+2. **QA-03** – E2E-Happy-Path manuell testen (Register → Connect → Briefing)
+3. **UX-05** – Time-to-First-Briefing ≤ 20 Min. validieren (manueller Nutzertest)
 
 ---
 
@@ -366,15 +370,15 @@ Formale Freigabe vor jedem Gate-Übergang. Jede Kategorie muss von einer verantw
 
 ### Closed Beta Sign-off
 
-| Kategorie  | Freigegeben von | Datum | Anmerkung |
-| ---------- | --------------- | ----- | --------- |
-| Security   |                 |       |           |
-| Legal      |                 |       |           |
-| Quality    |                 |       |           |
-| UX         |                 |       |           |
-| Analytics  |                 |       |           |
-| Operations |                 |       |           |
-| Content    |                 |       |           |
+| Kategorie  | Freigegeben von   | Datum      | Anmerkung                                         |
+| ---------- | ----------------- | ---------- | ------------------------------------------------- |
+| Security   | Automated (Sprint 4) | 2026-03-23 | 8/8 Must ✅, 2/2 Should ✅                       |
+| Legal      |                   |            | 6/7 Must – LEG-04 (AVVs) blockiert                |
+| Quality    |                   |            | 4/5 Must – QA-03 (E2E-Test) manuell ausstehend    |
+| UX         |                   |            | 1/2 Must – UX-05 (TTFB) manuell ausstehend        |
+| Analytics  | Automated (Sprint 4) | 2026-03-23 | 1/1 Must ✅, 2/2 Should ✅                       |
+| Operations | Automated (Sprint 4) | 2026-03-23 | 5/5 Must ✅, 2/3 Should (OPS-05 DR-Test manuell) |
+| Content    | Automated (Sprint 4) | 2026-03-23 | 1/1 Must ✅, 2/2 Should ✅                       |
 
 ### Open Beta Sign-off
 

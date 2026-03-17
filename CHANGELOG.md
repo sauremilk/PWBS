@@ -9,6 +9,7 @@ Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/spec/v2.0.0
 ### 🏗️ Refactoring – MVP-Fokussierung
 
 #### Schritt 1: Out-of-Scope Module nach `_deferred/` verschoben
+
 - **Verschobene Module:** billing, teams, rbac, marketplace, developer, sso → `_deferred/`
 - **Verschobene Routes:** billing.py, rbac.py, marketplace.py, developer.py, organizations.py, sso.py → `_deferred/routes/`
 - **Verschobene Tests:** test_billing, test_teams, test_rbac, test_marketplace, test_developer, test_sso → `_deferred/tests/`
@@ -18,6 +19,7 @@ Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/spec/v2.0.0
 - **Dokumentation:** `_deferred/README.md` mit Reaktivierungsanleitung erstellt
 
 #### Schritt 2: Phase-3 Konnektoren deaktiviert (nur Kern-4 aktiv)
+
 - **Aktive Konnektoren (Kern-4):** Google Calendar, Notion, Zoom, Obsidian
 - **Deaktivierte Konnektoren:** Gmail, Slack, Outlook, Google Docs → `_deferred/connectors/`
 - **Deaktivierte Integration:** `integrations/slack/` → `_deferred/integrations/slack/`
@@ -27,17 +29,20 @@ Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/spec/v2.0.0
 - **Verifiziert:** 320 Connector-Tests bestehen, 18/18 aktive Module importieren fehlerfrei
 
 #### Schritt 3: Feature Flags – beibehalten (bereits MVP-tauglich)
+
 - **Analyse-Ergebnis:** Feature-Flags-Service ist nicht over-engineered – unterstützt bereits ENV-Overrides als höchste Priorität (`FEATURE_FLAGS_OVERRIDE`)
 - **Aktueller Status:** Kein Business-Logik-Code nutzt Feature Flags; Service ist opt-in
 - **Entscheidung:** Beibehalten. ENV-Override erfüllt MVP-Anforderungen; DB-Backend ist vorbereitet für Phase 3
 
 #### Schritt 4: Vertikale Profile – beibehalten (bereits auf Default eingefroren)
+
 - **Analyse-Ergebnis:** Standard-Profil "general" ist bereits Default; kein Supplement, keine Speziallogik
 - **Einziger Nutzungsort:** `briefing/generator.py` (optionaler System-Prompt-Supplement)
 - **entity_priorities/ner_focus:** Definiert, aber nirgends in Processing/Search implementiert → kein Overhead
 - **Entscheidung:** Beibehalten. Dormante Konfiguration kostet nichts; entfernen würde Tests brechen
 
 #### Schritt 5: Datenbank-Architektur vereinfacht – Neo4j optional
+
 - **Analyse-Ergebnis:** Neo4j Knowledge Graph wird in der MVP-Pipeline nicht beschrieben (GraphBuilder nie aufgerufen)
 - **Problem:** App crashte beim Startup wenn Neo4j nicht erreichbar → kritische einzelne Fehlerstelle
 - **neo4j_client.py:** `get_neo4j_driver()` gibt `None` zurück bei Verbindungsfehlern; `_init_failed`-Flag verhindert wiederholte Timeouts
@@ -89,6 +94,7 @@ Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/spec/v2.0.0
 - Dependabot aktiviert für pip und npm (LAUNCH-OPS-005)
 
 #### Test-Suite Performance: von ∞ Timeout auf 72s
+
 - **Root Cause 1:** DB-Singletons (Redis, Weaviate) wurden in Tests nicht gemockt → echte Verbindungsversuche → Timeout
   - `tests/conftest.py`: Autouse-Fixture `_isolate_db_singletons` patcht `_client`-Singletons mit Mocks
   - Betrifft alle Tests die `create_app()` mit `AsyncClient` aufrufen (lifespan triggert DB-Init)

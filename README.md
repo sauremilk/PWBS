@@ -26,12 +26,12 @@ This codebase is a working demonstration of senior-level full-stack engineering 
 - End-to-end platform: Python backend · Next.js frontend · Tauri desktop · React Native mobile · Chrome extension · Obsidian plugin
 - Production practices throughout: pre-commit hooks, Docker Compose + Helm, Terraform IaC, Alembic migrations, ~140-file pytest suite, Prometheus + Grafana observability
 
-| | |
-|---|---|
-| **6** agent roles (Ingestion · Processing · Briefing · Search · Graph · Scheduler) | **18** API endpoint groups |
-| **4** active OAuth2 connectors | **33** SQLAlchemy ORM models |
-| **3** databases (PostgreSQL · Weaviate · Neo4j) | **140+** pytest test files |
-| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …) | **6** platform targets |
+|                                                                                    |                              |
+| ---------------------------------------------------------------------------------- | ---------------------------- |
+| **6** agent roles (Ingestion · Processing · Briefing · Search · Graph · Scheduler) | **18** API endpoint groups   |
+| **4** active OAuth2 connectors                                                     | **33** SQLAlchemy ORM models |
+| **3** databases (PostgreSQL · Weaviate · Neo4j)                                    | **140+** pytest test files   |
+| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …)            | **6** platform targets       |
 
 ---
 
