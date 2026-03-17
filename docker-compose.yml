@@ -331,6 +331,66 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  # ── PostHog Self-Hosted Analytics (LAUNCH-ANA-001) ─────────────────
+  # Product analytics with EU data residency (self-hosted = data stays local).
+  # Activate with: docker compose --profile analytics up -d
+  posthog-db:
+    image: postgres:16-alpine
+    profiles: ["analytics"]
+    volumes:
+      - posthog_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: posthog
+      POSTGRES_USER: posthog
+      POSTGRES_PASSWORD: posthog_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U posthog -d posthog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  posthog-redis:
+    image: redis:7-alpine
+    profiles: ["analytics"]
+    restart: unless-stopped
+
+  posthog-clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    profiles: ["analytics"]
+    volumes:
+      - posthog_clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+  posthog:
+    image: posthog/posthog:release-1.43.0
+    profiles: ["analytics"]
+    ports:
+      - "8200:8000"
+    environment:
+      DATABASE_URL: postgres://posthog:posthog_dev@posthog-db:5432/posthog
+      REDIS_URL: redis://posthog-redis:6379/
+      CLICKHOUSE_HOST: posthog-clickhouse
+      SECRET_KEY: "pwbs-dev-posthog-secret-key-change-in-production"
+      SITE_URL: http://localhost:8200
+      IS_BEHIND_PROXY: "false"
+      DISABLE_SECURE_SSL_REDIRECT: "true"
+      SECURE_COOKIES: "false"
+      OPT_OUT_CAPTURE: "true"
+      ANONYMIZE_IPS: "true"
+    depends_on:
+      posthog-db:
+        condition: service_healthy
+      posthog-redis:
+        condition: service_started
+      posthog-clickhouse:
+        condition: service_started
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   weaviate_data:
@@ -341,3 +401,5 @@ volumes:
   grafana_data:
   plausible_db_data:
   plausible_events_data:
+  posthog_db_data:
+  posthog_clickhouse_data:

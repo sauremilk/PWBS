@@ -36,6 +36,7 @@ from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
 from pwbs.core.logging import setup_logging
 from pwbs.core.metrics import setup_metrics
+from pwbs.core.posthog import init_posthog, shutdown as shutdown_posthog
 from pwbs.core.sentry import init_sentry
 
 logger = logging.getLogger(__name__)
@@ -85,6 +86,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await close_weaviate_client()
     await close_neo4j_driver()
     await close_redis_client()
+    shutdown_posthog()
     logger.info("All database connections closed.")
 
 
@@ -106,6 +108,9 @@ def create_app() -> FastAPI:
         environment=settings.environment,
         traces_sample_rate=settings.sentry_traces_sample_rate,
     )
+
+    # PostHog analytics (LAUNCH-ANA-001)
+    init_posthog(api_key=settings.posthog_api_key, host=settings.posthog_host)
 
     application = FastAPI(
         title="PWBS API",

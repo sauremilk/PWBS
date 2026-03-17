@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     sentry_dsn: str = ""  # empty = disabled
     sentry_traces_sample_rate: float = 1.0
 
+    #  PostHog Analytics (LAUNCH-ANA-001)
+    posthog_api_key: str = ""  # empty = disabled
+    posthog_host: str = "http://localhost:8200"
+
     #  DSGVO Export (TASK-104)
     export_dir: str = "data/exports"
 
