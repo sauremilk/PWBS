@@ -24,7 +24,7 @@
 |    2    | Alembic-Migration ausführen   |   < 1 min   |    CI / CD    |
 |    3    | ECS Task Definition erstellen |   < 1 min   |      CD       |
 |    4    | ECS Service Update (Rolling)  |   3–5 min   |      CD       |
-|    5    | Health-Check-Validierung      |   1–2 min   |   Manuell     |
+|    5    | Health-Check-Validierung      |   1–2 min   |    Manuell    |
 
 ---
 
@@ -78,6 +78,7 @@ aws ecs update-service \
 ```
 
 **Rolling-Update-Strategie:**
+
 - `minimumHealthyPercent=50` – mind. 50 % der Tasks bleiben während des Deployments aktiv
 - `maximumPercent=200` – bis zu 200 % der gewünschten Tasks gleichzeitig (neue starten bevor alte stoppen)
 
@@ -163,6 +164,7 @@ alembic current
 ```
 
 **Achtung bei destruktiven Migrationen** (DROP COLUMN, DROP TABLE):
+
 1. Vor der Migration: PostgreSQL-Backup erzwingen (siehe `docs/runbooks/disaster-recovery.md`)
 2. Bei Rollback-Bedarf: Backup-Restore statt Alembic-Downgrade
 
@@ -214,10 +216,10 @@ docker compose -f deploy/docker-compose.prod.yml exec redis \
 
 ## 8. Troubleshooting
 
-| Problem                          | Ursache                        | Lösung                                          |
-| -------------------------------- | ------------------------------ | ----------------------------------------------- |
-| ECS Tasks starten nicht          | Health-Check schlägt fehl      | Logs prüfen, Umgebungsvariablen verifizieren    |
-| Alembic `Multiple heads`         | Parallele Migrationen          | `alembic merge heads`, neuen Merge-Commit       |
-| 502 Bad Gateway nach Deploy      | Container noch nicht ready     | Start Period abwarten (30s), Health-Check prüfen |
-| Alte Tasks werden nicht gestoppt  | Deployment hängt               | `aws ecs update-service --force-new-deployment` |
-| Celery-Tasks verschwinden        | Worker vor Task-Ende gestoppt  | Graceful Shutdown Timeout erhöhen               |
+| Problem                          | Ursache                       | Lösung                                           |
+| -------------------------------- | ----------------------------- | ------------------------------------------------ |
+| ECS Tasks starten nicht          | Health-Check schlägt fehl     | Logs prüfen, Umgebungsvariablen verifizieren     |
+| Alembic `Multiple heads`         | Parallele Migrationen         | `alembic merge heads`, neuen Merge-Commit        |
+| 502 Bad Gateway nach Deploy      | Container noch nicht ready    | Start Period abwarten (30s), Health-Check prüfen |
+| Alte Tasks werden nicht gestoppt | Deployment hängt              | `aws ecs update-service --force-new-deployment`  |
+| Celery-Tasks verschwinden        | Worker vor Task-Ende gestoppt | Graceful Shutdown Timeout erhöhen                |

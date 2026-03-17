@@ -99,7 +99,7 @@ groups:
           severity: critical
         annotations:
           summary: "HTTP Error Rate liegt über 5 %"
-          description: "Fehlerrate {{ $value | printf \"%.1f\" }}% in den letzten 5 min. Logs und Sentry prüfen."
+          description: 'Fehlerrate {{ $value | printf "%.1f" }}% in den letzten 5 min. Logs und Sentry prüfen.'
         noDataState: OK
         execErrState: Alerting
 
@@ -150,7 +150,7 @@ groups:
           severity: warning
         annotations:
           summary: "DB Connection Pool Auslastung > 80 %"
-          description: "Pool-Auslastung: {{ $value | printf \"%.0f\" }}%. Mögliche Connection-Leaks oder zu viele gleichzeitige Anfragen."
+          description: 'Pool-Auslastung: {{ $value | printf "%.0f" }}%. Mögliche Connection-Leaks oder zu viele gleichzeitige Anfragen.'
         noDataState: OK
         execErrState: Alerting
 
@@ -195,7 +195,7 @@ groups:
           severity: warning
         annotations:
           summary: "P95 API-Latenz liegt über 2 Sekunden"
-          description: "P95 = {{ $value | printf \"%.2f\" }}s. Slow Queries oder LLM-Timeout prüfen."
+          description: 'P95 = {{ $value | printf "%.2f" }}s. Slow Queries oder LLM-Timeout prüfen.'
         noDataState: OK
         execErrState: Alerting
 
@@ -241,6 +241,6 @@ groups:
           severity: warning
         annotations:
           summary: "Disk-Nutzung über 85 %"
-          description: "Mountpoint / ist zu {{ $value | printf \"%.0f\" }}% belegt. Log-Rotation oder Volume-Erweiterung nötig."
+          description: 'Mountpoint / ist zu {{ $value | printf "%.0f" }}% belegt. Log-Rotation oder Volume-Erweiterung nötig.'
         noDataState: OK
         execErrState: Alerting

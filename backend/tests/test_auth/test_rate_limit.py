@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+import pwbs.api.middleware.rate_limit as _rl_mod
 from pwbs.api.middleware.rate_limit import (
     RateLimitMiddleware,
     _check_mem_rate_limit,
@@ -14,8 +15,6 @@ from pwbs.api.middleware.rate_limit import (
     _get_client_ip,
     reset_mem_counters,
 )
-import pwbs.api.middleware.rate_limit as _rl_mod
-
 
 # ---------------------------------------------------------------------------
 # Helpers

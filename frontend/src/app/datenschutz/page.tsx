@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Datenschutzerklaerung – PWBS",
+  title: "Datenschutzerklärung – PWBS",
   description:
-    "Datenschutzerklaerung des Persoenlichen Wissens-Betriebssystems (PWBS).",
+    "Datenschutzerklärung des Persönlichen Wissens-Betriebssystems (PWBS).",
 };
 
 export default function DatenschutzPage() {
@@ -19,14 +19,14 @@ export default function DatenschutzPage() {
             href="/"
             className="text-sm text-text-tertiary hover:text-text transition-colors"
           >
-            Zurueck zur Startseite
+            Zurück zur Startseite
           </Link>
         </div>
       </nav>
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-3xl font-bold text-text sm:text-4xl">
-          Datenschutzerklaerung
+          Datenschutzerklärung
         </h1>
         <p className="mt-2 text-sm text-text-tertiary">Stand: Juli 2025</p>
 
@@ -54,17 +54,17 @@ export default function DatenschutzPage() {
           {/* 2 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              2. Ueberblick ueber die Datenverarbeitung
+              2. Überblick über die Datenverarbeitung
             </h2>
             <p className="mt-2">
-              PWBS (Persoenliches Wissens-Betriebssystem) ist eine KI-gestuetzte
-              Plattform, die Ihre persoenlichen Wissensdaten (Kalender, Notizen,
-              Meeting-Transkripte) zusammenfuehrt, semantisch analysiert und als
+              PWBS (Persönliches Wissens-Betriebssystem) ist eine KI-gestützte
+              Plattform, die Ihre persönlichen Wissensdaten (Kalender, Notizen,
+              Meeting-Transkripte) zusammenführt, semantisch analysiert und als
               kontextbezogene Briefings aufbereitet.
             </p>
             <p className="mt-2">
-              Wir verarbeiten Ihre Daten ausschliesslich zur Erbringung des
-              Dienstes. Ihre Daten werden <strong>niemals</strong> fuer das
+              Wir verarbeiten Ihre Daten ausschließlich zur Erbringung des
+              Dienstes. Ihre Daten werden <strong>niemals</strong> für das
               Training von KI-Modellen verwendet.
             </p>
           </section>
@@ -76,12 +76,12 @@ export default function DatenschutzPage() {
             </h2>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
-                <strong>Vertragserfuellung (Art. 6 Abs. 1 lit. b):</strong>{" "}
+                <strong>Vertragserfüllung (Art. 6 Abs. 1 lit. b):</strong>{" "}
                 Verarbeitung Ihrer Wissensdaten zur Erbringung des PWBS-Dienstes
               </li>
               <li>
                 <strong>Einwilligung (Art. 6 Abs. 1 lit. a):</strong> Anbindung
-                externer Datenquellen ueber OAuth (jederzeit widerrufbar)
+                externer Datenquellen über OAuth (jederzeit widerrufbar)
               </li>
               <li>
                 <strong>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f):</strong>{" "}
@@ -101,8 +101,8 @@ export default function DatenschutzPage() {
             </h3>
             <p className="mt-1">
               E-Mail-Adresse, gehashtes Passwort (Argon2id), OAuth-Tokens
-              (AES-256-GCM verschluesselt). Aufbewahrung: bis zur
-              Kontoloeschung.
+              (AES-256-GCM verschlüsselt). Aufbewahrung: bis zur
+              Kontolöschung.
             </p>
 
             <h3 className="mt-4 font-semibold text-text">
@@ -111,8 +111,8 @@ export default function DatenschutzPage() {
             <p className="mt-1">
               Wenn Sie sich auf die Warteliste eintragen, speichern wir Ihre
               E-Mail-Adresse auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1
-              lit. a DSGVO). Die E-Mail wird ausschliesslich genutzt, um Sie
-              ueber den Start von PWBS zu informieren. Sie koennen Ihre
+              lit. a DSGVO). Die E-Mail wird ausschließlich genutzt, um Sie
+              über den Start von PWBS zu informieren. Sie können Ihre
               Einwilligung jederzeit per E-Mail an{" "}
               <a
                 href="mailto:kontakt@pwbs.app"
@@ -180,16 +180,16 @@ export default function DatenschutzPage() {
             <ul className="mt-1 list-disc pl-6 space-y-1">
               <li>
                 <strong>Embeddings (Vektoren):</strong> Mathematische
-                Repraesentationen Ihrer Texte fuer die semantische Suche.
-                Loeschung kaskadiert mit dem Quelldokument.
+                Repräsentationen Ihrer Texte für die semantische Suche.
+                Löschung kaskadiert mit dem Quelldokument.
               </li>
               <li>
                 <strong>LLM-generierte Inhalte:</strong> Briefings,
                 Zusammenfassungen, Antworten. Aufbewahrung: 90 Tage.
               </li>
               <li>
-                <strong>Knowledge Graph:</strong> Extrahierte Entitaeten
-                (Personen, Projekte, Entscheidungen). Loeschung kaskadiert mit
+                <strong>Knowledge Graph:</strong> Extrahierte Entitäten
+                (Personen, Projekte, Entscheidungen). Löschung kaskadiert mit
                 dem Quelldokument.
               </li>
             </ul>
@@ -201,7 +201,7 @@ export default function DatenschutzPage() {
               5. KI-Verarbeitung und LLM-Nutzung
             </h2>
             <p className="mt-2">
-              PWBS nutzt grosse Sprachmodelle (LLMs) zur Analyse und
+              PWBS nutzt große Sprachmodelle (LLMs) zur Analyse und
               Aufbereitung Ihrer Daten. Dabei gelten folgende Prinzipien:
             </p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
@@ -218,7 +218,7 @@ export default function DatenschutzPage() {
                 versehen
               </li>
               <li>
-                LLM-Audit-Logs dokumentieren jede Anfrage fuer Transparenz
+                LLM-Audit-Logs dokumentieren jede Anfrage für Transparenz
               </li>
             </ul>
             <p className="mt-2">
@@ -226,7 +226,7 @@ export default function DatenschutzPage() {
             </p>
             <ul className="mt-1 list-disc pl-6 space-y-1">
               <li>
-                Anthropic (Claude) – primaeres Sprachmodell,
+                Anthropic (Claude) – primäres Sprachmodell,
                 Auftragsverarbeitungsvertrag (AVV) geschlossen
               </li>
               <li>
@@ -239,7 +239,7 @@ export default function DatenschutzPage() {
           {/* 6 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              6. Auftragsverarbeiter und Drittlaender
+              6. Auftragsverarbeiter und Drittländer
             </h2>
             <p className="mt-2">Wir setzen folgende Auftragsverarbeiter ein:</p>
             <div className="mt-2 overflow-x-auto">
@@ -264,7 +264,7 @@ export default function DatenschutzPage() {
                   <tr>
                     <td className="px-4 py-2">AWS (Frankfurt)</td>
                     <td className="px-4 py-2">
-                      Hosting, Datenbanken, Verschluesselung
+                      Hosting, Datenbanken, Verschlüsselung
                     </td>
                     <td className="px-4 py-2">EU (eu-central-1)</td>
                     <td className="px-4 py-2">AVV</td>
@@ -301,15 +301,15 @@ export default function DatenschutzPage() {
           {/* 7 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              7. Technische und organisatorische Massnahmen
+              7. Technische und organisatorische Maßnahmen
             </h2>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
-                <strong>Verschluesselung:</strong> AES-256-GCM fuer OAuth-Tokens
+                <strong>Verschlüsselung:</strong> AES-256-GCM für OAuth-Tokens
                 und sensible Daten (Envelope Encryption mit AWS KMS)
               </li>
               <li>
-                <strong>Transport:</strong> TLS 1.3 fuer alle Verbindungen
+                <strong>Transport:</strong> TLS 1.3 für alle Verbindungen
               </li>
               <li>
                 <strong>Passwort-Hashing:</strong> Argon2id
@@ -335,32 +335,32 @@ export default function DatenschutzPage() {
               8. Ihre Rechte
             </h2>
             <p className="mt-2">
-              Sie haben gegenueber uns folgende Rechte hinsichtlich Ihrer
+              Sie haben gegenüber uns folgende Rechte hinsichtlich Ihrer
               personenbezogenen Daten:
             </p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
-                <strong>Auskunft (Art. 15 DSGVO):</strong> Sie koennen jederzeit
-                Auskunft ueber Ihre gespeicherten Daten anfordern
+                <strong>Auskunft (Art. 15 DSGVO):</strong> Sie können jederzeit
+                Auskunft über Ihre gespeicherten Daten anfordern
               </li>
               <li>
                 <strong>Berichtigung (Art. 16 DSGVO):</strong> Anspruch auf
                 Korrektur unrichtiger Daten
               </li>
               <li>
-                <strong>Loeschung (Art. 17 DSGVO):</strong> Recht auf Loeschung
-                Ihrer Daten – eine vollstaendige Kontoloeschung entfernt alle
+                <strong>Löschung (Art. 17 DSGVO):</strong> Recht auf Löschung
+                Ihrer Daten – eine vollständige Kontolöschung entfernt alle
                 Daten kaskadierend (Dokumente, Embeddings, Knowledge Graph)
               </li>
               <li>
                 <strong>
                   Einschraenkung der Verarbeitung (Art. 18 DSGVO):
                 </strong>{" "}
-                Recht auf eingeschraenkte Verarbeitung unter bestimmten
+                Recht auf eingeschränkte Verarbeitung unter bestimmten
                 Voraussetzungen
               </li>
               <li>
-                <strong>Datenportabilitaet (Art. 20 DSGVO):</strong> Export
+                <strong>Datenportabilität (Art. 20 DSGVO):</strong> Export
                 Ihrer Daten in einem maschinenlesbaren Format (JSON)
               </li>
               <li>
@@ -374,7 +374,7 @@ export default function DatenschutzPage() {
               </li>
             </ul>
             <p className="mt-2">
-              Zur Ausuebung Ihrer Rechte wenden Sie sich an:{" "}
+              Zur Ausübung Ihrer Rechte wenden Sie sich an:{" "}
               <a
                 href="mailto:kontakt@pwbs.app"
                 className="text-indigo-600 hover:underline"
@@ -401,7 +401,7 @@ export default function DatenschutzPage() {
               </a>
               , ein datenschutzfreundliches Analysetool. Plausible setzt{" "}
               <strong>keine Cookies</strong>, speichert keine personenbezogenen
-              Daten und ist vollstaendig DSGVO-konform. Es werden nur
+              Daten und ist vollständig DSGVO-konform. Es werden nur
               aggregierte Nutzungsstatistiken erhoben.
             </p>
           </section>
@@ -412,18 +412,18 @@ export default function DatenschutzPage() {
               10. Beschwerderecht
             </h2>
             <p className="mt-2">
-              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehoerde
-              ueber unsere Verarbeitung personenbezogener Daten zu beschweren.
+              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde
+              über unsere Verarbeitung personenbezogener Daten zu beschweren.
             </p>
           </section>
 
           {/* 11 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              11. Aenderungen
+              11. Änderungen
             </h2>
             <p className="mt-2">
-              Diese Datenschutzerklaerung kann von Zeit zu Zeit aktualisiert
+              Diese Datenschutzerklärung kann von Zeit zu Zeit aktualisiert
               werden. Die jeweils aktuelle Fassung finden Sie auf dieser Seite.
             </p>
           </section>

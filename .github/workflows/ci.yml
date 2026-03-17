@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  #  Backend Lint 
+  #  Backend Lint
   backend-lint:
     name: Backend Lint (ruff + mypy)
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
       - name: Mypy
         run: mypy pwbs/ --strict
 
-  #  Frontend Lint 
+  #  Frontend Lint
   frontend-lint:
     name: Frontend Lint (eslint + tsc)
     runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
       - name: TypeScript type check
         run: npm run type-check
 
-  #  Backend Unit Tests 
+  #  Backend Unit Tests
   backend-unit-tests:
     name: Backend Unit Tests
     runs-on: ubuntu-latest
@@ -85,7 +85,7 @@ jobs:
       - name: Run unit tests
         run: pytest tests/unit/ -v --tb=short --timeout=120
 
-  #  Alembic Migration Validation (TASK-175) 
+  #  Alembic Migration Validation (TASK-175)
   migration-check:
     name: Alembic Migration Check
     runs-on: ubuntu-latest
@@ -132,7 +132,7 @@ jobs:
       - name: Check for schema drift
         run: alembic check
 
-  #  Frontend Unit Tests 
+  #  Frontend Unit Tests
   frontend-unit-tests:
     name: Frontend Unit Tests
     runs-on: ubuntu-latest
@@ -155,7 +155,7 @@ jobs:
       - name: Run tests
         run: npm test -- --passWithNoTests
 
-  #  Integration Tests (nur auf main) 
+  #  Integration Tests (nur auf main)
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest

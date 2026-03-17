@@ -1,29 +1,30 @@
 import Link from "next/link";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
+import { ProductPreview } from "@/components/landing/product-preview";
 
 const FEATURES = [
   {
     title: "Kontextbriefings",
     description:
-      "Jeden Morgen ein massgeschneidertes Briefing aus all Ihren Datenquellen – automatisch, mit Quellenbelegen.",
+      "Jeden Morgen ein maßgeschneidertes Briefing aus all Ihren Datenquellen – automatisch, mit Quellenbelegen.",
     icon: "📋",
   },
   {
     title: "Semantische Suche",
     description:
-      "Finden Sie Informationen nach Bedeutung, nicht nur nach Stichworten. Ueber alle Quellen hinweg.",
+      "Finden Sie Informationen nach Bedeutung, nicht nur nach Stichworten. Über alle Quellen hinweg.",
     icon: "🔍",
   },
   {
     title: "Knowledge Graph",
     description:
-      "Automatische Vernetzung Ihrer Notizen, E-Mails, Kalender und Dokumente zu einem persoenlichen Wissensnetz.",
+      "Automatische Vernetzung Ihrer Notizen, E-Mails, Kalender und Dokumente zu einem persönlichen Wissensnetz.",
     icon: "🕸️",
   },
   {
     title: "DSGVO by Design",
     description:
-      "Ihre Daten gehoeren Ihnen. Verschluesselung, Loeschbarkeit und Transparenz sind Grundstruktur.",
+      "Ihre Daten gehören Ihnen. Verschlüsselung, Löschbarkeit und Transparenz sind Grundstruktur.",
     icon: "🔒",
   },
 ] as const;
@@ -43,7 +44,7 @@ const SOCIAL_PROOF = [
   },
   {
     quote:
-      "Die semantische Suche findet Zusammenhaenge, die mir vorher entgangen sind.",
+      "Die semantische Suche findet Zusammenhänge, die mir vorher entgangen sind.",
     author: "Lisa R.",
     role: "Produktmanagerin",
   },
@@ -77,19 +78,34 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24 lg:py-32">
         <h1 className="text-4xl font-extrabold tracking-tight text-text sm:text-5xl lg:text-6xl">
-          Ihr persoenliches{" "}
+          Ihr persönliches{" "}
           <span className="text-indigo-600">Wissens-Betriebssystem</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-text-secondary sm:text-xl">
-          PWBS verbindet Ihre Datenquellen, erkennt Zusammenhaenge und liefert
-          Ihnen taeglich kontextbezogene Briefings – damit Sie bessere
+          PWBS verbindet Ihre Datenquellen, erkennt Zusammenhänge und liefert
+          Ihnen täglich kontextbezogene Briefings – damit Sie bessere
           Entscheidungen treffen.
         </p>
-        <div className="mx-auto mt-10 max-w-lg">
+
+        <div className="mx-auto mt-10 max-w-md">
           <WaitlistForm />
-          <p className="mt-3 text-sm text-text-tertiary">
-            Kostenlos fuer Beta-Tester. Kein Spam, jederzeit abmeldbar.
+        </div>
+
+        <p className="mt-4 text-sm text-text-tertiary">
+          Kostenlos für Beta-Tester · Keine Kreditkarte nötig
+        </p>
+      </section>
+
+      {/* Product Preview */}
+      <section
+        className="bg-surface py-12 sm:py-16"
+        aria-label="Produktvorschau"
+      >
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <p className="mb-8 text-center text-sm font-medium uppercase tracking-wider text-text-tertiary">
+            So sieht Ihr persönliches Wissens-Betriebssystem aus
           </p>
+          <ProductPreview />
         </div>
       </section>
 
@@ -103,8 +119,8 @@ export default function LandingPage() {
             Ihre Daten. Intelligent vernetzt.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-text-secondary">
-            PWBS fuehrt heterogene Datenquellen zusammen und macht Wissen
-            kontextbezogen verfuegbar.
+            PWBS führt heterogene Datenquellen zusammen und macht Wissen
+            kontextbezogen verfügbar.
           </p>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((feature) => (
@@ -156,11 +172,11 @@ export default function LandingPage() {
       <section className="bg-gray-900 py-16 sm:py-24">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">
-            Bereit fuer intelligenteres Arbeiten?
+            Bereit für intelligenteres Arbeiten?
           </h2>
           <p className="mt-4 text-gray-300">
-            Sichern Sie sich Ihren Platz in der Beta. Begrenzte Plaetze
-            verfuegbar.
+            Sichern Sie sich Ihren Platz in der Beta. Begrenzte Plätze
+            verfügbar.
           </p>
           <div className="mx-auto mt-8 max-w-lg">
             <WaitlistForm />

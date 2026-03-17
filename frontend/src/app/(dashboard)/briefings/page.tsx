@@ -1,11 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Calendar, ChevronRight, Loader2, Plus, Sparkles } from "lucide-react";
-import { useBriefingList, useGenerateBriefingWithFallback } from "@/hooks/use-briefings";
+import {
+  FileText,
+  Calendar,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Sparkles,
+} from "lucide-react";
+import {
+  useBriefingList,
+  useGenerateBriefingWithFallback,
+} from "@/hooks/use-briefings";
 import { trackFirstBriefing } from "@/lib/analytics";
 import BriefingPreferencesPanel from "@/components/briefings/briefing-preferences";
-import type { BriefingType, BriefingListItem, BriefingDetailResponse } from "@/types/api";
+import type {
+  BriefingType,
+  BriefingListItem,
+  BriefingDetailResponse,
+} from "@/types/api";
 
 const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
   morning: "Morgen-Briefing",
@@ -43,7 +57,11 @@ function BriefingRow({ item }: { item: BriefingListItem }) {
   );
 }
 
-function DemoBriefingBanner({ briefing }: { briefing: BriefingDetailResponse }) {
+function DemoBriefingBanner({
+  briefing,
+}: {
+  briefing: BriefingDetailResponse;
+}) {
   return (
     <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
       <div className="mb-2 flex items-center gap-2">
@@ -53,11 +71,13 @@ function DemoBriefingBanner({ briefing }: { briefing: BriefingDetailResponse }) 
         </span>
       </div>
       <p className="mb-3 text-xs text-amber-700">
-        So sieht ein echtes Briefing aus. Sobald deine Datenquellen verbunden sind,
-        erhältst du personalisierte Inhalte.
+        So sieht ein echtes Briefing aus. Sobald deine Datenquellen verbunden
+        sind, erhältst du personalisierte Inhalte.
       </p>
       <div className="rounded-lg border border-amber-100 bg-white p-4">
-        <h3 className="mb-1 text-sm font-semibold text-text">{briefing.title}</h3>
+        <h3 className="mb-1 text-sm font-semibold text-text">
+          {briefing.title}
+        </h3>
         <p className="line-clamp-4 text-sm text-text-secondary whitespace-pre-line">
           {briefing.content.slice(0, 300)}…
         </p>

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Impressum – PWBS",
-  description: "Impressum und Anbieterkennzeichnung gemaess § 5 TMG.",
+  description: "Impressum und Anbieterkennzeichnung gemäß § 5 TMG.",
 };
 
 export default function ImpressumPage() {
@@ -18,7 +18,7 @@ export default function ImpressumPage() {
             href="/"
             className="text-sm text-text-tertiary hover:text-text transition-colors"
           >
-            Zurueck zur Startseite
+            Zurück zur Startseite
           </Link>
         </div>
       </nav>
@@ -27,17 +27,17 @@ export default function ImpressumPage() {
         <h1 className="text-3xl font-bold text-text sm:text-4xl">
           Impressum
         </h1>
-        <p className="mt-2 text-sm text-text-tertiary">Angaben gemaess § 5 TMG</p>
+        <p className="mt-2 text-sm text-text-tertiary">Angaben gemäß § 5 TMG</p>
 
         <div className="mt-8 space-y-8 text-text-secondary leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-text">Anbieter</h2>
             <p className="mt-2">
-              PWBS – Persoenliches Wissens-Betriebssystem
+              PWBS – Persönliches Wissens-Betriebssystem
               <br />
               Mick Gajewski
               <br />
-              [Strasse und Hausnummer]
+              [Straße und Hausnummer]
               <br />
               [PLZ Ort]
               <br />
@@ -60,12 +60,12 @@ export default function ImpressumPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-text">
-              Verantwortlich fuer den Inhalt nach § 55 Abs. 2 RStV
+              Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
             </h2>
             <p className="mt-2">
               Mick Gajewski
               <br />
-              [Strasse und Hausnummer]
+              [Straße und Hausnummer]
               <br />
               [PLZ Ort]
             </p>
@@ -76,7 +76,7 @@ export default function ImpressumPage() {
               EU-Streitschlichtung
             </h2>
             <p className="mt-2">
-              Die Europaeische Kommission stellt eine Plattform zur
+              Die Europäische Kommission stellt eine Plattform zur
               Online-Streitbeilegung (OS) bereit:{" "}
               <a
                 href="https://ec.europa.eu/consumers/odr/"
@@ -94,25 +94,25 @@ export default function ImpressumPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-text">
-              Haftung fuer Inhalte
+              Haftung für Inhalte
             </h2>
             <p className="mt-2">
-              Als Diensteanbieter sind wir gemaess § 7 Abs. 1 TMG fuer eigene
+              Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene
               Inhalte auf diesen Seiten nach den allgemeinen Gesetzen
               verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter
-              jedoch nicht verpflichtet, uebermittelte oder gespeicherte fremde
-              Informationen zu ueberwachen oder nach Umstaenden zu forschen, die
-              auf eine rechtswidrige Taetigkeit hinweisen.
+              jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
+              Informationen zu überwachen oder nach Umständen zu forschen, die
+              auf eine rechtswidrige Tätigkeit hinweisen.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-text">
-              Haftung fuer Links
+              Haftung für Links
             </h2>
             <p className="mt-2">
-              Unser Angebot enthaelt Links zu externen Websites Dritter, auf
-              deren Inhalte wir keinen Einfluss haben. Fuer die Inhalte der
+              Unser Angebot enthält Links zu externen Websites Dritter, auf
+              deren Inhalte wir keinen Einfluss haben. Für die Inhalte der
               verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber
               der Seiten verantwortlich.
             </p>
@@ -125,8 +125,8 @@ export default function ImpressumPage() {
             <p className="mt-2">
               Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
               diesen Seiten unterliegen dem deutschen Urheberrecht. Die
-              Vervielfaeltigung, Bearbeitung, Verbreitung und jede Art der
-              Verwertung ausserhalb der Grenzen des Urheberrechtes beduerfen der
+              Vervielfältigung, Bearbeitung, Verbreitung und jede Art der
+              Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
               schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
             </p>
           </section>

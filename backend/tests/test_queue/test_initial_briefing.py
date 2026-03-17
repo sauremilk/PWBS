@@ -16,7 +16,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -60,7 +59,6 @@ def _scalar_one_or_none_result(value: object) -> MagicMock:
 class TestTaskRegistration:
     def test_task_is_registered(self) -> None:
         import pwbs.queue.tasks.briefing  # noqa: F401
-
         from pwbs.queue.celery_app import app
 
         assert "pwbs.queue.tasks.briefing.generate_initial_briefing" in app.tasks

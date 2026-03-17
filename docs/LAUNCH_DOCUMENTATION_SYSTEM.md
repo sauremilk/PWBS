@@ -1,29 +1,29 @@
 # Launch-Dokumentensystem: Phase „Code Complete → Public Launch"
 
-Version: 1.0.0 | Stand: 17. März 2026  
-Basis: [App-Launch: Zusätzliche Planungsdokumente](App-Launch_%20Zusätzliche%20Planungsdokumente.md)  
+Version: 1.0.0 | Stand: 17. März 2026
+Basis: [App-Launch: Zusätzliche Planungsdokumente](App-Launch_%20Zusätzliche%20Planungsdokumente.md)
 Scope: PWBS – Persönliches Wissens-Betriebssystem
 
 ---
 
 ## Vorhandene Ausgangsbasis
 
-| Datei | Ebene | Status |
-|-------|-------|--------|
-| `vision-wissens-os.md` | Strategisch | ✅ Vorhanden |
-| `ARCHITECTURE.md` | Strategisch/Taktisch | ✅ Vorhanden |
-| `ROADMAP.md` | Strategisch | ✅ Vorhanden |
-| `PRD-SPEC.md` | Taktisch | ✅ Vorhanden |
-| `tasks.md` | Operativ | ✅ Vorhanden |
-| `GOVERNANCE.md` | Strategisch | ✅ Vorhanden |
-| `ORCHESTRATION.md` | Operativ | ✅ Vorhanden |
-| `docs/dsgvo-erstkonzept.md` | Taktisch | ✅ Vorhanden |
-| `docs/encryption-strategy.md` | Taktisch | ✅ Vorhanden |
-| `docs/runbooks/disaster-recovery.md` | Operativ | ✅ Vorhanden |
-| `docs/public-beta/onboarding-flow.md` | Taktisch | ✅ Vorhanden |
-| `docs/public-beta/community-setup.md` | Taktisch | ✅ Vorhanden |
-| `docs/adr/014-beta-launch-strategie.md` | Strategisch | ✅ Vorhanden |
-| `legal/` (tom.md, avv/, security-audit.md) | Taktisch | ✅ Teilweise vorhanden |
+| Datei                                      | Ebene                | Status                 |
+| ------------------------------------------ | -------------------- | ---------------------- |
+| `vision-wissens-os.md`                     | Strategisch          | ✅ Vorhanden           |
+| `ARCHITECTURE.md`                          | Strategisch/Taktisch | ✅ Vorhanden           |
+| `ROADMAP.md`                               | Strategisch          | ✅ Vorhanden           |
+| `PRD-SPEC.md`                              | Taktisch             | ✅ Vorhanden           |
+| `tasks.md`                                 | Operativ             | ✅ Vorhanden           |
+| `GOVERNANCE.md`                            | Strategisch          | ✅ Vorhanden           |
+| `ORCHESTRATION.md`                         | Operativ             | ✅ Vorhanden           |
+| `docs/dsgvo-erstkonzept.md`                | Taktisch             | ✅ Vorhanden           |
+| `docs/encryption-strategy.md`              | Taktisch             | ✅ Vorhanden           |
+| `docs/runbooks/disaster-recovery.md`       | Operativ             | ✅ Vorhanden           |
+| `docs/public-beta/onboarding-flow.md`      | Taktisch             | ✅ Vorhanden           |
+| `docs/public-beta/community-setup.md`      | Taktisch             | ✅ Vorhanden           |
+| `docs/adr/014-beta-launch-strategie.md`    | Strategisch          | ✅ Vorhanden           |
+| `legal/` (tom.md, avv/, security-audit.md) | Taktisch             | ✅ Teilweise vorhanden |
 
 ---
 
@@ -32,16 +32,19 @@ Scope: PWBS – Persönliches Wissens-Betriebssystem
 Das Dokumentensystem für die Launch-Phase ist in drei Ebenen organisiert, die aufeinander aufbauen:
 
 ### Ebene 1 – Strategische Zielzustände (Was und Warum)
+
 Definiert die angestrebten Endzustände für Marktpositionierung, rechtliche Absicherung und Erfolgsmessung. Diese Ebene ist stabiler und ändert sich selten nach erstmaliger Festlegung.
 
 **Dokumente:** GTM_PLAN.md, LEGAL_COMPLIANCE.md
 
 ### Ebene 2 – Taktische Spezifikationen (Wie genau)
+
 Konkretisiert die strategischen Ziele in umsetzbare Spezifikationen für UX, Analytics, Betrieb und Support. Diese Ebene enthält die detaillierten Anforderungen, aus denen Tasks abgeleitet werden.
 
 **Dokumente:** TRACKING_PLAN.md, UX_ONBOARDING_SPEC.md, SUPPORT_OPERATIONS_PLAN.md
 
 ### Ebene 3 – Operative Readiness-Gates (Ist es fertig?)
+
 Operationalisiert alle Spezifikationen in prüfbare Checklisten und konkrete Tasks. Diese Ebene ist rein exekutiv und beantwortet die Frage: „Sind alle Voraussetzungen erfüllt?"
 
 **Dokumente:** RELEASE_READINESS.md, LAUNCH_TASKS.md
@@ -81,25 +84,25 @@ Operationalisiert alle Spezifikationen in prüfbare Checklisten und konkrete Tas
 
 ## Neue Dateien (zu erstellen)
 
-| # | Dateiname | Pfad | Ebene | Zweck | Hauptinhalte | Inputs | Outputs | Rolle | Priorität |
-|---|-----------|------|-------|-------|-------------|--------|---------|-------|-----------|
-| 1 | **GTM_PLAN.md** | `docs/` | Strategisch | Operative Definition der Closed-Beta- und Public-Launch-Strategie | ICP, Value Proposition, Positionierung, Kanäle, Pricing-Hypothese, 90-Tage-Timeline | `vision-wissens-os.md`, `ROADMAP.md`, `PRD-SPEC.md` | Marketing-Tasks, Kanal-Setup, Pricing-Validierung → `TRACKING_PLAN.md`, `LAUNCH_TASKS.md` | Product Owner | **Pflicht** |
-| 2 | **LEGAL_COMPLIANCE.md** | `docs/` | Strategisch | Vollständige rechtliche Checkliste für EU-Launch | DSGVO-Consent-Flows, Impressum (DDG), AGB, Datenschutzerklärung, EU AI Act Inventory, Cookie-/Tracking-Consent | `ARCHITECTURE.md`, `PRD-SPEC.md`, `docs/dsgvo-erstkonzept.md`, `legal/` | Rechtstext-Tasks, Consent-Banner-Impl., DPA-Template → `RELEASE_READINESS.md` | Legal / PO | **Pflicht** |
-| 3 | **TRACKING_PLAN.md** | `docs/` | Taktisch | Übersetzung strategischer KPIs in konkrete Telemetrie-Events | Event-Taxonomie, Event Properties, User Properties, Trigger-Bedingungen, Funnel-Definitionen | `GTM_PLAN.md`, `PRD-SPEC.md` | Analytics-Implementierungs-Tasks, Dashboard-Setup → `LAUNCH_TASKS.md` | PO / Data | **Pflicht** |
-| 4 | **UX_ONBOARDING_SPEC.md** | `docs/` | Taktisch | Vereint UX-Audit und First-Run-Experience in einem Dokument | Heuristische Evaluation, Accessibility-Gaps, Onboarding-Flow (Register → First Briefing), Empty States, Tooltips, Time-to-Value-Optimierung | `PRD-SPEC.md`, `docs/public-beta/onboarding-flow.md`, Staging-Umgebung | UI/UX-Tasks, Onboarding-Implementierung → `LAUNCH_TASKS.md` | UX / PO | **Pflicht** |
-| 5 | **SUPPORT_OPERATIONS_PLAN.md** | `docs/` | Taktisch | Definition des laufenden Betriebs, Monitorings und Supports | SLO-Definitionen, Support-Kanäle, Eskalationspfade, Runbook-Index, Alerting-Regeln, Incident-Response-Protokoll | `ARCHITECTURE.md`, `GTM_PLAN.md`, `docs/runbooks/disaster-recovery.md` | Alerting-Setup, Support-Tool-Config, Schulungsunterlagen → `RELEASE_READINESS.md` | Ops / SRE | **Pflicht** |
-| 6 | **RELEASE_READINESS.md** | `docs/` | Operativ | Formaler Go/No-Go-Kriterienkatalog vor GA-Deployment | Security-Sign-off, QA-Sign-off, Legal-Sign-off, Ops-Readiness, Rollback-Plan, UAT-Status, Tracking-Verification | Alle Ebene-1- und Ebene-2-Dokumente | Go/No-Go-Entscheidung, Deployment-Freigabe | Engineering Lead | **Pflicht** |
-| 7 | **LAUNCH_TASKS.md** | `docs/` | Operativ | Konsolidierte, priorisierte Task-Liste aus allen Launch-Dokumenten | Kategorisierte Tasks (UX, Legal, Ops, GTM, Analytics, Release), jeweils mit Quelle, Priorität, Akzeptanzkriterium | Alle vorherigen Dokumente | Direkte Arbeitsgrundlage für Agenten und Entwickler | PO | **Pflicht** |
+| #   | Dateiname                      | Pfad    | Ebene       | Zweck                                                              | Hauptinhalte                                                                                                                                | Inputs                                                                  | Outputs                                                                                   | Rolle            | Priorität   |
+| --- | ------------------------------ | ------- | ----------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------- | ----------- |
+| 1   | **GTM_PLAN.md**                | `docs/` | Strategisch | Operative Definition der Closed-Beta- und Public-Launch-Strategie  | ICP, Value Proposition, Positionierung, Kanäle, Pricing-Hypothese, 90-Tage-Timeline                                                         | `vision-wissens-os.md`, `ROADMAP.md`, `PRD-SPEC.md`                     | Marketing-Tasks, Kanal-Setup, Pricing-Validierung → `TRACKING_PLAN.md`, `LAUNCH_TASKS.md` | Product Owner    | **Pflicht** |
+| 2   | **LEGAL_COMPLIANCE.md**        | `docs/` | Strategisch | Vollständige rechtliche Checkliste für EU-Launch                   | DSGVO-Consent-Flows, Impressum (DDG), AGB, Datenschutzerklärung, EU AI Act Inventory, Cookie-/Tracking-Consent                              | `ARCHITECTURE.md`, `PRD-SPEC.md`, `docs/dsgvo-erstkonzept.md`, `legal/` | Rechtstext-Tasks, Consent-Banner-Impl., DPA-Template → `RELEASE_READINESS.md`             | Legal / PO       | **Pflicht** |
+| 3   | **TRACKING_PLAN.md**           | `docs/` | Taktisch    | Übersetzung strategischer KPIs in konkrete Telemetrie-Events       | Event-Taxonomie, Event Properties, User Properties, Trigger-Bedingungen, Funnel-Definitionen                                                | `GTM_PLAN.md`, `PRD-SPEC.md`                                            | Analytics-Implementierungs-Tasks, Dashboard-Setup → `LAUNCH_TASKS.md`                     | PO / Data        | **Pflicht** |
+| 4   | **UX_ONBOARDING_SPEC.md**      | `docs/` | Taktisch    | Vereint UX-Audit und First-Run-Experience in einem Dokument        | Heuristische Evaluation, Accessibility-Gaps, Onboarding-Flow (Register → First Briefing), Empty States, Tooltips, Time-to-Value-Optimierung | `PRD-SPEC.md`, `docs/public-beta/onboarding-flow.md`, Staging-Umgebung  | UI/UX-Tasks, Onboarding-Implementierung → `LAUNCH_TASKS.md`                               | UX / PO          | **Pflicht** |
+| 5   | **SUPPORT_OPERATIONS_PLAN.md** | `docs/` | Taktisch    | Definition des laufenden Betriebs, Monitorings und Supports        | SLO-Definitionen, Support-Kanäle, Eskalationspfade, Runbook-Index, Alerting-Regeln, Incident-Response-Protokoll                             | `ARCHITECTURE.md`, `GTM_PLAN.md`, `docs/runbooks/disaster-recovery.md`  | Alerting-Setup, Support-Tool-Config, Schulungsunterlagen → `RELEASE_READINESS.md`         | Ops / SRE        | **Pflicht** |
+| 6   | **RELEASE_READINESS.md**       | `docs/` | Operativ    | Formaler Go/No-Go-Kriterienkatalog vor GA-Deployment               | Security-Sign-off, QA-Sign-off, Legal-Sign-off, Ops-Readiness, Rollback-Plan, UAT-Status, Tracking-Verification                             | Alle Ebene-1- und Ebene-2-Dokumente                                     | Go/No-Go-Entscheidung, Deployment-Freigabe                                                | Engineering Lead | **Pflicht** |
+| 7   | **LAUNCH_TASKS.md**            | `docs/` | Operativ    | Konsolidierte, priorisierte Task-Liste aus allen Launch-Dokumenten | Kategorisierte Tasks (UX, Legal, Ops, GTM, Analytics, Release), jeweils mit Quelle, Priorität, Akzeptanzkriterium                           | Alle vorherigen Dokumente                                               | Direkte Arbeitsgrundlage für Agenten und Entwickler                                       | PO               | **Pflicht** |
 
 ## Bewusst NICHT als eigene Dateien
 
-| Konzept | Grund | Wo stattdessen |
-|---------|-------|----------------|
-| **LAUNCH_BRIEF.md** | Bei Solo-/Kleinteam-Projekt wäre dies eine Dublette zum GTM_PLAN. Ein Launch Brief koordiniert cross-funktionale Teams; hier übernimmt `GTM_PLAN.md` (Strategie) + `RELEASE_READINESS.md` (Checkliste) diese Funktion. | `GTM_PLAN.md` Abschnitt „Timeline & Meilensteine" |
-| **UX_AUDIT.md** + **FRE_SPEC.md** | Zwei separate Dateien für eng verzahnte Inhalte erzeugen Redundanz. Audit-Findings fließen direkt in die Onboarding-Spec. | Zusammengelegt in `UX_ONBOARDING_SPEC.md` |
-| **INCIDENT_RESPONSE.md** | Existiert bereits als `docs/runbooks/disaster-recovery.md`. Incident-Response-Protokolle gehören in den Operations-Plan + Runbook-Verzeichnis. | `SUPPORT_OPERATIONS_PLAN.md` Abschnitt „Incident Response" + `docs/runbooks/` |
-| **LAUNCH_RETRO.md** | Wird erst nach dem Launch erstellt. Kein Planungsdokument, sondern ein Ergebnis-Dokument. Vorlage kann im GTM_PLAN definiert werden. | Erst post-Launch anlegen |
-| **GO_NO_GO.md** | Inhaltlich identisch mit Release Readiness Gate. Keine separate Datei nötig. | `RELEASE_READINESS.md` |
+| Konzept                           | Grund                                                                                                                                                                                                                  | Wo stattdessen                                                                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **LAUNCH_BRIEF.md**               | Bei Solo-/Kleinteam-Projekt wäre dies eine Dublette zum GTM_PLAN. Ein Launch Brief koordiniert cross-funktionale Teams; hier übernimmt `GTM_PLAN.md` (Strategie) + `RELEASE_READINESS.md` (Checkliste) diese Funktion. | `GTM_PLAN.md` Abschnitt „Timeline & Meilensteine"                             |
+| **UX_AUDIT.md** + **FRE_SPEC.md** | Zwei separate Dateien für eng verzahnte Inhalte erzeugen Redundanz. Audit-Findings fließen direkt in die Onboarding-Spec.                                                                                              | Zusammengelegt in `UX_ONBOARDING_SPEC.md`                                     |
+| **INCIDENT_RESPONSE.md**          | Existiert bereits als `docs/runbooks/disaster-recovery.md`. Incident-Response-Protokolle gehören in den Operations-Plan + Runbook-Verzeichnis.                                                                         | `SUPPORT_OPERATIONS_PLAN.md` Abschnitt „Incident Response" + `docs/runbooks/` |
+| **LAUNCH_RETRO.md**               | Wird erst nach dem Launch erstellt. Kein Planungsdokument, sondern ein Ergebnis-Dokument. Vorlage kann im GTM_PLAN definiert werden.                                                                                   | Erst post-Launch anlegen                                                      |
+| **GO_NO_GO.md**                   | Inhaltlich identisch mit Release Readiness Gate. Keine separate Datei nötig.                                                                                                                                           | `RELEASE_READINESS.md`                                                        |
 
 ---
 
@@ -138,15 +141,15 @@ GTM_PLAN.md ──────────────────┘           
 
 ## Entscheidungsebenen
 
-| Ebene | Dokument | Typische Entscheidungen |
-|-------|----------|------------------------|
-| **Strategisch** | GTM_PLAN.md | Wer ist die Zielgruppe? Welche Kanäle? Pricing-Modell? Beta-Strategie open/closed? |
-| **Strategisch** | LEGAL_COMPLIANCE.md | Welche Rechtsgrundlagen für Datenverarbeitung? Consent-Pflichten? AGB-Umfang? |
-| **Taktisch** | TRACKING_PLAN.md | Welche Events messen wir? Welche Funnels? Welches Analytics-Tool? |
-| **Taktisch** | UX_ONBOARDING_SPEC.md | Wie viele Onboarding-Schritte? Welche Empty States? Progressive Disclosure oder Wizard? |
-| **Taktisch** | SUPPORT_OPERATIONS_PLAN.md | Welche SLOs? Support-Kanal (E-Mail, Discord, Ticket)? Eskalationsstufen? |
-| **Operativ** | RELEASE_READINESS.md | Ist [X] fertig? Ja/Nein-Prüfung auf Basis aller vorherigen Dokumente. |
-| **Operativ** | LAUNCH_TASKS.md | Wer macht was bis wann? Abgeleitet aus allen task-relevanten Dokumenten. |
+| Ebene           | Dokument                   | Typische Entscheidungen                                                                 |
+| --------------- | -------------------------- | --------------------------------------------------------------------------------------- |
+| **Strategisch** | GTM_PLAN.md                | Wer ist die Zielgruppe? Welche Kanäle? Pricing-Modell? Beta-Strategie open/closed?      |
+| **Strategisch** | LEGAL_COMPLIANCE.md        | Welche Rechtsgrundlagen für Datenverarbeitung? Consent-Pflichten? AGB-Umfang?           |
+| **Taktisch**    | TRACKING_PLAN.md           | Welche Events messen wir? Welche Funnels? Welches Analytics-Tool?                       |
+| **Taktisch**    | UX_ONBOARDING_SPEC.md      | Wie viele Onboarding-Schritte? Welche Empty States? Progressive Disclosure oder Wizard? |
+| **Taktisch**    | SUPPORT_OPERATIONS_PLAN.md | Welche SLOs? Support-Kanal (E-Mail, Discord, Ticket)? Eskalationsstufen?                |
+| **Operativ**    | RELEASE_READINESS.md       | Ist [X] fertig? Ja/Nein-Prüfung auf Basis aller vorherigen Dokumente.                   |
+| **Operativ**    | LAUNCH_TASKS.md            | Wer macht was bis wann? Abgeleitet aus allen task-relevanten Dokumenten.                |
 
 ## Punkt der Task-Entstehung
 
@@ -184,11 +187,13 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 
 **Typische Entscheidungen:** ICP-Eingrenzung, Beta-Modell (invitation-only vs. self-serve), Pricing-Kommunikation, Kanal-Priorisierung.
 
-**Abhängigkeiten:** 
+**Abhängigkeiten:**
+
 - Input: `vision-wissens-os.md` (Produktvision), `ROADMAP.md` (Phasen), `PRD-SPEC.md` (Features)
 - Vorhandene Vorarbeit: `docs/adr/014-beta-launch-strategie.md`, `docs/public-beta/community-setup.md`
 
 **Was NICHT in diese Datei gehört:**
+
 - Technische Architekturentscheidungen (→ `ARCHITECTURE.md`)
 - Code-Level-Spezifikationen (→ `PRD-SPEC.md`)
 - Rechtliche Details (→ `LEGAL_COMPLIANCE.md`)
@@ -215,10 +220,12 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** Rechtsgrundlage pro Verarbeitungszweck, Consent-Granularität, AGB-Umfang (minimal vs. umfassend), Haftungsausschlüsse für LLM-generierte Inhalte.
 
 **Abhängigkeiten:**
+
 - Input: `ARCHITECTURE.md` (Datenflüsse), `PRD-SPEC.md` (Features), `docs/dsgvo-erstkonzept.md`, `docs/encryption-strategy.md`, `legal/tom.md`, `legal/avv/`
 - Externe Referenz: aktuelle DSGVO-Anforderungen, DDG, TDDDG
 
 **Was NICHT in diese Datei gehört:**
+
 - Technische Implementierungsdetails (→ `ARCHITECTURE.md`, Code)
 - Fertige Rechtstexte (→ eigene Dateien in `legal/`)
 - UX-Design der Consent-Dialoge (→ `UX_ONBOARDING_SPEC.md`)
@@ -250,10 +257,12 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** Analytics-Tool-Wahl, Granularität des Trackings, Server-Side vs. Client-Side Tracking, Consent-Pflicht pro Event-Typ.
 
 **Abhängigkeiten:**
+
 - Input: `GTM_PLAN.md` (KPIs), `PRD-SPEC.md` (User Flows)
 - Constraint: `LEGAL_COMPLIANCE.md` (Consent-Architektur)
 
 **Was NICHT in diese Datei gehört:**
+
 - Backend-Metriken / Infrastruktur-Monitoring (→ `SUPPORT_OPERATIONS_PLAN.md`, Prometheus/Grafana)
 - Business Intelligence / Revenue-Metriken (→ Phase 3)
 - Implementierungscode (→ Tasks + Code)
@@ -282,10 +291,12 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** Wizard vs. Progressive Disclosure, Pflicht-Konnektor bei Onboarding ja/nein, Skip-Optionen.
 
 **Abhängigkeiten:**
+
 - Input: `PRD-SPEC.md` (Features), `docs/public-beta/onboarding-flow.md` (bestehender Entwurf)
 - Requires: Lauffähige Staging-Umgebung für heuristische Evaluation
 
 **Was NICHT in diese Datei gehört:**
+
 - Visuelle Design-Tokens / Farben / Typografie (→ Tailwind Config / Design System)
 - Technische Implementierungsdetails der Komponenten (→ Code)
 - Analytics-Event-Definitionen (→ `TRACKING_PLAN.md`)
@@ -312,10 +323,12 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** SLO-Werte, Discord vs. E-Mail als primärer Support-Kanal, Alerting-Schwellwerte, Rollback-Verfahren.
 
 **Abhängigkeiten:**
+
 - Input: `ARCHITECTURE.md` (System-Topologie), `GTM_PLAN.md` (erwartete Nutzerzahlen), `docs/runbooks/disaster-recovery.md`
 - Vorhandene Infrastruktur: `infra/prometheus/`, `infra/grafana/`
 
 **Was NICHT in diese Datei gehört:**
+
 - Individuelle Runbooks (→ `docs/runbooks/`)
 - Detaillierte Infrastruktur-Konfiguration (→ `infra/`, `deploy/`)
 - Nutzerseitiger UX-Flow für Fehlermeldungen (→ `UX_ONBOARDING_SPEC.md`)
@@ -346,10 +359,12 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** Welche Kriterien sind „Must" vs. „Should" je Gate? Welche Known Issues sind akzeptabel?
 
 **Abhängigkeiten:**
+
 - Input: Alle Ebene-1- und Ebene-2-Dokumente (jedes liefert Kriterien)
 - Vorhandene Referenzen: `legal/security-audit.md`, `docs/audit-reports/`
 
 **Was NICHT in diese Datei gehört:**
+
 - Detaillierte Spezifikationen (→ jeweilige Quelle)
 - Task-Management (→ `LAUNCH_TASKS.md`)
 - Post-Launch-Evaluation (→ zukünftige `LAUNCH_RETRO.md`)
@@ -372,9 +387,11 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 **Typische Entscheidungen:** Priorisierung, Reihenfolge, Parallelisierbarkeit.
 
 **Abhängigkeiten:**
+
 - Input: Alle vorherigen Dokumente. Jedes taktische Dokument liefert Tasks.
 
 **Was NICHT in diese Datei gehört:**
+
 - Strategische Begründungen (→ in den Quell-Dokumenten nachlesbar)
 - Feature-Backlog für Phase 3+ (→ `tasks.md`)
 - Abgeschlossene, archivierte Tasks (→ entfernen oder markieren)
@@ -389,25 +406,25 @@ Die strategische Ebene liefert **Rahmenbedingungen** (z.B. „Closed Beta mit ma
 
 Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGVO-Pflichten):
 
-| # | Datei | Begründung |
-|---|-------|------------|
-| 1 | **LEGAL_COMPLIANCE.md** | Ohne rechtliche Absicherung ist kein Launch in der EU möglich. DSGVO-Verstöße sind existenzbedrohend. Die vorhandenen Fragmente (`dsgvo-erstkonzept.md`, `legal/`) müssen konsolidiert und zu einer vollständigen Checkliste werden. |
-| 2 | **GTM_PLAN.md** | Definiert, wer die ersten 20 Beta-Nutzer sind und wie sie akquiriert werden. Ohne dies ist jede andere Planung spekulativ. |
-| 3 | **UX_ONBOARDING_SPEC.md** | Die größte GTM-Gap laut Analyse: Nutzer registrieren sich, wissen aber nicht, was sie tun sollen. Onboarding entscheidet über Retention. |
-| 4 | **RELEASE_READINESS.md** | Prüft, ob alles zusammenkommt. Ohne formalen Checkpoint droht ein Launch mit offenen Flanken. |
+| #   | Datei                     | Begründung                                                                                                                                                                                                                           |
+| --- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **LEGAL_COMPLIANCE.md**   | Ohne rechtliche Absicherung ist kein Launch in der EU möglich. DSGVO-Verstöße sind existenzbedrohend. Die vorhandenen Fragmente (`dsgvo-erstkonzept.md`, `legal/`) müssen konsolidiert und zu einer vollständigen Checkliste werden. |
+| 2   | **GTM_PLAN.md**           | Definiert, wer die ersten 20 Beta-Nutzer sind und wie sie akquiriert werden. Ohne dies ist jede andere Planung spekulativ.                                                                                                           |
+| 3   | **UX_ONBOARDING_SPEC.md** | Die größte GTM-Gap laut Analyse: Nutzer registrieren sich, wissen aber nicht, was sie tun sollen. Onboarding entscheidet über Retention.                                                                                             |
+| 4   | **RELEASE_READINESS.md**  | Prüft, ob alles zusammenkommt. Ohne formalen Checkpoint droht ein Launch mit offenen Flanken.                                                                                                                                        |
 
 ## Kann unmittelbar danach folgen (2 Dateien)
 
-| # | Datei | Begründung |
-|---|-------|------------|
-| 5 | **TRACKING_PLAN.md** | Erst relevant, wenn GTM-KPIs definiert sind. Kann parallel zur Onboarding-Arbeit erstellt werden. |
-| 6 | **LAUNCH_TASKS.md** | Erst sinnvoll, wenn mindestens GTM + Legal + UX fertig sind und daraus Tasks extrahiert werden können. |
+| #   | Datei                | Begründung                                                                                             |
+| --- | -------------------- | ------------------------------------------------------------------------------------------------------ |
+| 5   | **TRACKING_PLAN.md** | Erst relevant, wenn GTM-KPIs definiert sind. Kann parallel zur Onboarding-Arbeit erstellt werden.      |
+| 6   | **LAUNCH_TASKS.md**  | Erst sinnvoll, wenn mindestens GTM + Legal + UX fertig sind und daraus Tasks extrahiert werden können. |
 
 ## Nur bei höherer Komplexität (1 Datei)
 
-| # | Datei | Bedingung |
-|---|-------|-----------|
-| 7 | **SUPPORT_OPERATIONS_PLAN.md** | Wird bei > 50 Beta-Nutzern oder bei SLA-pflichtigen Enterprise-Kunden relevant. Im Closed-Beta mit 20 Nutzern reichen das bestehende Runbook und informelle Prozesse. Spätestens vor Open Beta erstellen. |
+| #   | Datei                          | Bedingung                                                                                                                                                                                                 |
+| --- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7   | **SUPPORT_OPERATIONS_PLAN.md** | Wird bei > 50 Beta-Nutzern oder bei SLA-pflichtigen Enterprise-Kunden relevant. Im Closed-Beta mit 20 Nutzern reichen das bestehende Runbook und informelle Prozesse. Spätestens vor Open Beta erstellen. |
 
 ---
 
@@ -418,6 +435,7 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum zuerst:** Rechtliche Anforderungen können technische Implementierung beeinflussen (Consent-Flows, Datenflüsse zu LLM-APIs, Tracking-Einschränkungen). Jede spätere Entscheidung in GTM, Tracking oder UX muss mit den rechtlichen Constraints konsistent sein. Wird dies nachgelagert erstellt, drohen Rückbauten.
 
 **Benötigter Input:**
+
 - `ARCHITECTURE.md` (Datenflüsse, externe Dienste)
 - `PRD-SPEC.md` (Features mit Datenverarbeitung)
 - `docs/dsgvo-erstkonzept.md` (vorhandene DSGVO-Analyse)
@@ -425,6 +443,7 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 - `docs/encryption-strategy.md` (Verschlüsselungsstrategie)
 
 **Danach verfügbar:**
+
 - Vollständiges Inventar der rechtlichen Pflichten
 - Consent-Architektur als Constraint für Tracking und UX
 - Handlungsbedarf-Liste als Input für Tasks
@@ -436,12 +455,14 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum als zweites:** Definiert die Zielgruppe und damit den Kontext für alle weiteren Spezifikationen. Ohne ICP kann weder Onboarding (für wen?) noch Tracking (was messen?) noch Operations (wie viel Last?) sinnvoll spezifiziert werden.
 
 **Benötigter Input:**
+
 - `vision-wissens-os.md`, `ROADMAP.md`, `PRD-SPEC.md`
 - `docs/adr/014-beta-launch-strategie.md` (bereits getroffene Beta-Entscheidungen)
 - `docs/public-beta/community-setup.md` (Community-Planung)
 - `LEGAL_COMPLIANCE.md` (Constraints für Pricing-Kommunikation, Datennutzung)
 
 **Danach verfügbar:**
+
 - ICP-Definition
 - Beta-Phasen und Timeline
 - KPI-Definitionen als Input für Tracking
@@ -454,12 +475,14 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum als drittes:** Setzt die GTM-Erkenntnisse (wer ist der Nutzer?) in konkrete UX-Anforderungen um. Die Staging-Umgebung ist lauffähig, sodass eine heuristische Evaluation möglich ist.
 
 **Benötigter Input:**
+
 - `PRD-SPEC.md` (Feature-Scope)
 - `GTM_PLAN.md` (ICP, Value Proposition)
 - `docs/public-beta/onboarding-flow.md` (bestehender Onboarding-Entwurf)
 - Lauffähige Staging-Umgebung
 
 **Danach verfügbar:**
+
 - Priorisierte UX-Befundliste
 - Onboarding-Flow-Spezifikation
 - Empty-State- und Error-State-Texte
@@ -472,11 +495,13 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum als viertes:** Die KPIs aus dem GTM_PLAN und die UX-Flows aus der Onboarding-Spec definieren, welche Events gemessen werden müssen. Die Consent-Architektur aus LEGAL_COMPLIANCE bestimmt die Tracking-Constraints.
 
 **Benötigter Input:**
+
 - `GTM_PLAN.md` (KPIs)
 - `UX_ONBOARDING_SPEC.md` (User Flows, Funnel Steps)
 - `LEGAL_COMPLIANCE.md` (Consent-Anforderungen)
 
 **Danach verfügbar:**
+
 - Event-Katalog für Implementierung
 - Dashboard-Spezifikation
 - Tracking-Implementierungs-Tasks
@@ -488,9 +513,11 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum als fünftes:** Konsolidiert die Anforderungen aller vorherigen Dokumente zu prüfbaren Kriterien. Kann erst sinnvoll erstellt werden, wenn die Kriterienquellen existieren.
 
 **Benötigter Input:**
+
 - Alle Ebene-1- und Ebene-2-Dokumente
 
 **Danach verfügbar:**
+
 - Vollständige Go/No-Go-Checkliste
 - Klarheit über offene Blocker
 
@@ -501,9 +528,11 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 **Warum zuletzt:** Extrahiert und konsolidiert Tasks aus allen vorherigen Dokumenten. Ist das Ausführungsartefakt, nicht das Planungsartefakt.
 
 **Benötigter Input:**
+
 - Alle vorherigen Dokumente
 
 **Danach verfügbar:**
+
 - Priorisierte, kategorisierte Arbeitsliste
 - Grundlage für Sprint-Planung und Agenten-Orchestrierung
 
@@ -515,14 +544,14 @@ Auf Basis der Projektgröße (Solo-/Kleinteam, Closed-Beta-Fokus, EU-Markt, DSGV
 
 Nicht alle Dokumente erzeugen gleich viele oder gleich konkrete Tasks:
 
-| Dokumenttyp | Task-Dichte | Task-Art |
-|-------------|-------------|----------|
-| `GTM_PLAN.md` | Mittel | Marketing-Tasks (Texte, Kanäle), Kommunikations-Tasks |
-| `LEGAL_COMPLIANCE.md` | Hoch | Implementierungs-Tasks (Consent, Rechtstexte), Prüf-Tasks |
-| `TRACKING_PLAN.md` | Hoch | Reine Implementierungs-Tasks (Events, Dashboards) |
-| `UX_ONBOARDING_SPEC.md` | Hoch | UI-Implementierungs-Tasks, Content-Tasks (Texte, Empty States) |
-| `SUPPORT_OPERATIONS_PLAN.md` | Mittel | Konfigurations-Tasks (Alerting, Monitoring), Prozess-Tasks |
-| `RELEASE_READINESS.md` | Niedrig | Verifikations-Tasks (Prüfung, Sign-off), Lücken-Tasks |
+| Dokumenttyp                  | Task-Dichte | Task-Art                                                       |
+| ---------------------------- | ----------- | -------------------------------------------------------------- |
+| `GTM_PLAN.md`                | Mittel      | Marketing-Tasks (Texte, Kanäle), Kommunikations-Tasks          |
+| `LEGAL_COMPLIANCE.md`        | Hoch        | Implementierungs-Tasks (Consent, Rechtstexte), Prüf-Tasks      |
+| `TRACKING_PLAN.md`           | Hoch        | Reine Implementierungs-Tasks (Events, Dashboards)              |
+| `UX_ONBOARDING_SPEC.md`      | Hoch        | UI-Implementierungs-Tasks, Content-Tasks (Texte, Empty States) |
+| `SUPPORT_OPERATIONS_PLAN.md` | Mittel      | Konfigurations-Tasks (Alerting, Monitoring), Prozess-Tasks     |
+| `RELEASE_READINESS.md`       | Niedrig     | Verifikations-Tasks (Prüfung, Sign-off), Lücken-Tasks          |
 
 ## Regeln für Task-Extraktion
 
@@ -535,15 +564,15 @@ Nicht alle Dokumente erzeugen gleich viele oder gleich konkrete Tasks:
 
 ## Task-Kategorien
 
-| Kategorie | Präfix | Beispiel |
-|-----------|--------|----------|
-| **UX** | `UX-` | `UX-001: Welcome-Screen mit 3-Step-Wizard implementieren` |
-| **Legal** | `LEG-` | `LEG-001: Datenschutzerklärung erstellen und unter /legal/datenschutz.md ablegen` |
-| **Ops** | `OPS-` | `OPS-001: Sentry-Alerting für HTTP 5xx > 5/min konfigurieren` |
-| **GTM** | `GTM-` | `GTM-001: Product-Hunt-Listing vorbereiten (Beschreibung, Screenshots)` |
+| Kategorie     | Präfix | Beispiel                                                                                  |
+| ------------- | ------ | ----------------------------------------------------------------------------------------- |
+| **UX**        | `UX-`  | `UX-001: Welcome-Screen mit 3-Step-Wizard implementieren`                                 |
+| **Legal**     | `LEG-` | `LEG-001: Datenschutzerklärung erstellen und unter /legal/datenschutz.md ablegen`         |
+| **Ops**       | `OPS-` | `OPS-001: Sentry-Alerting für HTTP 5xx > 5/min konfigurieren`                             |
+| **GTM**       | `GTM-` | `GTM-001: Product-Hunt-Listing vorbereiten (Beschreibung, Screenshots)`                   |
 | **Analytics** | `ANA-` | `ANA-001: Event briefing_generated mit properties owner_id, briefing_type implementieren` |
-| **Release** | `REL-` | `REL-001: E2E-UAT-Durchlauf Register → Connect → Briefing dokumentieren` |
-| **Content** | `CNT-` | `CNT-001: Landing-Page-Copy für Beta-Phase aktualisieren` |
+| **Release**   | `REL-` | `REL-001: E2E-UAT-Durchlauf Register → Connect → Briefing dokumentieren`                  |
+| **Content**   | `CNT-` | `CNT-001: Landing-Page-Copy für Beta-Phase aktualisieren`                                 |
 
 ## Pflichtfelder pro Task
 

@@ -1,18 +1,13 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import {
   FileText,
-  Plus,
   Cable,
   AlertCircle,
-  Search,
-  FolderKanban,
   ArrowRight,
   Sparkles,
-  TrendingUp,
-  Clock,
-  Zap,
 } from "lucide-react";
 import { useLatestBriefing, useGenerateBriefing } from "@/hooks/use-briefings";
 import { useConnectionStatus } from "@/hooks/use-connectors";
@@ -21,6 +16,12 @@ import {
   BriefingCardSkeleton,
   ConnectorStatusSkeleton,
 } from "@/components/ui/loading-states";
+import { CommandBar } from "@/components/command-bar/command-bar";
+import {
+  SmartPrompts,
+  DashboardGreeting,
+} from "@/components/command-bar/smart-prompts";
+import { KnowledgeProgress } from "@/components/command-bar/knowledge-progress";
 
 function BriefingCard() {
   const { data: briefing, isLoading, error } = useLatestBriefing("morning");
@@ -43,15 +44,17 @@ function BriefingCard() {
 
   if (!briefing) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-6">
+      <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-surface p-6">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100">
             <Sparkles className="h-5 w-5 text-indigo-600" aria-hidden="true" />
           </div>
           <div>
-            <h3 className="font-semibold text-text">Morgen-Briefing</h3>
+            <h3 className="font-semibold text-text">
+              Dein erstes Briefing wartet
+            </h3>
             <p className="text-sm text-text-secondary">
-              Kein aktuelles Briefing verfügbar
+              PWBS fasst dein Wissen zusammen – in 2 Sekunden generiert.
             </p>
           </div>
         </div>
@@ -60,8 +63,8 @@ function BriefingCard() {
           disabled={generate.isPending}
           className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 disabled:opacity-50"
         >
-          <Plus aria-hidden="true" className="h-4 w-4" />
-          {generate.isPending ? "Generiere…" : "Briefing jetzt generieren"}
+          <Sparkles aria-hidden="true" className="h-4 w-4" />
+          {generate.isPending ? "Generiere…" : "Jetzt ausprobieren"}
         </button>
       </div>
     );
@@ -125,17 +128,18 @@ function ConnectorStatusWidget() {
       {connections.length === 0 ? (
         <div className="py-4 text-center">
           <Cable
-            className="mx-auto mb-2 h-8 w-8 text-text-tertiary"
+            className="mx-auto mb-2 h-8 w-8 text-indigo-400"
             aria-hidden="true"
           />
-          <p className="text-sm text-text-secondary">
-            Keine Konnektoren verbunden.
+          <p className="text-sm font-medium text-text">Wissen verbinden</p>
+          <p className="mt-1 text-xs text-text-tertiary">
+            Verbinde deine erste Datenquelle und PWBS lernt dich kennen.
           </p>
           <Link
             href="/connectors"
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-500"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
           >
-            Jetzt verbinden <ArrowRight className="h-3 w-3" />
+            Jetzt starten <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
       ) : (
@@ -183,132 +187,39 @@ function ConnectorStatusWidget() {
   );
 }
 
-function QuickActions() {
-  const actions = [
-    {
-      href: "/briefings",
-      icon: Sparkles,
-      label: "Neues Briefing",
-      description: "KI-Briefing generieren",
-      color: "bg-indigo-100 text-indigo-600",
-    },
-    {
-      href: "/search",
-      icon: Search,
-      label: "Suche",
-      description: "Dokumente durchsuchen",
-      color: "bg-indigo-100 text-indigo-600",
-    },
-    {
-      href: "/connectors",
-      icon: Cable,
-      label: "Verbinden",
-      description: "Datenquelle hinzufügen",
-      color: "bg-emerald-100 text-emerald-600",
-    },
-    {
-      href: "/projects",
-      icon: FolderKanban,
-      label: "Projekte",
-      description: "Projekt-Briefing abrufen",
-      color: "bg-amber-100 text-amber-600",
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {actions.map((action) => (
-        <Link
-          key={action.href}
-          href={action.href}
-          className="group flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 text-center transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5"
-        >
-          <div
-            className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.color} transition-transform group-hover:scale-110`}
-          >
-            <action.icon className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-text">{action.label}</p>
-            <p className="text-xs text-text-tertiary">{action.description}</p>
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-function StatsOverview() {
-  const { data } = useConnectionStatus();
-  const connections = data?.connections ?? [];
-  const activeCount = connections.filter((c) => c.status === "active").length;
-  const totalDocs = connections.reduce((sum, c) => sum + c.doc_count, 0);
-
-  const stats = [
-    {
-      label: "Konnektoren",
-      value: `${activeCount}/${connections.length}`,
-      icon: Zap,
-      color: "text-emerald-600",
-    },
-    {
-      label: "Dokumente",
-      value: totalDocs.toLocaleString("de-DE"),
-      icon: FileText,
-      color: "text-indigo-600",
-    },
-    {
-      label: "Letzte Aktivität",
-      value: connections.length > 0 ? "Heute" : "–",
-      icon: Clock,
-      color: "text-amber-600",
-    },
-    {
-      label: "Wissensgraph",
-      value: "Aktiv",
-      icon: TrendingUp,
-      color: "text-indigo-600",
-    },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="rounded-xl border border-border bg-surface p-4"
-        >
-          <div className="flex items-center gap-2">
-            <stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
-            <span className="text-xs font-medium text-text-secondary">
-              {stat.label}
-            </span>
-          </div>
-          <p className="mt-1 text-xl font-bold text-text">{stat.value}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function DashboardPage() {
+  const [commandValue, setCommandValue] = useState("");
+  const [promptKey, setPromptKey] = useState(0);
+
+  const handlePromptSelect = useCallback((prompt: string) => {
+    setCommandValue(prompt);
+    setPromptKey((k) => k + 1);
+    // Focus the command bar input after React re-renders
+    requestAnimationFrame(() => {
+      const input = document.querySelector<HTMLInputElement>(
+        '[aria-label="PWBS Kommandozeile"]',
+      );
+      input?.focus();
+    });
+  }, []);
+
   return (
     <div className="space-y-6">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-text">Dashboard</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Dein persönliches Wissens-Betriebssystem auf einen Blick
-        </p>
+      {/* Greeting + Command Bar: the new center of gravity */}
+      <div className="mx-auto max-w-3xl space-y-5 pt-4">
+        <DashboardGreeting className="text-center" />
+
+        <CommandBar
+          key={promptKey}
+          initialValue={commandValue}
+          className="w-full"
+        />
+
+        <SmartPrompts
+          onSelect={handlePromptSelect}
+          className="flex justify-center"
+        />
       </div>
-
-      {/* Stats */}
-      <ErrorBoundary>
-        <StatsOverview />
-      </ErrorBoundary>
-
-      {/* Quick Actions */}
-      <QuickActions />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -318,6 +229,9 @@ export default function DashboardPage() {
           </ErrorBoundary>
         </div>
         <div className="space-y-4">
+          <ErrorBoundary>
+            <KnowledgeProgress />
+          </ErrorBoundary>
           <ErrorBoundary>
             <ConnectorStatusWidget />
           </ErrorBoundary>

@@ -36,7 +36,8 @@ from pwbs.core.config import get_settings
 from pwbs.core.exceptions import PWBSError
 from pwbs.core.logging import setup_logging
 from pwbs.core.metrics import setup_metrics
-from pwbs.core.posthog import init_posthog, shutdown as shutdown_posthog
+from pwbs.core.posthog import init_posthog
+from pwbs.core.posthog import shutdown as shutdown_posthog
 from pwbs.core.sentry import init_sentry
 
 logger = logging.getLogger(__name__)

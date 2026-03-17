@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Allgemeine Geschaeftsbedingungen – PWBS",
-  description: "Allgemeine Geschaeftsbedingungen fuer die Nutzung von PWBS.",
+  title: "Allgemeine Geschäftsbedingungen – PWBS",
+  description: "Allgemeine Geschäftsbedingungen für die Nutzung von PWBS.",
 };
 
 export default function AGBPage() {
@@ -18,14 +18,14 @@ export default function AGBPage() {
             href="/"
             className="text-sm text-text-tertiary hover:text-text transition-colors"
           >
-            Zurueck zur Startseite
+            Zurück zur Startseite
           </Link>
         </div>
       </nav>
 
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-3xl font-bold text-text sm:text-4xl">
-          Allgemeine Geschaeftsbedingungen
+          Allgemeine Geschäftsbedingungen
         </h1>
         <p className="mt-2 text-sm text-text-tertiary">Stand: Juli 2025</p>
 
@@ -36,8 +36,8 @@ export default function AGBPage() {
               1. Geltungsbereich
             </h2>
             <p className="mt-2">
-              Diese Allgemeinen Geschaeftsbedingungen (AGB) gelten fuer die
-              Nutzung des Dienstes &quot;PWBS – Persoenliches
+              Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die
+              Nutzung des Dienstes &quot;PWBS – Persönliches
               Wissens-Betriebssystem&quot;, betrieben von Mick Gajewski
               (nachfolgend &quot;Anbieter&quot;).
             </p>
@@ -53,15 +53,15 @@ export default function AGBPage() {
               2. Leistungsbeschreibung
             </h2>
             <p className="mt-2">
-              PWBS ist eine KI-gestuetzte Plattform, die persoenliche
+              PWBS ist eine KI-gestützte Plattform, die persönliche
               Wissensdaten aus verschiedenen Quellen (Kalender, Notizen,
-              Meeting-Transkripte) zusammenfuehrt, semantisch analysiert und als
+              Meeting-Transkripte) zusammenführt, semantisch analysiert und als
               kontextbezogene Briefings aufbereitet.
             </p>
             <p className="mt-2">
               Der Dienst befindet sich derzeit in der{" "}
-              <strong>Beta-Phase</strong>. Funktionsumfang und Verfuegbarkeit
-              koennen sich aendern.
+              <strong>Beta-Phase</strong>. Funktionsumfang und Verfügbarkeit
+              können sich ändern.
             </p>
           </section>
 
@@ -72,17 +72,17 @@ export default function AGBPage() {
             </h2>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
-                Sie muessen wahrheitsgemäße Angaben bei der Registrierung machen
+                Sie müssen wahrheitsgemäße Angaben bei der Registrierung machen
               </li>
               <li>
-                Sie sind fuer die Sicherheit Ihrer Zugangsdaten verantwortlich
+                Sie sind für die Sicherheit Ihrer Zugangsdaten verantwortlich
               </li>
               <li>
-                Ein Konto ist persoenlich und darf nicht an Dritte weitergegeben
+                Ein Konto ist persönlich und darf nicht an Dritte weitergegeben
                 werden
               </li>
               <li>
-                Der Anbieter kann Konten bei Verstoss gegen diese AGB sperren
+                Der Anbieter kann Konten bei Verstoß gegen diese AGB sperren
               </li>
             </ul>
           </section>
@@ -92,23 +92,23 @@ export default function AGBPage() {
             <h2 className="text-xl font-semibold text-text">
               4. Beta-Bedingungen
             </h2>
-            <p className="mt-2">Waehrend der Beta-Phase gilt zusaetzlich:</p>
+            <p className="mt-2">Während der Beta-Phase gilt zusätzlich:</p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
                 Der Dienst wird &quot;wie besehen&quot; (as-is) bereitgestellt
               </li>
               <li>
-                Es besteht kein Anspruch auf eine bestimmte Verfuegbarkeit oder
-                Funktionalitaet
+                Es besteht kein Anspruch auf eine bestimmte Verfügbarkeit oder
+                Funktionalität
               </li>
               <li>
-                Der Anbieter kann den Dienst jederzeit aendern, einschraenken
+                Der Anbieter kann den Dienst jederzeit ändern, einschränken
                 oder einstellen
               </li>
               <li>
                 Ihre Daten werden auch bei Einstellung des Dienstes nicht ohne
-                Vorankuendigung geloescht – Sie erhalten mindestens 30 Tage Zeit
-                fuer einen Export
+                Vorankündigung gelöscht – Sie erhalten mindestens 30 Tage Zeit
+                für einen Export
               </li>
             </ul>
           </section>
@@ -120,17 +120,17 @@ export default function AGBPage() {
             </h2>
             <p className="mt-2">Der Nutzer verpflichtet sich:</p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
-              <li>Den Dienst nicht fuer rechtswidrige Zwecke zu verwenden</li>
+              <li>Den Dienst nicht für rechtswidrige Zwecke zu verwenden</li>
               <li>
                 Keine automatisierten Massenabfragen (Scraping, Bots)
-                durchzufuehren
+                durchzuführen
               </li>
               <li>
                 Keine Sicherheitsmechanismen zu umgehen oder zu manipulieren
               </li>
               <li>
-                Nur eigene Daten oder Daten, fuer die eine
-                Verarbeitungsberechtigung besteht, zu uebermitteln
+                Nur eigene Daten oder Daten, für die eine
+                Verarbeitungsberechtigung besteht, zu übermitteln
               </li>
             </ul>
           </section>
@@ -146,8 +146,8 @@ export default function AGBPage() {
               verbleiben im Eigentum des Nutzers.
             </p>
             <p className="mt-2">
-              Der Anbieter erhaelt kein Nutzungsrecht an den Inhalten des
-              Nutzers ueber die zur Diensterbringung notwendige Verarbeitung
+              Der Anbieter erhält kein Nutzungsrecht an den Inhalten des
+              Nutzers über die zur Diensterbringung notwendige Verarbeitung
               hinaus.
             </p>
           </section>
@@ -155,22 +155,22 @@ export default function AGBPage() {
           {/* 7 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              7. Haftungsbeschraenkung
+              7. Haftungsbeschränkung
             </h2>
             <p className="mt-2">
-              Der Anbieter haftet unbeschraenkt fuer Vorsatz und grobe
-              Fahrlaessigkeit. Bei leichter Fahrlaessigkeit haftet der Anbieter
+              Der Anbieter haftet unbeschränkt für Vorsatz und grobe
+              Fahrlässigkeit. Bei leichter Fahrlässigkeit haftet der Anbieter
               nur bei Verletzung wesentlicher Vertragspflichten und nur bis zur
-              Hoehe des vorhersehbaren, vertragstypischen Schadens.
+              Höhe des vorhersehbaren, vertragstypischen Schadens.
             </p>
-            <p className="mt-2">Der Anbieter haftet nicht fuer:</p>
+            <p className="mt-2">Der Anbieter haftet nicht für:</p>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
                 Inhaltliche Richtigkeit der KI-generierten Briefings und
                 Zusammenfassungen
               </li>
               <li>
-                Datenverlust durch hoehe Gewalt, Serverausfaelle Dritter oder
+                Datenverlust durch hoehe Gewalt, Serverausfälle Dritter oder
                 Handlungen des Nutzers
               </li>
               <li>
@@ -186,12 +186,12 @@ export default function AGBPage() {
               8. Datenschutz
             </h2>
             <p className="mt-2">
-              Die Verarbeitung personenbezogener Daten erfolgt gemaess unserer{" "}
+              Die Verarbeitung personenbezogener Daten erfolgt gemäß unserer{" "}
               <Link
                 href="/datenschutz"
                 className="text-indigo-600 hover:underline"
               >
-                Datenschutzerklaerung
+                Datenschutzerklärung
               </Link>
               , die Bestandteil dieser AGB ist.
             </p>
@@ -200,19 +200,19 @@ export default function AGBPage() {
           {/* 9 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              9. Kuendigung
+              9. Kündigung
             </h2>
             <ul className="mt-2 list-disc pl-6 space-y-1">
               <li>
-                Sie koennen Ihr Konto jederzeit in den Einstellungen loeschen
+                Sie können Ihr Konto jederzeit in den Einstellungen löschen
               </li>
               <li>
-                Bei Kontoloeschung werden alle Ihre Daten unwiderruflich
+                Bei Kontolöschung werden alle Ihre Daten unwiderruflich
                 entfernt (Dokumente, Embeddings, Knowledge Graph, Audit-Logs)
               </li>
               <li>
-                Der Anbieter kann den Zugang bei schwerwiegenden Verstoessen
-                gegen diese AGB mit sofortiger Wirkung kuendigen
+                Der Anbieter kann den Zugang bei schwerwiegenden Verstößen
+                gegen diese AGB mit sofortiger Wirkung kündigen
               </li>
             </ul>
           </section>
@@ -220,13 +220,13 @@ export default function AGBPage() {
           {/* 10 */}
           <section>
             <h2 className="text-xl font-semibold text-text">
-              10. Aenderungen der AGB
+              10. Änderungen der AGB
             </h2>
             <p className="mt-2">
-              Der Anbieter behaelt sich vor, diese AGB zu aendern. Aenderungen
+              Der Anbieter behält sich vor, diese AGB zu ändern. Änderungen
               werden per E-Mail oder in-App-Benachrichtigung mitgeteilt.
               Widerspricht der Nutzer nicht innerhalb von 30 Tagen, gelten die
-              geaenderten AGB als angenommen.
+              geänderten AGB als angenommen.
             </p>
           </section>
 
@@ -237,7 +237,7 @@ export default function AGBPage() {
             </h2>
             <p className="mt-2">
               Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss
-              des UN-Kaufrechts. Gerichtsstand ist, soweit gesetzlich zulaessig,
+              des UN-Kaufrechts. Gerichtsstand ist, soweit gesetzlich zulässig,
               der Wohnsitz des Anbieters.
             </p>
           </section>
@@ -249,9 +249,9 @@ export default function AGBPage() {
             </h2>
             <p className="mt-2">
               Sollte eine Bestimmung dieser AGB unwirksam sein oder werden, so
-              bleibt die Wirksamkeit der uebrigen Bestimmungen unberuehrt. An
+              bleibt die Wirksamkeit der übrigen Bestimmungen unberührt. An
               die Stelle der unwirksamen Bestimmung tritt eine wirksame
-              Regelung, die dem wirtschaftlichen Zweck am naechsten kommt.
+              Regelung, die dem wirtschaftlichen Zweck am nächsten kommt.
             </p>
           </section>
         </div>

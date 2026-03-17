@@ -8,7 +8,7 @@ A cognitive infrastructure that continuously ingests data from heterogeneous per
 
 ## Features
 
-- **Universal data ingestion** — connects to Google Calendar, Notion, Obsidian, Zoom transcripts, Slack, and Gmail via OAuth2 or local file watchers; cursor-based incremental sync prevents data loss or duplication
+- **Universal data ingestion** — connects to Google Calendar, Notion, Obsidian, and Zoom transcripts via OAuth2 or local file watchers; cursor-based incremental sync prevents data loss or duplication (Slack, Gmail, Outlook, Google Docs: Phase 3)
 - **Unified Document Format (UDF)** — all sources are normalized into a single canonical data model before any downstream processing
 - **Semantic processing pipeline** — chunks documents, generates embeddings, extracts named entities (people, projects, decisions, open questions), and writes to a multi-database knowledge store
 - **Hybrid search** — combines vector similarity (Weaviate) with full-text BM25 using Reciprocal Rank Fusion; owner-isolated by design
@@ -44,7 +44,7 @@ A cognitive infrastructure that continuously ingests data from heterogeneous per
 - Python 3.12+
 - Node.js 20+
 - API keys for at least one LLM provider (Anthropic or OpenAI) and one embedding provider
-- OAuth2 application credentials for any connectors you want to enable (Google, Notion, Slack, Zoom)
+- OAuth2 application credentials for any connectors you want to enable (Google, Notion, Zoom)
 
 ---
 
@@ -68,7 +68,9 @@ cp .env.example .env
 
 ```bash
 docker compose up -d
-# Starts PostgreSQL, Weaviate, Neo4j, and Redis
+# Starts PostgreSQL, Weaviate, and Redis
+# Neo4j (Knowledge Graph) is optional — activate with:
+#   docker compose --profile graph up -d
 ```
 
 ### 4. Set up the backend
@@ -214,9 +216,9 @@ All secrets and environment-specific settings are loaded from `.env`. Commit `.e
 | `PWBS_ENV`             | Yes      | `development` or `production` (disables `/docs` in production) |
 | `DATABASE_URL`         | Yes      | PostgreSQL connection string                                   |
 | `WEAVIATE_URL`         | Yes      | Weaviate instance URL                                          |
-| `NEO4J_URI`            | Yes      | Neo4j bolt URI                                                 |
-| `NEO4J_USER`           | Yes      | Neo4j username                                                 |
-| `NEO4J_PASSWORD`       | Yes      | Neo4j password                                                 |
+| `NEO4J_URI`            | No       | Neo4j bolt URI (optional – activate with `--profile graph`)    |
+| `NEO4J_USER`           | No       | Neo4j username                                                 |
+| `NEO4J_PASSWORD`       | No       | Neo4j password                                                 |
 | `ANTHROPIC_API_KEY`    | Yes\*    | Claude API key (\*required unless using Ollama only)           |
 | `OPENAI_API_KEY`       | No       | OpenAI API key (embeddings + GPT-4 fallback)                   |
 | `JWT_PRIVATE_KEY`      | Yes      | RS256 private key for signing access tokens                    |
@@ -226,11 +228,11 @@ All secrets and environment-specific settings are loaded from `.env`. Commit `.e
 | `GOOGLE_CLIENT_SECRET` | No       | OAuth2 client secret for Google connectors                     |
 | `NOTION_CLIENT_ID`     | No       | OAuth2 client ID for Notion connector                          |
 | `NOTION_CLIENT_SECRET` | No       | OAuth2 client secret for Notion connector                      |
-| `SLACK_CLIENT_ID`      | No       | OAuth2 client ID for Slack connector                           |
-| `SLACK_CLIENT_SECRET`  | No       | OAuth2 client secret for Slack connector                       |
+| `SLACK_CLIENT_ID`      | No       | OAuth2 client ID for Slack connector (Phase 3)                 |
+| `SLACK_CLIENT_SECRET`  | No       | OAuth2 client secret for Slack connector (Phase 3)             |
 | `ZOOM_CLIENT_ID`       | No       | OAuth2 client ID for Zoom connector                            |
 | `ZOOM_CLIENT_SECRET`   | No       | OAuth2 client secret for Zoom connector                        |
-| `REDIS_URL`            | No       | Redis connection string (required for Phase 3 task queue)      |
+| `REDIS_URL`            | Yes      | Redis connection string (required for Celery task queues)      |
 
 Security defaults enforced in production (`PWBS_ENV=production`):
 

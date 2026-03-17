@@ -22,7 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.exceptions import AuthenticationError, ValidationError
-from pwbs.core.posthog import capture as posthog_capture, identify as posthog_identify
+from pwbs.core.posthog import capture as posthog_capture
+from pwbs.core.posthog import identify as posthog_identify
 from pwbs.db.postgres import get_db_session
 from pwbs.models.briefing import Briefing as BriefingORM
 from pwbs.models.connection import Connection
@@ -198,24 +199,31 @@ async def login(
 
     # PostHog identify: sync user properties for analytics segmentation
     conn_count_stmt = (
-        select(func.count()).select_from(Connection).where(
+        select(func.count())
+        .select_from(Connection)
+        .where(
             Connection.user_id == user.id,
             Connection.status == "active",
         )
     )
     briefing_count_stmt = (
-        select(func.count()).select_from(BriefingORM).where(
+        select(func.count())
+        .select_from(BriefingORM)
+        .where(
             BriefingORM.user_id == user.id,
         )
     )
     conn_count = (await db.execute(conn_count_stmt)).scalar_one()
     briefing_count = (await db.execute(briefing_count_stmt)).scalar_one()
-    posthog_identify(str(user.id), {
-        "connected_sources_count": conn_count,
-        "total_briefings_generated": briefing_count,
-        "account_created_at": user.created_at.isoformat() if user.created_at else None,
-        "plan": "beta",
-    })
+    posthog_identify(
+        str(user.id),
+        {
+            "connected_sources_count": conn_count,
+            "total_briefings_generated": briefing_count,
+            "account_created_at": user.created_at.isoformat() if user.created_at else None,
+            "plan": "beta",
+        },
+    )
 
     return LoginResponse(
         access_token=pair.access_token,
