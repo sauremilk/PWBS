@@ -70,3 +70,19 @@ backend/migrations/versions/__pycache__/
 # PoC
 poc/.venv/
 poc/sample_data/
+
+# Development scratch / diagnostic files
+_diag*.txt
+_si.txt
+_sysinfo.txt
+_virt.txt
+_create_env.py
+backend/_*.txt
+backend/_*.py
+backend/t.ps1
+backend/test_*.txt
+backend/test_collect.txt
+backend/.test*.txt
+backend/openapi_current.json
+backend/_openapi_spec.json
+docs/internal/

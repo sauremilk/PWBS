@@ -145,7 +145,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Datenschutzrelevante Aktionen (Consent, Datenexport, Account-L�schung, Konnektor-Anbindung/-Trennung) werden unver�nderlich in `audit_log` protokolliert |
 | **Abh�ngigkeit**        | �                                                                                                                                                        |
 | **Gesch�tzter Aufwand** | M                                                                                                                                                        |
-| **Status**              | Fertig                                                                                                                                                    |
+| **Status**              | Fertig                                                                                                                                                   |
 
 **Beschreibung:** Audit-Log-Service implementieren, der Art. 5 Abs. 2 DSGVO (Rechenschaftspflicht) erf�llt. Protokolliert: Consent-Erteilung/-Widerruf, Datenexport, Account-L�schung, Konnektor-Anbindung/-Trennung, Login/Logout. Append-only, kein UPDATE/DELETE auf `audit_log`-Tabelle. Schlie�t das hohe OWASP-Finding A09-F01 aus dem Security-Audit.
 
@@ -161,7 +161,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Consent-Banner wird angezeigt, PostHog JS-SDK wird nur bei Opt-in geladen |
 | **Abh�ngigkeit**        | LAUNCH-LEG-001 (DSE muss existieren, damit Banner darauf verlinken kann)  |
 | **Gesch�tzter Aufwand** | S                                                                         |
-| **Status**              | Fertig                                                                     |
+| **Status**              | Fertig                                                                    |
 
 **Beschreibung:** TDDDG � 25-konformer Consent-Banner implementieren. �Ablehnen" gleichwertig prominent wie �Akzeptieren". Consent in `localStorage` speichern. Bei Ablehnung: `posthog-js` nicht laden. Nur f�r Client-Side-Analytics relevant (Server-Side-Events laufen unter Art. 6 Abs. 1 lit. b DSGVO ohne Consent). Spezifikation: TRACKING_PLAN �7.7.
 
@@ -213,7 +213,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Automatisierter E2E-Test validiert Register ? Konnektor verbinden ? erstes Briefing generieren |
 | **Abh�ngigkeit**        | LAUNCH-UX-001 (Error-Mapping), LAUNCH-ANA-002 (Core Events zur Messung)                        |
 | **Gesch�tzter Aufwand** | M                                                                                              |
-| **Status**              | Fertig                                                                                          |
+| **Status**              | Fertig                                                                                         |
 
 **Beschreibung:** Playwright- oder pytest-basierter E2E-Test, der den kompletten Happy-Path abdeckt: Registrierung ? OAuth-Mock ? Sync ? Briefing-Generierung ? Briefing-Anzeige. Test muss gegen Staging-Umgebung oder Docker-Compose-Stack lauff�hig sein. Critical User Journey aus UX_ONBOARDING_SPEC �4 als Testspezifikation.
 
@@ -229,7 +229,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `alembic current` zeigt `head` auf der Produktions-DB            |
 | **Abh�ngigkeit**        | Referenz: TASK-018 (Alembic-Setup), TASK-024 (Initial-Migration) |
 | **Gesch�tzter Aufwand** | S                                                                |
-| **Status**              | Fertig                                                                           |
+| **Status**              | Fertig                                                           |
 
 **Beschreibung:** Sicherstellen, dass alle Alembic-Migrationen konsistent angewendet sind. `alembic upgrade head` l�uft fehlerfrei auf einer leeren DB. `alembic current` zeigt `head` an. Migrationstests als Teil der CI-Pipeline.
 
@@ -245,7 +245,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `Content-Security-Policy`-Header wird bei allen Responses gesetzt             |
 | **Abh�ngigkeit**        | �                                                                             |
 | **Gesch�tzter Aufwand** | S                                                                             |
-| **Status**              | Fertig                                                                         |
+| **Status**              | Fertig                                                                        |
 
 **Beschreibung:** `Content-Security-Policy`-Header in `SecurityHeadersMiddleware` erg�nzen. Policy muss in Produktion XSS-Schutz bieten, ohne Frontend-Funktionalit�t zu brechen. Schlie�t das mittlere OWASP-Finding A03-F01.
 
@@ -261,7 +261,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `allow_methods` und `allow_headers` enthalten nur tats�chlich genutzte Werte |
 | **Abh�ngigkeit**        | �                                                                            |
 | **Gesch�tzter Aufwand** | XS                                                                           |
-| **Status**              | Fertig                                                                        |
+| **Status**              | Fertig                                                                       |
 
 **Beschreibung:** CORS-Konfiguration in der FastAPI-App von `allow_methods=["*"]` auf die tats�chlich genutzten HTTP-Methoden und Header einschr�nken. Senkt theoretisches Attack-Surface (Finding A05-F02).
 
@@ -297,7 +297,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 80 % der Testnutzer erhalten ihr erstes Briefing innerhalb von 20 Minuten nach Registrierung |
 | **Abh�ngigkeit**        | LAUNCH-UX-004 (Sync-Progress), LAUNCH-ANA-002 (Events zur Messung)                           |
 | **Gesch�tzter Aufwand** | M                                                                                            |
-| **Status**              | Blockiert: Erfordert reale Nutzertests gegen laufende Infrastruktur                                                                                        |
+| **Status**              | Blockiert: Erfordert reale Nutzertests gegen laufende Infrastruktur                          |
 
 **Beschreibung:** Den kompletten Flow Register ? Connect ? Sync ? Briefing manuell mit 5+ Testnutzern validieren. Engstellen identifizieren und optimieren gem�� UX_ONBOARDING_SPEC �8 (Ziel-Flow: ~2:30 Min). Messung erfolgt �ber Timestamps in Core Events (`auth_user_registered` ? `briefing_generated`).
 
@@ -313,7 +313,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei Sync > 2 Min oder LLM-Fehler wird ein vorbereitetes Demo-Briefing angezeigt |
 | **Abh�ngigkeit**        | �                                                                               |
 | **Gesch�tzter Aufwand** | M                                                                               |
-| **Status**              | Fertig                                                                           |
+| **Status**              | Fertig                                                                          |
 
 **Beschreibung:** Demo-Briefing-Template erstellen, das die Briefing-Struktur und den Nutzen demonstriert. Wird angezeigt bei: Sync-Timeout, LLM-Fehler, zu wenig Daten. Sobald das echte Briefing verf�gbar ist, ersetzt es das Demo-Briefing. Verhindert Onboarding-Abbr�che bei langen Wartezeiten.
 
@@ -329,7 +329,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Sync-Schritt zeigt Fortschrittsbalken, importierte Dokumentenzahl und gesch�tzte Restdauer |
 | **Abh�ngigkeit**        | �                                                                                          |
 | **Gesch�tzter Aufwand** | S                                                                                          |
-| **Status**              | Fertig                                                                                      |
+| **Status**              | Fertig                                                                                     |
 
 **Beschreibung:** Den Onboarding-Sync-Schritt (Step 3) erweitern um: Fortschrittsbalken mit %, importierte Dokumentenzahl, gesch�tzte Restdauer, mehrstufige Checkliste (Verbindung ? Abruf ? Analyse ? Wissensmodell), Educational Snippets w�hrend der Wartezeit. Spezifikation: UX_ONBOARDING_SPEC �5 Step 3 Wireframe.
 
@@ -345,7 +345,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Nach Wizard-Abbruch und R�ckkehr wird der Wizard am letzten abgeschlossenen Schritt fortgesetzt |
 | **Abh�ngigkeit**        | �                                                                                               |
 | **Gesch�tzter Aufwand** | S                                                                                               |
-| **Status**              | Fertig                                                                                           |
+| **Status**              | Fertig                                                                                          |
 
 **Beschreibung:** Onboarding-State im User-Profil (Backend) persistieren. `OnboardingGate` pr�ft beim Laden den gespeicherten Schritt und setzt dort fort. Verhindert Frustration bei versehentlichem Tab-Schlie�en.
 
@@ -361,7 +361,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Jeder Wizard-Schritt hat einen sichtbaren �Zur�ck"-Button |
 | **Abh�ngigkeit**        | �                                                         |
 | **Gesch�tzter Aufwand** | XS                                                        |
-| **Status**              | Fertig                                                     |
+| **Status**              | Fertig                                                    |
 
 **Beschreibung:** Sichtbaren �? Zur�ck"-Button in jedem Wizard-Schritt implementieren. Nielsen-Heuristik #3 (User Control and Freedom). Betreffende Komponente: `OnboardingWizard`.
 
@@ -377,7 +377,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alle 10 Dashboard-Seiten zeigen spezifische, motivierende Empty States mit CTA |
 | **Abh�ngigkeit**        | �                                                                              |
 | **Gesch�tzter Aufwand** | M                                                                              |
-| **Status**              | Fertig                                        |
+| **Status**              | Fertig                                                                         |
 
 **Beschreibung:** Empty States f�r alle Dashboard-Seiten implementieren gem�� UX_ONBOARDING_SPEC �6 Tabelle. Seiten: Dashboard (2 Varianten), Briefings (2), Konnektoren, Suche (2), Knowledge, Erinnerungen, Projekte, Entscheidungen. Texte und CTAs aus UX_ONBOARDING_SPEC �6 �bernehmen.
 
@@ -393,7 +393,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Nach Wizard-Skip wird ein persistenter, schlie�barer Banner auf dem Dashboard angezeigt |
 | **Abh�ngigkeit**        | �                                                                                       |
 | **Gesch�tzter Aufwand** | XS                                                                                      |
-| **Status**              | Offen                                                                                   |
+| **Status**              | Fertig                                                                                   |
 
 **Beschreibung:** Wenn der Nutzer den Onboarding-Wizard �berspringt, einen schlie�baren Banner anzeigen: �Verbinde deine erste Quelle, um dein Wissenssystem zu aktivieren." Verhindert, dass Nutzer ohne Konnektor im leeren Dashboard landen.
 
@@ -445,7 +445,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alert-Regeln f�r P0/P1-Metriken (API Down, Error Rate > 5 %, DB-Connection-Fehler) sind aktiv und liefern an Discord |
 | **Abh�ngigkeit**        | LAUNCH-OPS-001 (Error-Patterns aus Sentry informieren Alert-Schwellen)                                               |
 | **Gesch�tzter Aufwand** | S                                                                                                                    |
-| **Status**              | Fertig                                                                                                                |
+| **Status**              | Fertig                                                                                                               |
 
 **Beschreibung:** Grafana-Alert-Regeln erstellen f�r: API-Health-Check fehlgeschlagen, Error Rate > 5 %, P95-Latenz > 2 s, DB-Connection-Pool > 80 %, Disk > 85 %. Discord-Webhook als Notification-Kanal. Konfiguration gem�� SUPPORT_OPS �3.3 Monitoring-Matrix.
 
@@ -461,7 +461,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `docs/runbooks/deployment.md` existiert mit Zero-Downtime-Deploy und Rollback-Verfahren |
 | **Abh�ngigkeit**        | �                                                                                       |
 | **Gesch�tzter Aufwand** | S                                                                                       |
-| **Status**              | Fertig                                                                                      |
+| **Status**              | Fertig                                                                                  |
 
 **Beschreibung:** Deployment-Runbook erstellen: ECS Rolling Update (min/max 50 %/200 %), Docker Image Tag Pinning, Task Definition Revisions, Rollback-Verfahren (vorherige Revision aktivieren), Alembic-Migration vor Deploy, Health-Check-Validierung nach Deploy. Kurzskizze in SUPPORT_OPS �6.1.
 
@@ -469,15 +469,15 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 
 #### LAUNCH-OPS-004: Backup-Restore-Test durchf�hren
 
-| Feld                    | Wert                                                                       |
-| ----------------------- | -------------------------------------------------------------------------- |
-| **Quelle**              | RELEASE_READINESS OPS-05, SUPPORT_OPS �10 #15                              |
-| **Priorit�t**           | P1                                                                         |
-| **Kategorie**           | OPS                                                                        |
-| **Akzeptanzkriterium**  | DR-Runbook wurde praktisch durchgef�hrt und RTO ist gemessen (Ziel: < 4 h) |
-| **Abh�ngigkeit**        | �                                                                          |
-| **Gesch�tzter Aufwand** | M                                                                          |
-| **Status**              | Blockiert: Manuelle DR-Testdurchfuehrung gegen Staging erforderlich. Testprotokoll in DR-Runbook ergaenzt                                                                      |
+| Feld                    | Wert                                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Quelle**              | RELEASE_READINESS OPS-05, SUPPORT_OPS �10 #15                                                             |
+| **Priorit�t**           | P1                                                                                                        |
+| **Kategorie**           | OPS                                                                                                       |
+| **Akzeptanzkriterium**  | DR-Runbook wurde praktisch durchgef�hrt und RTO ist gemessen (Ziel: < 4 h)                                |
+| **Abh�ngigkeit**        | �                                                                                                         |
+| **Gesch�tzter Aufwand** | M                                                                                                         |
+| **Status**              | Blockiert: Manuelle DR-Testdurchfuehrung gegen Staging erforderlich. Testprotokoll in DR-Runbook ergaenzt |
 
 **Beschreibung:** Disaster-Recovery-Runbook (`docs/runbooks/disaster-recovery.md`) praktisch validieren: PostgreSQL-Backup-Restore, Weaviate-Neuaufbau, Redis-AOF-Recovery. RTO messen und gegen Ziel < 4 h pr�fen. Testumgebung verwenden (nicht Produktion).
 
@@ -493,7 +493,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `.github/dependabot.yml` existiert f�r Python und npm Ecosystems |
 | **Abh�ngigkeit**        | �                                                                |
 | **Gesch�tzter Aufwand** | XS                                                               |
-| **Status**              | Fertig                                                            |
+| **Status**              | Fertig                                                           |
 
 **Beschreibung:** `.github/dependabot.yml` erstellen mit automatischen Dependency-Updates f�r Python (pip) und JavaScript (npm). W�chentliche Checks, PRs mit Changelogs. Erg�nzt die manuelle Pr�fung aus LAUNCH-REL-001.
 
@@ -561,7 +561,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei Login wird `posthog.identify()` aufgerufen und User Properties (`connected_sources_count`, `total_briefings_generated`) werden aktualisiert |
 | **Abh�ngigkeit**        | LAUNCH-ANA-001                                                                                                                                  |
 | **Gesch�tzter Aufwand** | S                                                                                                                                               |
-| **Status**              | Fertig                                                                                                                                           |
+| **Status**              | Fertig                                                                                                                                          |
 
 **Beschreibung:** PostHog `identify()` bei Login implementieren. User Properties setzen und bei Konnektor- und Briefing-Events aktualisieren: `connected_sources_count`, `total_briefings_generated`, `first_briefing_at`, `account_created_at`, `plan` (= "beta"). Erm�glicht Kohortenanalyse und Retention-Tracking.
 
@@ -569,15 +569,15 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 
 #### LAUNCH-ANA-004: Activation-Funnel messbar machen
 
-| Feld                    | Wert                                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| **Quelle**              | RELEASE_READINESS ANA-02, TRACKING_PLAN �6.1                                             |
-| **Priorit�t**           | P2                                                                                       |
-| **Kategorie**           | ANA                                                                                      |
-| **Akzeptanzkriterium**  | Activation-Funnel (Register ? Connect ? Briefing) ist in PostHog als Funnel konfiguriert |
-| **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events m�ssen flie�en)                                              |
-| **Gesch�tzter Aufwand** | S                                                                                        |
-| **Status**              | Blockiert: PostHog-UI-Konfiguration erforderlich (Events vorhanden, Dashboard-Setup manuell)                                                                                    |
+| Feld                    | Wert                                                                                         |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| **Quelle**              | RELEASE_READINESS ANA-02, TRACKING_PLAN �6.1                                                 |
+| **Priorit�t**           | P2                                                                                           |
+| **Kategorie**           | ANA                                                                                          |
+| **Akzeptanzkriterium**  | Activation-Funnel (Register ? Connect ? Briefing) ist in PostHog als Funnel konfiguriert     |
+| **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events m�ssen flie�en)                                                  |
+| **Gesch�tzter Aufwand** | S                                                                                            |
+| **Status**              | Blockiert: PostHog-UI-Konfiguration erforderlich (Events vorhanden, Dashboard-Setup manuell) |
 
 **Beschreibung:** Activation-Funnel in PostHog konfigurieren gem�� TRACKING_PLAN �6.1: `auth_user_registered` ? `onboarding_started` ? `connector_connected` ? `briefing_generated` (is_first=true) ? `briefing_viewed`. 30-Tage-Zeitfenster. Erm�glicht Dropout-Analyse pro Schritt.
 
@@ -605,15 +605,15 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 
 #### LAUNCH-GTM-002: Demo-Video erstellen
 
-| Feld                    | Wert                                                               |
-| ----------------------- | ------------------------------------------------------------------ |
-| **Quelle**              | GTM_PLAN �7 Woche 1�2, �9, RELEASE_READINESS CNT-OB-02             |
-| **Priorit�t**           | P1                                                                 |
-| **Kategorie**           | GTM                                                                |
-| **Akzeptanzkriterium**  | 90-Sekunden-Screencast ist fertig: Register ? Konnektor ? Briefing |
-| **Abh�ngigkeit**        | �                                                                  |
-| **Gesch�tzter Aufwand** | M                                                                  |
-| **Status**              | Blockiert: Storyboard fertig, Screencast-Aufnahme manuell erforderlich                                                              |
+| Feld                    | Wert                                                                   |
+| ----------------------- | ---------------------------------------------------------------------- |
+| **Quelle**              | GTM_PLAN �7 Woche 1�2, �9, RELEASE_READINESS CNT-OB-02                 |
+| **Priorit�t**           | P1                                                                     |
+| **Kategorie**           | GTM                                                                    |
+| **Akzeptanzkriterium**  | 90-Sekunden-Screencast ist fertig: Register ? Konnektor ? Briefing     |
+| **Abh�ngigkeit**        | �                                                                      |
+| **Gesch�tzter Aufwand** | M                                                                      |
+| **Status**              | Blockiert: Storyboard fertig, Screencast-Aufnahme manuell erforderlich |
 
 **Beschreibung:** 90-Sekunden-Screencast produzieren, der den Kern-Flow zeigt: Registrierung ? Konnektor verbinden ? erstes Briefing. Deutsch mit englischen Untertiteln. Wird auf Landing Page, ProductHunt-Listing und Social Media eingesetzt. Spezifikation: GTM_PLAN �9 Tabelle �Vor dem Launch".
 
@@ -629,7 +629,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Discord-Server ist live mit Moderationsregeln gem�� `docs/public-beta/community-setup.md` |
 | **Abh�ngigkeit**        | �                                                                                         |
 | **Gesch�tzter Aufwand** | S                                                                                         |
-| **Status**              | Blockiert: Manuelle Aktion  Discord-Server erstellen und konfigurieren                                                                                     |
+| **Status**              | Blockiert: Manuelle Aktion Discord-Server erstellen und konfigurieren                     |
 
 **Beschreibung:** Discord-Community-Server einrichten nach `docs/public-beta/community-setup.md`. Kan�le: #ank�ndigungen, #feedback, #bugs, #fragen, #off-topic. Moderationsregeln aktivieren. Ziel: 20 Mitglieder zum Start der Closed Beta. Prim�rer Support-Kanal.
 
@@ -677,7 +677,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alle 6 Exit-Kriterien aus GTM_PLAN �6 sind evaluiert (je Kriterium: erf�llt/nicht erf�llt) |
 | **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events), LAUNCH-UX-002 (TTFB), LAUNCH-GTM-001 (Design-Partner aktiv)  |
 | **Gesch�tzter Aufwand** | S                                                                                          |
-| **Status**              | Blockiert: ANA-002 + UX-002 + GTM-001 nicht Fertig                                                                                      |
+| **Status**              | Blockiert: ANA-002 + UX-002 + GTM-001 nicht Fertig                                         |
 
 **Beschreibung:** Nach 4�6 Wochen Closed Beta alle 6 Exit-Kriterien systematisch evaluieren: (1) = 5 aktive Nutzer, (2) D7-Retention = 60 %, (3) TTFB = 20 Min, (4) kein offener P0-Bug, (5) = 3 Briefings/Nutzer/Woche, (6) 80 % der Nutzer bewerten Briefings als hilfreich. Entscheidung: Open-Beta-�bergang oder Iteration.
 

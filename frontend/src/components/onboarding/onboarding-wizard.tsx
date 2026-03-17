@@ -13,7 +13,11 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { useConnectorTypes, useConnectionStatus, useConnectOAuth } from "@/hooks/use-connectors";
+import {
+  useConnectorTypes,
+  useConnectionStatus,
+  useConnectOAuth,
+} from "@/hooks/use-connectors";
 import { useGenerateBriefing } from "@/hooks/use-briefings";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { trackEvent } from "@/lib/analytics";
@@ -40,7 +44,10 @@ function StepIndicator({ current }: { current: WizardStep }) {
   const currentIdx = STEPS.findIndex((s) => s.key === current);
 
   return (
-    <nav className="flex items-center justify-center gap-2" aria-label="Onboarding-Schritte">
+    <nav
+      className="flex items-center justify-center gap-2"
+      aria-label="Onboarding-Schritte"
+    >
       {STEPS.map((step, idx) => {
         const Icon = step.icon;
         const isDone = idx < currentIdx;
@@ -86,12 +93,11 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100">
         <Sparkles className="h-8 w-8 text-indigo-600" />
       </div>
-      <h2 className="mb-3 text-2xl font-bold text-text">
-        Willkommen bei PWBS
-      </h2>
+      <h2 className="mb-3 text-2xl font-bold text-text">Willkommen bei PWBS</h2>
       <p className="mb-2 max-w-md text-text-secondary">
         Dein Persoenliches Wissens-Betriebssystem verbindet deine Datenquellen,
-        analysiert Zusammenhaenge und liefert dir taeglich kontextbezogene Briefings.
+        analysiert Zusammenhaenge und liefert dir taeglich kontextbezogene
+        Briefings.
       </p>
       <p className="mb-8 max-w-md text-sm text-text-tertiary">
         In wenigen Schritten verbindest du deine erste Datenquelle und erhaeltst
@@ -211,7 +217,9 @@ function StepSync({
   const activeConnections = connections.filter(
     (c: ConnectionStatus) => c.status === "active" || c.status === "syncing",
   );
-  const isSyncing = activeConnections.some((c: ConnectionStatus) => c.status === "syncing");
+  const isSyncing = activeConnections.some(
+    (c: ConnectionStatus) => c.status === "syncing",
+  );
   const totalDocs = activeConnections.reduce((sum, c) => sum + c.doc_count, 0);
 
   // Animated progress for the indeterminate bar
@@ -290,18 +298,28 @@ function StepSync({
             className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3"
           >
             {c.status === "syncing" ? (
-              <RefreshCw aria-hidden="true" className="h-4 w-4 animate-spin text-indigo-500" />
+              <RefreshCw
+                aria-hidden="true"
+                className="h-4 w-4 animate-spin text-indigo-500"
+              />
             ) : (
-              <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-green-500" />
+              <CheckCircle2
+                aria-hidden="true"
+                className="h-4 w-4 text-green-500"
+              />
             )}
-            <span className="text-sm font-medium text-text-secondary">{c.type}</span>
+            <span className="text-sm font-medium text-text-secondary">
+              {c.type}
+            </span>
             <span className="ml-auto text-xs text-text-tertiary">
               {c.doc_count} Dokumente
             </span>
           </div>
         ))}
         {activeConnections.length === 0 && (
-          <p className="text-sm text-text-tertiary">Keine aktiven Verbindungen.</p>
+          <p className="text-sm text-text-tertiary">
+            Keine aktiven Verbindungen.
+          </p>
         )}
       </div>
 
@@ -329,7 +347,13 @@ function StepSync({
 // Step 4: Generate First Briefing
 // ---------------------------------------------------------------------------
 
-function StepBriefing({ onComplete, onBack }: { onComplete: () => void; onBack: () => void }) {
+function StepBriefing({
+  onComplete,
+  onBack,
+}: {
+  onComplete: () => void;
+  onBack: () => void;
+}) {
   const generate = useGenerateBriefing();
   const router = useRouter();
   const [generated, setGenerated] = useState(false);
@@ -357,9 +381,7 @@ function StepBriefing({ onComplete, onBack }: { onComplete: () => void; onBack: 
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100">
         <FileText className="h-8 w-8 text-green-600" />
       </div>
-      <h2 className="mb-2 text-xl font-bold text-text">
-        Dein erstes Briefing
-      </h2>
+      <h2 className="mb-2 text-xl font-bold text-text">Dein erstes Briefing</h2>
       <p className="mb-6 max-w-md text-sm text-text-secondary">
         {generated
           ? "Dein Briefing wurde erstellt! Du kannst es jetzt ansehen."
@@ -437,7 +459,10 @@ export function OnboardingWizard() {
 
   // Resume from last saved step or start at "welcome"
   const initialStep: WizardStep =
-    lastStep && (["welcome", "connector", "sync", "briefing"] as string[]).includes(lastStep)
+    lastStep &&
+    (["welcome", "connector", "sync", "briefing"] as string[]).includes(
+      lastStep,
+    )
       ? (lastStep as WizardStep)
       : "welcome";
   const [step, setStep] = useState<WizardStep>(initialStep);
@@ -484,9 +509,7 @@ export function OnboardingWizard() {
         </div>
 
         {/* Step Content */}
-        {step === "welcome" && (
-          <StepWelcome onNext={() => goTo("connector")} />
-        )}
+        {step === "welcome" && <StepWelcome onNext={() => goTo("connector")} />}
         {step === "connector" && (
           <StepConnector
             onNext={() => goTo("sync")}

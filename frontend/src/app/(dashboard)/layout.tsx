@@ -4,6 +4,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { WebSocketProvider } from "@/components/layout/websocket-provider";
 import { SkipLink } from "@/components/ui/skip-link";
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
+import { OnboardingSkipBanner } from "@/components/onboarding/skip-banner";
 import { MobileNavProvider } from "@/components/layout/mobile-nav-context";
 import { FeedbackWidget } from "@/components/feedback/feedback-widget";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -29,6 +30,7 @@ export default function DashboardLayout({
                 tabIndex={-1}
               >
                 <div className="mx-auto max-w-7xl animate-fade-in">
+                  <OnboardingSkipBanner />
                   <ErrorBoundary>{children}</ErrorBoundary>
                 </div>
               </main>

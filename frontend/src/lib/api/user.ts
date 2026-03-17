@@ -86,7 +86,9 @@ export async function getLlmUsage(params?: {
 }
 
 export async function getBriefingPreferences(): Promise<BriefingPreferencesResponse> {
-  return apiClient.get<BriefingPreferencesResponse>("/user/briefing-preferences");
+  return apiClient.get<BriefingPreferencesResponse>(
+    "/user/briefing-preferences",
+  );
 }
 
 export async function updateBriefingPreferences(

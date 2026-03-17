@@ -40,7 +40,9 @@ export function useOnboarding() {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const complete = useCallback(() => {
