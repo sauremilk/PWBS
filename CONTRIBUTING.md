@@ -91,14 +91,14 @@ pytest tests/integration/ -v   # requires running Docker services
 
 The following modules in `backend/_deferred/` are **not part of the MVP** and must not be imported or extended:
 
-| Module | Phase |
-|--------|-------|
-| `billing/` | Phase 4 |
-| `teams/` | Phase 4 |
-| `rbac/` | Phase 4 |
+| Module         | Phase   |
+| -------------- | ------- |
+| `billing/`     | Phase 4 |
+| `teams/`       | Phase 4 |
+| `rbac/`        | Phase 4 |
 | `marketplace/` | Phase 5 |
-| `developer/` | Phase 5 |
-| `sso/` | Phase 4 |
+| `developer/`   | Phase 5 |
+| `sso/`         | Phase 4 |
 
 Active connectors (MVP): **Google Calendar, Notion, Zoom, Obsidian**
 
@@ -121,6 +121,7 @@ pytest tests/integration/ -v --docker
 ## Opening Issues
 
 Please include:
+
 - Expected vs. actual behavior
 - Steps to reproduce
 - Relevant log output (remove any personal data before posting)

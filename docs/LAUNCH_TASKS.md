@@ -509,7 +509,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `docs/runbooks/database-migration.md` existiert mit Rollback-Verfahren |
 | **Abh�ngigkeit**        | �                                                                      |
 | **Gesch�tzter Aufwand** | S                                                                      |
-| **Status**              | Offen                                                                  |
+| **Status**              | Fertig                                                                  |
 
 **Beschreibung:** Runbook f�r Alembic-Migrationen: `alembic upgrade head` im CI vor Deploy, Downgrade-Verfahren, Backup-Pflicht bei destruktiven Migrationen (DROP COLUMN), Snapshot-Restore bei Fehler. Kurzskizze in SUPPORT_OPS �6.1.
 
