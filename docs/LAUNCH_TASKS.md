@@ -445,7 +445,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alert-Regeln f�r P0/P1-Metriken (API Down, Error Rate > 5 %, DB-Connection-Fehler) sind aktiv und liefern an Discord |
 | **Abh�ngigkeit**        | LAUNCH-OPS-001 (Error-Patterns aus Sentry informieren Alert-Schwellen)                                               |
 | **Gesch�tzter Aufwand** | S                                                                                                                    |
-| **Status**              | Offen                                                                                                                |
+| **Status**              | In Arbeit                                                                                                                |
 
 **Beschreibung:** Grafana-Alert-Regeln erstellen f�r: API-Health-Check fehlgeschlagen, Error Rate > 5 %, P95-Latenz > 2 s, DB-Connection-Pool > 80 %, Disk > 85 %. Discord-Webhook als Notification-Kanal. Konfiguration gem�� SUPPORT_OPS �3.3 Monitoring-Matrix.
 
