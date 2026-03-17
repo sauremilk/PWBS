@@ -71,4 +71,4 @@ class OrganizationMember(Base):
     )
 
     organization: Mapped[Organization] = relationship(back_populates="members")
-    user: Mapped[User] = relationship()  # noqa: F821
+    user: Mapped[User] = relationship()  # noqa: F821  # type: ignore[name-defined]

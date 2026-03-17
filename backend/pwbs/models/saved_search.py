@@ -19,6 +19,6 @@ class SavedSearch(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
     query: Mapped[str] = mapped_column(Text, nullable=False)
-    filters_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    filters_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # type: ignore[type-arg]
 
-    user: Mapped[User] = relationship(back_populates="saved_searches")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="saved_searches")  # noqa: F821  # type: ignore[name-defined]

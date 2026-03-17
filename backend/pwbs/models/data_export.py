@@ -32,4 +32,4 @@ class DataExport(UUIDPrimaryKeyMixin, Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    user: Mapped[User] = relationship()  # noqa: F821
+    user: Mapped[User] = relationship()  # noqa: F821  # type: ignore[name-defined]

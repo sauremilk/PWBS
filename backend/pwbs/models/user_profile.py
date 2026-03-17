@@ -31,14 +31,14 @@ class UserProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     analysis_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Top themes as JSON list: [{"name": "...", "mention_count": N}, ...]
-    top_themes: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    top_themes: Mapped[list | None] = mapped_column(JSONB, nullable=True)  # type: ignore[type-arg]
 
     # Average meetings per week (float)
     avg_meetings_per_week: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # Preferred work hours as JSON:
     # {"hours": {0: count, ...}, "peak_start": 9, "peak_end": 17}
-    preferred_hours: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    preferred_hours: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # type: ignore[type-arg]
 
     # Average days from decision creation to status=made
     decision_speed_avg_days: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -47,4 +47,4 @@ class UserProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship
-    user: Mapped[User] = relationship(back_populates="profiles")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="profiles")  # noqa: F821  # type: ignore[name-defined]

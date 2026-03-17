@@ -93,7 +93,7 @@ class Plugin(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    author: Mapped[User] = relationship(lazy="selectin")  # noqa: F821
+    author: Mapped[User] = relationship(lazy="selectin")  # noqa: F821  # type: ignore[name-defined]
     installations: Mapped[list[InstalledPlugin]] = relationship(
         back_populates="plugin",
         cascade="all, delete-orphan",
@@ -137,7 +137,7 @@ class InstalledPlugin(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    user: Mapped[User] = relationship(lazy="selectin")  # noqa: F821
+    user: Mapped[User] = relationship(lazy="selectin")  # noqa: F821  # type: ignore[name-defined]
     plugin: Mapped[Plugin] = relationship(
         back_populates="installations",
         lazy="selectin",
@@ -172,5 +172,5 @@ class PluginRating(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    user: Mapped[User] = relationship(lazy="selectin")  # noqa: F821
+    user: Mapped[User] = relationship(lazy="selectin")  # noqa: F821  # type: ignore[name-defined]
     plugin: Mapped[Plugin] = relationship(lazy="selectin")

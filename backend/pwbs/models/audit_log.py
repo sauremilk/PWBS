@@ -35,4 +35,4 @@ class AuditLog(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    user: Mapped[User | None] = relationship(back_populates="audit_logs")  # noqa: F821
+    user: Mapped[User | None] = relationship(back_populates="audit_logs")  # noqa: F821  # type: ignore[name-defined]

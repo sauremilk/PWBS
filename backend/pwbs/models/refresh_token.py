@@ -48,4 +48,4 @@ class RefreshToken(UUIDPrimaryKeyMixin, Base):
         nullable=False,
     )
 
-    user: Mapped[User] = relationship(back_populates="refresh_tokens")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="refresh_tokens")  # noqa: F821  # type: ignore[name-defined]

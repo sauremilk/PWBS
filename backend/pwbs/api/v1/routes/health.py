@@ -15,6 +15,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 import httpx
@@ -85,7 +86,9 @@ async def _check_llm_health() -> bool:
     return False
 
 
-async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
+async def _timed_check(
+    name: str, check_fn: Callable[[], Coroutine[Any, Any, bool]]
+) -> dict[str, Any]:
     start = time.monotonic()
     try:
         ok = await asyncio.wait_for(check_fn(), timeout=_HEALTH_TIMEOUT)
@@ -174,7 +177,9 @@ def _require_admin(user: User) -> None:
         )
 
 
-async def _detailed_timed_check(name: str, check_fn: Any) -> dict[str, Any]:
+async def _detailed_timed_check(
+    name: str, check_fn: Callable[[], Coroutine[Any, Any, bool]]
+) -> dict[str, Any]:
     """Run a health check capturing status, latency, and details."""
     start = time.monotonic()
     try:

@@ -54,4 +54,4 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship back to user
-    user: Mapped[User] = relationship(back_populates="subscription")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="subscription")  # noqa: F821  # type: ignore[name-defined]

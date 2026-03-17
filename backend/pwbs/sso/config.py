@@ -9,9 +9,8 @@ Pydantic models for per-organization SSO setup:
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 __all__ = [
     "AttributeMapping",
@@ -137,7 +136,7 @@ class SSOConfig(BaseModel):
     @field_validator("saml")
     @classmethod
     def _require_saml_for_saml_provider(
-        cls, v: SAMLProviderConfig | None, info: Any
+        cls, v: SAMLProviderConfig | None, info: ValidationInfo
     ) -> SAMLProviderConfig | None:
         data = info.data
         if data.get("provider") == SSOProvider.SAML and v is None:
@@ -147,7 +146,7 @@ class SSOConfig(BaseModel):
     @field_validator("oidc")
     @classmethod
     def _require_oidc_for_oidc_provider(
-        cls, v: OIDCProviderConfig | None, info: Any
+        cls, v: OIDCProviderConfig | None, info: ValidationInfo
     ) -> OIDCProviderConfig | None:
         data = info.data
         if data.get("provider") == SSOProvider.OIDC and v is None:

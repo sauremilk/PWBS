@@ -65,7 +65,7 @@ class WebhookDelivery(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     event_type: Mapped[str] = mapped_column(Text, nullable=False)
-    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)  # type: ignore[type-arg]
     status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
     response_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     success: Mapped[bool] = mapped_column(default=False, nullable=False)

@@ -62,5 +62,5 @@ class Decision(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user: Mapped[User] = relationship(back_populates="decisions")  # noqa: F821
-    source_document: Mapped[Document | None] = relationship()  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="decisions")  # noqa: F821  # type: ignore[name-defined]
+    source_document: Mapped[Document | None] = relationship()  # noqa: F821  # type: ignore[name-defined]

@@ -37,8 +37,8 @@ class Document(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=True,
     )
 
-    user: Mapped[User] = relationship(back_populates="documents")  # noqa: F821
-    chunks: Mapped[list[Chunk]] = relationship(  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="documents")  # noqa: F821  # type: ignore[name-defined]
+    chunks: Mapped[list[Chunk]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="document",
         cascade="all, delete-orphan",
         lazy="selectin",

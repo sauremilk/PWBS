@@ -52,9 +52,9 @@ class BriefingShare(UUIDPrimaryKeyMixin, Base):
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    briefing: Mapped[Briefing] = relationship()  # noqa: F821
-    sharer: Mapped[User] = relationship(foreign_keys=[shared_by])  # noqa: F821
-    recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])  # noqa: F821
+    briefing: Mapped[Briefing] = relationship()  # noqa: F821  # type: ignore[name-defined]
+    sharer: Mapped[User] = relationship(foreign_keys=[shared_by])  # noqa: F821  # type: ignore[name-defined]
+    recipient: Mapped[User] = relationship(foreign_keys=[recipient_id])  # noqa: F821  # type: ignore[name-defined]
 
 
 class BriefingComment(UUIDPrimaryKeyMixin, Base):
@@ -91,5 +91,5 @@ class BriefingComment(UUIDPrimaryKeyMixin, Base):
     )
 
     # Relationships
-    briefing: Mapped[Briefing] = relationship()  # noqa: F821
-    author: Mapped[User] = relationship()  # noqa: F821
+    briefing: Mapped[Briefing] = relationship()  # noqa: F821  # type: ignore[name-defined]
+    author: Mapped[User] = relationship()  # noqa: F821  # type: ignore[name-defined]

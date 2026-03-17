@@ -392,12 +392,12 @@ async def _run_briefing_generation(
         from pwbs.briefing.generator import BriefingGenerator
         from pwbs.briefing.persistence import BriefingPersistenceService
         from pwbs.core.llm_gateway import LLMGateway
-        from pwbs.db.postgres import async_session_factory
+        from pwbs.db.postgres import async_session_factory  # type: ignore[attr-defined]
         from pwbs.prompts.registry import PromptRegistry
 
         async with async_session_factory()() as session:
             # Build services
-            llm = LLMGateway()
+            llm = LLMGateway()  # type: ignore[call-arg]
             registry = PromptRegistry()
             generator = BriefingGenerator(llm, registry)
 
@@ -414,7 +414,7 @@ async def _run_briefing_generation(
                 from pwbs.briefing.context import NullGraphService
                 from pwbs.search.service import SemanticSearchService as _MornSearchSvc
 
-                morn_search_svc = _MornSearchSvc(session)
+                morn_search_svc = _MornSearchSvc(session)  # type: ignore[call-arg]
                 morn_assembler = MorningContextAssembler(
                     session=session,
                     search_service=morn_search_svc,
@@ -450,7 +450,7 @@ async def _run_briefing_generation(
                     )
                     return
 
-                proj_search_svc = _ProjSearchSvc(session)
+                proj_search_svc = _ProjSearchSvc(session)  # type: ignore[call-arg]
                 proj_assembler = ProjectContextAssembler(
                     session=session,
                     search_service=proj_search_svc,
@@ -478,7 +478,7 @@ async def _run_briefing_generation(
                 )
                 from pwbs.search.service import SemanticSearchService
 
-                search_svc = SemanticSearchService(session)
+                search_svc = SemanticSearchService(session)  # type: ignore[call-arg]
                 assembler = WeeklyContextAssembler(
                     session=session,
                     search_service=search_svc,
@@ -498,7 +498,7 @@ async def _run_briefing_generation(
                 context = trigger_context or {}
 
             llm_result = await generator.generate(
-                briefing_type=briefing_type,
+                briefing_type=briefing_type,  # type: ignore[arg-type]
                 context=context,
                 user_id=user_id,
                 vertical_profile=vertical_profile,

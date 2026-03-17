@@ -68,7 +68,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default="daily",
         server_default="daily",
     )
-    briefing_preferences: Mapped[dict | None] = mapped_column(
+    briefing_preferences: Mapped[dict | None] = mapped_column(  # type: ignore[type-arg]
         JSONB,
         nullable=True,
         default=None,
@@ -86,72 +86,72 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    connections: Mapped[list[Connection]] = relationship(  # noqa: F821
+    connections: Mapped[list[Connection]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    documents: Mapped[list[Document]] = relationship(  # noqa: F821
+    documents: Mapped[list[Document]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    chunks: Mapped[list[Chunk]] = relationship(  # noqa: F821
+    chunks: Mapped[list[Chunk]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    entities: Mapped[list[Entity]] = relationship(  # noqa: F821
+    entities: Mapped[list[Entity]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    decisions: Mapped[list[Decision]] = relationship(  # noqa: F821
+    decisions: Mapped[list[Decision]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    briefings: Mapped[list[Briefing]] = relationship(  # noqa: F821
+    briefings: Mapped[list[Briefing]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    audit_logs: Mapped[list[AuditLog]] = relationship(  # noqa: F821
+    audit_logs: Mapped[list[AuditLog]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         lazy="selectin",
     )
-    refresh_tokens: Mapped[list[RefreshToken]] = relationship(  # noqa: F821
+    refresh_tokens: Mapped[list[RefreshToken]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    subscription: Mapped[Subscription | None] = relationship(  # noqa: F821
+    subscription: Mapped[Subscription | None] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         uselist=False,
         lazy="selectin",
     )
-    profiles: Mapped[list[UserProfile]] = relationship(  # noqa: F821
+    profiles: Mapped[list[UserProfile]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    api_keys: Mapped[list[ApiKey]] = relationship(  # noqa: F821
+    api_keys: Mapped[list[ApiKey]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    assumptions: Mapped[list[Assumption]] = relationship(  # noqa: F821
+    assumptions: Mapped[list[Assumption]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    saved_searches: Mapped[list[SavedSearch]] = relationship(  # noqa: F821
+    saved_searches: Mapped[list[SavedSearch]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    search_history_entries: Mapped[list[SearchHistory]] = relationship(  # noqa: F821
+    search_history_entries: Mapped[list[SearchHistory]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",

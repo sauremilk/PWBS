@@ -27,7 +27,7 @@ class ApiKey(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     key_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     key_prefix: Mapped[str] = mapped_column(Text, nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)
-    scopes: Mapped[dict] = mapped_column(
+    scopes: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
         JSONB,
         nullable=False,
         server_default='["read"]',
@@ -61,4 +61,4 @@ class ApiKey(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationship
-    user: Mapped[User] = relationship(back_populates="api_keys", lazy="selectin")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="api_keys", lazy="selectin")  # noqa: F821  # type: ignore[name-defined]

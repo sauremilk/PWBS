@@ -109,6 +109,53 @@ known-first-party = ["pwbs"]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
+# Some type: ignore comments are needed locally but not in CI (or vice versa)
+# due to optional deps and platform differences; suppress unused-ignore noise.
+warn_unused_ignores = false
+
+# Third-party packages without type stubs or not installed in CI (optional extras)
+[[tool.mypy.overrides]]
+module = [
+    "anthropic",
+    "anthropic.*",
+    "openai",
+    "openai.*",
+    "celery",
+    "celery.*",
+    "kombu",
+    "kombu.*",
+    "weaviate",
+    "weaviate.*",
+    "neo4j",
+    "neo4j.*",
+    "tiktoken",
+    "tiktoken.*",
+    "markdown",
+    "markdown.*",
+    "yaml",
+    "yaml.*",
+    "frontmatter",
+    "frontmatter.*",
+    "prometheus_fastapi_instrumentator",
+    "prometheus_fastapi_instrumentator.*",
+    "watchdog",
+    "watchdog.*",
+    "redis",
+    "redis.*",
+    "posthog",
+    "posthog.*",
+    "sentence_transformers",
+    "sentence_transformers.*",
+    "pytesseract",
+    "pytesseract.*",
+    "whisper",
+    "whisper.*",
+    "weasyprint",
+    "weasyprint.*",
+    "testcontainers",
+    "testcontainers.*",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

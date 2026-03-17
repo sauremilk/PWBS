@@ -59,7 +59,7 @@ class SyncRun(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
         server_default="0",
     )
-    errors_json: Mapped[list | None] = mapped_column(
+    errors_json: Mapped[list | None] = mapped_column(  # type: ignore[type-arg]
         JSONB,
         nullable=True,
         comment="Array of {step, message} error objects",

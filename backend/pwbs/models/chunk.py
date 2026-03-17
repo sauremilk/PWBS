@@ -30,9 +30,9 @@ class Chunk(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    document: Mapped[Document] = relationship(back_populates="chunks")  # noqa: F821
-    user: Mapped[User] = relationship(back_populates="chunks")  # noqa: F821
-    entity_mentions: Mapped[list[EntityMention]] = relationship(  # noqa: F821
+    document: Mapped[Document] = relationship(back_populates="chunks")  # noqa: F821  # type: ignore[name-defined]
+    user: Mapped[User] = relationship(back_populates="chunks")  # noqa: F821  # type: ignore[name-defined]
+    entity_mentions: Mapped[list[EntityMention]] = relationship(  # noqa: F821  # type: ignore[name-defined]
         back_populates="chunk",
         cascade="all, delete-orphan",
         lazy="selectin",

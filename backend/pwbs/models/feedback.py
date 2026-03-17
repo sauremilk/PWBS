@@ -44,7 +44,7 @@ class Feedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Text,
         nullable=False,
     )
-    context_meta: Mapped[dict] = mapped_column(
+    context_meta: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
         JSONB,
         nullable=False,
         server_default="{}",
