@@ -281,7 +281,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Kein technischer Stacktrace erreicht den Endnutzer; alle Fehler zeigen deutsche Texte mit Recovery-Aktion |
 | **Abh�ngigkeit**        | �                                                                                                         |
 | **Gesch�tzter Aufwand** | M                                                                                                         |
-| **Status**              | Offen                                                                                                     |
+| **Status**              | In Arbeit                                                                                                 |
 
 **Beschreibung:** Backend-Fehlercodes in nutzerfreundliche deutsche Texte mit konkreter Recovery-Aktion �bersetzen. Betreffende Komponenten: `ErrorCard` und `ErrorBoundary` in `frontend/src/components/ui/`. Fehlertexte f�r alle Szenarien aus UX_ONBOARDING_SPEC �7 umsetzen: OAuth (Zugriff verweigert, Token-Exchange, Pop-up blockiert), Sync (API down, keine Daten, ung�ltiger Vault), Briefing (LLM-Timeout, LLM-Fehler, Rate-Limit), System (Netzwerk, Session abgelaufen).
 
