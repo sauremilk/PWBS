@@ -154,7 +154,8 @@ async function request<T>(
   if (!response.ok) {
     const errorData = await response.json().catch(() => undefined);
     throw new ApiClientError(
-      errorData?.message ?? `API error: ${response.status} ${response.statusText}`,
+      errorData?.message ??
+        `API error: ${response.status} ${response.statusText}`,
       response.status,
       errorData,
     );
@@ -186,4 +187,29 @@ export const apiClient = {
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: "DELETE" }),
+
+  /** POST with FormData (multipart/form-data). Content-Type is set by browser. */
+  postForm: <T>(endpoint: string, formData: FormData): Promise<T> => {
+    const headers: Record<string, string> = {};
+    const token = getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "POST",
+      headers,
+      body: formData,
+    }).then(async (response) => {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => undefined);
+        throw new ApiClientError(
+          errorData?.message ??
+            `API error: ${response.status} ${response.statusText}`,
+          response.status,
+          errorData,
+        );
+      }
+      return response.json() as Promise<T>;
+    });
+  },
 };

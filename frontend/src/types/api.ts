@@ -138,6 +138,15 @@ export interface ConfigResponse {
   file_count: number;
 }
 
+/** Response from Obsidian vault upload (ADR-018). */
+export interface UploadResponse {
+  connection_id: string;
+  document_count: number;
+  error_count: number;
+  deleted_count: number;
+  errors: Array<{ source_id: string; error: string }>;
+}
+
 export interface DisconnectResponse {
   message: string;
   deleted_doc_count: number;

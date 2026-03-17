@@ -12,6 +12,7 @@ import {
   grantConsent,
   revokeConsent,
   getSyncHistory,
+  uploadObsidian,
 } from "@/lib/api/connectors";
 
 export function useConnectorTypes() {
@@ -111,5 +112,15 @@ export function useSyncHistory(
     queryKey: ["connectors", "history", connectorType, offset],
     queryFn: () => getSyncHistory(connectorType!, offset, 10),
     enabled: connectorType !== null,
+  });
+}
+
+export function useUploadObsidian() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadObsidian(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connectors"] });
+    },
   });
 }

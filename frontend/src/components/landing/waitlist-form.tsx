@@ -52,8 +52,8 @@ export function WaitlistForm({ className = "" }: WaitlistFormProps) {
           if (status !== "idle") setStatus("idle");
         }}
         placeholder="ihre@email.de"
-        className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-base
-          focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+        className="flex-1 rounded-lg border border-border px-4 py-3 text-base
+          focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20
           disabled:opacity-60"
         disabled={status === "loading"}
         aria-describedby={status !== "idle" ? "waitlist-status" : undefined}
@@ -61,8 +61,8 @@ export function WaitlistForm({ className = "" }: WaitlistFormProps) {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white
-          hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50
+        className="rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white
+          hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50
           disabled:opacity-60 transition-colors whitespace-nowrap"
       >
         {status === "loading" ? "Wird gesendet..." : "Platz sichern"}

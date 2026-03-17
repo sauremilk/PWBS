@@ -13,6 +13,7 @@ import type {
   DisconnectResponse,
   SyncHistoryResponse,
   SyncResponse,
+  UploadResponse,
 } from "@/types/api";
 
 export async function listConnectorTypes(): Promise<ConnectorListResponse> {
@@ -100,5 +101,15 @@ export async function getSyncHistory(
 ): Promise<SyncHistoryResponse> {
   return apiClient.get<SyncHistoryResponse>(
     `/connectors/${encodeURIComponent(connectorType)}/history?offset=${offset}&limit=${limit}`,
+  );
+}
+
+/** Upload an Obsidian vault ZIP or single .md file (ADR-018). */
+export async function uploadObsidian(file: File): Promise<UploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiClient.postForm<UploadResponse>(
+    "/connectors/obsidian/upload",
+    formData,
   );
 }

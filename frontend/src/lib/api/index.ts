@@ -8,3 +8,4 @@ export * as userApi from "./user";
 export * as remindersApi from "./reminders";
 export * as adminApi from "./admin";
 export * as organizationsApi from "./organizations";
+export * as marketplaceApi from "./marketplace";
