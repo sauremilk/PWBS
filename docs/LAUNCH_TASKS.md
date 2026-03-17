@@ -197,7 +197,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei `PWBS_ENV=production` ohne gültige RSA-Keys startet die Anwendung nicht   |
 | **Abhängigkeit**        | –                                                                             |
 | **Geschätzter Aufwand** | S                                                                             |
-| **Status**              | In Arbeit                                                                         |
+| **Status**              | Fertig                                                                         |
 
 **Beschreibung:** Startup-Check in der FastAPI-App implementieren, der bei `PWBS_ENV=production` prüft, ob RSA-Keys vorhanden und gültig sind. Ohne Keys: Start verweigern mit klarer Fehlermeldung, um HS256-Fallback in Produktion zu verhindern (Finding A02-F01).
 
