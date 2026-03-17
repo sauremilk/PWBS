@@ -19,7 +19,6 @@ from pathlib import Path
 
 def find_except_var(lines: list[str], raise_row: int) -> str | None:
     """Walk backwards from raise_row to find except ... as <var>:"""
-    indent_of_raise = len(lines[raise_row]) - len(lines[raise_row].lstrip())
     for i in range(raise_row - 1, max(raise_row - 50, -1), -1):
         line = lines[i]
         stripped = line.lstrip()
