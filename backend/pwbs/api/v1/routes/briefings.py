@@ -411,14 +411,15 @@ async def _run_briefing_generation(
 
             # For morning briefings, assemble context via MorningContextAssembler
             if briefing_type == BriefingType.MORNING:
-                from pwbs.briefing.context import NullGraphService
+                from pwbs.db.neo4j_client import get_neo4j_driver as _get_neo4j
+                from pwbs.graph.query_service import Neo4jGraphQueryService
                 from pwbs.search.service import SemanticSearchService as _MornSearchSvc
 
                 morn_search_svc = _MornSearchSvc(session)  # type: ignore[call-arg]
                 morn_assembler = MorningContextAssembler(
                     session=session,
                     search_service=morn_search_svc,
-                    graph_service=NullGraphService(),
+                    graph_service=Neo4jGraphQueryService(_get_neo4j()),
                 )
                 morn_ctx = await morn_assembler.assemble(
                     user_id=user_id,
@@ -433,9 +434,10 @@ async def _run_briefing_generation(
                 }
             elif briefing_type == BriefingType.PROJECT:
                 from pwbs.briefing.project_context import (
-                    NullProjectGraphService,
                     ProjectContextAssembler,
                 )
+                from pwbs.db.neo4j_client import get_neo4j_driver as _get_neo4j
+                from pwbs.graph.query_service import Neo4jProjectGraphService
                 from pwbs.search.service import SemanticSearchService as _ProjSearchSvc
 
                 project_name = (trigger_context or {}).get("project_name", "")
@@ -454,7 +456,7 @@ async def _run_briefing_generation(
                 proj_assembler = ProjectContextAssembler(
                     session=session,
                     search_service=proj_search_svc,
-                    graph_service=NullProjectGraphService(),
+                    graph_service=Neo4jProjectGraphService(_get_neo4j()),
                 )
                 proj_ctx = await proj_assembler.assemble(
                     user_id=user_id,
@@ -473,16 +475,17 @@ async def _run_briefing_generation(
                 }
             elif briefing_type == BriefingType.WEEKLY:
                 from pwbs.briefing.weekly_context import (
-                    NullWeeklyGraphService,
                     WeeklyContextAssembler,
                 )
+                from pwbs.db.neo4j_client import get_neo4j_driver as _get_neo4j
+                from pwbs.graph.query_service import Neo4jWeeklyGraphService
                 from pwbs.search.service import SemanticSearchService
 
                 search_svc = SemanticSearchService(session)  # type: ignore[call-arg]
                 assembler = WeeklyContextAssembler(
                     session=session,
                     search_service=search_svc,
-                    graph_service=NullWeeklyGraphService(),
+                    graph_service=Neo4jWeeklyGraphService(_get_neo4j()),
                 )
                 weekly_ctx = await assembler.assemble(user_id=user_id)
                 context = {

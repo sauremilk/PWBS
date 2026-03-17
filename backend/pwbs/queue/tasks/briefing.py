@@ -248,16 +248,17 @@ async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
 
                 if briefing_type == "weekly":
                     from pwbs.briefing.weekly_context import (
-                        NullWeeklyGraphService,
                         WeeklyContextAssembler,
                     )
+                    from pwbs.db.neo4j_client import get_neo4j_driver as _get_neo4j
+                    from pwbs.graph.query_service import Neo4jWeeklyGraphService
                     from pwbs.search.service import SemanticSearchService
 
                     search_svc = SemanticSearchService(db)
                     assembler = WeeklyContextAssembler(
                         session=db,
                         search_service=search_svc,
-                        graph_service=NullWeeklyGraphService(),
+                        graph_service=Neo4jWeeklyGraphService(_get_neo4j()),
                     )
                     weekly_ctx = await assembler.assemble(user_id=user.id)
                     context = {
