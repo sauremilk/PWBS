@@ -229,7 +229,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `alembic current` zeigt `head` auf der Produktions-DB            |
 | **Abh�ngigkeit**        | Referenz: TASK-018 (Alembic-Setup), TASK-024 (Initial-Migration) |
 | **Gesch�tzter Aufwand** | S                                                                |
-| **Status**              | Offen (in Arbeit)                                                |
+| **Status**              | Fertig                                                                           |
 
 **Beschreibung:** Sicherstellen, dass alle Alembic-Migrationen konsistent angewendet sind. `alembic upgrade head` l�uft fehlerfrei auf einer leeren DB. `alembic current` zeigt `head` an. Migrationstests als Teil der CI-Pipeline.
 
