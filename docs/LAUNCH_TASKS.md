@@ -297,7 +297,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 80 % der Testnutzer erhalten ihr erstes Briefing innerhalb von 20 Minuten nach Registrierung |
 | **Abh�ngigkeit**        | LAUNCH-UX-004 (Sync-Progress), LAUNCH-ANA-002 (Events zur Messung)                           |
 | **Gesch�tzter Aufwand** | M                                                                                            |
-| **Status**              | Offen                                                                                        |
+| **Status**              | Blockiert: UX-004 + ANA-002 Offen                                                                                        |
 
 **Beschreibung:** Den kompletten Flow Register ? Connect ? Sync ? Briefing manuell mit 5+ Testnutzern validieren. Engstellen identifizieren und optimieren gem�� UX_ONBOARDING_SPEC �8 (Ziel-Flow: ~2:30 Min). Messung erfolgt �ber Timestamps in Core Events (`auth_user_registered` ? `briefing_generated`).
 
@@ -677,7 +677,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alle 6 Exit-Kriterien aus GTM_PLAN �6 sind evaluiert (je Kriterium: erf�llt/nicht erf�llt) |
 | **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events), LAUNCH-UX-002 (TTFB), LAUNCH-GTM-001 (Design-Partner aktiv)  |
 | **Gesch�tzter Aufwand** | S                                                                                          |
-| **Status**              | Offen                                                                                      |
+| **Status**              | Blockiert: ANA-002 + UX-002 + GTM-001 nicht Fertig                                                                                      |
 
 **Beschreibung:** Nach 4�6 Wochen Closed Beta alle 6 Exit-Kriterien systematisch evaluieren: (1) = 5 aktive Nutzer, (2) D7-Retention = 60 %, (3) TTFB = 20 Min, (4) kein offener P0-Bug, (5) = 3 Briefings/Nutzer/Woche, (6) 80 % der Nutzer bewerten Briefings als hilfreich. Entscheidung: Open-Beta-�bergang oder Iteration.
 
