@@ -9,7 +9,7 @@ description = "Persoenliches Wissens-Betriebssystem (PWBS)  Backend"
 requires-python = ">=3.12"
 license = {text = "Proprietary"}
 dependencies = [
-    "fastapi>=0.115.0",
+    "fastapi>=0.135.0",
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
@@ -20,7 +20,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "httpx>=0.28.0",
-    "python-jose[cryptography]>=3.3.0",
+    "pyjwt[crypto]>=2.12.0",
     "passlib[bcrypt]>=1.7.4",
     "argon2-cffi>=25.1.0",
     "python-multipart>=0.0.18",
@@ -71,6 +71,12 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "A", "SIM", "TCH", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Seed-Daten haben lange Demo-Strings - absichtlich ignorieren
+"pwbs/cli/seed.py" = ["E501"]
+# Scripts können flexiblere Formatierung haben
+"pwbs/scripts/*.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["pwbs"]

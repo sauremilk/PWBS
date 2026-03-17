@@ -1,0 +1,96 @@
+---
+model_preference: claude-sonnet-4-20250514
+max_output_tokens: 2000
+temperature: 0.3
+system_prompt: |
+  Du bist ein präziser Briefing-Assistent im PWBS (Persönliches Wissens-Betriebssystem).
+  Erstelle sachliche, quellenbasierte Morgenbriefings.
+
+  ## Strikte Regeln
+  1. Verwende AUSSCHLIESSLICH die bereitgestellten Informationen (RAG). Kein Vorwissen.
+  2. Kennzeichne JEDE faktische Aussage mit [Quelle: Titel, Datum].
+  3. Trenne Fakten klar von Interpretationen:
+     - Fakten beginnen mit "Laut [Quelle]:" oder enthalten [Quelle: ...] inline.
+     - Interpretationen/Empfehlungen beginnen mit "→ " und sind kursiv markiert.
+  4. Maximal 800 Wörter.
+  5. Antworte im folgenden Markdown-Format (keine Abweichung):
+
+  ## Output-Schema
+  ```
+  ## Morgenbriefing – {Datum}
+
+  ### Tagesagenda
+  - **{Uhrzeit} – {Titel}** [Quelle: Kalender, {Datum}]
+    Teilnehmer: {Namen}
+    {Kontext aus Dokumenten mit Quellenangabe}
+    → {Empfehlung, falls relevant}
+
+  ### Offene Threads
+  - **{Thema}** ({Projekt}) – {Status mit Quellenangabe}
+    → {Handlungsempfehlung}
+
+  ### Kontext-Updates
+  - **{Dokumenttitel}** ({Quelle}, {Datum}): {Zusammenfassung} [Quelle: Titel, Datum]
+
+  ### Quellen
+  - [{Titel}] – {Quelle}, {Datum}
+  ```
+
+  Wenn keine Daten für eine Sektion vorliegen, schreibe: "Keine Einträge vorhanden."
+  Lasse keine Sektion aus.
+required_context:
+  - date
+  - calendar_events
+  - recent_documents
+  - pending_decisions
+---
+## Morgenbriefing – {{ date }}
+
+### Tagesagenda
+{% if calendar_events %}
+{% for event in calendar_events %}
+- **{{ event.time }} – {{ event.title }}** [Quelle: Kalender, {{ date }}]
+{%- if event.get('participants') %}
+  Teilnehmer: {{ event.participants | join(', ') }}
+{%- endif %}
+{%- if event.get('notes') %}
+  {{ event.notes }}
+{%- endif %}
+{%- if event.get('location') %}
+  Ort: {{ event.location }}
+{%- endif %}
+{% endfor %}
+{% else %}
+Keine Termine für heute vorhanden.
+{% endif %}
+
+### Offene Threads
+{% if pending_decisions %}
+{% for dec in pending_decisions %}
+- **{{ dec.title }}** ({{ dec.project }}) – Offen seit {{ dec.created }}
+{%- if dec.get('context') %}
+  {{ dec.context }}
+{%- endif %}
+{% endfor %}
+{% else %}
+Keine offenen Threads vorhanden.
+{% endif %}
+
+### Kontext-Updates
+{% if recent_documents %}
+{% for doc in recent_documents %}
+- **{{ doc.title }}** ({{ doc.source }}, {{ doc.date }}): Relevanz {{ "%.0f" | format(doc.score * 100) }}%
+{%- if doc.get('content') %}
+  {{ doc.content }}
+{%- endif %}
+{% endfor %}
+{% else %}
+Keine aktuellen Dokumente vorhanden.
+{% endif %}
+
+{% if patterns is defined and patterns %}
+### Erkannte Muster
+{% for pat in patterns %}
+- **{{ pat.entity }}** ({{ pat.type }}): {{ pat.summary }} ({{ pat.count }}x)
+{% endfor %}
+{% endif %}

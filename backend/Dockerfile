@@ -1,14 +1,14 @@
 ﻿# PWBS Backend  Production Dockerfile
 # Multi-stage build for minimal image size
 
-FROM python:3.12-slim AS builder
+FROM python:3.12.10-slim AS builder
 
 WORKDIR /build
 
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir --prefix=/install -e ".[llm,vector,graph]"
 
-FROM python:3.12-slim
+FROM python:3.12.10-slim
 
 WORKDIR /app
 
