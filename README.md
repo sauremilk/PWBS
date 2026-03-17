@@ -32,7 +32,7 @@ A cognitive infrastructure that continuously ingests data from heterogeneous per
 | **Embeddings**     | OpenAI `text-embedding-3-small` (cloud), `all-MiniLM-L6-v2` via Sentence Transformers (local) |
 | **Frontend**       | Next.js (App Router), React, TypeScript, Tailwind CSS                                         |
 | **Infrastructure** | Docker Compose (local), Vercel (frontend), AWS ECS Fargate + RDS + ElastiCache (backend)      |
-| **Task queue**     | Direct async processing in MVP; Celery + Redis in Phase 3                                     |
+| **Task queue**     | Celery + Redis (active in MVP: ingestion, processing, briefing queues)                         |
 | **Migrations**     | Alembic                                                                                       |
 | **Testing**        | pytest, pytest-asyncio                                                                        |
 

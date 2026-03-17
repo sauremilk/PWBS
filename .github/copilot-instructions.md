@@ -115,7 +115,7 @@ Phase-3-Konnektoren liegen in `backend/_deferred/connectors/`. Einträge in `con
 | Embeddings    | Sentence Transformers (lokal), OpenAI Ada (Cloud)                        |
 | Frontend      | Next.js (App Router), React, TypeScript, Tailwind CSS                    |
 | Infrastruktur | Docker Compose (lokal), Vercel (Frontend), AWS (Backend+DBs)             |
-| Aufgabenqueue | Celery + Redis (Phase 3), direkte Verarbeitung im MVP                    |
+| Aufgabenqueue | Celery + Redis (aktiv im MVP für Ingestion, Processing, Briefings)     |
 
 ---
 

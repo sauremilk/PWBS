@@ -183,7 +183,7 @@ processing_result = await processing_agent.process(ingestion_result.documents)
 response = await httpx.post("/api/internal/process", json=...)
 ```
 
-Ab Phase 3 werden Agenten über eine Message-Queue (Celery + Redis) orchestriert.
+Agenten werden über Celery + Redis als Message-Queue orchestriert (aktiv seit MVP).
 
 ---
 
