@@ -493,7 +493,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `.github/dependabot.yml` existiert f�r Python und npm Ecosystems |
 | **Abh�ngigkeit**        | �                                                                |
 | **Gesch�tzter Aufwand** | XS                                                               |
-| **Status**              | Offen                                                            |
+| **Status**              | Fertig                                                            |
 
 **Beschreibung:** `.github/dependabot.yml` erstellen mit automatischen Dependency-Updates f�r Python (pip) und JavaScript (npm). W�chentliche Checks, PRs mit Changelogs. Erg�nzt die manuelle Pr�fung aus LAUNCH-REL-001.
 
