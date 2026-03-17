@@ -1,0 +1,267 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - "desktop-v*"
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+jobs:
+  # ── Build Frontend Static Export ──
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build static export
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.pwbs.app
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-out
+          path: frontend/out
+          retention-days: 1
+
+  # ── Build Tauri Binaries ──
+  build-tauri:
+    name: Build Desktop (${{ matrix.platform.name }})
+    needs: build-frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Windows
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+          - name: macOS (Intel)
+            runner: macos-13
+            target: x86_64-apple-darwin
+            bundles: dmg
+          - name: macOS (Apple Silicon)
+            runner: macos-latest
+            target: aarch64-apple-darwin
+            bundles: dmg
+          - name: Linux
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+    runs-on: ${{ matrix.platform.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-out
+          path: frontend/out
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.target }}
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop-app/src-tauri
+          cache-on-failure: true
+
+      # Linux system dependencies for Tauri
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      # macOS code signing
+      - name: Import macOS signing certificate
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -n "$APPLE_CERTIFICATE" ]; then
+            echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+            security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+            security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+            rm certificate.p12
+          fi
+
+      - name: Build Tauri app
+        working-directory: desktop-app
+        run: |
+          cargo install tauri-cli --version "^2" --locked
+          cargo tauri build --target ${{ matrix.platform.target }} --bundles ${{ matrix.platform.bundles }}
+        env:
+          # Windows code signing (optional – only if secrets are set)
+          TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_SIGNING_PRIVATE_KEY }}
+
+      # Upload platform-specific artifacts
+      - name: Upload Windows artifacts
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: |
+            desktop-app/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            desktop-app/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.nsis.zip
+            desktop-app/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.nsis.zip.sig
+          if-no-files-found: error
+
+      - name: Upload macOS artifacts
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos-${{ matrix.platform.target }}
+          path: |
+            desktop-app/src-tauri/target/${{ matrix.platform.target }}/release/bundle/dmg/*.dmg
+            desktop-app/src-tauri/target/${{ matrix.platform.target }}/release/bundle/macos/*.app.tar.gz
+            desktop-app/src-tauri/target/${{ matrix.platform.target }}/release/bundle/macos/*.app.tar.gz.sig
+          if-no-files-found: error
+
+      - name: Upload Linux artifacts
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux
+          path: |
+            desktop-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+            desktop-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage.tar.gz
+            desktop-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage.tar.gz.sig
+            desktop-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
+          if-no-files-found: error
+
+  # ── Create GitHub Release ──
+  publish-release:
+    name: Publish GitHub Release
+    needs: build-tauri
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/desktop-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Collect release files
+        run: |
+          mkdir -p release-files
+          find artifacts/ -type f \( \
+            -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \
+            -o -name "*.tar.gz" -o -name "*.sig" -o -name "*.nsis.zip" -o -name "*.nsis.zip.sig" \
+          \) -exec cp {} release-files/ \;
+          echo "Release files:"
+          ls -lh release-files/
+
+      - name: Generate Tauri updater manifest
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/desktop-v${VERSION}"
+
+          # Read signatures if they exist
+          WIN_SIG=""
+          MAC_INTEL_SIG=""
+          MAC_ARM_SIG=""
+          LINUX_SIG=""
+
+          [ -f "release-files/PWBS_${VERSION}_x64-setup.nsis.zip.sig" ] && \
+            WIN_SIG=$(cat "release-files/PWBS_${VERSION}_x64-setup.nsis.zip.sig")
+          [ -f "release-files/PWBS.app.tar.gz.sig" ] && \
+            MAC_INTEL_SIG=$(cat "release-files/PWBS.app.tar.gz.sig")
+
+          # Find any .AppImage.tar.gz.sig
+          LINUX_SIG_FILE=$(find release-files/ -name "*.AppImage.tar.gz.sig" | head -1)
+          [ -n "$LINUX_SIG_FILE" ] && LINUX_SIG=$(cat "$LINUX_SIG_FILE")
+
+          cat > release-files/latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "notes": "PWBS Desktop v${VERSION}",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "windows-x86_64": {
+                "signature": "${WIN_SIG}",
+                "url": "${RELEASE_URL}/PWBS_${VERSION}_x64-setup.nsis.zip"
+              },
+              "darwin-x86_64": {
+                "signature": "${MAC_INTEL_SIG}",
+                "url": "${RELEASE_URL}/PWBS.app.tar.gz"
+              },
+              "darwin-aarch64": {
+                "signature": "${MAC_ARM_SIG}",
+                "url": "${RELEASE_URL}/PWBS.app.tar.gz"
+              },
+              "linux-x86_64": {
+                "signature": "${LINUX_SIG}",
+                "url": "${RELEASE_URL}/PWBS_${VERSION}_amd64.AppImage.tar.gz"
+              }
+            }
+          }
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-v${{ steps.version.outputs.version }}
+          name: "PWBS Desktop v${{ steps.version.outputs.version }}"
+          body: |
+            ## PWBS Desktop v${{ steps.version.outputs.version }}
+
+            ### Downloads
+
+            | Platform | Download |
+            |----------|----------|
+            | Windows (x64) | `PWBS_${{ steps.version.outputs.version }}_x64-setup.exe` |
+            | macOS (Intel) | `PWBS_${{ steps.version.outputs.version }}_x64.dmg` |
+            | macOS (Apple Silicon) | `PWBS_${{ steps.version.outputs.version }}_aarch64.dmg` |
+            | Linux (x64) | `PWBS_${{ steps.version.outputs.version }}_amd64.AppImage` |
+            | Linux (Debian) | `PWBS_${{ steps.version.outputs.version }}_amd64.deb` |
+
+            ---
+            Vollstaendige Aenderungen: [Changelog](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md)
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
+          files: release-files/*
