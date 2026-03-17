@@ -23,15 +23,15 @@ This codebase is a working demonstration of senior-level full-stack engineering 
 **Scope at a glance:**
 
 - Multi-agent orchestration built on Celery + Redis — autonomous, safe-by-design, stateless workers
-- End-to-end platform: Python backend · Next.js frontend · Tauri desktop · React Native mobile · Chrome extension · Obsidian plugin
-- Production practices throughout: pre-commit hooks, Docker Compose + Helm, Terraform IaC, Alembic migrations, ~140-file pytest suite, Prometheus + Grafana observability
+- Python backend + Next.js frontend + Obsidian plugin
+- Production practices throughout: Docker Compose + Helm, Terraform IaC, Alembic migrations, ~150-file pytest suite, Prometheus + Grafana observability
 
 |                                                                                    |                              |
 | ---------------------------------------------------------------------------------- | ---------------------------- |
 | **6** agent roles (Ingestion · Processing · Briefing · Search · Graph · Scheduler) | **18** API endpoint groups   |
-| **4** active OAuth2 connectors                                                     | **33** SQLAlchemy ORM models |
-| **3** databases (PostgreSQL · Weaviate · Neo4j)                                    | **140+** pytest test files   |
-| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …)            | **6** platform targets       |
+| **4** active connectors (Calendar · Notion · Zoom · Obsidian)                      | **33** SQLAlchemy ORM models |
+| **3** databases (PostgreSQL · Weaviate · Neo4j)                                    | **150+** pytest test files   |
+| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …)            |                              |
 
 ---
 
@@ -216,11 +216,12 @@ PWBS/
 │   │   └── types/              # TypeScript types from OpenAPI schema
 │   ├── package.json            # Next.js, React, TypeScript, Tailwind CSS
 │   └── tsconfig.json           # Strict TypeScript configuration
+├── obsidian-plugin/            # Obsidian community plugin for vault sync
 ├── infra/
 │   ├── terraform/              # Infrastructure as Code (AWS)
 │   └── docker/                 # Production Docker Compose
 ├── docs/
-│   ├── adr/                    # Architecture Decision Records
+│   ├── adr/                    # Architecture Decision Records (21 ADRs)
 │   └── orchestration/          # Multi-agent task coordination
 ├── .github/
 │   ├── copilot-instructions.md
@@ -257,8 +258,6 @@ All secrets and environment-specific settings are loaded from `.env`. Commit `.e
 | `GOOGLE_CLIENT_SECRET` | No       | OAuth2 client secret for Google connectors                     |
 | `NOTION_CLIENT_ID`     | No       | OAuth2 client ID for Notion connector                          |
 | `NOTION_CLIENT_SECRET` | No       | OAuth2 client secret for Notion connector                      |
-| `SLACK_CLIENT_ID`      | No       | OAuth2 client ID for Slack connector (Phase 3)                 |
-| `SLACK_CLIENT_SECRET`  | No       | OAuth2 client secret for Slack connector (Phase 3)             |
 | `ZOOM_CLIENT_ID`       | No       | OAuth2 client ID for Zoom connector                            |
 | `ZOOM_CLIENT_SECRET`   | No       | OAuth2 client secret for Zoom connector                        |
 | `REDIS_URL`            | Yes      | Redis connection string (required for Celery task queues)      |
@@ -350,7 +349,7 @@ flowchart TD
 
 The processing pipeline runs in three stages:
 
-1. **Chunking** — semantic splitting at sentence boundaries, max 512 tokens, 64-token overlap
+1. **Chunking** — two strategies: regex-based semantic splitting (fast, default) and embedding-based coherence chunking that detects topic shifts via cosine similarity curves ([ADR-021](docs/adr/021-semantic-coherence-chunking.md))
 2. **Embedding** — batch embedding generation (OpenAI or local Sentence Transformers)
 3. **NER + Graph** — two-stage entity extraction (rule-based → LLM-based) followed by idempotent `MERGE` writes to Neo4j
 

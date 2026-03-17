@@ -37,7 +37,7 @@ jobs:
 
       - name: Mypy
         run: mypy pwbs/ --strict
-        continue-on-error: true   # TODO: Remove once all mypy --strict errors are resolved
+        continue-on-error: true # TODO: Remove once all mypy --strict errors are resolved
 
   #  Frontend Lint
   frontend-lint:

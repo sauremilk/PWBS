@@ -86,3 +86,9 @@ backend/.test*.txt
 backend/openapi_current.json
 backend/_openapi_spec.json
 docs/internal/
+
+# Phase-3+ Clients (lokal behalten, nicht im Repo)
+browser-extension/
+desktop-app/
+mobile-app/
+poc/

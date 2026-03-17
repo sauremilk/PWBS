@@ -16,9 +16,6 @@ frontend/         Next.js · TypeScript frontend
 docs/             Architecture decisions (ADR), API docs, audit reports
 infra/            Docker, Terraform, Prometheus/Grafana
 obsidian-plugin/  Obsidian vault sync plugin
-browser-extension Chrome/Edge extension (Manifest V3)
-desktop-app/      Tauri desktop wrapper (Phase 4)
-mobile-app/       React Native · Expo (Phase 4)
 ```
 
 ---

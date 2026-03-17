@@ -74,7 +74,7 @@ _PLUGIN_PY_TEMPLATE = dedent('''\
             cursor: str | None = None,
         ) -> tuple[list[dict[str, Any]], str | None]:
             # TODO: Replace with real API integration
-            raise NotImplementedError("TASK-156: Implement fetch_data for {name}")
+            raise NotImplementedError("fetch_data not yet implemented for {name}")
 
 
     def create_plugin() -> {class_name}:
