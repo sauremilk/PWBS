@@ -29,6 +29,21 @@ Dieser Workspace ist für **Claude Opus 4.6** konfiguriert und optimiert. Das Mo
 - Bei Unsicherheit: Mögliche Probleme **benennen**, nicht stillschweigend ignorieren.
 - Sicherheitsimplikationen jeder neuen Funktion proaktiv im Code-Kommentar oder ADR erwähnen.
 
+### Opus 4.6 Verhaltenssteuerung (Anthropic Best Practices)
+
+Diese Regeln basieren auf der offiziellen Anthropic-Dokumentation für Claude Opus 4.6 und sind in `.github/instructions/opus-4.6-behavior.instructions.md` vollständig dokumentiert.
+
+| Regel | Aktivierung |
+|-------|-------------|
+| **Implementieren statt Vorschlagen** | Standard – bei unklarer Absicht nützlichste Aktion ableiten |
+| **Neutrale Tool-Sprache** | Standard – aggressive Formulierungen ("MUST", "CRITICAL") vermeiden |
+| **Parallele Tool-Execution** | Standard – unabhängige Calls parallel, abhängige sequentiell |
+| **Sichere Autonomie** | Standard – Bestätigung bei destruktiven/externen Aktionen |
+| **Halluzinations-Prävention** | Standard – Dateien lesen bevor über sie gesprochen wird |
+| **Overengineering verhindern** | Standard – nur angeforderte Änderungen, minimale Komplexität |
+| **Subagent-Steuerung** | Bei Bedarf – Opus spawnt proaktiv, bei Overuse einschränken |
+| **Context-Window-Awareness** | Standard – nicht vorzeitig stoppen, Memory nutzen |
+
 ---
 
 ## Projektkontext

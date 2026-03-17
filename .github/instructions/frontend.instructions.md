@@ -88,6 +88,47 @@ const res = await fetch("/api/briefings/morning"); // VERBOTEN in Komponenten
 - `shadcn/ui`-Primitive als Basis für Komponenten.
 - Dark Mode via `class`-Strategie in Tailwind.
 
+## Frontend-Ästhetik
+
+Generische "AI Slop"-Ästhetik vermeiden. Kreative, distinkte Frontends erstellen, die überraschen und Freude bereiten.
+
+### Typografie
+
+- Schriftarten wählen, die schön, einzigartig und charaktervoll sind.
+- Generische Schriftarten vermeiden: Inter, Roboto, Arial, System-Fonts.
+- Auch häufig von KI gewählte Alternativen meiden (z.B. Space Grotesk) – aktiv unkonventionelle Optionen suchen.
+- Google Fonts oder Fontsource für distinctive Typefaces nutzen.
+
+### Farbe & Thema
+
+- Sich zu einer kohärenten Ästhetik verpflichten. CSS-Variablen für Konsistenz verwenden.
+- Dominante Farben mit scharfen Akzenten übertreffen timide, gleichmäßig verteilte Paletten.
+- Inspiration aus IDE-Themen, kulturellen Ästhetiken, Printdesign schöpfen.
+- Klischeehafte Farbschemen vermeiden – insbesondere violette Gradienten auf weißem Hintergrund.
+- Zwischen hellen und dunklen Themen variieren, nicht immer dieselbe Basis wählen.
+
+### Motion & Micro-Interaktionen
+
+- Animationen für Effekte und Micro-Interaktionen einsetzen.
+- CSS-only-Lösungen bevorzugen (`@keyframes`, `transition`, `animation-delay`).
+- Für React: `motion`-Bibliothek (Framer Motion) wenn verfügbar.
+- Hochwertige Momente priorisieren: Ein orchestriertes Page-Load mit gestaffelten Reveals (`animation-delay`) schafft mehr Freude als verstreute Micro-Interaktionen.
+
+### Hintergründe & Atmosphäre
+
+- Atmosphäre und Tiefe schaffen statt Vollfarben zu verwenden.
+- CSS-Gradienten schichten, geometrische Muster nutzen, kontextuelle Effekte einsetzen.
+- Hintergründe zur Gesamtästhetik passen, nicht isoliert betrachten.
+
+### Anti-Patterns (aktiv vermeiden)
+
+- Übernutzte Schriftfamilien (Inter, Roboto, Arial, Space Grotesk, System-Fonts)
+- Klischeehafte Farbschemen (violette Gradienten, generisches Blau/Weiß)
+- Vorhersehbare Layouts und Cookie-Cutter-Komponentenmuster
+- Design ohne kontextspezifischen Charakter
+
+Kreativ interpretieren und unerwartete Entscheidungen treffen, die sich für den Kontext genuine designt anfühlen.
+
 ## Briefing-Feature (Kern-UX)
 
 Die Briefing-Ansicht ist das Herzstück der App:

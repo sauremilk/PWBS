@@ -18,6 +18,24 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 8. **MVP-Scope einhalten.** Nur aktive Module und Kern-4-Konnektoren bearbeiten. Deaktivierte Module in `_deferred/` NICHT importieren, referenzieren oder weiterentwickeln. Siehe `copilot-instructions.md` → "MVP-Fokussierung (ADR-016)".
 9. **Neo4j ist optional.** `get_neo4j_driver()` kann `None` zurückgeben. Jeder Code der Neo4j nutzt, MUSS mit `driver is None` umgehen können. `NullGraphService`-Fallbacks verwenden.
 
+### Opus 4.6 Verhaltensregeln (Anthropic Best Practices)
+
+Die folgenden Regeln sind spezifisch für Claude Opus 4.6 optimiert:
+
+10. **Implementieren statt Vorschlagen.** Bei unklarer Absicht die wahrscheinlichste nützliche Aktion ableiten und ausführen. Tools nutzen um fehlende Details zu ermitteln, nicht raten.
+
+11. **Neutrale Tool-Sprache.** Aggressive Formulierungen ("CRITICAL", "MUST", "ALWAYS") vermeiden – sie führen bei Opus 4.6 zu Overtriggering. Einfach: "Use this tool when..." genügt.
+
+12. **Parallele Tool-Calls.** Unabhängige Tool-Aufrufe parallel ausführen (z.B. 3 Dateien gleichzeitig lesen). Bei Abhängigkeiten: sequentiell, niemals mit geratenen Parametern.
+
+13. **Sichere Autonomie.** Lokale, reversible Aktionen (Edits, Tests, Commits) ohne Rückfrage. Destruktive/externe Aktionen (push --force, delete, PR-Comments) nur nach Bestätigung.
+
+14. **Halluzinations-Prävention.** Dateien LESEN bevor über ihren Inhalt gesprochen wird. Keine Spekulation über nicht-geöffneten Code.
+
+15. **Overengineering verhindern.** Nur angeforderte Änderungen. Keine zusätzlichen Features, unnötigen Abstraktionen oder "Future-Proofing". Minimale Komplexität für die aktuelle Aufgabe.
+
+Vollständige Dokumentation: `.github/instructions/opus-4.6-behavior.instructions.md`
+
 ---
 
 ## Agenten-Rollen (System-interne KI-Agenten)
@@ -186,14 +204,13 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 
 ### Kern-Workflows
 
-| Datei                                           | Verwendung                                              |
-| ----------------------------------------------- | ------------------------------------------------------- |
-| `.github/prompts/new-connector.prompt.md`       | Neuen Datenquellen-Konnektor implementieren             |
-| `.github/prompts/briefing-feature.prompt.md`    | Briefing-Feature entwickeln oder debuggen               |
-| `.github/prompts/architecture-review.prompt.md` | Architektur-Review durchführen                          |
-| `.github/prompts/db-migration.prompt.md`        | Alembic-Migration erstellen                             |
-| `.github/prompts/debug-agent.prompt.md`         | Agenten-Fehler diagnostizieren                          |
-| `.github/prompts/extended-thinking.prompt.md`   | **Opus 4.6:** Tiefenanalyse komplexer Architekturthemen |
+| Datei                                        | Verwendung                                               |
+| -------------------------------------------- | -------------------------------------------------------- |
+| `.github/prompts/new-connector.prompt.md`    | Neuen Datenquellen-Konnektor implementieren              |
+| `.github/prompts/scaffold-feature.prompt.md` | Feature-Scaffolding: Backend, Frontend, Tests generieren |
+| `.github/prompts/deep-analysis.prompt.md`    | Tiefenanalyse: Debugging, Architektur, Performance       |
+| `.github/prompts/db-migration.prompt.md`     | Alembic-Migration erstellen                              |
+| `.github/prompts/debug-agent.prompt.md`      | Agenten-Fehler diagnostizieren                           |
 
 ### Orchestrierung
 
@@ -201,34 +218,15 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | --------------------------------------------- | ------------------------------------------------------------------ |
 | `.github/prompts/orchestrator-init.prompt.md` | Parallele Orchestrator-Session initialisieren (Claim → Implement)  |
 | `.github/prompts/task-executor.prompt.md`     | Einzelnen Task vollständig durchführen (Implement → Test → Commit) |
+| `.github/prompts/expand-backlog.prompt.md`    | Task-Backlog erweitern und vertiefen                               |
 
-### Workspace-Fundament-Suite (übertragbar auf andere Projekte)
+### Audit-Suite (parametrisiert)
 
-| Datei                                            | Verwendung                                                                       |
-| ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| `.github/prompts/bootstrap-foundation.prompt.md` | Alle 5 Fundament-Dokumente in Sequenz generieren (Interview → Generierung)       |
-| `.github/prompts/gen-vision.prompt.md`           | Vision-Dokument: Problem, Zielgruppe, "Was es NICHT ist", Kernfähigkeiten        |
-| `.github/prompts/gen-roadmap.prompt.md`          | Roadmap: Phasen mit messbaren KPIs, Risiken, Out-of-Scope                        |
-| `.github/prompts/gen-architecture.prompt.md`     | Architektur: Designprinzipien mit Implikationen, Komponenten, Tech-Stack         |
-| `.github/prompts/gen-prd-spec.prompt.md`         | PRD-SPEC: Tiefe Personas, falsifizierbare Hypothese, FRs mit Acceptance Criteria |
-| `.github/prompts/gen-tasks.prompt.md`            | Task-Backlog: Atomare Tasks mit Quellenrückverfolgbarkeit                        |
-| `.github/prompts/enrich-foundation.prompt.md`    | **Schritt 2:** Tiefe Dokumente – Tasks von 20 auf 100+, Personas vertiefen, NFs konkretisieren |
-
-### Optimierungs-Suite
-
-| Datei                                               | Verwendung                                          |
-| --------------------------------------------------- | --------------------------------------------------- |
-| `.github/prompts/optimize-all.prompt.md`            | Meta-Orchestrator: Gesamtoptimierung des Workspaces |
-| `.github/prompts/optimize-continuous.prompt.md`     | Kaizen-Zyklus: Priorisierte Optimierungssequenz     |
-| `.github/prompts/optimize-architecture.prompt.md`   | Modul-Grenzen, Abhängigkeiten, Schichtentrennung    |
-| `.github/prompts/optimize-code-quality.prompt.md`   | Typing, Patterns, Konsistenz, Komplexität           |
-| `.github/prompts/optimize-security.prompt.md`       | OWASP Top 10, DSGVO-Compliance, Verschlüsselung     |
-| `.github/prompts/optimize-testing.prompt.md`        | Coverage, Test-Qualität, Edge Cases, Fixtures       |
-| `.github/prompts/optimize-documentation.prompt.md`  | ADRs, README, API-Docs, Inline-Dokumentation        |
-| `.github/prompts/optimize-infrastructure.prompt.md` | Docker, Terraform, CI/CD, DevOps                    |
-| `.github/prompts/optimize-performance.prompt.md`    | Queries, API-Latenz, Embeddings, Frontend-Bundles   |
-| `.github/prompts/optimize-dependencies.prompt.md`   | CVEs, Versionen, Tech Debt, Upgrade-Pfade           |
-| `.github/prompts/optimize-prompts.prompt.md`        | Meta: Prompts & Instructions selbst optimieren      |
+| Datei                                          | Verwendung                                                                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.github/prompts/audit-workspace.prompt.md`    | Meta-Orchestrator: Ganzheitliche Workspace-Analyse mit Roadmap                                                                             |
+| `.github/prompts/audit-domain.prompt.md`       | Domain-Audit: security, architecture, code-quality, testing, documentation, infrastructure, performance, dependencies, monitoring, prompts |
+| `.github/prompts/audit-architecture.prompt.md` | Modul-Grenzen, Datenfluss, Skalierbarkeit, Anti-Patterns                                                                                   |
 
 ---
 
@@ -240,6 +238,7 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}`                          |
 | `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}`                                |
 | `.github/instructions/agents.instructions.md`   | `backend/pwbs/{connectors,ingestion,...}/**/*.py` |
+| `.github/instructions/audit.instructions.md`    | Audit-Workflows (gemeinsame Konventionen)         |
 
 ---
 

@@ -137,6 +137,7 @@ Bei jeder Implementierungsaufgabe den Denkprozess explizit durchlaufen:
 ### Selbst-Review nach dem Code
 
 Vor dem Ausgeben generierten Code intern prüfen:
+
 - [ ] Alle `owner_id`-Filter vorhanden? Gibt es Queries ohne Mandanten-Isolation?
 - [ ] Alle Writes als Upsert/idempotent implementiert?
 - [ ] Alle I/O-Operationen als `async def`?
@@ -147,7 +148,8 @@ Vor dem Ausgeben generierten Code intern prüfen:
 
 - Keine `pass`-Stubs oder `# TODO: implement` – entweder vollständig implementieren oder explizit `raise NotImplementedError("Begründung")`.
 - Alle Randfälle explizit behandeln: leere Listen, `None`-Werte, leere Strings, Maximalwert-Überschreitungen.
-```
+
+````
 
 ## LLM-Aufrufe
 
@@ -156,3 +158,65 @@ Vor dem Ausgeben generierten Code intern prüfen:
 - Jede LLM-Antwort mit Quellenreferenzen versehen (Pflichtfeld `sources: list[SourceRef]`).
 - LLM-Calls über den `LLMGateway`-Service abstrahieren – nie direkt Anthropic/OpenAI SDK aufrufen.
 - Fallback-Reihenfolge: Claude → GPT-4 → Ollama (konfigurierbar per Env-Var).
+
+---
+
+## REST API Konventionen
+
+### Endpunkt-Design
+
+| Operation | HTTP-Methode | Pfad-Muster | Status-Code |
+|-----------|--------------|-------------|-------------|
+| Liste abrufen | `GET` | `/resources` | 200 |
+| Einzelne Ressource | `GET` | `/resources/{id}` | 200 / 404 |
+| Erstellen | `POST` | `/resources` | 201 (Location-Header!) |
+| Aktualisieren | `PATCH` | `/resources/{id}` | 200 / 404 |
+| Vollständig ersetzen | `PUT` | `/resources/{id}` | 200 / 404 |
+| Löschen | `DELETE` | `/resources/{id}` | 204 (kein Body!) / 404 |
+
+### Namenskonventionen
+
+- **Plural** für Sammlungen: `/briefings`, nicht `/briefing`
+- **kebab-case** für mehrteilige Namen: `/search-history`, nicht `/searchHistory`
+- **Ressourcen-IDs**: UUIDv4, nie sequentielle Integer
+- **Verschachtelung max. 2 Ebenen**: `/connectors/{id}/sync-runs`, nicht `/users/{uid}/connectors/{cid}/sync-runs/{sid}/logs`
+
+### Pagination (bei Listen)
+
+```python
+@router.get("/resources")
+async def list_resources(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    sort_by: str = Query("created_at"),
+    sort_order: Literal["asc", "desc"] = Query("desc"),
+) -> PaginatedResponse[ResourceResponse]:
+    ...
+````
+
+Response enthält `items`, `total`, `skip`, `limit`.
+
+### Fehlerformat (RFC 7807-inspiriert)
+
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "Human-readable description",
+  "field": "source_id",  // bei Validierungsfehlern
+  "details": { ... }     // optional, für Debug-Kontext
+}
+```
+
+Kein Stack-Trace in Produktionsfehlerantworten!
+
+### Versionierung
+
+- URL-Präfix: `/api/v1/...`
+- Keine Breaking Changes ohne Major-Version-Bump
+- Deprecation-Header: `Deprecation: true`, `Sunset: <date>`
+
+### OpenAPI / Swagger
+
+- Jede Route braucht `summary` und `description`
+- `response_model` explizit annotieren – kein `Any`
+- Tags (`tags=["Briefings"]`) für API-Explorer-Gruppierung
