@@ -129,7 +129,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | AVVs mit AWS, Anthropic, OpenAI und Vercel sind formal abgeschlossen/akzeptiert |
 | **Abhängigkeit**        | –                                                                               |
 | **Geschätzter Aufwand** | S                                                                               |
-| **Status**              | In Arbeit                                 |
+| **Status**              | Blockiert: Formale Akzeptanz der Online-DPAs bei AWS, Anthropic, OpenAI, Vercel erfordert manuelle Aktion |
 
 **Beschreibung:** AVV-Entwürfe finalisieren: AWS-DPA online akzeptieren, Anthropic-DPA und OpenAI-DPA unterzeichnen, Vercel-DPA akzeptieren. Provider-Prozesse können bis zu 2 Wochen dauern.
 
