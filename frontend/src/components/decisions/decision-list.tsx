@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { EmptyDecisions } from "@/components/ui/empty-states";
 import type { DecisionListItem, DecisionStatus } from "@/types/api";
 
 const STATUS_CONFIG: Record<
@@ -102,18 +103,7 @@ export function DecisionList({
       </div>
 
       {decisions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-8 text-center">
-          <p className="text-sm text-text-tertiary">
-            Noch keine Entscheidungen erfasst.
-          </p>
-          <Link
-            href="/decisions/new"
-            className="mt-2 inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            <Plus aria-hidden="true" className="h-4 w-4" />
-            Erste Entscheidung erstellen
-          </Link>
-        </div>
+        <EmptyDecisions />
       ) : (
         <div className="space-y-2">
           {decisions.map((d) => (

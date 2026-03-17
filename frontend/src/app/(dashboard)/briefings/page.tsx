@@ -15,6 +15,7 @@ import {
 } from "@/hooks/use-briefings";
 import { trackFirstBriefing } from "@/lib/analytics";
 import BriefingPreferencesPanel from "@/components/briefings/briefing-preferences";
+import { EmptyBriefings } from "@/components/ui/empty-states";
 import type {
   BriefingType,
   BriefingListItem,
@@ -134,17 +135,7 @@ export default function BriefingsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-surface p-12 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-            <FileText aria-hidden="true" className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 className="mb-1 text-sm font-semibold text-text">
-            Noch keine Briefings
-          </h3>
-          <p className="text-sm text-text-secondary">
-            Erstelle dein erstes Briefing, um loszulegen.
-          </p>
-        </div>
+        <EmptyBriefings />
       )}
     </div>
   );

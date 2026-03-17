@@ -14,6 +14,7 @@ import {
 import { useSearch, useCreateSavedSearch } from "@/hooks/use-search";
 import { trackSearch } from "@/lib/analytics";
 import { SearchCombobox } from "@/components/search/search-combobox";
+import { EmptySearch } from "@/components/ui/empty-states";
 import type { SearchFilters, SourceType, SearchResult } from "@/types/api";
 
 const SOURCE_TYPE_OPTIONS: { value: SourceType; label: string }[] = [
@@ -305,18 +306,7 @@ function SearchContent() {
           ))}
         </div>
       ) : query.length > 0 && !isLoading ? (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
-          <SearchIcon
-            aria-hidden="true"
-            className="mx-auto mb-3 h-10 w-10 text-text-tertiary"
-          />
-          <h3 className="mb-1 text-sm font-semibold text-text">
-            Keine Ergebnisse gefunden
-          </h3>
-          <p className="text-sm text-text-tertiary">
-            Versuche andere Suchbegriffe oder entferne Filter.
-          </p>
-        </div>
+        <EmptySearch />
       ) : null}
     </div>
   );

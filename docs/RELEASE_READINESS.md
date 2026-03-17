@@ -70,7 +70,7 @@ Open Beta → General Availability:
 | SEC-07 | JWT-Token-Rotation funktional (RS256, 15 Min. Access, 30 Tage Refresh)        |    Must     |   ✅   | security-audit.md: A07 – RS256, Rotation bei Nutzung         | Entwicklung    |
 | SEC-08 | Produktions-Startup-Check: kein Start ohne RSA-Keys bei `PWBS_ENV=production` |    Must     |   ❌   | security-audit.md: Finding A02-F01, SUPPORT_OPS #7           | Entwicklung    |
 | SEC-09 | CSP-Header in SecurityHeadersMiddleware implementiert                         |   Should    |   ❌   | security-audit.md: Finding A03-F01, SUPPORT_OPS #6           | Entwicklung    |
-| SEC-10 | CORS `allow_methods` und `allow_headers` auf genutzte Werte eingeschränkt     |   Should    |   ❌   | security-audit.md: Finding A05-F02                           | Entwicklung    |
+| SEC-10 | CORS `allow_methods` und `allow_headers` auf genutzte Werte eingeschränkt     |   Should    |   ✅   | security-audit.md: Finding A05-F02                           | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -139,8 +139,8 @@ Open Beta → General Availability:
 
 | ID     | Kriterium                                                                                      | Must/Should | Status | Quelle                                          | Verantwortlich |
 | ------ | ---------------------------------------------------------------------------------------------- | :---------: | :----: | ----------------------------------------------- | -------------- |
-| ANA-01 | Core-Events implementiert: `auth_user_registered`, `connector_connected`, `briefing_generated` |    Must     |   ❌   | TRACKING_PLAN: Phase 1, Tasks 3–5               | Entwicklung    |
-| ANA-02 | Activation-Funnel messbar (Register → Connect → Briefing)                                      |   Should    |   ❌   | TRACKING_PLAN: Abschnitt 6.1                    | Entwicklung    |
+| ANA-01 | Core-Events implementiert: `auth_user_registered`, `connector_connected`, `briefing_generated` |    Must     |   ✅   | TRACKING_PLAN: Phase 1, Tasks 3–5               | Entwicklung    |
+| ANA-02 | Activation-Funnel messbar (Register → Connect → Briefing)                                      |   Should    |   ⏳   | TRACKING_PLAN: Abschnitt 6.1                    | Entwicklung    |
 | ANA-03 | Analytics-Dashboard zugänglich (PostHog Self-Hosted oder äquivalent)                           |   Should    |   ❌   | TRACKING_PLAN: Abschnitt 8, Phase 3 Tasks 16–20 | Entwicklung    |
 
 **Begründung Must/Should:**

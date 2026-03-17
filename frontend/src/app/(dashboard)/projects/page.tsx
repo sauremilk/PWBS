@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderKanban, Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
+
+import { EmptyProjects } from "@/components/ui/empty-states";
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -50,17 +52,7 @@ export default function ProjectsPage() {
         </form>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface p-8 text-center">
-        <FolderKanban className="mx-auto mb-3 h-10 w-10 text-text-tertiary" />
-        <h3 className="mb-1 text-sm font-semibold text-text">
-          Projekt-\u00dcbersicht
-        </h3>
-        <p className="text-sm text-text-tertiary">
-          Suche ein Projekt, um ein detailliertes Briefing zu generieren. Das
-          Briefing enthält Entscheidungen, Beteiligte und relevante Dokumente
-          aus den letzten 90 Tagen.
-        </p>
-      </div>
+      <EmptyProjects />
     </div>
   );
 }

@@ -377,7 +377,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alle 10 Dashboard-Seiten zeigen spezifische, motivierende Empty States mit CTA |
 | **Abh�ngigkeit**        | �                                                                              |
 | **Gesch�tzter Aufwand** | M                                                                              |
-| **Status**              | Offen (generische Komponente vorhanden)                                        |
+| **Status**              | Fertig                                        |
 
 **Beschreibung:** Empty States f�r alle Dashboard-Seiten implementieren gem�� UX_ONBOARDING_SPEC �6 Tabelle. Seiten: Dashboard (2 Varianten), Briefings (2), Konnektoren, Suche (2), Knowledge, Erinnerungen, Projekte, Entscheidungen. Texte und CTAs aus UX_ONBOARDING_SPEC �6 �bernehmen.
 
@@ -545,7 +545,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Events `auth_user_registered`, `connector_connected`, `briefing_generated` werden in PostHog erfasst |
 | **Abh�ngigkeit**        | LAUNCH-ANA-001 (PostHog muss deployt sein)                                                           |
 | **Gesch�tzter Aufwand** | M                                                                                                    |
-| **Status**              | Offen                                                                                                |
+| **Status**              | Fertig                                                                                               |
 
 **Beschreibung:** Server-Side Events gem�� TRACKING_PLAN �5 Event-Katalog implementieren: `auth_user_registered`, `auth_user_logged_in`, `auth_user_logged_out`, `connector_oauth_started`, `connector_connected`, `connector_connection_failed`, `connector_sync_completed`, `connector_disconnected`, `briefing_generated`, `briefing_feedback_given`, `search_executed`. Kein Consent n�tig (Art. 6 Abs. 1 lit. b DSGVO). Ohne diese Events sind die Exit-Kriterien der Closed Beta nicht messbar.
 
