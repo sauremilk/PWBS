@@ -6,6 +6,7 @@ Adds defensive HTTP headers to every response:
   - Strict-Transport-Security (production only)
   - Referrer-Policy: strict-origin-when-cross-origin
   - X-XSS-Protection: 0 (modern browsers rely on CSP instead)
+  - Content-Security-Policy: restrictive API policy
 """
 
 from __future__ import annotations
@@ -15,6 +16,9 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from pwbs.core.config import get_settings
+
+# Restrictive CSP for a JSON API backend (no HTML pages served).
+_CSP = "default-src 'none'; frame-ancestors 'none'"
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -26,6 +30,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "0"
+        response.headers["Content-Security-Policy"] = _CSP
 
         settings = get_settings()
         if settings.is_production:

@@ -245,7 +245,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `Content-Security-Policy`-Header wird bei allen Responses gesetzt             |
 | **Abh�ngigkeit**        | �                                                                             |
 | **Gesch�tzter Aufwand** | S                                                                             |
-| **Status**              | Offen                                                                         |
+| **Status**              | Fertig                                                                         |
 
 **Beschreibung:** `Content-Security-Policy`-Header in `SecurityHeadersMiddleware` erg�nzen. Policy muss in Produktion XSS-Schutz bieten, ohne Frontend-Funktionalit�t zu brechen. Schlie�t das mittlere OWASP-Finding A03-F01.
 
