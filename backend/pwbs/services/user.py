@@ -1,4 +1,4 @@
-﻿"""User registration service (TASK-082).
+"""User registration service (TASK-082).
 
 Handles:
 - Password validation (>= 12 chars, 1 uppercase, 1 digit)
@@ -72,9 +72,7 @@ class RegisterRequest(BaseModel):
     def validate_password_complexity(cls, v: str) -> str:
         errors: list[str] = []
         if len(v) < _PASSWORD_MIN_LENGTH:
-            errors.append(
-                f"Passwort muss mindestens {_PASSWORD_MIN_LENGTH} Zeichen lang sein"
-            )
+            errors.append(f"Passwort muss mindestens {_PASSWORD_MIN_LENGTH} Zeichen lang sein")
         if not _PASSWORD_UPPERCASE_RE.search(v):
             errors.append("Passwort muss mindestens einen Großbuchstaben enthalten")
         if not _PASSWORD_DIGIT_RE.search(v):
@@ -193,7 +191,7 @@ async def register_user(
         raise AuthenticationError(
             "Registrierung fehlgeschlagen",
             code="REGISTRATION_FAILED",
-        )
+        ) from None
 
     # Issue token pair
     pair = await create_token_pair(user.id, db)

@@ -10,7 +10,7 @@ Business logic for the plugin marketplace. Handles:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -123,7 +123,7 @@ async def review_plugin(
 
     plugin.status = new_status
     if new_status == PluginStatus.APPROVED.value and plugin.published_at is None:
-        plugin.published_at = datetime.now(timezone.utc)
+        plugin.published_at = datetime.now(UTC)
     if new_status == PluginStatus.APPROVED.value:
         plugin.is_verified = True
 
@@ -398,7 +398,7 @@ async def rate_plugin(
         old_score = existing.score
         existing.score = score
         existing.review_text = review_text
-        existing.rated_at = datetime.now(timezone.utc)
+        existing.rated_at = datetime.now(UTC)
         # Adjust aggregates: remove old, add new
         plugin.rating_sum = plugin.rating_sum - old_score + score
         await db.flush()

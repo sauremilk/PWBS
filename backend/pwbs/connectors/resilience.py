@@ -93,8 +93,7 @@ class CircuitBreaker:
     @property
     def state(self) -> CircuitState:
         """Current state, accounting for automatic open -> half-open transition."""
-        if self._state == CircuitState.OPEN:
-            if time.monotonic() - self._opened_at >= self._recovery_timeout:
+        if self._state == CircuitState.OPEN and time.monotonic() - self._opened_at >= self._recovery_timeout:
                 self._state = CircuitState.HALF_OPEN
                 logger.info(
                     "Circuit '%s' transitioned to HALF_OPEN after %.0fs recovery timeout",
@@ -184,8 +183,7 @@ class CircuitBreaker:
         self._state = CircuitState.OPEN
         self._opened_at = time.monotonic()
         logger.warning(
-            "Circuit '%s' OPENED after %d consecutive failures. "
-            "Recovery in %.0fs.",
+            "Circuit '%s' OPENED after %d consecutive failures. Recovery in %.0fs.",
             self._name,
             self._failure_count,
             self._recovery_timeout,
@@ -220,8 +218,7 @@ class CircuitBreaker:
                 if attempt < len(self._retry_delays):
                     delay = self._retry_delays[attempt]
                     logger.warning(
-                        "Circuit '%s' call failed (attempt %d/%d), "
-                        "retrying in %.0fs: %s",
+                        "Circuit '%s' call failed (attempt %d/%d), retrying in %.0fs: %s",
                         self._name,
                         attempt + 1,
                         max_attempts,

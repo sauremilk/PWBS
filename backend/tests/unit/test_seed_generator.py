@@ -1,4 +1,4 @@
-﻿"""Tests for the Seed-Data-Generator CLI (TASK-198).
+"""Tests for the Seed-Data-Generator CLI (TASK-198).
 
 Verifies:
 - Document generation produces correct count across 4 connectors
@@ -10,7 +10,7 @@ Verifies:
 from __future__ import annotations
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -47,9 +47,17 @@ class TestDocumentGeneration:
     def test_all_documents_have_required_fields(self) -> None:
         docs = generate_documents(DEMO_USER_ID, 20)
         required_fields = {
-            "id", "user_id", "source_type", "source_id", "title",
-            "content", "content_hash", "language", "created_at",
-            "updated_at", "processing_status",
+            "id",
+            "user_id",
+            "source_type",
+            "source_id",
+            "title",
+            "content",
+            "content_hash",
+            "language",
+            "created_at",
+            "updated_at",
+            "processing_status",
         }
         for doc in docs:
             missing = required_fields - set(doc.keys())
@@ -109,6 +117,7 @@ class TestCLIArgumentParsing:
 
     def test_seed_command_defaults(self) -> None:
         from pwbs.cli.__main__ import main
+
         with patch("pwbs.cli.seed.run_seed") as mock_seed:
             with patch("sys.argv", ["pwbs.cli", "seed"]):
                 main()
@@ -120,8 +129,11 @@ class TestCLIArgumentParsing:
 
     def test_seed_command_custom_args(self) -> None:
         from pwbs.cli.__main__ import main
+
         with patch("pwbs.cli.seed.run_seed") as mock_seed:
-            with patch("sys.argv", ["pwbs.cli", "seed", "--user", "test@example.com", "--documents", "25"]):
+            with patch(
+                "sys.argv", ["pwbs.cli", "seed", "--user", "test@example.com", "--documents", "25"]
+            ):
                 main()
             mock_seed.assert_called_once_with(
                 user_email="test@example.com",
@@ -131,6 +143,7 @@ class TestCLIArgumentParsing:
 
     def test_seed_command_clean_flag(self) -> None:
         from pwbs.cli.__main__ import main
+
         with patch("pwbs.cli.seed.run_seed") as mock_seed:
             with patch("sys.argv", ["pwbs.cli", "seed", "--clean"]):
                 main()
@@ -142,6 +155,7 @@ class TestCLIArgumentParsing:
 
     def test_no_command_exits_with_error(self) -> None:
         from pwbs.cli.__main__ import main
+
         with patch("sys.argv", ["pwbs.cli"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()

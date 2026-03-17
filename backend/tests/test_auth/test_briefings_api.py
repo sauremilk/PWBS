@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from pwbs.api.v1.routes.briefings import (
-    BriefingDetailResponse,
-    BriefingListItem,
     BriefingListResponse,
     FeedbackRequest,
-    FeedbackResponse,
     GenerateRequest,
     GenerateResponse,
     SourceRefResponse,
@@ -63,7 +60,7 @@ def _make_briefing_orm(
     row.source_chunks = source_chunks or []
     row.source_entities = source_entities
     row.trigger_context = trigger_context
-    row.generated_at = generated_at or datetime(2026, 3, 14, 6, 30, tzinfo=timezone.utc)
+    row.generated_at = generated_at or datetime(2026, 3, 14, 6, 30, tzinfo=UTC)
     row.expires_at = expires_at
     return row
 
@@ -96,8 +93,8 @@ class TestOrmToDetail:
     def test_maps_all_fields(self) -> None:
         bid = uuid.uuid4()
         chunk_id = uuid.uuid4()
-        gen_at = datetime(2026, 3, 14, 6, 30, tzinfo=timezone.utc)
-        exp_at = datetime(2026, 3, 15, 6, 30, tzinfo=timezone.utc)
+        gen_at = datetime(2026, 3, 14, 6, 30, tzinfo=UTC)
+        exp_at = datetime(2026, 3, 15, 6, 30, tzinfo=UTC)
 
         row = _make_briefing_orm(
             briefing_id=bid,
@@ -154,7 +151,7 @@ class TestResolveSources:
     @pytest.mark.asyncio
     async def test_resolves_chunks_to_source_refs(self) -> None:
         chunk_id = uuid.uuid4()
-        doc_created = datetime(2026, 3, 1, 12, 0, tzinfo=timezone.utc)
+        doc_created = datetime(2026, 3, 1, 12, 0, tzinfo=UTC)
 
         mock_row = MagicMock()
         mock_row.id = chunk_id
@@ -181,7 +178,7 @@ class TestResolveSources:
         mock_row.id = chunk_id
         mock_row.title = None
         mock_row.source_type = "obsidian"
-        mock_row.created_at = datetime(2026, 3, 1, tzinfo=timezone.utc)
+        mock_row.created_at = datetime(2026, 3, 1, tzinfo=UTC)
 
         db = AsyncMock()
         execute_result = MagicMock()

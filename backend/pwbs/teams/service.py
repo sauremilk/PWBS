@@ -1,4 +1,4 @@
-﻿"""Team/organization service for multi-tenancy (TASK-144).
+"""Team/organization service for multi-tenancy (TASK-144).
 
 Provides:
 1. Organization CRUD with slug generation
@@ -50,9 +50,7 @@ async def create_organization(
     slug = _slugify(name)
 
     # Check slug uniqueness
-    existing = await db.execute(
-        select(Organization).where(Organization.slug == slug)
-    )
+    existing = await db.execute(select(Organization).where(Organization.slug == slug))
     if existing.scalar_one_or_none() is not None:
         slug = f"{slug}-{str(owner_id)[:8]}"
 
@@ -282,9 +280,7 @@ async def can_access_document(
         return True
 
     if doc.visibility == DocumentVisibility.TEAM.value and doc.organization_id is not None:
-        membership = await _get_membership(
-            db, org_id=doc.organization_id, user_id=user_id
-        )
+        membership = await _get_membership(db, org_id=doc.organization_id, user_id=user_id)
         return membership is not None
 
     return False

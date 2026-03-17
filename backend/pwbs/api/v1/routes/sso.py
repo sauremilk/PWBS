@@ -144,9 +144,9 @@ async def configure_sso(
         saved = await service.save_sso_config(org_id, sso_config)
         await db.commit()
     except NotFoundError:
-        raise HTTPException(status_code=404, detail="Organization not found")
+        raise HTTPException(status_code=404, detail="Organization not found") from None
     except ValidationError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
     return SSOConfigResponse(
         enabled=saved.enabled,
@@ -175,7 +175,7 @@ async def get_sso_config(
     try:
         config = await service.get_sso_config(org_id)
     except NotFoundError:
-        raise HTTPException(status_code=404, detail="Organization not found")
+        raise HTTPException(status_code=404, detail="Organization not found") from None
 
     if config is None:
         raise HTTPException(status_code=404, detail="SSO not configured")
@@ -208,7 +208,7 @@ async def delete_sso_config(
         await service.delete_sso_config(org_id)
         await db.commit()
     except NotFoundError:
-        raise HTTPException(status_code=404, detail="Organization not found")
+        raise HTTPException(status_code=404, detail="Organization not found") from None
 
 
 # ── Public SSO login endpoints ────────────────────────────────────────
@@ -304,7 +304,7 @@ async def oidc_callback(
                 "fallback_available": True,
                 "retry_url": f"/api/v1/sso/{org_slug}/login",
             },
-        )
+        ) from exc
 
     # JIT provision or find existing user
     service = SSOService(db)
@@ -317,7 +317,7 @@ async def oidc_callback(
             sso_config=config,
         )
     except AuthenticationError as exc:
-        raise HTTPException(status_code=403, detail=str(exc))
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
 
     # Issue PWBS token pair
     token_pair = await create_token_pair(login_result.user_id, db)

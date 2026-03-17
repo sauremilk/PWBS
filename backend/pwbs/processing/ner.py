@@ -1,4 +1,4 @@
-﻿"""Rule-based Named Entity Recognition for the PWBS Processing Pipeline (TASK-061).
+"""Rule-based Named Entity Recognition for the PWBS Processing Pipeline (TASK-061).
 
 First stage of the NER pipeline. Extracts entities from document
 chunks using deterministic regex patterns:

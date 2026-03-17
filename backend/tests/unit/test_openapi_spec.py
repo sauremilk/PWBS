@@ -18,6 +18,7 @@ from pwbs.api.main import create_app
 
 POSTMAN_PATH = Path(__file__).resolve().parents[3] / "docs" / "api" / "pwbs-collection.json"
 
+
 @pytest.fixture(scope="module")
 def openapi_spec() -> dict:
     app = create_app()
@@ -86,6 +87,7 @@ class TestPostmanCollection:
                 # Strip {{baseUrl}} prefix and normalize :param -> {param}
                 path = raw.replace("{{baseUrl}}", "")
                 import re
+
                 path = re.sub(r":(\w+)", r"{\1}", path)
                 collection_paths.add(path)
 

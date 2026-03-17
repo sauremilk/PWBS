@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -88,7 +88,7 @@ async def share_briefing(
     if not valid_recipients:
         return []
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     values = [
         {
             "id": uuid.uuid4(),
@@ -160,7 +160,7 @@ async def mark_read(
         raise ValueError("SHARE_NOT_FOUND")
 
     if share.read_at is None:
-        share.read_at = datetime.now(timezone.utc)
+        share.read_at = datetime.now(UTC)
         await db.flush()
 
     return share

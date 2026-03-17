@@ -1,4 +1,4 @@
-﻿"""Tests for Structured Logging with Correlation IDs (TASK-196).
+"""Tests for Structured Logging with Correlation IDs (TASK-196).
 
 Verifies:
 - CorrelationIdMiddleware sets X-Request-ID in response

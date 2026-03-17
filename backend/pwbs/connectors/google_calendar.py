@@ -29,7 +29,6 @@ from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
-
     from pwbs.schemas.document import UnifiedDocument
 
 logger = logging.getLogger(__name__)
@@ -299,7 +298,7 @@ class GoogleCalendarConnector(BaseConnector):
         except RateLimitError:
             raise
         except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 410:  # noqa: PLR2004
+            if exc.response.status_code == 410:
                 # syncToken invalidated — Google requires a full re-sync
                 logger.warning(
                     "syncToken invalidated (410 Gone), triggering full re-sync: connection_id=%s",
@@ -489,7 +488,7 @@ class GoogleCalendarConnector(BaseConnector):
                     params={"maxResults": 1},
                     headers={"Authorization": f"Bearer {access_token}"},
                 )
-                return response.status_code == 200  # noqa: PLR2004
+                return response.status_code == 200
         except httpx.RequestError:
             logger.warning(
                 "Health check failed – network error: connection_id=%s",

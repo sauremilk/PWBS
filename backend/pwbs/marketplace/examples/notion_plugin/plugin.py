@@ -63,7 +63,7 @@ class NotionConnectorPlugin(ConnectorPlugin):
         """
         # Import deferred to avoid hard dependency at module load
         from pwbs.connectors.base import ConnectorConfig
-        from pwbs.connectors.notion import NotionConnector  # noqa: F811
+        from pwbs.connectors.notion import NotionConnector
         from pwbs.schemas.enums import SourceType
 
         config = ConnectorConfig(
@@ -76,10 +76,7 @@ class NotionConnectorPlugin(ConnectorPlugin):
             config=config,
         )
         result = await connector.fetch_since(cursor)
-        records = [
-            {"source_id": doc.source_id, "content": doc.content}
-            for doc in result.documents
-        ]
+        records = [{"source_id": doc.source_id, "content": doc.content} for doc in result.documents]
         return records, result.new_cursor
 
     # -- Lifecycle hooks (TASK-156) ------------------------------------------

@@ -1,92 +1,92 @@
-# ADR-014: Beta-Launch-Strategie  Hybrid Go-to-Market fuer 100-500 Nutzer
+# ADR-014: Beta Launch Strategy – Hybrid Go-to-Market for 100-500 Users
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-14
-**Entscheider:** Projektteam
-
----
-
-## Kontext
-
-PWBS ist mit 159/175 Tasks (91%) produktionsreif. Die Roadmap definiert als Phase-3-Ziel "100-500 aktive Beta-Nutzer" mit > 60% 30-Tage-Retention und > 30% Zahlungsbereitschaft. Es existiert kein grosses Werbebudget (Roadmap-Annahme: "Community-getriebenes Wachstum"). Die Zielgruppe (Gruender, PMs, Berater mit PKM-Affinitaet) ist eine klar abgrenzbare Nische, erreichbar ueber PKM-Communities (Obsidian, Zettelkasten, Notion). Die technische Infrastruktur (Discord-Community-Setup, Feature-Flags, Billing, k6-Load-Tests) ist vorbereitet, aber eine koordinierte Launch-Strategie fehlt.
+**Status:** Accepted
+**Date:** 2026-03-14
+**Decision Makers:** Project Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir werden eine **Hybrid-Strategie** (Community-Aufbau + koordinierter Launch + Referral-Loop) verfolgen, weil sie die hohe Nischen-Conversion von Community-Marketing (4-8%) mit der Sichtbarkeit eines Launch-Events kombiniert und durch ein Referral-System nachhaltiges Wachstum sichert.
-
-### Phasen
-
-1. **Wochen 1-2 (Fundament):** DSGVO-konformes Analytics (Plausible/Fathom), Landing Page mit Demo-Video, minimaler Referral-Mechanismus (UUID-basierte Invite-Codes), Load-Testing auf 500 VUs
-2. **Wochen 2-4 (Community):** Authentische Praesenz in Obsidian-Discord, Reddit (r/Zettelkasten, r/PKMS), LinkedIn. 5-10 handverlesene "Design Partners" mit 1-on-1-Onboarding. Ziel: 200 Discord-Mitglieder vor Launch
-3. **Woche 5 (Launch):** Koordinierter ProductHunt + HackerNews "Show HN" + Newsletter + LinkedIn-Announcement. Community als Upvote- und Testimonial-Basis
-4. **Woche 6+ (Wachstum):** Referral-Aktivierung nach 7 Tagen aktiver Nutzung, Content-Pipeline (Blog, Use Cases), monatliche Community-Events
-
-### Kanaele und erwartete Conversion
-
-| Kanal | Reach | Signups | Aktive Beta-Nutzer |
-|---|---|---|---|
-| PKM-Communities (Obsidian, Reddit) | 5.000 | 160-350 | 65-140 |
-| LinkedIn (organisch) | 5.000 | 50-100 | 20-40 |
-| ProductHunt + HackerNews | 7.000-25.000 | 140-500 | 55-200 |
-| Design Partners | 10 | 10 | 8-10 |
-| Referral (ab Woche 4) | - | 30-80 | 15-40 |
-| **TOTAL** | **17.000-35.000** | **390-1.040** | **163-430** |
+PWBS is production-ready with 159/175 tasks (91%). The roadmap defines as Phase 3 goal "100-500 active beta users" with > 60% 30-day retention and > 30% willingness to pay. There is no large advertising budget (roadmap assumption: "community-driven growth"). The target audience (founders, PMs, consultants with PKM affinity) is a clearly delineated niche, reachable via PKM communities (Obsidian, Zettelkasten, Notion). The technical infrastructure (Discord community setup, feature flags, billing, k6 load tests) is prepared, but a coordinated launch strategy is missing.
 
 ---
 
-## Optionen bewertet
+## Decision
 
-| Option | Vorteile | Nachteile | Ausschlussgruende |
-|---|---|---|---|
-| A: Community-Only | Kostenarm, hohe Conversion, nachhaltig | Zu langsam (3-6 Monate fuer 100 Nutzer), Momentum geht verloren | Geschwindigkeit inkompatibel mit Roadmap-Timeline |
-| B: Launch-Event-Only | Hohe Sichtbarkeit, schnell | Einmal-Spike, kein Sicherheitsnetz, keine Testimonials | Zu riskant ohne Community-Basis |
-| **C: Hybrid (gewaehlt)** | Kombiniert Community-Basis mit Launch-Peak, Referral sichert Nachhaltigkeit | Hoechster Koordinationsaufwand | - |
+We will pursue a **hybrid strategy** (community building + coordinated launch + referral loop), because it combines the high niche conversion of community marketing (4-8%) with the visibility of a launch event and ensures sustainable growth through a referral system.
 
----
+### Phases
 
-## Konsequenzen
+1. **Weeks 1-2 (Foundation):** GDPR-compliant analytics (Plausible/Fathom), landing page with demo video, minimal referral mechanism (UUID-based invite codes), load testing at 500 VUs
+2. **Weeks 2-4 (Community):** Authentic presence in Obsidian Discord, Reddit (r/Zettelkasten, r/PKMS), LinkedIn. 5-10 hand-picked "Design Partners" with 1-on-1 onboarding. Goal: 200 Discord members before launch
+3. **Week 5 (Launch):** Coordinated ProductHunt + HackerNews "Show HN" + newsletter + LinkedIn announcement. Community as upvote and testimonial base
+4. **Week 6+ (Growth):** Referral activation after 7 days of active usage, content pipeline (blog, use cases), monthly community events
 
-### Positive Konsequenzen
+### Channels and Expected Conversion
 
-- Product-Market-Fit-Validierung mit qualitativ hochwertigem Feedback (Design Partners + Community)
-- Aufbau einer Community-Asset, das fuer Phase 4 (1.000-5.000 Nutzer) weiter skaliert
-- NPS- und Testimonial-Basis fuer spaetere Marketing-Aktivitaeten
-- Niedrige Kosten (primaer Zeitinvestition, kein Ad-Spend noetig)
-
-### Negative Konsequenzen / Trade-offs
-
-- Signifikanter Zeitaufwand fuer Community-Engagement (10-15h/Woche in Phase 2)
-- ProductHunt/HN-Launch ist nicht wiederholbar  muss beim ersten Mal sitzen
-- Referral-Mechanismus erfordert minimalen Engineering-Aufwand
-
-### Offene Fragen
-
-- Wer ist der "Hunter" fuer ProductHunt? (Idealerweise jemand mit Follower-Basis in der PKM-Nische)
-- Soll die Beta limitiert sein (z.B. "500 Plaetze") oder offen? Kuenstliche Verknappung erhoehe FOMO, kann aber even authentischer Community-Wachstum bremsen
-- Pricing waehrend Beta: Gratis mit Upgrade-Pfad oder sofort $20/Monat mit 50% Beta-Discount?
+| Channel                            | Reach             | Signups       | Active Beta Users |
+| ---------------------------------- | ----------------- | ------------- | ----------------- |
+| PKM Communities (Obsidian, Reddit) | 5,000             | 160-350       | 65-140            |
+| LinkedIn (organic)                 | 5,000             | 50-100        | 20-40             |
+| ProductHunt + HackerNews           | 7,000-25,000      | 140-500       | 55-200            |
+| Design Partners                    | 10                | 10            | 8-10              |
+| Referral (from Week 4)             | -                 | 30-80         | 15-40             |
+| **TOTAL**                          | **17,000-35,000** | **390-1,040** | **163-430**       |
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Analytics:** Plausible/Fathom statt Google Analytics (kein Cookie-Banner noetig, EU-Hosting)
-- **Referral-Codes:** UUID-basiert, nicht mit E-Mail verknuepft, kein PII
-- **Community-Daten:** Discord-Accounts nicht mit PWBS-Accounts verknuepft (existierende Regel aus community-setup.md)
-- **Landing-Page-Signups:** E-Mail-Adressen mit explizitem Consent (Double-Opt-in), Loeschmoel nach Beta-Start
-
----
-
-## Sicherheitsimplikationen
-
-- **Registrierungs-Spam bei Launch:** Rate-Limiting auf /api/v1/auth/register existiert (TASK-108)
-- **Referral-Abuse:** Max 20 Invites pro Nutzer, Codes mit 7-Tage-Ablauf
-- **Launch-Spike-Last:** k6-Load-Test auf 500 VUs validieren VOR Launch, Connection-Pool und Redis-Cache pruefen
-- **Waitlist-Fallback:** Feature-Flag `beta_registration_open` fuer sofortigen Cutoff bei Ueberlast
+| Option                 | Advantages                                                                | Disadvantages                                         | Exclusion Reasons                        |
+| ---------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| A: Community Only      | Low cost, high conversion, sustainable                                    | Too slow (3-6 months for 100 users), momentum is lost | Speed incompatible with roadmap timeline |
+| B: Launch Event Only   | High visibility, fast                                                     | One-time spike, no safety net, no testimonials        | Too risky without community base         |
+| **C: Hybrid (chosen)** | Combines community base with launch peak, referral ensures sustainability | Highest coordination effort                           | -                                        |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-Nach Erreichen von 100 aktiven Beta-Nutzern (voraussichtlich Woche 5-6 nach Start) oder nach 8 Wochen, je nachdem was frueher eintritt.
+### Positive Consequences
+
+- Product-market fit validation with high-quality feedback (Design Partners + community)
+- Building a community asset that scales further for Phase 4 (1,000-5,000 users)
+- NPS and testimonial base for later marketing activities
+- Low cost (primarily time investment, no ad spend needed)
+
+### Negative Consequences / Trade-offs
+
+- Significant time investment for community engagement (10-15h/week in Phase 2)
+- ProductHunt/HN launch is not repeatable — must succeed on the first attempt
+- Referral mechanism requires minimal engineering effort
+
+### Open Questions
+
+- Who is the "Hunter" for ProductHunt? (Ideally someone with a follower base in the PKM niche)
+- Should the beta be limited (e.g., "500 spots") or open? Artificial scarcity increases FOMO but can hinder authentic community growth
+- Pricing during beta: Free with upgrade path or immediately $20/month with 50% beta discount?
+
+---
+
+## GDPR Implications
+
+- **Analytics:** Plausible/Fathom instead of Google Analytics (no cookie banner needed, EU hosting)
+- **Referral codes:** UUID-based, not linked to email, no PII
+- **Community data:** Discord accounts not linked to PWBS accounts (existing rule from community-setup.md)
+- **Landing page signups:** Email addresses with explicit consent (double opt-in), deletion after beta start
+
+---
+
+## Security Implications
+
+- **Registration spam at launch:** Rate limiting on /api/v1/auth/register exists (TASK-108)
+- **Referral abuse:** Max 20 invites per user, codes with 7-day expiry
+- **Launch spike load:** Validate k6 load test at 500 VUs BEFORE launch, check connection pool and Redis cache
+- **Waitlist fallback:** Feature flag `beta_registration_open` for immediate cutoff on overload
+
+---
+
+## Revision Date
+
+After reaching 100 active beta users (estimated weeks 5-6 after start) or after 8 weeks, whichever comes first.

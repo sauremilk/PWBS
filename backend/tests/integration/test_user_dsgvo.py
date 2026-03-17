@@ -16,7 +16,9 @@ pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
 class TestUserSettings:
     async def test_get_settings(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/user/settings", headers=auth_headers)
         assert resp.status_code == 200
@@ -24,7 +26,9 @@ class TestUserSettings:
         assert "email" in body
 
     async def test_update_display_name(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.patch(
             "/api/v1/user/settings",
@@ -41,7 +45,9 @@ class TestUserSettings:
 
 class TestDataExport:
     async def test_start_export(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.post("/api/v1/user/export", headers=auth_headers)
         assert resp.status_code == 202
@@ -49,7 +55,9 @@ class TestDataExport:
         assert "export_id" in body
 
     async def test_get_export_status(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         # Start export
         start_resp = await client.post("/api/v1/user/export", headers=auth_headers)
@@ -57,7 +65,8 @@ class TestDataExport:
 
         # Get status
         resp = await client.get(
-            f"/api/v1/user/export/{export_id}", headers=auth_headers,
+            f"/api/v1/user/export/{export_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 200
         assert resp.json()["status"] in ("pending", "processing", "completed", "failed")
@@ -65,7 +74,9 @@ class TestDataExport:
 
 class TestAccountDeletion:
     async def test_delete_account_schedules_deletion(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
         resp = await client.delete(
@@ -81,7 +92,9 @@ class TestAccountDeletion:
         assert "scheduled_at" in body or "grace_period_ends" in body
 
     async def test_cancel_deletion(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
         # Schedule deletion
@@ -95,12 +108,15 @@ class TestAccountDeletion:
         )
         # Cancel
         resp = await client.post(
-            "/api/v1/user/account/cancel-deletion", headers=headers,
+            "/api/v1/user/account/cancel-deletion",
+            headers=headers,
         )
         assert resp.status_code == 200
 
     async def test_delete_wrong_password_rejected(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.delete(
             "/api/v1/user/account",
@@ -113,7 +129,9 @@ class TestAccountDeletion:
         assert resp.status_code in (400, 401, 403)
 
     async def test_delete_wrong_confirmation_rejected(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
         resp = await client.delete(
@@ -129,7 +147,9 @@ class TestAccountDeletion:
 
 class TestAuditLog:
     async def test_audit_log_returns_entries(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         # The registration itself should have created audit entries
         resp = await client.get("/api/v1/user/audit-log", headers=auth_headers)
@@ -140,7 +160,9 @@ class TestAuditLog:
 
 class TestSecurityStatus:
     async def test_security_status(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/user/security", headers=auth_headers)
         assert resp.status_code == 200

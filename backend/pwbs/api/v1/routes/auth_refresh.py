@@ -1,4 +1,4 @@
-﻿"""Auth refresh endpoint (TASK-084).
+"""Auth refresh endpoint (TASK-084).
 
 POST /api/v1/auth/refresh  Rotate a refresh token and return a new token pair.
 """

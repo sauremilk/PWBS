@@ -10,7 +10,7 @@ Tests cover:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -228,7 +228,7 @@ class TestSendBriefingEmailsTask:
         briefing.id = uuid.uuid4()
         briefing.title = "Morning Briefing"
         briefing.content = "Today you have 2 meetings."
-        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=UTC)
         briefing.source_chunks = []
         briefing.email_sent_at = None
 
@@ -362,7 +362,7 @@ class TestSendBriefingEmailsTask:
         briefing.id = uuid.uuid4()
         briefing.title = "Briefing"
         briefing.content = "Content"
-        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=UTC)
         briefing.source_chunks = []
         briefing.email_sent_at = None
 
@@ -412,7 +412,7 @@ class TestSendBriefingEmailsTask:
         briefing.id = uuid.uuid4()
         briefing.title = "Briefing"
         briefing.content = "Content"
-        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 1, 15, 6, 30, tzinfo=UTC)
         briefing.source_chunks = []
         briefing.email_sent_at = None
 

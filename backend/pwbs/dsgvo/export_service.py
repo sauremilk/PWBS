@@ -14,7 +14,7 @@ import logging
 import time
 import uuid
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -138,7 +138,7 @@ async def run_export(
             file_path = export_path / file_name
             file_path.write_bytes(zip_bytes)
 
-            now = datetime.now(tz=timezone.utc)
+            now = datetime.now(tz=UTC)
             stmt = select(DataExport).where(DataExport.id == export_id)
             result = await session.execute(stmt)
             export_record = result.scalar_one()
@@ -185,7 +185,7 @@ def is_export_expired(export: DataExport) -> bool:
     """Check if a completed export has expired (> 24h)."""
     if export.expires_at is None:
         return False
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     return now > export.expires_at
 
 
@@ -280,9 +280,7 @@ async def _collect_audit_log(user_id: uuid.UUID, session: AsyncSession) -> list[
     ]
 
 
-async def _collect_llm_audit_log(
-    user_id: uuid.UUID, session: AsyncSession
-) -> list[dict[str, Any]]:
+async def _collect_llm_audit_log(user_id: uuid.UUID, session: AsyncSession) -> list[dict[str, Any]]:
     """Collect LLM audit log entries for DSGVO export."""
     stmt = (
         select(LlmAuditLog)

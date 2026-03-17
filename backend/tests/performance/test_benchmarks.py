@@ -15,7 +15,6 @@ Markers:
 
 from __future__ import annotations
 
-import uuid
 from typing import Any
 
 import pytest
@@ -39,7 +38,7 @@ class TestDocumentQueryPerformance:
         benchmark: Any,
     ) -> None:
         """Benchmark: List all documents for a user (paginated)."""
-        from sqlalchemy import select, text
+        from sqlalchemy import text
 
         user_id = perf_synthetic_data["user_id"]
 

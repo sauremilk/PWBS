@@ -1,4 +1,4 @@
-﻿"""OpenAPI schema completeness test (TASK-193).
+"""OpenAPI schema completeness test (TASK-193).
 
 Ensures every active API endpoint has summary, description and responses
 documented in the generated OpenAPI schema.

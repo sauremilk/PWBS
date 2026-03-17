@@ -1,9 +1,9 @@
-﻿"""Tests for RetryHandler (TASK-071)."""
+"""Tests for RetryHandler (TASK-071)."""
 
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -15,7 +15,6 @@ from pwbs.core.retry import (
     RetryHandler,
     RetryResult,
 )
-
 
 # ------------------------------------------------------------------
 # Helpers
@@ -85,46 +84,56 @@ class TestDelayCalculation:
     """Tests for exponential backoff delay calculation."""
 
     def test_first_retry_base_delay(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=60.0,
-            backoff_factor=5.0,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=60.0,
+                backoff_factor=5.0,
+                jitter_fraction=0.0,
+            )
+        )
         delay = handler._calculate_delay(0)
         assert delay == 60.0
 
     def test_second_retry_5x(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=60.0,
-            backoff_factor=5.0,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=60.0,
+                backoff_factor=5.0,
+                jitter_fraction=0.0,
+            )
+        )
         delay = handler._calculate_delay(1)
         assert delay == 300.0  # 5 min
 
     def test_third_retry_25x(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=60.0,
-            backoff_factor=5.0,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=60.0,
+                backoff_factor=5.0,
+                jitter_fraction=0.0,
+            )
+        )
         delay = handler._calculate_delay(2)
         assert delay == 1500.0  # 25 min
 
     def test_jitter_within_range(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=60.0,
-            backoff_factor=5.0,
-            jitter_fraction=0.1,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=60.0,
+                backoff_factor=5.0,
+                jitter_fraction=0.1,
+            )
+        )
         delays = [handler._calculate_delay(0) for _ in range(100)]
         assert all(54.0 <= d <= 66.0 for d in delays)
 
     def test_no_negative_delay(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=0.01,
-            jitter_fraction=0.5,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=0.01,
+                jitter_fraction=0.5,
+            )
+        )
         delays = [handler._calculate_delay(0) for _ in range(100)]
         assert all(d >= 0.0 for d in delays)
 
@@ -214,10 +223,12 @@ class TestExecuteSuccess:
 
     @pytest.mark.asyncio
     async def test_immediate_success(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            base_delay_seconds=0.01,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                base_delay_seconds=0.01,
+                jitter_fraction=0.0,
+            )
+        )
         fn = AsyncMock(return_value="ok")
 
         result = await handler.execute(fn)
@@ -229,11 +240,13 @@ class TestExecuteSuccess:
 
     @pytest.mark.asyncio
     async def test_success_after_retries(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            max_retries=3,
-            base_delay_seconds=0.001,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                max_retries=3,
+                base_delay_seconds=0.001,
+                jitter_fraction=0.0,
+            )
+        )
         fn = _make_failing_fn(2, ConnectionError("fail"))
 
         result = await handler.execute(fn)
@@ -292,11 +305,13 @@ class TestExecuteExhausted:
 
     @pytest.mark.asyncio
     async def test_exhausted_raises(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            max_retries=2,
-            base_delay_seconds=0.001,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                max_retries=2,
+                base_delay_seconds=0.001,
+                jitter_fraction=0.0,
+            )
+        )
         fn = AsyncMock(side_effect=ConnectionError("down"))
 
         with pytest.raises(RetryExhaustedError) as exc_info:
@@ -307,11 +322,13 @@ class TestExecuteExhausted:
 
     @pytest.mark.asyncio
     async def test_exhausted_carries_last_error(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            max_retries=1,
-            base_delay_seconds=0.001,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                max_retries=1,
+                base_delay_seconds=0.001,
+                jitter_fraction=0.0,
+            )
+        )
         err = FakeAPIError(500, "server error")
         fn = AsyncMock(side_effect=err)
 
@@ -331,10 +348,12 @@ class TestTimeout:
 
     @pytest.mark.asyncio
     async def test_timeout_triggers(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            max_retries=0,
-            call_timeout_seconds=0.05,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                max_retries=0,
+                call_timeout_seconds=0.05,
+            )
+        )
 
         async def slow_fn():
             await asyncio.sleep(10)
@@ -347,12 +366,14 @@ class TestTimeout:
 
     @pytest.mark.asyncio
     async def test_timeout_retried_as_transient(self) -> None:
-        handler = RetryHandler(RetryConfig(
-            max_retries=1,
-            call_timeout_seconds=0.05,
-            base_delay_seconds=0.001,
-            jitter_fraction=0.0,
-        ))
+        handler = RetryHandler(
+            RetryConfig(
+                max_retries=1,
+                call_timeout_seconds=0.05,
+                base_delay_seconds=0.001,
+                jitter_fraction=0.0,
+            )
+        )
         call_count = 0
 
         async def sometimes_slow():

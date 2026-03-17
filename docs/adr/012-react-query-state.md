@@ -1,77 +1,77 @@
-# ADR-012: React Query statt Redux/Zustand für Server-State
+# ADR-012: React Query Instead of Redux/Zustand for Server State
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Das PWBS-Frontend muss Server-State (Briefings, Suchergebnisse, Konnektoren-Status, Nutzerprofil) und Client-State (UI-Zustand, offene Modals, Filter-Einstellungen) verwalten. Server-State und Client-State haben grundverschiedene Anforderungen: Server-State muss gecacht, refetched, invalidiert und synchronisiert werden, während Client-State lokal und synchron ist. Die Wahl der State-Management-Strategie beeinflusst Bundle-Size, Boilerplate-Menge und Caching-Verhalten.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **React Query (TanStack Query)** für Server-State-Management und **Zustand** minimal für Client-UI-State, weil diese Trennung die Komplexität reduziert und das richtige Tool für jede State-Kategorie verwendet.
-
----
-
-## Optionen bewertet
-
-| Option                                        | Vorteile                                                                                                                                                                                                         | Nachteile                                                                                                                                                                                        | Ausschlussgründe                    |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| **React Query + Zustand (minimal)** (gewählt) | Server-State: optimiertes Caching, Stale-While-Revalidate, automatisches Refetching, Deduplication. Client-State: Zustand ist leichtgewichtig (~1KB), kein Boilerplate. Klare Trennung der Verantwortlichkeiten. | Zwei Libraries statt einer. React Query hat Lernkurve (Query Keys, Invalidation, Mutations).                                                                                                     | –                                   |
-| Redux Toolkit + RTK Query                     | Einheitliche State-Library, RTK Query für Server-State, Redux Toolkit für Client-State. Großes Ökosystem, DevTools.                                                                                              | Deutlich mehr Boilerplate (Slices, Reducers, Actions). Redux-mentales Modell (immutable State, Dispatch) überdimensioniert für PWBS-Anforderungen. RTK Query weniger ausgereift als React Query. | Zu viel Boilerplate für MVP         |
-| Zustand für alles                             | Eine Library, minimaler API-Footprint, kein Provider nötig.                                                                                                                                                      | Manuelles Implementieren von Caching, Refetching, Stale-While-Revalidate, Deduplication. Fetch-Logik in jedem Store separat.                                                                     | Fehlende Server-State-Optimierungen |
-| Apollo Client                                 | Hervorragendes Caching, optimistic Updates, Subscriptions.                                                                                                                                                       | Designt für GraphQL – PWBS verwendet REST. REST-Support (apollo-rest-link) umständlich und weniger ausgereift. Größere Bundle-Size.                                                              | REST-API, nicht GraphQL             |
+The PWBS frontend must manage server state (briefings, search results, connector status, user profile) and client state (UI state, open modals, filter settings). Server state and client state have fundamentally different requirements: server state must be cached, refetched, invalidated, and synchronized, while client state is local and synchronous. The choice of state management strategy affects bundle size, boilerplate amount, and caching behavior.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Stale-While-Revalidate: Sofortige UI-Response aus dem Cache, Background-Refetch für Aktualität
-- Automatische Query-Deduplication: Mehrere Komponenten, die dieselben Daten brauchen, lösen nur einen API-Call aus
-- Fokussiertes Refetching: `invalidateQueries` nach Mutations aktualisiert gezielt betroffene Cache-Einträge
-- Zustand (~1KB) für minimalen Client-State: Keine globale Store-Komplexität für UI-Toggles und Filter
-- DevTools für React Query und Zustand vereinfachen Debugging
-
-### Negative Konsequenzen / Trade-offs
-
-- Zwei State-Libraries statt einer (mitigiert: klare Trennung – React Query für alles, was vom Server kommt; Zustand nur für lokale UI-State wie Sidebar-Collapse, Theme-Preference)
-- React Query hat Lernkurve: Query Keys als Cache-IDs, Invalidation-Strategien, Mutation-Callbacks (mitigiert: Standardisierte Query-Key-Factory und Custom Hooks in `/src/lib/api/`)
-- Zustand-Store kann bei unkontrolliertem Wachstum unübersichtlich werden (mitigiert: striktes Zustand-Budget – nur UI-State, kein Server-State)
-
-### Offene Fragen
-
-- Query-Key-Konvention standardisieren (z.B. `['briefings', userId, type]`, `['search', query, filters]`)
-- Prefetching-Strategie für Briefings (Server Components prefetchen, Client hydriert)
-- React Query + Server Components Integration (Next.js Hydration-Boundary)
+We use **React Query (TanStack Query)** for server state management and **Zustand** minimally for client UI state, because this separation reduces complexity and uses the right tool for each state category.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Client-Cache:** React Query cached Server-Responses im Browser-Memory. Sensible Daten (Briefings, Suchergebnisse) werden bei staleTime-Ablauf refetched und bei Logout invalidiert (queryClient.clear()).
-- **Kein persistenter Cache:** Standardmäßig kein LocalStorage/SessionStorage-Caching für API-Responses (keine Nutzerdaten persistieren im Browser).
-- **Cache-Control:** API-Responses mit `Cache-Control: no-store` für sensible Endpunkte verhindern Browser-Disk-Caching.
-- **Logout-Cleanup:** `queryClient.clear()` bei Logout entfernt alle gecachten Nutzerdaten aus dem Memory.
-
----
-
-## Sicherheitsimplikationen
-
-- Alle API-Calls über zentrale `/src/lib/api/` Abstraktion mit automatischer Auth-Header-Injection
-- Token-Refresh-Logik in React Query Retry-Handler integriert (401 → Refresh → Retry)
-- Keine Secrets oder Tokens in Zustand-Store speichern (nur UI-State)
-- Query Results im DevTools-Panel zeigen Nutzerdaten – DevTools nur in Development-Builds aktiviert
-- XSS-Schutz: Cached API-Responses werden via React-DOM gerendert (automatisches Escaping)
+| Option                                       | Advantages                                                                                                                                                                                       | Disadvantages                                                                                                                                                                       | Exclusion Reasons                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **React Query + Zustand (minimal)** (chosen) | Server state: optimized caching, stale-while-revalidate, automatic refetching, deduplication. Client state: Zustand is lightweight (~1KB), no boilerplate. Clear separation of responsibilities. | Two libraries instead of one. React Query has a learning curve (query keys, invalidation, mutations).                                                                               | –                                  |
+| Redux Toolkit + RTK Query                    | Unified state library, RTK Query for server state, Redux Toolkit for client state. Large ecosystem, DevTools.                                                                                    | Significantly more boilerplate (slices, reducers, actions). Redux mental model (immutable state, dispatch) oversized for PWBS requirements. RTK Query less mature than React Query. | Too much boilerplate for MVP       |
+| Zustand for everything                       | One library, minimal API footprint, no provider needed.                                                                                                                                          | Manual implementation of caching, refetching, stale-while-revalidate, deduplication. Fetch logic separate in each store.                                                            | Missing server state optimizations |
+| Apollo Client                                | Excellent caching, optimistic updates, subscriptions.                                                                                                                                            | Designed for GraphQL – PWBS uses REST. REST support (apollo-rest-link) cumbersome and less mature. Larger bundle size.                                                              | REST API, not GraphQL              |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-03-13 – Bewertung der State-Management-Komplexität und Developer Experience nach 12 Monaten. Evaluation, ob Zustand weiterhin benötigt wird oder Server Components ausreichen.
+### Positive Consequences
+
+- Stale-while-revalidate: Instant UI response from cache, background refetch for freshness
+- Automatic query deduplication: Multiple components needing the same data trigger only one API call
+- Focused refetching: `invalidateQueries` after mutations selectively updates affected cache entries
+- Zustand (~1KB) for minimal client state: No global store complexity for UI toggles and filters
+- DevTools for React Query and Zustand simplify debugging
+
+### Negative Consequences / Trade-offs
+
+- Two state libraries instead of one (mitigated: clear separation – React Query for everything from the server; Zustand only for local UI state like sidebar collapse, theme preference)
+- React Query has a learning curve: Query keys as cache IDs, invalidation strategies, mutation callbacks (mitigated: standardized query key factory and custom hooks in `/src/lib/api/`)
+- Zustand store can become unwieldy with uncontrolled growth (mitigated: strict Zustand budget – only UI state, no server state)
+
+### Open Questions
+
+- Standardize query key convention (e.g., `['briefings', userId, type]`, `['search', query, filters]`)
+- Prefetching strategy for briefings (Server Components prefetch, client hydrates)
+- React Query + Server Components integration (Next.js Hydration Boundary)
+
+---
+
+## GDPR Implications
+
+- **Client cache:** React Query caches server responses in browser memory. Sensitive data (briefings, search results) is refetched when staleTime expires and invalidated on logout (queryClient.clear()).
+- **No persistent cache:** By default, no LocalStorage/SessionStorage caching for API responses (no user data persisted in the browser).
+- **Cache-Control:** API responses with `Cache-Control: no-store` for sensitive endpoints prevent browser disk caching.
+- **Logout cleanup:** `queryClient.clear()` on logout removes all cached user data from memory.
+
+---
+
+## Security Implications
+
+- All API calls via central `/src/lib/api/` abstraction with automatic auth header injection
+- Token refresh logic integrated in React Query retry handler (401 → refresh → retry)
+- No secrets or tokens stored in Zustand store (only UI state)
+- Query results in DevTools panel show user data – DevTools only enabled in development builds
+- XSS protection: Cached API responses are rendered via React DOM (automatic escaping)
+
+---
+
+## Revision Date
+
+2027-03-13 – Assessment of state management complexity and developer experience after 12 months. Evaluation of whether Zustand is still needed or Server Components suffice.

@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from pydantic import BaseModel
 
 # ── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -35,8 +34,8 @@ def _make_entity(
     e.name = name
     e.normalized_name = normalized_name
     e.mention_count = mention_count
-    e.first_seen = first_seen or datetime(2024, 1, 1, tzinfo=timezone.utc)
-    e.last_seen = last_seen or datetime(2024, 6, 1, tzinfo=timezone.utc)
+    e.first_seen = first_seen or datetime(2024, 1, 1, tzinfo=UTC)
+    e.last_seen = last_seen or datetime(2024, 6, 1, tzinfo=UTC)
     e.metadata_ = metadata_ or {}
     return e
 
@@ -61,7 +60,7 @@ class TestSchemaValidation:
             type="PERSON",
             name="Alice",
             mention_count=5,
-            last_seen=datetime(2024, 6, 1, tzinfo=timezone.utc),
+            last_seen=datetime(2024, 6, 1, tzinfo=UTC),
         )
         assert item.id == ENTITY_ID
         assert item.type == "PERSON"
@@ -119,7 +118,7 @@ class TestSchemaValidation:
             id=uuid.uuid4(),
             title="Meeting Notes",
             source_type="notion",
-            created_at=datetime(2024, 3, 1, tzinfo=timezone.utc),
+            created_at=datetime(2024, 3, 1, tzinfo=UTC),
         )
         assert item.source_type == "notion"
 
@@ -639,7 +638,7 @@ class TestGetEntityDocuments:
         doc_row.id = doc_id
         doc_row.title = "Meeting Notes"
         doc_row.source_type = "notion"
-        doc_row.created_at = datetime(2024, 3, 1, tzinfo=timezone.utc)
+        doc_row.created_at = datetime(2024, 3, 1, tzinfo=UTC)
 
         doc_result = MagicMock()
         doc_result.all.return_value = [doc_row]

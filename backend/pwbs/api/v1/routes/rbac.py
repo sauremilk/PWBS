@@ -97,7 +97,7 @@ async def list_roles(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     roles = []
     for role in OrgRole:
@@ -136,7 +136,7 @@ async def get_member_permissions(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     role = await get_user_role(db, org_id=org_id, user_id=member_user_id)
     perms = await get_user_permissions(db, org_id=org_id, user_id=member_user_id)
@@ -169,7 +169,7 @@ async def get_role_audit_log(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     clamped_limit = min(max(limit, 1), 200)
     stmt = (

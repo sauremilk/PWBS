@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -14,8 +14,8 @@ from pwbs.api.v1.routes.briefings import (
     FeedbackResponse,
     FeedbackStatsItem,
     FeedbackStatsResponse,
-    submit_feedback,
     feedback_stats,
+    submit_feedback,
 )
 from pwbs.models.briefing import Briefing as BriefingORM
 from pwbs.models.briefing_feedback import BriefingFeedback
@@ -50,7 +50,7 @@ def _make_briefing(
     row.source_chunks = []
     row.source_entities = None
     row.trigger_context = None
-    row.generated_at = datetime(2026, 3, 14, 6, 30, tzinfo=timezone.utc)
+    row.generated_at = datetime(2026, 3, 14, 6, 30, tzinfo=UTC)
     row.expires_at = None
     return row
 
@@ -269,10 +269,12 @@ class TestFeedbackStatsSchema:
         assert item.positive == 10
 
     def test_stats_response_creation(self) -> None:
-        resp = FeedbackStatsResponse(stats=[
-            FeedbackStatsItem(briefing_type="morning", positive=5, negative=1, total=6),
-            FeedbackStatsItem(briefing_type="weekly", positive=3, negative=0, total=3),
-        ])
+        resp = FeedbackStatsResponse(
+            stats=[
+                FeedbackStatsItem(briefing_type="morning", positive=5, negative=1, total=6),
+                FeedbackStatsItem(briefing_type="weekly", positive=3, negative=0, total=3),
+            ]
+        )
         assert len(resp.stats) == 2
 
 
@@ -287,8 +289,7 @@ class TestBriefingFeedbackModel:
 
     def test_unique_constraint_exists(self) -> None:
         constraint_names = [
-            c.name for c in BriefingFeedback.__table__.constraints
-            if hasattr(c, "name") and c.name
+            c.name for c in BriefingFeedback.__table__.constraints if hasattr(c, "name") and c.name
         ]
         assert "uq_feedback_briefing_owner" in constraint_names
 

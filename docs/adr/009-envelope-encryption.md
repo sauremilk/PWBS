@@ -1,83 +1,83 @@
-# ADR-009: Envelope Encryption mit per-User-Keys
+# ADR-009: Envelope Encryption with per-User Keys
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Das PWBS speichert hochsensible personenbezogene Daten: OAuth-Tokens, Kalendereinträge, Notizen, Meeting-Transkripte, LLM-generierte Briefings. Die Verschlüsselungsstrategie muss DSGVO-konform sein (Art. 32: angemessene technische Maßnahmen), Account-Löschung ohne Gesamt-Re-Encryption ermöglichen und gleichzeitig serverseitige Suche und Briefing-Generierung nicht verhindern. Die Balance zwischen Sicherheit und Funktionalität ist der zentrale Trade-off.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **Envelope Encryption mit per-User Data Encryption Keys (DEKs)**, wobei AWS KMS als Key Encryption Key (KEK) dient, weil dieses Schema Account-Löschung durch einfaches DEK-Löschen ermöglicht und Key-Management-Komplexität an AWS KMS delegiert.
-
----
-
-## Optionen bewertet
-
-| Option                                      | Vorteile                                                                                                                                                                                     | Nachteile                                                                                                                                                                                                | Ausschlussgründe                                |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| **Envelope Encryption (KEK/DEK)** (gewählt) | Per-User-Keys ermöglichen Account-Löschung ohne Gesamt-Re-Encryption (DEK löschen = Daten kryptografisch unlesbar). AWS KMS als KEK vermeidet Key-Management-Komplexität. Industriestandard. | Weaviate-Vektoren liegen unverschlüsselt im Index (notwendig für Suche). Erfordert sorgfältiges Key-Lifecycle-Management.                                                                                | –                                               |
-| Applikations-Level Encryption nur           | Einfacherer Aufbau, kein KMS erforderlich.                                                                                                                                                   | Key-Management komplett in der Anwendung – höheres Risiko durch Key-Verlust. Kein HSM-backed Key-Storage. Keine Key-Rotation ohne Re-Encryption.                                                         | Unzureichendes Key-Management                   |
-| DB-Level Encryption only                    | Einfachste Implementierung (AWS RDS Encryption), transparent für Anwendung.                                                                                                                  | Kein per-User-Isolation – alle Daten mit gleichem Key verschlüsselt. Account-Löschung erfordert keine kryptografische Isolation. Schutz nur gegen physischen Datenträgerzugriff, nicht gegen DB-Zugriff. | Keine per-User-Isolation                        |
-| Zero-Knowledge-Architektur                  | Maximale Sicherheit – Server kann Daten nicht entschlüsseln.                                                                                                                                 | Verhindert serverseitige Suche und Briefing-Generierung. Nutzer müssen Key-Material selbst verwalten. Key-Verlust = Datenverlust. Inkompatibel mit der Kernfunktionalität des PWBS.                      | Inkompatibel mit serverseitiger Suche/Briefings |
+The PWBS stores highly sensitive personal data: OAuth tokens, calendar entries, notes, meeting transcripts, LLM-generated briefings. The encryption strategy must be GDPR-compliant (Art. 32: appropriate technical measures), enable account deletion without full re-encryption, and at the same time not prevent server-side search and briefing generation. The balance between security and functionality is the central trade-off.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Account-Löschung: DEK löschen → alle Nutzerdaten kryptografisch unlesbar, ohne teure Re-Encryption
-- AWS KMS: HSM-backed Key-Storage, automatische Key-Rotation, Audit-Trail über CloudTrail
-- Per-User-DEK: Kompromittierung eines DEKs betrifft nur einen Nutzer, nicht alle
-- Industriestandard: Bewährtes Schema, das von AWS, Google Cloud und Azure empfohlen wird
-- Kompatibel mit serverseitiger Suche und Briefing-Generierung (Server entschlüsselt temporär für Verarbeitung)
-
-### Negative Konsequenzen / Trade-offs
-
-- Weaviate-Vektoren und BM25-Index liegen unverschlüsselt im Klartext (notwendig für Suche). Mitigiert durch Volume Encryption (AWS EBS), Netzwerkisolation und physische Tenant-Separation in Weaviate.
-- Neo4j-Graph-Daten liegen im Klartext für Query-Performance. Mitigiert durch Volume Encryption und Netzwerkisolation.
-- Key-Rotation des KEK erfordert Re-Wrapping aller DEKs (nicht Re-Encryption der Daten – deutlich günstiger)
-- Bei AWS-KMS-Ausfall können keine neuen Daten verschlüsselt werden (mitigiert: KMS Multi-Region-Keys, DEK-Caching im Application Memory)
-
-### Offene Fragen
-
-- DEK-Caching-Strategie: Wie lange bleibt ein entschlüsselter DEK im Application Memory? (Trade-off: Performance vs. Angriffsfläche)
-- Backup-Encryption: Separate Backup-Keys vs. User-DEKs für Backups
-- Key-Rotation-Frequenz für KEK definieren
+We use **Envelope Encryption with per-user Data Encryption Keys (DEKs)**, with AWS KMS serving as the Key Encryption Key (KEK), because this scheme enables account deletion by simply deleting the DEK and delegates key management complexity to AWS KMS.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Art. 32 (Sicherheit):** Envelope Encryption erfüllt die Anforderung an „angemessene technische Maßnahmen" zum Schutz personenbezogener Daten.
-- **Art. 17 (Löschung):** DEK-Löschung macht Nutzerdaten kryptografisch unlesbar – effektive Löschung ohne physisches Überschreiben aller Datenbankeinträge.
-- **Art. 25 (Privacy by Design):** Per-User-Verschlüsselung als Grundstruktur, nicht als optionales Feature.
-- **Verschlüsselungsmatrix:**
-  - PostgreSQL: AWS RDS TDE + Spalten-Level AES-256-GCM für OAuth-Tokens mit User-DEK
-  - Weaviate: Volume Encryption (AWS EBS) – Klartext im Index (dokumentierter Trade-off)
-  - Neo4j: Volume Encryption (AWS EBS) – Klartext im Graph (dokumentierter Trade-off)
+| Option                                     | Advantages                                                                                                                                                                             | Disadvantages                                                                                                                                                                                    | Exclusion Reasons                              |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| **Envelope Encryption (KEK/DEK)** (chosen) | Per-user keys enable account deletion without full re-encryption (delete DEK = data cryptographically unreadable). AWS KMS as KEK avoids key management complexity. Industry standard. | Weaviate vectors are stored unencrypted in the index (required for search). Requires careful key lifecycle management.                                                                           | –                                              |
+| Application-level encryption only          | Simpler setup, no KMS required.                                                                                                                                                        | Key management entirely in the application – higher risk from key loss. No HSM-backed key storage. No key rotation without re-encryption.                                                        | Insufficient key management                    |
+| DB-level encryption only                   | Simplest implementation (AWS RDS Encryption), transparent to application.                                                                                                              | No per-user isolation – all data encrypted with the same key. Account deletion does not require cryptographic isolation. Protection only against physical storage access, not against DB access. | No per-user isolation                          |
+| Zero-knowledge architecture                | Maximum security – server cannot decrypt data.                                                                                                                                         | Prevents server-side search and briefing generation. Users must manage key material themselves. Key loss = data loss. Incompatible with the core functionality of the PWBS.                      | Incompatible with server-side search/briefings |
+
+---
+
+## Consequences
+
+### Positive Consequences
+
+- Account deletion: delete DEK → all user data cryptographically unreadable, without expensive re-encryption
+- AWS KMS: HSM-backed key storage, automatic key rotation, audit trail via CloudTrail
+- Per-user DEK: compromise of one DEK affects only one user, not all
+- Industry standard: proven scheme recommended by AWS, Google Cloud, and Azure
+- Compatible with server-side search and briefing generation (server decrypts temporarily for processing)
+
+### Negative Consequences / Trade-offs
+
+- Weaviate vectors and BM25 index are stored unencrypted in plaintext (required for search). Mitigated by volume encryption (AWS EBS), network isolation, and physical tenant separation in Weaviate.
+- Neo4j graph data is stored in plaintext for query performance. Mitigated by volume encryption and network isolation.
+- Key rotation of the KEK requires re-wrapping all DEKs (not re-encryption of the data – significantly cheaper)
+- In case of AWS KMS outage, no new data can be encrypted (mitigated: KMS multi-region keys, DEK caching in application memory)
+
+### Open Questions
+
+- DEK caching strategy: How long does a decrypted DEK remain in application memory? (Trade-off: performance vs. attack surface)
+- Backup encryption: Separate backup keys vs. user DEKs for backups
+- Define key rotation frequency for KEK
+
+---
+
+## GDPR Implications
+
+- **Art. 32 (Security):** Envelope encryption fulfills the requirement for "appropriate technical measures" to protect personal data.
+- **Art. 17 (Erasure):** DEK deletion makes user data cryptographically unreadable – effective erasure without physically overwriting all database entries.
+- **Art. 25 (Privacy by Design):** Per-user encryption as a fundamental structure, not as an optional feature.
+- **Encryption Matrix:**
+  - PostgreSQL: AWS RDS TDE + column-level AES-256-GCM for OAuth tokens with user DEK
+  - Weaviate: Volume encryption (AWS EBS) – plaintext in index (documented trade-off)
+  - Neo4j: Volume encryption (AWS EBS) – plaintext in graph (documented trade-off)
   - Redis: AWS ElastiCache Encryption at Rest
-  - Backups: AES-256-GCM mit separaten Backup-Keys
+  - Backups: AES-256-GCM with separate backup keys
 
 ---
 
-## Sicherheitsimplikationen
+## Security Implications
 
-- AWS KMS als HSM-backed Key-Storage vermeidet handgemachtes Key-Management
-- CloudTrail-Logging für alle KEK-Operationen (Encrypt, Decrypt, GenerateDataKey)
-- DEKs werden verschlüsselt in der users-Tabelle gespeichert (`encryption_key_enc` Spalte)
-- Entschlüsselte DEKs nur temporär im Application Memory – kein Logging, kein Disk-Swap
-- Risiko: Side-Channel-Angriffe auf Application Memory (mitigiert: Nitro-Enclaves für Phase 5 evaluieren)
+- AWS KMS as HSM-backed key storage avoids hand-rolled key management
+- CloudTrail logging for all KEK operations (Encrypt, Decrypt, GenerateDataKey)
+- DEKs are stored encrypted in the users table (`encryption_key_enc` column)
+- Decrypted DEKs only temporarily in application memory – no logging, no disk swap
+- Risk: side-channel attacks on application memory (mitigated: evaluate Nitro Enclaves for Phase 5)
 
 ---
 
-## Revisionsdatum
+## Revision Date
 
-2027-03-13 – Bewertung der Key-Rotation-Erfahrungen, DEK-Caching-Strategie und Evaluation von AWS Nitro Enclaves für zusätzliche Isolation.
+2027-03-13 – Assessment of key rotation experience, DEK caching strategy, and evaluation of AWS Nitro Enclaves for additional isolation.

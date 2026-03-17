@@ -18,9 +18,7 @@ from pwbs.models.base import Base
 
 class AuditLog(Base):
     __tablename__ = "audit_log"
-    __table_args__ = (
-        Index("idx_audit_user_time", "user_id", "created_at"),
-    )
+    __table_args__ = (Index("idx_audit_user_time", "user_id", "created_at"),)
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -37,4 +35,4 @@ class AuditLog(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    user: Mapped["User | None"] = relationship(back_populates="audit_logs")  # noqa: F821
+    user: Mapped[User | None] = relationship(back_populates="audit_logs")  # noqa: F821

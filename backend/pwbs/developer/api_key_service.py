@@ -1,4 +1,4 @@
-﻿"""API Key management service (TASK-150).
+"""API Key management service (TASK-150).
 
 Handles creation, validation, revocation and usage tracking of API keys
 for the public developer API.
@@ -10,7 +10,7 @@ import hashlib
 import logging
 import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,9 +54,7 @@ async def create_api_key(
     Returns ``(api_key_row, raw_key)``  the raw key is returned only once.
     """
     # Enforce per-user limit
-    count_stmt = select(func.count()).where(
-        ApiKey.owner_id == owner_id, ApiKey.is_active.is_(True)
-    )
+    count_stmt = select(func.count()).where(ApiKey.owner_id == owner_id, ApiKey.is_active.is_(True))
     result = await db.execute(count_stmt)
     active_count = result.scalar_one()
 
@@ -87,26 +85,21 @@ async def create_api_key(
     return api_key, raw_key
 
 
-async def validate_api_key(
-    db: AsyncSession, raw_key: str
-) -> tuple[ApiKey, User]:
+async def validate_api_key(db: AsyncSession, raw_key: str) -> tuple[ApiKey, User]:
     """Validate a raw API key and return the key row + owning user.
 
     Raises ``ApiKeyError`` if the key is invalid, expired or revoked.
     """
     key_hash = _hash_key(raw_key)
 
-    stmt = (
-        select(ApiKey)
-        .where(ApiKey.key_hash == key_hash, ApiKey.is_active.is_(True))
-    )
+    stmt = select(ApiKey).where(ApiKey.key_hash == key_hash, ApiKey.is_active.is_(True))
     result = await db.execute(stmt)
     api_key = result.scalar_one_or_none()
 
     if api_key is None:
         raise ApiKeyError("Invalid API key", code="API_KEY_INVALID")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if api_key.expires_at is not None and api_key.expires_at < now:
         raise ApiKeyError("API key expired", code="API_KEY_EXPIRED")
 
@@ -128,22 +121,14 @@ async def validate_api_key(
     return api_key, user
 
 
-async def list_api_keys(
-    db: AsyncSession, owner_id: uuid.UUID
-) -> list[ApiKey]:
+async def list_api_keys(db: AsyncSession, owner_id: uuid.UUID) -> list[ApiKey]:
     """Return all API keys (active + inactive) for a user."""
-    stmt = (
-        select(ApiKey)
-        .where(ApiKey.owner_id == owner_id)
-        .order_by(ApiKey.created_at.desc())
-    )
+    stmt = select(ApiKey).where(ApiKey.owner_id == owner_id).order_by(ApiKey.created_at.desc())
     result = await db.execute(stmt)
     return list(result.scalars().all())
 
 
-async def revoke_api_key(
-    db: AsyncSession, key_id: uuid.UUID, owner_id: uuid.UUID
-) -> ApiKey:
+async def revoke_api_key(db: AsyncSession, key_id: uuid.UUID, owner_id: uuid.UUID) -> ApiKey:
     """Revoke (deactivate) an API key."""
     stmt = select(ApiKey).where(ApiKey.id == key_id, ApiKey.owner_id == owner_id)
     result = await db.execute(stmt)

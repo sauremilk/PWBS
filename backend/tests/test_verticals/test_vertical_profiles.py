@@ -1,4 +1,4 @@
-﻿"""Tests for vertical profile configurations (TASK-154)."""
+"""Tests for vertical profile configurations (TASK-154)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ import pytest
 from pwbs.schemas.enums import EntityType, VerticalProfile
 from pwbs.verticals.profiles import (
     VERTICAL_PROFILES,
-    VerticalConfig,
     get_vertical_config,
 )
 

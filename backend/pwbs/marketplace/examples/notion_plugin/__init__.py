@@ -1,1 +1,1 @@
-﻿"""Notion connector reference plugin (TASK-156)."""
+"""Notion connector reference plugin (TASK-156)."""

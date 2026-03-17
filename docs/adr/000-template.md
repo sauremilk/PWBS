@@ -1,61 +1,61 @@
-# ADR-000: Vorlage für Architekturentscheidungen
+# ADR-000: Template for Architecture Decisions
 
-**Status:** Vorlage
-**Datum:** ${DATUM}
-**Entscheider:** ${NAMES}
-
----
-
-## Kontext
-
-_Was ist die Situation, das Problem oder die Anforderung, die eine Entscheidung erfordert? Beschreibe den Kontext in 2-5 Sätzen. Was kann nicht getan werden, ohne diese Entscheidung zu treffen?_
+**Status:** Template
+**Date:** ${DATE}
+**Decision Makers:** ${NAMES}
 
 ---
 
-## Entscheidung
+## Context
 
-_Was wurde entschieden? Formuliere klar und präzise: „Wir werden X tun, weil Y."_
-
----
-
-## Optionen bewertet
-
-| Option              | Vorteile | Nachteile | Ausschlussgründe  |
-| ------------------- | -------- | --------- | ----------------- |
-| Option A            | ...      | ...       | (falls verworfen) |
-| Option B            | ...      | ...       | ...               |
-| **Gewählte Option** | ...      | ...       | –                 |
+_What is the situation, problem, or requirement that necessitates a decision? Describe the context in 2-5 sentences. What cannot be done without making this decision?_
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
+_What was decided? State clearly and concisely: "We will do X because Y."_
+
+---
+
+## Options Evaluated
+
+| Option            | Advantages | Disadvantages | Exclusion Reasons |
+| ----------------- | ---------- | ------------- | ----------------- |
+| Option A          | ...        | ...           | (if rejected)     |
+| Option B          | ...        | ...           | ...               |
+| **Chosen Option** | ...        | ...           | –                 |
+
+---
+
+## Consequences
+
+### Positive Consequences
 
 - ...
 
-### Negative Konsequenzen / Trade-offs
+### Negative Consequences / Trade-offs
 
 - ...
 
-### Offene Fragen
+### Open Questions
 
 - ...
 
 ---
 
-## DSGVO-Implikationen
+## GDPR Implications
 
-_Falls die Entscheidung Datenverarbeitung betrifft: Welche personenbezogenen Daten sind betroffen? Wie wird Löschbarkeit sichergestellt?_
-
----
-
-## Sicherheitsimplikationen
-
-_Welche Sicherheitsrisiken entstehen durch diese Entscheidung? Wie werden sie mitigiert?_
+_If the decision involves data processing: What personal data is affected? How is deletability ensured?_
 
 ---
 
-## Revisionsdatum
+## Security Implications
 
-_Wann sollte diese Entscheidung erneut geprüft werden?_ ${REVISIONSDATUM}
+_What security risks arise from this decision? How are they mitigated?_
+
+---
+
+## Revision Date
+
+_When should this decision be re-evaluated?_ ${REVISION_DATE}

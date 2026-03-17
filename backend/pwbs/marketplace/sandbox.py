@@ -336,9 +336,7 @@ class SandboxExecutor:
         try:
             process.start()
             # Wait with timeout (AC-1: configurable timeout)
-            await asyncio.to_thread(
-                process.join, timeout=self._config.timeout_seconds
-            )
+            await asyncio.to_thread(process.join, timeout=self._config.timeout_seconds)
 
             if process.is_alive():
                 # Timeout exceeded → kill the process
@@ -353,9 +351,7 @@ class SandboxExecutor:
                     process.kill()
                 return PluginResult(
                     success=False,
-                    errors=[
-                        f"Plugin execution timed out after {self._config.timeout_seconds}s"
-                    ],
+                    errors=[f"Plugin execution timed out after {self._config.timeout_seconds}s"],
                 )
 
             if process.exitcode != 0:
@@ -367,9 +363,7 @@ class SandboxExecutor:
                 )
                 return PluginResult(
                     success=False,
-                    errors=[
-                        f"Plugin process crashed with exit code {process.exitcode}"
-                    ],
+                    errors=[f"Plugin process crashed with exit code {process.exitcode}"],
                 )
 
             # Extract result from shared dict

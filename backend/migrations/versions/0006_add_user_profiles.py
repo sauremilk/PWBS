@@ -1,12 +1,12 @@
-﻿"""Add user_profiles table (TASK-134).
+"""Add user_profiles table (TASK-134).
 
 Revision ID: 0006
 Revises: 0005
 Create Date: 2026-03-14
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects.postgresql import JSONB
 
 revision = "0006"

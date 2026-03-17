@@ -1,9 +1,9 @@
-﻿"""Tests for LLM-basierte Entitätsextraktion (TASK-062)."""
+"""Tests for LLM-basierte Entitätsextraktion (TASK-062)."""
 
 from __future__ import annotations
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -21,7 +21,6 @@ from pwbs.processing.llm_ner import (
     HypothesisEntity,
     LLMEntityExtractor,
     LLMExtractionConfig,
-    LLMExtractionResult,
     OpenQuestion,
     PersonEntity,
     ProjectEntity,
@@ -161,7 +160,9 @@ class TestPersonExtraction:
     @pytest.mark.asyncio
     async def test_single_person(self) -> None:
         resp = _extraction_response(
-            persons=[PersonEntity(name="Alice Smith", role="CTO", context="Meeting", confidence=0.9)],
+            persons=[
+                PersonEntity(name="Alice Smith", role="CTO", context="Meeting", confidence=0.9)
+            ],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Alice Smith is CTO.", USER_ID, CHUNK_ID)
@@ -251,7 +252,9 @@ class TestDecisionExtraction:
     async def test_decision_with_metadata(self) -> None:
         resp = _extraction_response(
             decisions=[
-                DecisionEntity(what="Use PostgreSQL", by="Team Lead", date="2026-01-15", confidence=0.85),
+                DecisionEntity(
+                    what="Use PostgreSQL", by="Team Lead", date="2026-01-15", confidence=0.85
+                ),
             ],
         )
         ext = _make_extractor(response=resp)
@@ -291,7 +294,9 @@ class TestDateReferences:
     @pytest.mark.asyncio
     async def test_date_reference_becomes_topic(self) -> None:
         resp = _extraction_response(
-            dates=[DateReference(description="Release deadline", date="2026-03-01", confidence=0.8)],
+            dates=[
+                DateReference(description="Release deadline", date="2026-03-01", confidence=0.8)
+            ],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Release deadline March 1.", USER_ID)
@@ -310,7 +315,13 @@ class TestGoalExtraction:
     @pytest.mark.asyncio
     async def test_goal_with_status(self) -> None:
         resp = _extraction_response(
-            goals=[GoalEntity(description="Increase test coverage to 90%", status="in progress", confidence=0.85)],
+            goals=[
+                GoalEntity(
+                    description="Increase test coverage to 90%",
+                    status="in progress",
+                    confidence=0.85,
+                )
+            ],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Goal: Increase test coverage to 90%", USER_ID)
@@ -339,12 +350,14 @@ class TestRiskExtraction:
     @pytest.mark.asyncio
     async def test_risk_with_severity_and_mitigation(self) -> None:
         resp = _extraction_response(
-            risks=[RiskEntity(
-                description="Data loss during migration",
-                severity="high",
-                mitigation="Backup before migration",
-                confidence=0.9,
-            )],
+            risks=[
+                RiskEntity(
+                    description="Data loss during migration",
+                    severity="high",
+                    mitigation="Backup before migration",
+                    confidence=0.9,
+                )
+            ],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Risk: Data loss during migration", USER_ID)
@@ -373,11 +386,13 @@ class TestHypothesisExtraction:
     @pytest.mark.asyncio
     async def test_hypothesis_with_status(self) -> None:
         resp = _extraction_response(
-            hypotheses=[HypothesisEntity(
-                statement="Users prefer daily briefings over weekly",
-                status="unvalidated",
-                confidence=0.8,
-            )],
+            hypotheses=[
+                HypothesisEntity(
+                    statement="Users prefer daily briefings over weekly",
+                    status="unvalidated",
+                    confidence=0.8,
+                )
+            ],
         )
         ext = _make_extractor(response=resp)
         result = await ext.extract("Hypothesis: Users prefer daily briefings.", USER_ID)
@@ -460,7 +475,8 @@ class TestRateLimiting:
         limiter = AsyncMock()
         limiter.check_limits = AsyncMock(
             side_effect=RateLimitExceededError(
-                user_id=USER_ID, reason="Daily limit reached",
+                user_id=USER_ID,
+                reason="Daily limit reached",
             ),
         )
         ext = _make_extractor(rate_limiter=limiter)

@@ -1,4 +1,4 @@
-﻿"""Access-log middleware -- logs duration for every API request (TASK-113, TASK-116).
+"""Access-log middleware -- logs duration for every API request (TASK-113, TASK-116).
 
 Placed between RequestIDMiddleware and RateLimitMiddleware so that it
 captures the complete processing time of inner middleware + handler.

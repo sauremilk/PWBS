@@ -1,12 +1,9 @@
-﻿"""Tests for pwbs.processing.ner  RuleBasedNER (TASK-061)."""
+"""Tests for pwbs.processing.ner  RuleBasedNER (TASK-061)."""
 
 from __future__ import annotations
 
-import pytest
-
 from pwbs.processing.ner import (
     ExtractedEntity,
-    ExtractedMention,
     NERConfig,
     RuleBasedNER,
 )

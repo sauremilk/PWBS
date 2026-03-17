@@ -150,4 +150,3 @@ async def link_slack_account(
         slack_user_id=body.slack_user_id,
         slack_workspace_id=body.slack_workspace_id,
     )
-

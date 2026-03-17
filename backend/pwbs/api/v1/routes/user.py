@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -269,7 +269,7 @@ async def update_settings(
                         f"Must be one of: {', '.join(v.value for v in VerticalProfile)}"
                     ),
                 },
-            )
+            ) from None
         user.vertical_profile = update.vertical_profile
 
     # Update display_name on the User model (only field that exists in DB)
@@ -301,7 +301,7 @@ async def update_settings(
                     "code": "INVALID_TIME_FORMAT",
                     "message": "briefing_email_time must be HH:MM format",
                 },
-            )
+            ) from None
 
     await db.commit()
     await db.refresh(user)
@@ -568,7 +568,7 @@ async def delete_account(
                     "code": "INVALID_PASSWORD",
                     "message": "Passwort ist falsch",
                 },
-            )
+            ) from exc
         # Already scheduled
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -576,7 +576,7 @@ async def delete_account(
                 "code": "DELETION_ALREADY_SCHEDULED",
                 "message": "Account deletion already scheduled",
             },
-        )
+        ) from exc
 
     ip = get_client_ip(request)
     await log_event(
@@ -617,7 +617,7 @@ async def cancel_deletion(
                 "code": "NO_DELETION_SCHEDULED",
                 "message": "No account deletion is currently scheduled",
             },
-        )
+        ) from None
 
     ip = get_client_ip(request)
     await log_event(
@@ -971,7 +971,7 @@ async def update_onboarding_state(
         user.onboarding_step = update.step
 
     if update.completed is True and user.onboarding_completed_at is None:
-        user.onboarding_completed_at = datetime.now(timezone.utc)
+        user.onboarding_completed_at = datetime.now(UTC)
         user.onboarding_step = None
 
     await db.commit()

@@ -1,4 +1,4 @@
-﻿"""Email as primary briefing channel (ADR-019).
+"""Email as primary briefing channel (ADR-019).
 
 - Change email_briefing_enabled default to True for new users
 - Update existing users to opt-in (email_briefing_enabled = True)

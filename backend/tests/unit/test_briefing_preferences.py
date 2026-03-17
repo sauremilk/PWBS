@@ -61,9 +61,7 @@ def _make_response() -> MagicMock:
 async def test_get_briefing_preferences_default() -> None:
     """No preferences set → empty lists returned."""
     user = _make_user(preferences=None)
-    result = await get_briefing_preferences(
-        response=_make_response(), user=user, db=_make_db()
-    )
+    result = await get_briefing_preferences(response=_make_response(), user=user, db=_make_db())
     assert isinstance(result, BriefingPreferencesResponse)
     assert result.focus_projects == []
     assert result.excluded_sources == []
@@ -79,9 +77,7 @@ async def test_get_briefing_preferences_with_data() -> None:
         "priority_topics": ["AI", "ML"],
     }
     user = _make_user(preferences=prefs)
-    result = await get_briefing_preferences(
-        response=_make_response(), user=user, db=_make_db()
-    )
+    result = await get_briefing_preferences(response=_make_response(), user=user, db=_make_db())
     assert result.focus_projects == ["Project Alpha"]
     assert result.excluded_sources == ["slack"]
     assert result.priority_topics == ["AI", "ML"]
@@ -125,9 +121,7 @@ async def test_update_briefing_preferences_merges() -> None:
     db.refresh = AsyncMock(side_effect=lambda u: None)
 
     update = BriefingPreferencesUpdate(priority_topics=["New Topic"])
-    await update_briefing_preferences(
-        update=update, response=_make_response(), user=user, db=db
-    )
+    await update_briefing_preferences(update=update, response=_make_response(), user=user, db=db)
     # focus_projects and excluded_sources kept, priority_topics overwritten
     assert user.briefing_preferences["focus_projects"] == ["Old"]
     assert user.briefing_preferences["excluded_sources"] == ["gmail"]
@@ -144,9 +138,7 @@ async def test_update_strips_whitespace() -> None:
     update = BriefingPreferencesUpdate(
         focus_projects=["  Alpha  ", "", "  "],
     )
-    await update_briefing_preferences(
-        update=update, response=_make_response(), user=user, db=db
-    )
+    await update_briefing_preferences(update=update, response=_make_response(), user=user, db=db)
     assert user.briefing_preferences["focus_projects"] == ["Alpha"]
 
 

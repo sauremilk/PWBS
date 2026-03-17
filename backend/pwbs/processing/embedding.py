@@ -203,5 +203,5 @@ class EmbeddingService:
                     # Client errors (4xx except 429) are not retried
                     raise
 
-        assert last_error is not None  # noqa: S101 — guaranteed by loop logic
+        assert last_error is not None
         raise last_error

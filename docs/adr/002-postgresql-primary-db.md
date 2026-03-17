@@ -1,77 +1,77 @@
-# ADR-002: PostgreSQL als primäre Datenbank
+# ADR-002: PostgreSQL as Primary Database
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Das PWBS benötigt eine relationale Datenbank für Nutzerverwaltung, Konnektoren-Konfiguration, Dokument-Metadaten, Briefings, Audit-Logs und OAuth-Token-Speicherung. Die Datenbank muss JSONB für flexible Metadaten unterstützen, starke Transaktionsgarantien bieten und als Fallback für Vektorsuche dienen können (pgvector). Mandantenisolation auf Row-Level ist zwingend für DSGVO-Compliance.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **PostgreSQL 16+** als primäre relationale Datenbank, weil es die beste Kombination aus JSONB-Flexibilität, Transaktionssicherheit, Ökosystem-Reife und Erweiterbarkeit (pgvector als Fallback) bietet.
-
----
-
-## Optionen bewertet
-
-| Option                   | Vorteile                                                                                                                                                                                           | Nachteile                                                                                                                                                              | Ausschlussgründe                        |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| **PostgreSQL** (gewählt) | JSONB für flexible Metadaten, starke ACID-Transaktionen, bewährtes Ökosystem, pgvector als Backup, hervorragendes Tooling (Alembic, pgAdmin, psql). Full-Text-Search (tsvector) für BM25-Fallback. | Kein natives horizontales Sharding.                                                                                                                                    | –                                       |
-| MySQL                    | Weit verbreitet, gute Performance bei einfachen Queries.                                                                                                                                           | Schwächerer JSONB-Support, kein pgvector-Äquivalent, schwächere CHECK-Constraints.                                                                                     | JSONB- und Erweiterbarkeits-Nachteile   |
-| MongoDB                  | Schemaflexibel, horizontale Skalierung eingebaut.                                                                                                                                                  | Schwächere Transaktionsgarantien, kein nativer Join, schwierigere Migrations-Verwaltung. Nicht geeignet für stark relationale Daten (Users ↔ Connections ↔ Documents). | Relationale Daten dominieren das Schema |
-| CockroachDB              | PostgreSQL-kompatibel, natives horizontales Sharding, geographische Verteilung.                                                                                                                    | Höhere Latenz bei Single-Node, komplexeres Betriebsmodell, höhere Kosten. Overkill für MVP-Skala.                                                                      | Overkill für MVP-Anforderungen          |
+PWBS requires a relational database for user management, connector configuration, document metadata, briefings, audit logs, and OAuth token storage. The database must support JSONB for flexible metadata, provide strong transaction guarantees, and serve as a fallback for vector search (pgvector). Row-level tenant isolation is mandatory for GDPR compliance.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- JSONB-Spalten ermöglichen flexible Metadaten pro Dokumenttyp ohne Schema-Änderungen
-- pgvector als Fallback, falls Weaviate ausfällt oder für einfache Vektorsuche ohne separaten Service
-- Alembic für versionierte Schema-Migrationen mit Rollback-Fähigkeit
-- Bewährtes Backup/Restore mit pg_dump, Point-in-Time-Recovery via WAL
-- AWS RDS als managed Service mit automatischem Failover
-
-### Negative Konsequenzen / Trade-offs
-
-- Kein natives horizontales Sharding (mitigiert durch Read-Replicas und ggf. Citus-Extension in Phase 5)
-- documents-Tabelle kann bei hohem Volumen langsam werden (mitigiert durch Partitioning nach created_at oder owner_id)
-- Connection-Pool-Management erforderlich (PgBouncer in Phase 3+)
-
-### Offene Fragen
-
-- Partitioning-Strategie für documents-Tabelle evaluieren, sobald >100K Dokumente pro Nutzer erreicht werden
-- pgvector-Performance vs. Weaviate benchmarken für Fallback-Szenarien
+We use **PostgreSQL 16+** as the primary relational database because it offers the best combination of JSONB flexibility, transactional reliability, ecosystem maturity, and extensibility (pgvector as fallback).
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Mandantenisolation:** Jede Query enthält `WHERE owner_id = $user_id` als Filter. Row-Level Security (RLS) als zusätzliche Absicherungsschicht möglich.
-- **Löschbarkeit:** `DELETE CASCADE` auf allen Foreign Keys stellt sicher, dass Account-Löschung alle zugehörigen Daten entfernt.
-- **Verschlüsselung:** AWS RDS Encryption (AES-256) für at-rest. Zusätzliche Spalten-Level-Verschlüsselung für OAuth-Tokens mit User-DEK.
-- **Datenexport:** SQL-Queries können alle Nutzerdaten für Art.-15-Export zusammenstellen.
-- **Ablaufdaten:** `expires_at`-Spalte auf documents-Tabelle ermöglicht automatische Löschung abgelaufener Daten.
-
----
-
-## Sicherheitsimplikationen
-
-- Erzwungenes TLS für alle Verbindungen (API → PostgreSQL)
-- PostgreSQL in privatem Subnet, kein direkter Internet-Zugang
-- Zugangsdaten über Environment-Variablen, nicht im Code
-- Prepared Statements via SQLAlchemy verhindern SQL-Injection
-- Regelmäßige Security-Updates über AWS RDS Maintenance Windows
+| Option                  | Advantages                                                                                                                                                                              | Disadvantages                                                                                                                                           | Exclusion Reasons                     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **PostgreSQL** (chosen) | JSONB for flexible metadata, strong ACID transactions, proven ecosystem, pgvector as backup, excellent tooling (Alembic, pgAdmin, psql). Full-text search (tsvector) for BM25 fallback. | No native horizontal sharding.                                                                                                                          | –                                     |
+| MySQL                   | Widely adopted, good performance for simple queries.                                                                                                                                    | Weaker JSONB support, no pgvector equivalent, weaker CHECK constraints.                                                                                 | JSONB and extensibility disadvantages |
+| MongoDB                 | Schema-flexible, built-in horizontal scaling.                                                                                                                                           | Weaker transaction guarantees, no native joins, harder migration management. Not suitable for highly relational data (Users ↔ Connections ↔ Documents). | Relational data dominates the schema  |
+| CockroachDB             | PostgreSQL-compatible, native horizontal sharding, geographic distribution.                                                                                                             | Higher latency on single-node, more complex operational model, higher costs. Overkill for MVP scale.                                                    | Overkill for MVP requirements         |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-03-13 – Bewertung der Skalierungsanforderungen nach 12 Monaten, insbesondere Sharding-Bedarf und pgvector-Nutzung.
+### Positive Consequences
+
+- JSONB columns enable flexible metadata per document type without schema changes
+- pgvector as fallback in case Weaviate fails or for simple vector search without a separate service
+- Alembic for versioned schema migrations with rollback capability
+- Proven backup/restore with pg_dump, point-in-time recovery via WAL
+- AWS RDS as managed service with automatic failover
+
+### Negative Consequences / Trade-offs
+
+- No native horizontal sharding (mitigated by read replicas and potentially Citus extension in Phase 5)
+- Documents table can become slow at high volume (mitigated by partitioning on created_at or owner_id)
+- Connection pool management required (PgBouncer in Phase 3+)
+
+### Open Questions
+
+- Evaluate partitioning strategy for documents table once >100K documents per user is reached
+- Benchmark pgvector performance vs. Weaviate for fallback scenarios
+
+---
+
+## GDPR Implications
+
+- **Tenant Isolation:** Every query includes `WHERE owner_id = $user_id` as a filter. Row-Level Security (RLS) as an additional safeguard layer is possible.
+- **Deletability:** `DELETE CASCADE` on all foreign keys ensures account deletion removes all associated data.
+- **Encryption:** AWS RDS Encryption (AES-256) for at-rest. Additional column-level encryption for OAuth tokens with user DEK.
+- **Data Export:** SQL queries can compile all user data for Art. 15 export.
+- **Expiration Dates:** `expires_at` column on documents table enables automatic deletion of expired data.
+
+---
+
+## Security Implications
+
+- Enforced TLS for all connections (API → PostgreSQL)
+- PostgreSQL in private subnet, no direct internet access
+- Credentials via environment variables, not in code
+- Prepared statements via SQLAlchemy prevent SQL injection
+- Regular security updates via AWS RDS Maintenance Windows
+
+---
+
+## Revision Date
+
+2027-03-13 – Evaluation of scaling requirements after 12 months, particularly sharding needs and pgvector usage.

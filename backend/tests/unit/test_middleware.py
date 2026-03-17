@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import time
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.testclient import TestClient
 
 from pwbs.api.middleware.rate_limit import _classify_request, _get_client_ip
 from pwbs.api.middleware.security_headers import SecurityHeadersMiddleware

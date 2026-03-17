@@ -1,4 +1,4 @@
-﻿"""API Key ORM model (TASK-150).
+"""API Key ORM model (TASK-150).
 
 Stores hashed API keys for the public developer API. The raw key is
 returned only once at creation time; only the SHA-256 hash is persisted.
@@ -28,23 +28,37 @@ class ApiKey(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     key_prefix: Mapped[str] = mapped_column(Text, nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     scopes: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, server_default='["read"]',
+        JSONB,
+        nullable=False,
+        server_default='["read"]',
     )
     rate_limit_per_minute: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=60, server_default="60",
+        Integer,
+        nullable=False,
+        default=60,
+        server_default="60",
     )
     is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default="true",
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
     )
     last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, default=None,
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
     usage_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0",
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     # Relationship
-    user: Mapped["User"] = relationship(back_populates="api_keys", lazy="selectin")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="api_keys", lazy="selectin")  # noqa: F821

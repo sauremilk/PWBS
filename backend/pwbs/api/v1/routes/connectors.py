@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
@@ -56,45 +56,45 @@ router = APIRouter(
 _CONNECTOR_META: dict[str, dict[str, str]] = {
     SourceType.GOOGLE_CALENDAR.value: {
         "name": "Google Calendar",
-        "description": "Events und Termine aus Google Calendar",
+        "description": "Events and appointments from Google Calendar",
         "auth_method": "oauth2",
     },
     SourceType.NOTION.value: {
         "name": "Notion",
-        "description": "Seiten und Datenbanken aus Notion",
+        "description": "Pages and databases from Notion",
         "auth_method": "oauth2",
     },
     SourceType.OBSIDIAN.value: {
         "name": "Obsidian",
-        "description": "Markdown-Dateien aus einem Obsidian-Vault (ZIP-Upload)",
+        "description": "Markdown files from an Obsidian vault (ZIP upload)",
         "auth_method": "upload",
     },
     SourceType.ZOOM.value: {
         "name": "Zoom",
         "description": (
-            "Meeting-Transkripte als Upload (VTT/SRT/TXT). OAuth-Sync nach Marketplace-Approval."
+            "Meeting transcripts via upload (VTT/SRT/TXT). OAuth sync after Marketplace approval."
         ),
-        "auth_method": "upload",  # DEFERRED: oauth2 nach Zoom Marketplace Approval (ADR-019)
+        "auth_method": "upload",  # DEFERRED: oauth2 after Zoom Marketplace Approval (ADR-020)
     },
     # DEFERRED: Phase 3 – Gmail, Google Docs, Slack, Outlook
     # SourceType.GMAIL.value: {
     #     "name": "Gmail",
-    #     "description": "E-Mails und Threads aus Gmail",
+    #     "description": "Emails and threads from Gmail",
     #     "auth_method": "oauth2",
     # },
     # SourceType.GOOGLE_DOCS.value: {
     #     "name": "Google Docs",
-    #     "description": "Dokumente aus Google Docs",
+    #     "description": "Documents from Google Docs",
     #     "auth_method": "oauth2",
     # },
     # SourceType.SLACK.value: {
     #     "name": "Slack",
-    #     "description": "Nachrichten und Threads aus Slack-Channels",
+    #     "description": "Messages and threads from Slack channels",
     #     "auth_method": "oauth2",
     # },
     # SourceType.OUTLOOK_MAIL.value: {
     #     "name": "Outlook Mail",
-    #     "description": "E-Mails und Threads aus Microsoft Outlook",
+    #     "description": "Emails and threads from Microsoft Outlook",
     #     "auth_method": "oauth2",
     # },
 }
@@ -258,25 +258,23 @@ class ConsentRevokeResponse(BaseModel):
 
 _CONSENT_INFO: dict[str, dict[str, list[str] | str]] = {
     SourceType.GOOGLE_CALENDAR.value: {
-        "data_types": ["Kalendereinträge", "Teilnehmerlisten", "Besprechungsnotizen"],
-        "processing_purpose": "Automatische Erstellung von Meeting-Briefings und Terminübersichten",
+        "data_types": ["Calendar events", "Attendee lists", "Meeting notes"],
+        "processing_purpose": "Automatic creation of meeting briefings and schedule overviews",
         "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
     },
     SourceType.NOTION.value: {
-        "data_types": ["Notion-Seiten", "Datenbanken", "Kommentare"],
-        "processing_purpose": "Semantische Suche und Wissensvernetzung über Notion-Inhalte",
+        "data_types": ["Notion pages", "Databases", "Comments"],
+        "processing_purpose": "Semantic search and knowledge linking across Notion content",
         "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
     },
     SourceType.OBSIDIAN.value: {
-        "data_types": ["Markdown-Dateien", "Vault-Struktur", "Tags und Links"],
-        "processing_purpose": "Integration lokaler Notizen in die Wissenssuche und Briefings",
+        "data_types": ["Markdown files", "Vault structure", "Tags and links"],
+        "processing_purpose": "Integration of local notes into knowledge search and briefings",
         "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
     },
     SourceType.ZOOM.value: {
-        "data_types": ["Meeting-Transkripte", "Aufnahme-Metadaten", "Teilnehmerlisten"],
-        "processing_purpose": (
-            "Automatische Zusammenfassung und Entscheidungsextraktion aus Meetings"
-        ),
+        "data_types": ["Meeting transcripts", "Recording metadata", "Attendee lists"],
+        "processing_purpose": ("Automatic summarization and decision extraction from meetings"),
         "llm_providers": ["Claude API (Anthropic)", "GPT-4 (OpenAI, Fallback)"],
     },
 }
@@ -298,7 +296,7 @@ def _resolve_source_type(type_str: str) -> SourceType:
                 "code": "UNKNOWN_CONNECTOR_TYPE",
                 "message": f"Connector type '{type_str}' is not supported",
             },
-        )
+        ) from None
 
 
 # ---------------------------------------------------------------------------
@@ -311,9 +309,7 @@ def _resolve_source_type(type_str: str) -> SourceType:
     response_model=ConnectorListResponse,
     status_code=status.HTTP_200_OK,
     summary="List available connector types",
-    description=(
-        "Gibt alle verfügbaren Konnektor-Typen mit Name, Beschreibung und Auth-Methode zurück."
-    ),
+    description=("Returns all available connector types with name, description, and auth method."),
 )
 async def list_connectors(
     current_user: User = Depends(get_current_user),
@@ -403,8 +399,8 @@ async def connection_status(
     status_code=status.HTTP_200_OK,
     summary="Generate OAuth2 authorization URL",
     description=(
-        "Generiert eine OAuth2-Autorisierungs-URL für den angegebenen"
-        " Konnektor-Typ mit CSRF-State-Parameter."
+        "Generates an OAuth2 authorization URL for the specified"
+        " connector type with a CSRF state parameter."
     ),
 )
 async def get_auth_url(
@@ -709,8 +705,8 @@ async def _exchange_code_for_tokens(
     status_code=status.HTTP_201_CREATED,
     summary="Configure connector (e.g. Obsidian vault path)",
     description=(
-        "Konfiguriert einen Konnektor, der keine OAuth2-Autorisierung"
-        " benötigt (z.B. lokaler Obsidian-Vault-Pfad)."
+        "Configures a connector that does not require OAuth2 authorization"
+        " (e.g. local Obsidian vault path)."
     ),
 )
 async def configure_connector(
@@ -803,9 +799,9 @@ async def configure_connector(
     status_code=status.HTTP_200_OK,
     summary="Upload Obsidian vault (ZIP or .md files)",
     description=(
-        "Upload eines Obsidian-Vaults als ZIP-Archiv oder einzelner .md-Datei. "
-        "Idempotent: unveränderte Dateien werden per Content-Hash übersprungen. "
-        "Dateien, die im neuen Upload fehlen, werden als gelöscht markiert."
+        "Upload an Obsidian vault as a ZIP archive or single .md file. "
+        "Idempotent: unchanged files are skipped via content hash. "
+        "Files missing from the new upload are marked as deleted."
     ),
 )
 async def upload_obsidian(
@@ -837,7 +833,7 @@ async def upload_obsidian(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
                 "code": "INVALID_FILE_TYPE",
-                "message": "Nur .zip oder .md Dateien erlaubt",
+                "message": "Only .zip or .md files allowed",
             },
         )
 
@@ -848,7 +844,7 @@ async def upload_obsidian(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail={
                 "code": "FILE_TOO_LARGE",
-                "message": f"Datei überschreitet {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB",
+                "message": f"File exceeds {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB",
             },
         )
 
@@ -864,7 +860,7 @@ async def upload_obsidian(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
                 "code": "NO_MARKDOWN_FILES",
-                "message": "Keine .md-Dateien im Upload gefunden",
+                "message": "No .md files found in upload",
             },
         )
 
@@ -960,15 +956,15 @@ async def upload_obsidian(
             doc_ids.append(str(new_doc.id))
 
     # Update watermark
-    connection.watermark = datetime.now(timezone.utc)
+    connection.watermark = datetime.now(UTC)
 
     # Create SyncRun record
     sync_run = SyncRun(
         id=uuid.uuid4(),
         connection_id=connection.id,
         status="success" if not sync_result.errors else "partial",
-        started_at=datetime.now(timezone.utc),
-        completed_at=datetime.now(timezone.utc),
+        started_at=datetime.now(UTC),
+        completed_at=datetime.now(UTC),
         document_count=len(doc_ids),
         error_count=sync_result.error_count,
         errors_json=[{"source_id": e.source_id, "error": e.error} for e in sync_result.errors]
@@ -984,7 +980,7 @@ async def upload_obsidian(
             from pwbs.queue.tasks.pipeline import process_documents
 
             process_documents.delay(doc_ids, str(current_user.id))
-        except Exception:  # noqa: BLE001
+        except Exception:
             logger.warning("Failed to dispatch processing pipeline (queue unavailable)")
 
     await log_event(
@@ -1034,10 +1030,10 @@ _ZOOM_UPLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
     status_code=status.HTTP_201_CREATED,
     summary="Upload Zoom transcript (VTT/SRT/TXT)",
     description=(
-        "Lädt ein Zoom-Meeting-Transkript hoch (VTT, SRT oder TXT). "
-        "Idempotent: identische Inhalte werden per Content-Hash erkannt. "
-        "Speaker-Extraktion aus VTT/SRT-Formaten. "
-        "ADR-019: Upload-basiert im MVP, OAuth nach Zoom Marketplace Approval."
+        "Uploads a Zoom meeting transcript (VTT, SRT, or TXT). "
+        "Idempotent: identical content is detected via content hash. "
+        "Speaker extraction from VTT/SRT formats. "
+        "ADR-019: Upload-based in MVP, OAuth after Zoom Marketplace Approval."
     ),
 )
 async def upload_zoom_transcript(
@@ -1077,7 +1073,7 @@ async def upload_zoom_transcript(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
                 "code": "INVALID_FILE_TYPE",
-                "message": f"Nur {', '.join(sorted(_ZOOM_UPLOAD_ALLOWED_EXTENSIONS))} erlaubt",
+                "message": f"Only {', '.join(sorted(_ZOOM_UPLOAD_ALLOWED_EXTENSIONS))} allowed",
             },
         )
 
@@ -1088,7 +1084,7 @@ async def upload_zoom_transcript(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail={
                 "code": "FILE_TOO_LARGE",
-                "message": f"Maximale Dateigröße: {_ZOOM_UPLOAD_MAX_SIZE // (1024 * 1024)} MB",
+                "message": f"Maximum file size: {_ZOOM_UPLOAD_MAX_SIZE // (1024 * 1024)} MB",
             },
         )
 
@@ -1097,15 +1093,15 @@ async def upload_zoom_transcript(
     except UnicodeDecodeError:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"code": "INVALID_ENCODING", "message": "Datei muss UTF-8-kodiert sein"},
-        )
+            detail={"code": "INVALID_ENCODING", "message": "File must be UTF-8 encoded"},
+        ) from None
 
     # --- Parse transcript ---------------------------------------------------
     plaintext, speakers = parse_transcript(content_str, filename)
     if not plaintext.strip():
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"code": "EMPTY_TRANSCRIPT", "message": "Transkript enthält keinen Text"},
+            detail={"code": "EMPTY_TRANSCRIPT", "message": "Transcript contains no text"},
         )
 
     fmt = detect_transcript_format(content_str, filename)
@@ -1125,7 +1121,7 @@ async def upload_zoom_transcript(
             status_code=status.HTTP_409_CONFLICT,
             detail={
                 "code": "DOCUMENT_EXISTS",
-                "message": "Transkript bereits hochgeladen (identischer Inhalt)",
+                "message": "Transcript already uploaded (identical content)",
             },
         )
 
@@ -1236,8 +1232,8 @@ async def upload_zoom_transcript(
     status_code=status.HTTP_200_OK,
     summary="Disconnect source and cascade-delete data",
     description=(
-        "Trennt eine Datenquelle und löscht kaskadierend alle"
-        " importierten Dokumente, Chunks und Entitäten."
+        "Disconnects a data source and cascade-deletes all"
+        " imported documents, chunks, and entities."
     ),
 )
 async def disconnect(
@@ -1333,8 +1329,8 @@ async def disconnect(
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger manual sync",
     description=(
-        "Löst einen manuellen Sync-Vorgang für die angegebene Datenquelle aus."
-        " Cursor-basierte inkrementelle Synchronisation."
+        "Triggers a manual sync for the specified data source."
+        " Cursor-based incremental synchronization."
     ),
 )
 async def trigger_sync(
@@ -1372,8 +1368,8 @@ async def trigger_sync(
 
     # Rate-limit check: max 1 sync per 5 minutes per connector
     if connection.watermark is not None:
-        now = datetime.now(timezone.utc)
-        elapsed = (now - connection.watermark.replace(tzinfo=timezone.utc)).total_seconds()
+        now = datetime.now(UTC)
+        elapsed = (now - connection.watermark.replace(tzinfo=UTC)).total_seconds()
         if elapsed < 300:
             remaining = int(300 - elapsed)
             raise HTTPException(
@@ -1411,9 +1407,7 @@ async def trigger_sync(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_200_OK,
     summary="Get consent status for a connector type",
-    description=(
-        "Gibt den Einwilligungsstatus (DSGVO-Consent) für einen bestimmten Konnektor-Typ zurück."
-    ),
+    description=("Returns the consent status (GDPR consent) for a specific connector type."),
 )
 async def get_consent(
     type: str,
@@ -1462,9 +1456,7 @@ async def get_consent(
     response_model=ConsentStatusResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Grant consent for a connector type",
-    description=(
-        "Erteilt die DSGVO-Einwilligung für die Datenverarbeitung eines bestimmten Konnektor-Typs."
-    ),
+    description=("Grants GDPR consent for data processing of a specific connector type."),
 )
 async def grant_consent(
     type: str,
@@ -1539,8 +1531,8 @@ async def grant_consent(
     status_code=status.HTTP_200_OK,
     summary="Revoke consent and cascade-delete all data for this source",
     description=(
-        "Widerruft die DSGVO-Einwilligung und löscht kaskadierend"
-        " alle Daten dieser Quelle (Dokumente, Chunks, Entitäten)."
+        "Revokes GDPR consent and cascade-deletes all"
+        " data from this source (documents, chunks, entities)."
     ),
 )
 async def revoke_consent(
@@ -1570,7 +1562,7 @@ async def revoke_consent(
         )
 
     # Mark consent as revoked
-    consent.revoked_at = datetime.now(timezone.utc)
+    consent.revoked_at = datetime.now(UTC)
 
     # Count documents before deletion
     doc_count_stmt = (
@@ -1662,8 +1654,8 @@ class SyncHistoryResponse(BaseModel):
     response_model=SyncHistoryResponse,
     summary="Sync history for a connector",
     description=(
-        "Gibt die paginierte Sync-Historie für einen Konnektor-Typ"
-        " zurück inkl. Status, Dauer und Dokumentanzahl pro Sync."
+        "Returns the paginated sync history for a connector type"
+        " including status, duration, and document count per sync."
     ),
 )
 async def get_sync_history(

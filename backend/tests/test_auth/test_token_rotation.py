@@ -1,10 +1,10 @@
-﻿"""Tests for token rotation and refresh endpoint (TASK-084)."""
+"""Tests for token rotation and refresh endpoint (TASK-084)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -14,7 +14,6 @@ from pwbs.models.refresh_token import RefreshToken
 from pwbs.services.auth import (
     TokenPair,
     _hash_token,
-    create_token_pair,
     rotate_refresh_token,
     validate_access_token,
 )
@@ -65,7 +64,7 @@ class TestRotateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token(old_token),
             family_id=family_id,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
             revoked_at=None,
         )
         # validate_refresh_token queries DB -> return the token
@@ -97,7 +96,7 @@ class TestRotateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token(old_token),
             family_id=family_id,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
             revoked_at=None,
         )
         result_mock = MagicMock()
@@ -132,8 +131,8 @@ class TestRotateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token(old_token),
             family_id=family_id,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-            revoked_at=datetime.now(timezone.utc) - timedelta(hours=1),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
+            revoked_at=datetime.now(UTC) - timedelta(hours=1),
         )
         result_mock = MagicMock()
         result_mock.scalar_one_or_none.return_value = db_token
@@ -153,7 +152,7 @@ class TestRotateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token(old_token),
             family_id=family_id,
-            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
+            expires_at=datetime.now(UTC) - timedelta(hours=1),
             revoked_at=None,
         )
         result_mock = MagicMock()
@@ -174,7 +173,7 @@ class TestRotateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token(old_token),
             family_id=family_id,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
             revoked_at=None,
         )
         result_mock = MagicMock()
@@ -184,6 +183,6 @@ class TestRotateRefreshToken:
         await rotate_refresh_token(old_token, mock_db)
 
         saved = mock_db.add.call_args[0][0]
-        expected_expiry = datetime.now(timezone.utc) + timedelta(days=30)
+        expected_expiry = datetime.now(UTC) + timedelta(days=30)
         delta = abs((saved.expires_at - expected_expiry).total_seconds())
         assert delta < 5  # within 5 seconds tolerance

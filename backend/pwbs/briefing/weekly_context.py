@@ -18,7 +18,7 @@ import logging
 import uuid
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import Protocol, runtime_checkable
 
 import tiktoken
@@ -234,8 +234,10 @@ class WeeklyContextAssembler:
         today = target_date or date.today()
         week_start = today - timedelta(days=self._config.lookback_days)
         since = datetime(
-            week_start.year, week_start.month, week_start.day,
-            tzinfo=timezone.utc,
+            week_start.year,
+            week_start.month,
+            week_start.day,
+            tzinfo=UTC,
         )
 
         # Step 1: Fetch documents from the past week
@@ -246,7 +248,9 @@ class WeeklyContextAssembler:
 
         # Step 3: Decisions from graph
         decisions = await self._graph.get_week_decisions(
-            user_id, since, limit=self._config.max_decisions,
+            user_id,
+            since,
+            limit=self._config.max_decisions,
         )
 
         # Step 4: Project progress from graph
@@ -303,12 +307,14 @@ class WeeklyContextAssembler:
 
         documents: list[dict] = []
         for row in result.fetchall():
-            documents.append({
-                "doc_id": str(row.doc_id),
-                "title": row.title or "Untitled",
-                "source": row.source_type,
-                "date": row.created_at.strftime("%d.%m.%Y"),
-            })
+            documents.append(
+                {
+                    "doc_id": str(row.doc_id),
+                    "title": row.title or "Untitled",
+                    "source": row.source_type,
+                    "date": row.created_at.strftime("%d.%m.%Y"),
+                }
+            )
         return documents
 
     # ------------------------------------------------------------------
@@ -321,11 +327,48 @@ class WeeklyContextAssembler:
         Filters common stop words and returns most frequent meaningful terms.
         """
         stop_words = {
-            "der", "die", "das", "und", "in", "von", "zu", "mit", "für",
-            "auf", "ist", "im", "den", "des", "ein", "eine", "an", "als",
-            "am", "aus", "bei", "nach", "über", "the", "and", "for", "with",
-            "from", "this", "that", "are", "was", "has", "have", "not",
-            "but", "all", "can", "will", "new", "re", "untitled",
+            "der",
+            "die",
+            "das",
+            "und",
+            "in",
+            "von",
+            "zu",
+            "mit",
+            "für",
+            "auf",
+            "ist",
+            "im",
+            "den",
+            "des",
+            "ein",
+            "eine",
+            "an",
+            "als",
+            "am",
+            "aus",
+            "bei",
+            "nach",
+            "über",
+            "the",
+            "and",
+            "for",
+            "with",
+            "from",
+            "this",
+            "that",
+            "are",
+            "was",
+            "has",
+            "have",
+            "not",
+            "but",
+            "all",
+            "can",
+            "will",
+            "new",
+            "re",
+            "untitled",
         }
 
         word_counts: Counter[str] = Counter()
@@ -334,11 +377,7 @@ class WeeklyContextAssembler:
         for doc in documents:
             title = doc.get("title", "")
             source = doc.get("source", "")
-            words = [
-                w.lower().strip(".,;:!?()[]{}\"'")
-                for w in title.split()
-                if len(w) > 2
-            ]
+            words = [w.lower().strip(".,;:!?()[]{}\"'") for w in title.split() if len(w) > 2]
             for word in words:
                 if word not in stop_words:
                     word_counts[word] += 1
@@ -349,11 +388,13 @@ class WeeklyContextAssembler:
         topics: list[TopicSummary] = []
         for word, count in word_counts.most_common(self._config.max_topics):
             if count >= 2:  # Only topics mentioned at least twice
-                topics.append(TopicSummary(
-                    name=word,
-                    mention_count=count,
-                    source_types=sorted(word_sources.get(word, set())),
-                ))
+                topics.append(
+                    TopicSummary(
+                        name=word,
+                        mention_count=count,
+                        source_types=sorted(word_sources.get(word, set())),
+                    )
+                )
 
         return topics
 
@@ -380,12 +421,14 @@ class WeeklyContextAssembler:
         for entity in project_entities:
             name = entity.get("name", "Unbekannt")
             doc_count = entity.get("document_count", 0)
-            progress.append(ProjectProgress(
-                name=name,
-                document_count=doc_count,
-                decision_count=decision_by_project.get(name, 0),
-                open_items=open_by_project.get(name, []),
-            ))
+            progress.append(
+                ProjectProgress(
+                    name=name,
+                    document_count=doc_count,
+                    decision_count=decision_by_project.get(name, 0),
+                    open_items=open_by_project.get(name, []),
+                )
+            )
 
         return sorted(progress, key=lambda p: p.document_count, reverse=True)
 
@@ -462,18 +505,12 @@ class WeeklyContextAssembler:
             return context
 
         # Truncate documents first (lowest priority)
-        while (
-            context.recent_documents
-            and self._count_tokens(context) > self._config.token_budget
-        ):
+        while context.recent_documents and self._count_tokens(context) > self._config.token_budget:
             context.recent_documents.pop()
             context.truncated = True
 
         # Then project progress
-        while (
-            context.project_progress
-            and self._count_tokens(context) > self._config.token_budget
-        ):
+        while context.project_progress and self._count_tokens(context) > self._config.token_budget:
             context.project_progress.pop()
             context.truncated = True
 
@@ -506,8 +543,7 @@ class WeeklyContextAssembler:
             parts.append("Projekt-Fortschritt:")
             for p in context.project_progress:
                 parts.append(
-                    f"  - {p['name']}: {p['documents']} Dokumente, "
-                    f"{p['decisions']} Entscheidungen"
+                    f"  - {p['name']}: {p['documents']} Dokumente, {p['decisions']} Entscheidungen"
                 )
 
         if context.open_items:

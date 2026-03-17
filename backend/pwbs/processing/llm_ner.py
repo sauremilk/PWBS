@@ -1,4 +1,4 @@
-﻿"""LLM-basierte Entitätsextraktion mit Structured Output (TASK-062).
+"""LLM-basierte Entitätsextraktion mit Structured Output (TASK-062).
 
 Second stage of the two-stage NER pipeline.  Uses the
 `ENTITY_EXTRACTION_PROMPT` (D1 §3.2) with Structured Output
@@ -38,12 +38,12 @@ from pwbs.schemas.enums import EntityType
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "LLMEntityExtractor",
-    "LLMExtractionConfig",
-    "LLMExtractionResult",
     "ExtractionResponse",
     "GoalEntity",
     "HypothesisEntity",
+    "LLMEntityExtractor",
+    "LLMExtractionConfig",
+    "LLMExtractionResult",
     "RiskEntity",
 ]
 

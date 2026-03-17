@@ -1,4 +1,4 @@
-﻿"""Organizations API endpoints (TASK-144).
+"""Organizations API endpoints (TASK-144).
 
 GET    /api/v1/organizations                          -- List user's orgs
 POST   /api/v1/organizations                          -- Create org
@@ -187,7 +187,7 @@ async def add_org_member(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     # Acting role must outrank the role being assigned
     if not can_assign_role(acting_role, body.role):
@@ -247,7 +247,7 @@ async def remove_org_member(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     removed = await remove_member(
         db,
@@ -293,7 +293,7 @@ async def change_org_member_role(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "FORBIDDEN", "message": str(exc)},
-        )
+        ) from exc
 
     # Acting role must outrank the target new role
     if not can_assign_role(acting_role, body.role):

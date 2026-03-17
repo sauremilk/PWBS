@@ -37,4 +37,4 @@ class Briefing(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), nullable=True, default=None
     )
 
-    user: Mapped["User"] = relationship(back_populates="briefings")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="briefings")  # noqa: F821

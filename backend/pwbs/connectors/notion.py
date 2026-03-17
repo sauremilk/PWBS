@@ -31,7 +31,6 @@ from pwbs.core.exceptions import ConnectorError, RateLimitError
 from pwbs.schemas.enums import ContentType, SourceType
 
 if TYPE_CHECKING:
-
     from pwbs.schemas.document import UnifiedDocument
 
 logger = logging.getLogger(__name__)
@@ -85,7 +84,7 @@ def _decode_cursor(cursor: str) -> tuple[str | None, str | None]:
 
 def _raise_for_rate_limit(response: httpx.Response) -> None:
     """Raise ``RateLimitError`` on HTTP 429."""
-    if response.status_code == 429:  # noqa: PLR2004
+    if response.status_code == 429:
         retry_after = int(response.headers.get("Retry-After", "60"))
         raise RateLimitError(
             f"Notion API rate limited: {response.text}",
@@ -432,7 +431,7 @@ class NotionConnector(BaseConnector):
                 code="NOTION_NETWORK_ERROR",
             ) from exc
 
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != 200:
             raise ConnectorError(
                 f"Notion token exchange failed: HTTP {response.status_code} — {response.text}",
                 code="NOTION_TOKEN_EXCHANGE_FAILED",
@@ -512,7 +511,7 @@ class NotionConnector(BaseConnector):
 
             _raise_for_rate_limit(response)
 
-            if response.status_code != 200:  # noqa: PLR2004
+            if response.status_code != 200:
                 logger.warning(
                     "Block fetch failed for %s: HTTP %d",
                     block_id,
@@ -611,7 +610,7 @@ class NotionConnector(BaseConnector):
 
         _raise_for_rate_limit(response)
 
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != 200:
             raise ConnectorError(
                 f"Notion search failed: HTTP {response.status_code} — {response.text}",
                 code="NOTION_API_ERROR",
@@ -768,7 +767,7 @@ class NotionConnector(BaseConnector):
                         "Notion-Version": _NOTION_API_VERSION,
                     },
                 )
-                return response.status_code == 200  # noqa: PLR2004
+                return response.status_code == 200
         except httpx.RequestError:
             logger.warning(
                 "Health check failed — network error: connection_id=%s",

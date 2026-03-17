@@ -1,75 +1,75 @@
-# ADR-010: Hybrid-Suche (Vektor + BM25) statt reiner Vektorsuche
+# ADR-010: Hybrid Search (Vector + BM25) Instead of Pure Vector Search
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Das PWBS muss über heterogene Dokumente (Kalendereinträge, Notizen, Transkripte, Briefings) semantisch und keyword-basiert suchen können. Reine Vektorsuche hat Schwächen bei exakten Eigennamen, Projektnamen und Fachbegriffen. Reine Keyword-Suche versteht keine semantischen Zusammenhänge. Die Suche ist ein Kernfeature – Qualität und Relevanz der Ergebnisse bestimmen die Nutzererfahrung maßgeblich.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **Hybrid-Suche (Vektor + BM25)** mit Reciprocal Rank Fusion (RRF) für die Ergebnis-Kombination, weil die Kombination beider Ansätze die jeweils Schwächen des anderen kompensiert und Weaviate beide nativ unterstützt.
-
----
-
-## Optionen bewertet
-
-| Option                                     | Vorteile                                                                                                                                                                  | Nachteile                                                                                                                                           | Ausschlussgründe                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **Hybrid-Suche (Vektor + BM25)** (gewählt) | Vektorsuche für semantische Ähnlichkeit + BM25 für exakte Matches. Weaviate bietet beides nativ mit konfigurierbarem Alpha (Gewichtung). RRF als bewährte Ranking-Fusion. | Erhöhte Indexing-Kosten (zwei Indizes pro Collection). Komplexere Relevanz-Tuning.                                                                  | –                                                 |
-| Pure Vector Search                         | Einfacheres Setup, starke semantische Suche, funktioniert sprachübergreifend.                                                                                             | Versagt bei exakten Eigennamen (z.B. „Projekt Meridian"), Fachbegriffen und Akronymen. Halluziniert Ähnlichkeiten bei kurzen, spezifischen Queries. | Eigennamen- und Fachbegriff-Schwäche inakzeptabel |
-| Pure Keyword Search                        | Schnell, deterministisch, exzellent für exakte Matches und Filterung.                                                                                                     | Versteht keine Synonyme, keine semantischen Zusammenhänge. „Besprechung" findet nicht „Meeting". Schlecht für natürliche Sprache.                   | Keine semantische Verständnisfähigkeit            |
-| Elasticsearch                              | Ausgereiftes BM25, viele Analyzer, gute Facettierung. Semantische Suche über Plugin möglich.                                                                              | Separater Service mit hohem Ressourcenbedarf. Kein natives Vektor-Embedding (Plugin-Abhängigkeit). Redundant zu Weaviate.                           | Redundant – Weaviate bietet BM25 nativ            |
+The PWBS must be able to search across heterogeneous documents (calendar entries, notes, transcripts, briefings) both semantically and keyword-based. Pure vector search has weaknesses with exact proper names, project names, and technical terms. Pure keyword search does not understand semantic relationships. Search is a core feature – quality and relevance of results significantly determine the user experience.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Beste Suchergebnisse durch Kombination: Semantische Ähnlichkeit (Vektor) + exakte Matches (BM25)
-- Konfigurierbarer Alpha-Parameter: Gewichtung zwischen Vektor und BM25 kann pro Use Case angepasst werden (z.B. Alpha=0.7 für semantisch-dominante Suche, Alpha=0.3 für keyword-dominante Suche)
-- Kein zusätzlicher Service erforderlich – Weaviate bietet beides nativ
-- RRF als Fusion-Algorithmus ist robust und erfordert kein query-spezifisches Training
-- PostgreSQL tsvector als zusätzlicher Keyword-Fallback für Szenarien ohne Weaviate
-
-### Negative Konsequenzen / Trade-offs
-
-- Doppelte Indexing-Kosten: Jedes Dokument wird sowohl als Vektor als auch als BM25-Index gespeichert (mitigiert: marginal bei erwarteter MVP-Datenmenge)
-- Relevanz-Tuning ist komplexer als bei reiner Vektorsuche (Alpha-Parameter, RRF k-Parameter)
-- BM25 erfordert Klartext-Speicherung der Chunk-Inhalte in Weaviate (DSGVO-Trade-off, dokumentiert in ADR-009)
-
-### Offene Fragen
-
-- Optimaler Alpha-Wert für verschiedene Query-Typen (kurze Fragen vs. natürliche Sprache vs. Eigennamen) evaluieren
-- Relevanz-Feedback-Schleife für Alpha-Tuning implementieren (Phase 3)
-- Graph-Suche (Neo4j Traversal) als vierter Such-Modus integrieren
+We use **Hybrid Search (Vector + BM25)** with Reciprocal Rank Fusion (RRF) for result combination, because the combination of both approaches compensates for the respective weaknesses of the other, and Weaviate natively supports both.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **BM25-Index:** Erfordert Klartext-Speicherung der Chunk-Inhalte in Weaviate. Dieser Trade-off ist in ADR-009 dokumentiert und durch Volume Encryption, Netzwerkisolation und Tenant-Separation mitigiert.
-- **Mandantenisolation:** Jede Suchanfrage enthält `owner_id` als Filter – keine Cross-User-Ergebnisse möglich. Weaviate Multi-Tenancy garantiert physische Isolation.
-- **Audit-Logging:** Jede Suchanfrage wird im Audit-Log protokolliert (`search.executed` Event mit Query-Hash, nicht Klartext-Query).
-
----
-
-## Sicherheitsimplikationen
-
-- owner_id als Pflicht-Filter in jeder Suchanfrage verhindert Information Disclosure zwischen Nutzern
-- Query-Validierung: Maximale Query-Länge, top_k-Limit (max. 50) gegen ressourcenintensive Suchanfragen
-- Keine Speicherung von Such-Queries im Klartext in Logs (nur Query-Hash für Audit)
-- Rate-Limiting auf Search-Endpoint gegen Brute-Force-Enumeration
+| Option                                     | Advantages                                                                                                                                                       | Disadvantages                                                                                                                                    | Exclusion Reasons                                    |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| **Hybrid Search (Vector + BM25)** (chosen) | Vector search for semantic similarity + BM25 for exact matches. Weaviate offers both natively with configurable alpha (weighting). RRF as proven ranking fusion. | Increased indexing costs (two indices per collection). More complex relevance tuning.                                                            | –                                                    |
+| Pure Vector Search                         | Simpler setup, strong semantic search, works cross-language.                                                                                                     | Fails with exact proper names (e.g., "Project Meridian"), technical terms, and acronyms. Hallucinates similarities with short, specific queries. | Proper name and technical term weakness unacceptable |
+| Pure Keyword Search                        | Fast, deterministic, excellent for exact matches and filtering.                                                                                                  | Does not understand synonyms, no semantic relationships. "Besprechung" does not find "Meeting". Poor for natural language.                       | No semantic understanding capability                 |
+| Elasticsearch                              | Mature BM25, many analyzers, good faceting. Semantic search possible via plugin.                                                                                 | Separate service with high resource requirements. No native vector embedding (plugin dependency). Redundant to Weaviate.                         | Redundant – Weaviate offers BM25 natively            |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-03-13 – Bewertung der Suchqualität und Alpha-Tuning-Ergebnisse nach 12 Monaten MVP-Betrieb.
+### Positive Consequences
+
+- Best search results through combination: semantic similarity (vector) + exact matches (BM25)
+- Configurable alpha parameter: weighting between vector and BM25 can be adjusted per use case (e.g., alpha=0.7 for semantic-dominant search, alpha=0.3 for keyword-dominant search)
+- No additional service required – Weaviate offers both natively
+- RRF as fusion algorithm is robust and requires no query-specific training
+- PostgreSQL tsvector as additional keyword fallback for scenarios without Weaviate
+
+### Negative Consequences / Trade-offs
+
+- Double indexing costs: each document is stored as both a vector and a BM25 index (mitigated: marginal at expected MVP data volume)
+- Relevance tuning is more complex than with pure vector search (alpha parameter, RRF k parameter)
+- BM25 requires plaintext storage of chunk contents in Weaviate (GDPR trade-off, documented in ADR-009)
+
+### Open Questions
+
+- Evaluate optimal alpha value for different query types (short questions vs. natural language vs. proper names)
+- Implement relevance feedback loop for alpha tuning (Phase 3)
+- Integrate graph search (Neo4j traversal) as a fourth search mode
+
+---
+
+## GDPR Implications
+
+- **BM25 Index:** Requires plaintext storage of chunk contents in Weaviate. This trade-off is documented in ADR-009 and mitigated by volume encryption, network isolation, and tenant separation.
+- **Tenant Isolation:** Every search query contains `owner_id` as a filter – no cross-user results possible. Weaviate multi-tenancy guarantees physical isolation.
+- **Audit Logging:** Every search query is logged in the audit log (`search.executed` event with query hash, not plaintext query).
+
+---
+
+## Security Implications
+
+- owner_id as mandatory filter in every search query prevents information disclosure between users
+- Query validation: maximum query length, top_k limit (max. 50) against resource-intensive search queries
+- No storage of search queries in plaintext in logs (only query hash for audit)
+- Rate limiting on search endpoint against brute-force enumeration
+
+---
+
+## Revision Date
+
+2027-03-13 – Assessment of search quality and alpha tuning results after 12 months of MVP operation.

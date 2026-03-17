@@ -17,7 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from pwbs.models.connection import Connection  # noqa: F401
+    from pwbs.models.connection import Connection
 
 
 class SyncRun(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -66,4 +66,4 @@ class SyncRun(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    connection: Mapped["Connection"] = relationship(lazy="selectin")
+    connection: Mapped[Connection] = relationship(lazy="selectin")

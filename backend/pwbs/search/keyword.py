@@ -20,9 +20,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "KeywordSearchService",
     "KeywordSearchConfig",
     "KeywordSearchResult",
+    "KeywordSearchService",
 ]
 
 # Map short language codes to PostgreSQL text search configurations

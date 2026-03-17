@@ -1,4 +1,4 @@
-﻿"""Fehlerbehandlung und Retry-Logik fuer Embedding-Pipeline (TASK-060).
+"""Fehlerbehandlung und Retry-Logik fuer Embedding-Pipeline (TASK-060).
 
 Pipeline handler wrapping `EmbeddingService` with:
 - Batch-level retry with exponential backoff (1 min -> 5 min -> 25 min)
@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from pwbs.processing.chunking import TextChunk
@@ -23,12 +23,12 @@ from pwbs.processing.embedding import EmbeddingResult, EmbeddingService
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "AuditLogger",
+    "BatchResult",
+    "DocumentStatusUpdater",
     "EmbeddingPipelineHandler",
     "PipelineConfig",
     "PipelineResult",
-    "BatchResult",
-    "DocumentStatusUpdater",
-    "AuditLogger",
 ]
 
 
@@ -203,24 +203,20 @@ class EmbeddingPipelineHandler:
 
         # Split into batches (using embedding service's batch size)
         batch_size = self._embedding.config.max_batch_size
-        batches = [
-            chunks[i : i + batch_size]
-            for i in range(0, len(chunks), batch_size)
-        ]
+        batches = [chunks[i : i + batch_size] for i in range(0, len(chunks), batch_size)]
         result.total_batches = len(batches)
 
         for batch_idx, batch in enumerate(batches):
             batch_result = await self._process_batch_with_retry(
-                batch, batch_idx,
+                batch,
+                batch_idx,
             )
 
             result.successful_embeddings.extend(batch_result.successful)
 
             if batch_result.error is not None:
                 result.failed_batch_count += 1
-                result.errors.append(
-                    f"Batch {batch_idx}: {batch_result.error}"
-                )
+                result.errors.append(f"Batch {batch_idx}: {batch_result.error}")
 
         # Determine final status
         if result.failed_batch_count == 0:
@@ -289,9 +285,7 @@ class EmbeddingPipelineHandler:
                 retry_count = attempt + 1
 
                 if attempt < self._config.max_batch_retries:
-                    delay = self._config.base_retry_delay * (
-                        self._config.backoff_factor ** attempt
-                    )
+                    delay = self._config.base_retry_delay * (self._config.backoff_factor**attempt)
                     logger.warning(
                         "Batch %d failed (attempt %d/%d): %s  retrying in %.0fs",
                         batch_index,
@@ -332,12 +326,16 @@ class EmbeddingPipelineHandler:
         if self._status_updater is not None:
             try:
                 await self._status_updater.update_status(
-                    document_id, status, error_message,
+                    document_id,
+                    status,
+                    error_message,
                 )
             except Exception as exc:
                 logger.error(
                     "Failed to update document status: doc=%s status=%s: %s",
-                    document_id, status, exc,
+                    document_id,
+                    status,
+                    exc,
                 )
 
     async def _log_failure(
@@ -358,7 +356,7 @@ class EmbeddingPipelineHandler:
                     metadata={
                         "errors": errors,
                         "success_rate": round(success_rate, 3),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                     },
                 )
             except Exception as exc:

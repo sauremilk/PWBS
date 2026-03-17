@@ -97,7 +97,7 @@ def process_multimodal_file(
         return result
     except Exception as exc:
         logger.error("process_multimodal_file failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _process_and_persist(

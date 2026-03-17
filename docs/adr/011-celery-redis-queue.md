@@ -1,77 +1,77 @@
-# ADR-011: Celery + Redis statt AWS SQS (Phase 3)
+# ADR-011: Celery + Redis Instead of AWS SQS (Phase 3)
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Ab Phase 3 benötigt das PWBS eine Aufgabenqueue für asynchrone Verarbeitung: Ingestion-Zyklen, Embedding-Generierung, Briefing-Generierung, Reprocessing-Jobs und DSGVO-Löschkaskaden. Im MVP (Phase 2) erfolgt die Verarbeitung direkt (synchron/async innerhalb des Monolithen). Die Queue-Lösung muss Python-nativ sein, einfach zu betreiben und sich in die bestehende Infrastruktur einfügen.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **Celery mit Redis als Message Broker** für die Aufgabenqueue ab Phase 3, weil Celery Python-nativ, gut dokumentiert ist und Redis bereits für Caching und Session-Management genutzt wird.
-
----
-
-## Optionen bewertet
-
-| Option                       | Vorteile                                                                                                                                                                                                                  | Nachteile                                                                                                                               | Ausschlussgründe                       |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| **Celery + Redis** (gewählt) | Python-nativ, exzellent dokumentiert, großes Ökosystem (Flower für Monitoring, django-celery-beat für Scheduling). Redis wird bereits für Caching genutzt – keine zusätzliche Infrastruktur. Einfache lokale Entwicklung. | Redis als Broker weniger resilient als SQS (Nachrichten bei Redis-Crash verloren).                                                      | –                                      |
-| AWS SQS + Lambda             | Fully managed, keine Betriebskomplexität. SQS garantiert At-Least-Once-Delivery. Serverless Workers skalieren automatisch.                                                                                                | Vendor Lock-in (AWS-spezifisch). Lambda Cold-Starts problematisch für langläufige Processing-Jobs. Schwierigere lokale Entwicklung.     | Cold-Starts und Vendor Lock-in         |
-| RabbitMQ                     | Robust, AMQP-Standard, garantiert Message-Delivery, flexible Routing-Patterns.                                                                                                                                            | Separater Service mit eigenem Betriebsaufwand. Redundant, wenn Redis bereits läuft. Komplexere Konfiguration als Redis als Broker.      | Redundant zu bereits vorhandenem Redis |
-| Kafka                        | Exzellent für Event Streaming, hoher Durchsatz, persistente Messages, Replay-Fähigkeit.                                                                                                                                   | Massiver Betriebsaufwand (ZooKeeper/KRaft, Topic-Management). Overkill für die erwartete Message-Rate im MVP/Phase 3. Steile Lernkurve. | Overkill für erwartete Skala           |
+Starting in Phase 3, the PWBS requires a task queue for asynchronous processing: ingestion cycles, embedding generation, briefing generation, reprocessing jobs, and GDPR deletion cascades. In the MVP (Phase 2), processing occurs directly (synchronous/async within the monolith). The queue solution must be Python-native, easy to operate, and integrate into the existing infrastructure.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Keine zusätzliche Infrastruktur: Redis läuft bereits für Caching und Sessions
-- Python-native API: Tasks sind normale Python-Funktionen mit `@celery.task` Decorator
-- Flower-Dashboard für Task-Monitoring und -Debugging
-- Celery Beat für Cron-basiertes Scheduling (Morning Briefings, Ingestion-Zyklen)
-- Einfacher Übergang: Modularer Monolith → Celery-Workers ist ein Interface-Swap (`await agent.run()` → `agent.run.delay()`)
-
-### Negative Konsequenzen / Trade-offs
-
-- Redis als Broker: Bei Redis-Crash gehen unverarbeitete Messages verloren (mitigiert: Redis-Persistenz mit AOF, kritische Jobs werden zusätzlich in PostgreSQL als Fallback geloggt – `scheduled_job_runs` Tabelle)
-- Celery-Workers sind Single-Threaded per default – CPU-bound Tasks (Embedding-Generierung) erfordern separate Worker-Pools (mitigiert: Celery unterstützt Prefork-Pool und Gevent-Pool)
-- Migration zu SQS in Phase 5 erfordert Broker-Wechsel (mitigiert: Celery unterstützt SQS als Broker nativ)
-
-### Offene Fragen
-
-- Redis-Persistenz-Konfiguration (AOF vs. RDB) für Broker-Reliability definieren
-- Worker-Pool-Strategie: Separate Worker für I/O-bound (Ingestion) vs. CPU-bound (Embeddings)?
-- Retry-Strategie standardisieren: Max 3 Retries mit Exponential Backoff (1min → 5min → 25min)
+We use **Celery with Redis as Message Broker** for the task queue starting in Phase 3, because Celery is Python-native, well-documented, and Redis is already used for caching and session management.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Daten in Transit in Queue:** Messages in Redis enthalten Referenzen (IDs), nicht Klartext-Nutzerdaten. OAuth-Tokens oder Dokument-Inhalte werden nicht als Task-Parameter übergeben – Worker laden diese aus der DB.
-- **Löschkaskaden:** DSGVO-Löschjobs (`cleanup_expired`, Account-Deletion) laufen als Celery-Tasks mit höchster Priorität.
-- **Audit-Logging:** Jede Task-Ausführung wird in `scheduled_job_runs` protokolliert (Task-ID, Status, Dauer, Fehler).
-- **Datenresidenz:** Redis läuft auf AWS ElastiCache (eu-central-1) mit Encryption at Rest.
-
----
-
-## Sicherheitsimplikationen
-
-- Redis-Zugang: Nur aus privatem Subnet, Passwort-authentifiziert (AUTH), TLS-verschlüsselt
-- Keine Secrets in Task-Parametern – Worker laden Credentials aus der DB oder Environment
-- Flower-Dashboard nur über internen Port erreichbar (nicht öffentlich exponiert)
-- Rate-Limiting auf Task-Submission für LLM-basierte Tasks (Kostenkontrolle)
-- Dead-Letter-Queue-Pattern: Fehlgeschlagene Tasks nach 3 Retries in Fehler-Tabelle persistieren (nicht endlos wiederholen)
+| Option                      | Advantages                                                                                                                                                                                                     | Disadvantages                                                                                                                                  | Exclusion Reasons                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| **Celery + Redis** (chosen) | Python-native, excellently documented, large ecosystem (Flower for monitoring, django-celery-beat for scheduling). Redis is already used for caching – no additional infrastructure. Simple local development. | Redis as broker less resilient than SQS (messages lost on Redis crash).                                                                        | –                                   |
+| AWS SQS + Lambda            | Fully managed, no operational complexity. SQS guarantees at-least-once delivery. Serverless workers scale automatically.                                                                                       | Vendor lock-in (AWS-specific). Lambda cold starts problematic for long-running processing jobs. More difficult local development.              | Cold starts and vendor lock-in      |
+| RabbitMQ                    | Robust, AMQP standard, guaranteed message delivery, flexible routing patterns.                                                                                                                                 | Separate service with its own operational overhead. Redundant when Redis is already running. More complex configuration than Redis as broker.  | Redundant to already existing Redis |
+| Kafka                       | Excellent for event streaming, high throughput, persistent messages, replay capability.                                                                                                                        | Massive operational overhead (ZooKeeper/KRaft, topic management). Overkill for the expected message rate in MVP/Phase 3. Steep learning curve. | Overkill for expected scale         |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-09-13 – Bewertung nach Phase-3-Rollout. Evaluation Redis-Reliability vs. SQS-Migration basierend auf tatsächlichen Ausfallraten.
+### Positive Consequences
+
+- No additional infrastructure: Redis is already running for caching and sessions
+- Python-native API: Tasks are normal Python functions with `@celery.task` decorator
+- Flower dashboard for task monitoring and debugging
+- Celery Beat for cron-based scheduling (morning briefings, ingestion cycles)
+- Simple transition: Modular monolith → Celery workers is an interface swap (`await agent.run()` → `agent.run.delay()`)
+
+### Negative Consequences / Trade-offs
+
+- Redis as broker: Unprocessed messages are lost on Redis crash (mitigated: Redis persistence with AOF, critical jobs are additionally logged in PostgreSQL as fallback – `scheduled_job_runs` table)
+- Celery workers are single-threaded by default – CPU-bound tasks (embedding generation) require separate worker pools (mitigated: Celery supports prefork pool and gevent pool)
+- Migration to SQS in Phase 5 requires broker switch (mitigated: Celery natively supports SQS as broker)
+
+### Open Questions
+
+- Define Redis persistence configuration (AOF vs. RDB) for broker reliability
+- Worker pool strategy: Separate workers for I/O-bound (ingestion) vs. CPU-bound (embeddings)?
+- Standardize retry strategy: Max 3 retries with exponential backoff (1min → 5min → 25min)
+
+---
+
+## GDPR Implications
+
+- **Data in transit in queue:** Messages in Redis contain references (IDs), not plaintext user data. OAuth tokens or document contents are not passed as task parameters – workers load these from the DB.
+- **Deletion cascades:** GDPR deletion jobs (`cleanup_expired`, account deletion) run as Celery tasks with highest priority.
+- **Audit logging:** Every task execution is logged in `scheduled_job_runs` (task ID, status, duration, errors).
+- **Data residency:** Redis runs on AWS ElastiCache (eu-central-1) with encryption at rest.
+
+---
+
+## Security Implications
+
+- Redis access: Only from private subnet, password-authenticated (AUTH), TLS-encrypted
+- No secrets in task parameters – workers load credentials from the DB or environment
+- Flower dashboard only accessible via internal port (not publicly exposed)
+- Rate limiting on task submission for LLM-based tasks (cost control)
+- Dead letter queue pattern: Failed tasks after 3 retries are persisted to error table (not retried endlessly)
+
+---
+
+## Revision Date
+
+2027-09-13 – Assessment after Phase 3 rollout. Evaluation of Redis reliability vs. SQS migration based on actual outage rates.

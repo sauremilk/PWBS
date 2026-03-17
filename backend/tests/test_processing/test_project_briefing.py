@@ -11,7 +11,7 @@ Tests covering:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -24,7 +24,6 @@ from pwbs.briefing.generator import (
 )
 from pwbs.briefing.generator import BriefingType as GenBriefingType
 from pwbs.briefing.persistence import (
-    BriefingPersistenceService,
     PersistenceConfig,
 )
 from pwbs.briefing.project_context import (
@@ -69,19 +68,19 @@ def _mock_session_with_documents(
                 "doc_id": str(uuid.uuid4()),
                 "title": "PWBS Phase 2 Sprint Planning",
                 "source_type": "notion",
-                "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=timezone.utc),
+                "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=UTC),
             },
             {
                 "doc_id": str(uuid.uuid4()),
                 "title": "PWBS Phase 2 Architecture Review",
                 "source_type": "google_docs",
-                "created_at": datetime(2025, 6, 12, 14, 0, tzinfo=timezone.utc),
+                "created_at": datetime(2025, 6, 12, 14, 0, tzinfo=UTC),
             },
             {
                 "doc_id": str(uuid.uuid4()),
                 "title": "PWBS Phase 2 Meeting Notes",
                 "source_type": "zoom",
-                "created_at": datetime(2025, 6, 11, 16, 0, tzinfo=timezone.utc),
+                "created_at": datetime(2025, 6, 11, 16, 0, tzinfo=UTC),
             },
         ]
     )
@@ -170,22 +169,34 @@ class _MockGraphService:
         self._open_items = open_items or []
 
     async def get_project_decisions(
-        self, owner_id: uuid.UUID, project_name: str, limit: int = 20,
+        self,
+        owner_id: uuid.UUID,
+        project_name: str,
+        limit: int = 20,
     ) -> list[ProjectDecision]:
         return self._decisions
 
     async def get_project_participants(
-        self, owner_id: uuid.UUID, project_name: str, limit: int = 15,
+        self,
+        owner_id: uuid.UUID,
+        project_name: str,
+        limit: int = 15,
     ) -> list[ProjectParticipant]:
         return self._participants
 
     async def get_project_timeline(
-        self, owner_id: uuid.UUID, project_name: str, limit: int = 20,
+        self,
+        owner_id: uuid.UUID,
+        project_name: str,
+        limit: int = 20,
     ) -> list[ProjectMilestone]:
         return self._timeline
 
     async def get_project_open_items(
-        self, owner_id: uuid.UUID, project_name: str, limit: int = 10,
+        self,
+        owner_id: uuid.UUID,
+        project_name: str,
+        limit: int = 10,
     ) -> list[str]:
         return self._open_items
 
@@ -365,7 +376,7 @@ class TestProjectContextTokenBudget:
                 "doc_id": str(uuid.uuid4()),
                 "title": f"Dokument {i} mit einem langen Titel über das Projekt ABC und viele Details",
                 "source_type": "notion",
-                "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=timezone.utc),
+                "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=UTC),
             }
             for i in range(30)
         ]
@@ -373,9 +384,7 @@ class TestProjectContextTokenBudget:
         search = _mock_search_service()
         graph = _MockGraphService(
             open_items=[f"Open item {i}" for i in range(20)],
-            participants=[
-                ProjectParticipant(name=f"Person {i}") for i in range(15)
-            ],
+            participants=[ProjectParticipant(name=f"Person {i}") for i in range(15)],
         )
         assembler = ProjectContextAssembler(
             session=session,
@@ -508,19 +517,13 @@ class TestProjectPromptTemplate:
 
     def test_template_file_exists(self) -> None:
         template_path = (
-            Path(__file__).resolve().parents[2]
-            / "pwbs"
-            / "prompts"
-            / "briefing_project.v1.j2"
+            Path(__file__).resolve().parents[2] / "pwbs" / "prompts" / "briefing_project.v1.j2"
         )
         assert template_path.exists(), f"Template not found: {template_path}"
 
     def test_template_has_required_context(self) -> None:
         template_path = (
-            Path(__file__).resolve().parents[2]
-            / "pwbs"
-            / "prompts"
-            / "briefing_project.v1.j2"
+            Path(__file__).resolve().parents[2] / "pwbs" / "prompts" / "briefing_project.v1.j2"
         )
         content = template_path.read_text(encoding="utf-8")
         assert "project_name" in content
@@ -533,10 +536,7 @@ class TestProjectPromptTemplate:
 
     def test_template_has_front_matter(self) -> None:
         template_path = (
-            Path(__file__).resolve().parents[2]
-            / "pwbs"
-            / "prompts"
-            / "briefing_project.v1.j2"
+            Path(__file__).resolve().parents[2] / "pwbs" / "prompts" / "briefing_project.v1.j2"
         )
         content = template_path.read_text(encoding="utf-8")
         assert content.startswith("---")

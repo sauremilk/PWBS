@@ -1,73 +1,73 @@
-# ADR-013: Governance-Framework und Entwicklungsstandards
+# ADR-013: Governance Framework and Development Standards
 
-**Status:** Akzeptiert
-**Datum:** 13. März 2026
-**Entscheider:** Projektgründer
-
----
-
-## Kontext
-
-Das PWBS wächst von Phase 1 (PoC) in Phase 2 (MVP) mit bis zu 12 parallelen KI-Orchestratoren. Ohne formalisierte Prozesse für Branching, Commit-Konventionen, Code-Reviews, Task-Lifecycle und Entscheidungsdokumentation drohen Inkonsistenzen, schwer nachvollziehbare Änderungen und Koordinationsfehler zwischen Mensch und KI. Ein verbindliches Entwicklungs-Regelwerk ist Voraussetzung für skalierbare, nachvollziehbare Zusammenarbeit.
+**Status:** Accepted
+**Date:** March 13, 2026
+**Decision Makers:** Project Founder
 
 ---
 
-## Entscheidung
+## Context
 
-Wir werden ein zentrales Governance-Dokument (`GOVERNANCE.md`) als verbindliches Regelwerk für alle Entwicklungsprozesse etablieren, weil es die einzige Quelle der Wahrheit für Prozessfragen sein soll — sowohl für menschliche Entwickler als auch für KI-Agenten.
-
----
-
-## Optionen bewertet
-
-| Option                                            | Vorteile                                                                | Nachteile                                                          | Ausschlussgründe                     |
-| ------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------ |
-| Verstreute Regeln in README, CONTRIBUTING, ADRs   | Dezentral, flexibel                                                     | Inkonsistent, schwer auffindbar, Widersprüche möglich              | Skaliert nicht mit 12 Orchestratoren |
-| Wiki-basierte Dokumentation (GitHub Wiki)         | Suchbar, versioniert                                                    | Außerhalb des Repos, nicht in Git-History, nicht im Editor-Kontext | KI-Agenten haben keinen Wiki-Zugriff |
-| **Zentrales GOVERNANCE.md + Enforcement-Dateien** | Versioniert im Repo, maschinenlesbar, Pre-Commit-Hooks erzwingen Regeln | Ein großes Dokument, muss gepflegt werden                          | –                                    |
+The PWBS is growing from Phase 1 (PoC) into Phase 2 (MVP) with up to 12 parallel AI orchestrators. Without formalized processes for branching, commit conventions, code reviews, task lifecycle, and decision documentation, inconsistencies, hard-to-trace changes, and coordination errors between humans and AI are imminent. A binding development rulebook is a prerequisite for scalable, traceable collaboration.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Einheitliche Prozesse für Mensch und KI — gleiche Regeln, gleiche Werkzeuge
-- Commits sind durch Conventional Commits maschinenlesbar und automatisch auswertbar
-- Code-Reviews haben durch das PR-Template eine standardisierte Checkliste (inkl. DSGVO)
-- Trunk-Based Development mit kurzlebigen Branches verhindert divergierende Code-Stänge
-- Pre-Commit-Hooks fangen Fehler **vor** dem Commit ab, nicht erst in CI
-- ADR-Framework mit Pflichtfeldern (DSGVO, Sicherheit, Revision) verhindert unvollständige Dokumentation
-- CHANGELOG.md liefert eine menschenlesbare Änderungshistorie mit TASK-ID-Traceability
-
-### Negative Konsequenzen / Trade-offs
-
-- Overhead: Jeder Commit muss dem Conventional-Commits-Format entsprechen
-- Orchetrator-Sonderregeln (direkter Push auf master) weichen vom Standard ab — Risiko bei Konflikten
-- Governance-Dokument muss aktiv gepflegt werden, sonst veraltet es
-
-### Offene Fragen
-
-- Wann auf GitHub Actions CI/CD umstellen (TASK-012)?
-- Soll der `no-commit-to-branch`-Hook für Orchestratoren deaktiviert oder per `--no-verify` umgangen werden?
+We will establish a central governance document (`GOVERNANCE.md`) as a binding rulebook for all development processes, because it should be the single source of truth for process questions — for both human developers and AI agents.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-Keine direkten DSGVO-Implikationen. Das Governance-Framework **stärkt** die DSGVO-Compliance durch verpflichtende Checklisten in PRs und ADRs (owner_id-Filter, expires_at, Lösch-Kaskaden, PII-Prüfung).
-
----
-
-## Sicherheitsimplikationen
-
-- Pre-Commit-Hook `detect-private-key` verhindert Commit von Private Keys
-- PR-Template enthält OWASP-Checkliste
-- Security-Gate bei sicherheitsrelevanten Änderungen (2 Reviewer)
-- Risiko: Orchestratoren nutzen `--no-verify` für den `no-commit-to-branch`-Hook — andere Hooks (Linting, Keys) bleiben aktiv
+| Option                                        | Advantages                                                          | Disadvantages                                               | Exclusion Reasons                    |
+| --------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| Scattered rules in README, CONTRIBUTING, ADRs | Decentralized, flexible                                             | Inconsistent, hard to find, contradictions possible         | Does not scale with 12 orchestrators |
+| Wiki-based documentation (GitHub Wiki)        | Searchable, versioned                                               | Outside the repo, not in Git history, not in editor context | AI agents have no wiki access        |
+| **Central GOVERNANCE.md + enforcement files** | Versioned in repo, machine-readable, pre-commit hooks enforce rules | One large document, must be maintained                      | –                                    |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-September 2026 — nach Abschluss der Phase-2-MVP-Entwicklung evaluieren, ob die Prozesse skalieren.
+### Positive Consequences
+
+- Unified processes for humans and AI — same rules, same tools
+- Commits are machine-readable and automatically evaluable through Conventional Commits
+- Code reviews have a standardized checklist via the PR template (including GDPR)
+- Trunk-based development with short-lived branches prevents diverging code branches
+- Pre-commit hooks catch errors **before** the commit, not only in CI
+- ADR framework with mandatory fields (GDPR, security, revision) prevents incomplete documentation
+- CHANGELOG.md provides a human-readable change history with TASK-ID traceability
+
+### Negative Consequences / Trade-offs
+
+- Overhead: Every commit must follow the Conventional Commits format
+- Orchestrator special rules (direct push to master) deviate from the standard — risk of conflicts
+- Governance document must be actively maintained, otherwise it becomes outdated
+
+### Open Questions
+
+- When to switch to GitHub Actions CI/CD (TASK-012)?
+- Should the `no-commit-to-branch` hook be disabled for orchestrators or bypassed via `--no-verify`?
+
+---
+
+## GDPR Implications
+
+No direct GDPR implications. The governance framework **strengthens** GDPR compliance through mandatory checklists in PRs and ADRs (owner_id filters, expires_at, deletion cascades, PII checks).
+
+---
+
+## Security Implications
+
+- Pre-commit hook `detect-private-key` prevents committing private keys
+- PR template contains OWASP checklist
+- Security gate for security-relevant changes (2 reviewers)
+- Risk: Orchestrators use `--no-verify` for the `no-commit-to-branch` hook — other hooks (linting, keys) remain active
+
+---
+
+## Revision Date
+
+September 2026 — after completion of Phase 2 MVP development, evaluate whether the processes scale.

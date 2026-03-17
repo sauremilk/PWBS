@@ -126,7 +126,7 @@ _TEST_TEMPLATE = dedent('''\
                 await plugin.fetch_data(context)
 ''')
 
-_README_TEMPLATE = dedent('''\
+_README_TEMPLATE = dedent("""\
     # {name}
 
     A PWBS connector plugin.
@@ -143,7 +143,7 @@ _README_TEMPLATE = dedent('''\
     pip install -e .
     pytest tests/
     ```
-''')
+""")
 
 
 def _slug_to_class(slug: str) -> str:

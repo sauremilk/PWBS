@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
-
 import pytest
 
 from pwbs.core.llm_gateway import (
@@ -12,7 +10,6 @@ from pwbs.core.llm_gateway import (
     LLMGateway,
     LLMProvider,
     LLMRequest,
-    LLMResponse,
     ProviderError,
 )
 

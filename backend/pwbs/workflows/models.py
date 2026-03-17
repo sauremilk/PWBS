@@ -55,8 +55,8 @@ class WorkflowRule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship()  # noqa: F821
-    executions: Mapped[list["WorkflowExecution"]] = relationship(
+    user: Mapped[User] = relationship()  # noqa: F821
+    executions: Mapped[list[WorkflowExecution]] = relationship(
         back_populates="rule", cascade="all, delete-orphan", lazy="selectin"
     )
 
@@ -102,5 +102,5 @@ class WorkflowExecution(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    rule: Mapped["WorkflowRule"] = relationship(back_populates="executions")
-    user: Mapped["User"] = relationship()  # noqa: F821
+    rule: Mapped[WorkflowRule] = relationship(back_populates="executions")
+    user: Mapped[User] = relationship()  # noqa: F821

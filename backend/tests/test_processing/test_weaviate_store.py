@@ -6,10 +6,8 @@ All tests mock the Weaviate client to avoid requiring a running instance.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, PropertyMock, patch
-
-import pytest
+from datetime import UTC, datetime
+from unittest.mock import MagicMock
 
 from pwbs.storage.weaviate import (
     COLLECTION_NAME,
@@ -22,7 +20,7 @@ from pwbs.storage.weaviate import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-_NOW = datetime.now(tz=timezone.utc)
+_NOW = datetime.now(tz=UTC)
 _USER_ID = uuid.uuid4()
 _DOC_ID = uuid.uuid4()
 

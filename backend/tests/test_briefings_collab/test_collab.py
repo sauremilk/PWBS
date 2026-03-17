@@ -9,8 +9,8 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -20,7 +20,7 @@ OWNER_ID = uuid.uuid4()
 RECIPIENT_A = uuid.uuid4()
 RECIPIENT_B = uuid.uuid4()
 BRIEFING_ID = uuid.uuid4()
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 
 
 def _make_briefing(

@@ -1,4 +1,4 @@
-﻿"""Prometheus metrics for PWBS (TASK-116, TASK-166).
+"""Prometheus metrics for PWBS (TASK-116, TASK-166).
 
 Provides:
 - Automatic HTTP request latency & status code metrics via

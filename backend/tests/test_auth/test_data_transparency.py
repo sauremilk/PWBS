@@ -6,7 +6,7 @@ Covers: GET /data-report, GET /llm-usage, LlmAuditLog model, export integration.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -44,7 +44,7 @@ def _make_llm_log(
     log.input_tokens = input_tokens
     log.output_tokens = output_tokens
     log.purpose = purpose
-    log.created_at = datetime(2025, 3, 1, 10, 0, tzinfo=timezone.utc)
+    log.created_at = datetime(2025, 3, 1, 10, 0, tzinfo=UTC)
     return log
 
 
@@ -62,16 +62,21 @@ class TestLlmAuditLogModel:
     def test_has_required_columns(self) -> None:
         cols = {c.name for c in LlmAuditLog.__table__.columns}
         expected = {
-            "id", "owner_id", "provider", "model",
-            "input_tokens", "output_tokens", "purpose", "created_at",
+            "id",
+            "owner_id",
+            "provider",
+            "model",
+            "input_tokens",
+            "output_tokens",
+            "purpose",
+            "created_at",
         }
         assert expected <= cols
 
     def test_owner_id_indexed(self) -> None:
         col = LlmAuditLog.__table__.columns["owner_id"]
         assert col.index or any(
-            idx.name == "ix_llm_audit_log_owner_id"
-            for idx in LlmAuditLog.__table__.indexes
+            idx.name == "ix_llm_audit_log_owner_id" for idx in LlmAuditLog.__table__.indexes
         )
 
 
@@ -89,8 +94,8 @@ class TestDataReportSchemas:
         s = SourceStats(
             source_type="google_calendar",
             document_count=42,
-            oldest_document=datetime(2024, 1, 1, tzinfo=timezone.utc),
-            newest_document=datetime(2025, 3, 1, tzinfo=timezone.utc),
+            oldest_document=datetime(2024, 1, 1, tzinfo=UTC),
+            newest_document=datetime(2025, 3, 1, tzinfo=UTC),
         )
         assert s.document_count == 42
         assert s.source_type == "google_calendar"
@@ -108,7 +113,7 @@ class TestDataReportSchemas:
         c = ConnectionInfo(
             source_type="slack",
             status="active",
-            last_sync=datetime(2025, 3, 1, 12, 0, tzinfo=timezone.utc),
+            last_sync=datetime(2025, 3, 1, 12, 0, tzinfo=UTC),
         )
         assert c.status == "active"
 
@@ -145,7 +150,7 @@ class TestDataReportSchemas:
             input_tokens=500,
             output_tokens=200,
             purpose="search",
-            created_at=datetime(2025, 3, 1, tzinfo=timezone.utc),
+            created_at=datetime(2025, 3, 1, tzinfo=UTC),
         )
         assert entry.provider == "openai"
 
@@ -204,14 +209,14 @@ class TestDataReportEndpoint:
         doc_row1 = MagicMock(
             source_type="google_calendar",
             doc_count=10,
-            oldest=datetime(2024, 1, 1, tzinfo=timezone.utc),
-            newest=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            oldest=datetime(2024, 1, 1, tzinfo=UTC),
+            newest=datetime(2025, 1, 1, tzinfo=UTC),
         )
         doc_row2 = MagicMock(
             source_type="notion",
             doc_count=5,
-            oldest=datetime(2024, 6, 1, tzinfo=timezone.utc),
-            newest=datetime(2025, 3, 1, tzinfo=timezone.utc),
+            oldest=datetime(2024, 6, 1, tzinfo=UTC),
+            newest=datetime(2025, 3, 1, tzinfo=UTC),
         )
         doc_result = MagicMock()
         doc_result.all.return_value = [doc_row1, doc_row2]
@@ -247,7 +252,7 @@ class TestDataReportEndpoint:
         conn_obj = MagicMock()
         conn_obj.source_type = "slack"
         conn_obj.status = "active"
-        conn_obj.watermark = datetime(2025, 3, 1, tzinfo=timezone.utc)
+        conn_obj.watermark = datetime(2025, 3, 1, tzinfo=UTC)
 
         conn_result = MagicMock()
         conn_scalars = MagicMock()

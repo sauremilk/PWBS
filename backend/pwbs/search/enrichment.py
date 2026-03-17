@@ -1,4 +1,4 @@
-﻿"""Suchergebnisse mit SourceRef anreichern (TASK-075).
+"""Suchergebnisse mit SourceRef anreichern (TASK-075).
 
 Enriches `HybridSearchResult` items with `SourceRef` objects that carry
 all information the frontend needs for source attribution:
@@ -138,9 +138,7 @@ class SearchResultEnricher:
                 continue
 
             source_type_enum = _safe_source_type(meta["source_type"])
-            original_url = reconstruct_url(
-                meta["source_type"], meta["source_id"]
-            )
+            original_url = reconstruct_url(meta["source_type"], meta["source_id"])
 
             source_ref = SourceRef(
                 chunk_id=result.chunk_id,

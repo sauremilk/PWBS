@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pwbs.search.hybrid import HybridSearchResult
 
@@ -100,7 +100,7 @@ class SearchReranker:
         if not results:
             return []
 
-        ref_time = now or datetime.now(timezone.utc)
+        ref_time = now or datetime.now(UTC)
 
         # Normalise RRF scores to [0, 1] for fair weighting
         max_rrf = max(r.score for r in results)
@@ -124,10 +124,7 @@ class SearchReranker:
             )
 
             # Composite score
-            base = (
-                self._config.cosine_weight * cosine_score
-                + self._config.rrf_weight * norm_rrf
-            )
+            base = self._config.cosine_weight * cosine_score + self._config.rrf_weight * norm_rrf
             final_score = base * (1.0 + self._config.recency_boost_pct * recency)
 
             scored.append((final_score, result))
@@ -184,9 +181,9 @@ def _recency_factor(
 
     # Ensure timezone-aware comparison
     if doc_time.tzinfo is None:
-        doc_time = doc_time.replace(tzinfo=timezone.utc)
+        doc_time = doc_time.replace(tzinfo=UTC)
     if now.tzinfo is None:
-        now = now.replace(tzinfo=timezone.utc)
+        now = now.replace(tzinfo=UTC)
 
     age_days = (now - doc_time).total_seconds() / 86400.0
 

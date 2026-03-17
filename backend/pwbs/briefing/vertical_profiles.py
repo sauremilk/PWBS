@@ -149,8 +149,7 @@ _CONSULTANT = VerticalConfig(
     profile=VerticalProfile.CONSULTANT,
     display_name="Berater",
     description=(
-        "Optimiert für Beratungsarbeit: "
-        "Kundenprojekte, Lessons Learned, Cross-Projekt-Muster."
+        "Optimiert für Beratungsarbeit: Kundenprojekte, Lessons Learned, Cross-Projekt-Muster."
     ),
     entity_priorities=[
         EntityType.PROJECT,

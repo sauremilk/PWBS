@@ -1,9 +1,9 @@
-﻿"""Tests for Search Result Enrichment with SourceRef (TASK-075)."""
+"""Tests for Search Result Enrichment with SourceRef (TASK-075)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -18,13 +18,12 @@ from pwbs.search.enrichment import (
 )
 from pwbs.search.hybrid import HybridSearchResult
 
-
 # ------------------------------------------------------------------
 # Fixtures
 # ------------------------------------------------------------------
 
 USER_ID = uuid.uuid4()
-NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=UTC)
 
 
 def _hybrid_result(
@@ -279,9 +278,7 @@ class TestSearchResultEnricher:
         session = _make_session([row])
         enricher = SearchResultEnricher(session)
 
-        hybrid = _hybrid_result(
-            chunk_id=cid, semantic_rank=2, keyword_rank=5
-        )
+        hybrid = _hybrid_result(chunk_id=cid, semantic_rank=2, keyword_rank=5)
         results = await enricher.enrich([hybrid], USER_ID)
 
         assert results[0].semantic_rank == 2

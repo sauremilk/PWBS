@@ -1,8 +1,6 @@
-﻿"""Tests for ChunkingStrategyResolver (TASK-057)."""
+"""Tests for ChunkingStrategyResolver (TASK-057)."""
 
 from __future__ import annotations
-
-import pytest
 
 from pwbs.processing.chunking import ChunkingStrategy
 from pwbs.processing.strategy_resolver import (
@@ -10,7 +8,6 @@ from pwbs.processing.strategy_resolver import (
     StrategyMapping,
 )
 from pwbs.schemas.enums import SourceType
-
 
 # ------------------------------------------------------------------
 # Default Mapping Tests
@@ -122,7 +119,10 @@ class TestConfigurableMapping:
         )
         resolver = ChunkingStrategyResolver(custom)
         # source_type match wins over content_type
-        assert resolver.resolve(SourceType.NOTION, content_type="markdown") == ChunkingStrategy.PARAGRAPH
+        assert (
+            resolver.resolve(SourceType.NOTION, content_type="markdown")
+            == ChunkingStrategy.PARAGRAPH
+        )
 
     def test_content_type_case_insensitive(self) -> None:
         custom = StrategyMapping(

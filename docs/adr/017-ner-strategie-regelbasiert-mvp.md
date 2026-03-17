@@ -1,71 +1,71 @@
-﻿# ADR-017: NER-Strategie MVP  Regelbasiert statt LLM pro Chunk
+﻿# ADR-017: NER Strategy MVP – Rule-Based Instead of LLM per Chunk
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-16
-**Entscheider:** Architektur-Review
-
----
-
-## Kontext
-
-Die NER-Pipeline ist zweistufig konzipiert: regelbasierte Extraktion (TASK-061) gefolgt von LLM-basierter Extraktion (TASK-062) via Claude Structured Output pro Chunk. Die LLM-Stufe ist als Code fertig (`llm_ner.py`, 515 LOC) aber **noch nicht in die Pipeline integriert**  der Extraction-Task nutzt ausschliesslich `RuleBasedNER`.
-
-Bei geplantem Vollausbau wuerden bei 10-20 Early Adopters (~5.000 Chunks/Tag) ~150.000 Claude-Calls/Monat anfallen (~$450/Monat nur fuer NER). Das Rate-Limit von 100 Calls/User/Tag reicht fuer Power-User nicht. Die Briefings nutzen ohnehin einen eigenen LLM-Call, der fehlende Entitaeten im Kontext aufgreifen kann.
+**Status:** Accepted
+**Date:** 2026-03-16
+**Decision Makers:** Architecture Review
 
 ---
 
-## Entscheidung
+## Context
 
-Wir werden im MVP **keine LLM-basierte NER pro Chunk ausfuehren**, sondern die regelbasierte Extraktion (`RuleBasedNER`) um zusaetzliche Regex-Patterns fuer Datum, Entscheidungs-, Frage- und Ziel-Keywords erweitern. `llm_ner.py` bleibt als Code erhalten und wird hinter einem Feature-Flag (`NER_LLM_ENABLED=false`) fuer spaetere Aktivierung (Phase 3 / Premium-Tier) vorgehalten.
+The NER pipeline is designed as a two-stage process: rule-based extraction (TASK-061) followed by LLM-based extraction (TASK-062) via Claude Structured Output per chunk. The LLM stage is complete as code (`llm_ner.py`, 515 LOC) but **not yet integrated into the pipeline** – the extraction task exclusively uses `RuleBasedNER`.
 
----
-
-## Optionen bewertet
-
-| Option | Vorteile | Nachteile | Ausschlussgruende |
-| --- | --- | --- | --- |
-| A: Rule-Only Extended (gewaehlt) | Null Kosten, deterministisch, <1ms/Chunk, keine neuen Dependencies, trivial testbar | Geringere Recall bei Entitaeten in Freitext (Zoom-Transkripte) |  |
-| B: Rule + spaCy | Gute Personenerkennung in Fliesstext, lokale Inferenz | 200 MB Modell-Dependency, erkennt keine domaenenspezifischen Entities (Decisions, Goals, Risks) | Unverhaeltnismaessige Dependency fuer marginalen MVP-Mehrwert |
-| C: Rule + LLM-Selective (nur Zoom) | Beste Qualitaet fuer Transkripte, bestehender Code wiederverwendbar | Weiterhin LLM-Kosten, Rate-Limit-Probleme, nicht-deterministisch | Routing-Komplexitaet, Kosten/Nutzen im MVP nicht gerechtfertigt |
+At planned full deployment with 10–20 Early Adopters (~5,000 chunks/day), ~150,000 Claude calls/month would be incurred (~$450/month just for NER). The rate limit of 100 calls/user/day is insufficient for power users. The briefings use their own LLM call anyway, which can pick up missing entities in context.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- ~$450/Monat Betriebskosten-Einsparung bei 20 Early Adopters
-- Kein Rate-Limit-Engpass (100 Calls/User/Tag irrelevant ohne LLM-NER)
-- Deterministische, reproduzierbare Extraktion  identische Ergebnisse bei Re-Processing
-- Schnellere Processing-Pipeline (~1ms statt ~2s pro Chunk)
-- Keine externe API-Abhaengigkeit in der NER-Stufe (DSGVO-Vorteil: Daten verlassen System nicht)
-
-### Negative Konsequenzen / Trade-offs
-
-- Geringere Extraktionsqualitaet bei unstrukturierten Texten (insb. Zoom-Transkripte)
-- Entity-Typen GOAL, RISK, HYPOTHESIS nur per Keyword-Heuristik erkennbar (Confidence ~0.85 statt LLM ~0.8-0.95)
-- Personen in Fliesstext ohne @-Mention/Email werden nicht erkannt
-- Briefings kompensieren teilweise ueber ihren eigenen LLM-Call
-
-### Offene Fragen
-
-- Schwellenwert definieren: Ab welcher Recall-Luecke wird LLM-NER aktiviert? (Messung nach 4 Wochen MVP-Betrieb)
-- Feature-Flag-Granularitaet: Pro User, pro Source-Type, oder global?
+In the MVP, we will **not execute LLM-based NER per chunk**, but instead extend the rule-based extraction (`RuleBasedNER`) with additional regex patterns for dates, decision keywords, question keywords, and goal keywords. `llm_ner.py` remains as code and is held behind a feature flag (`NER_LLM_ENABLED=false`) for later activation (Phase 3 / premium tier).
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-Positive Auswirkung: Ohne LLM-NER verlassen keine Chunk-Inhalte das System fuer Entity-Extraktion. Personenbezogene Daten werden ausschliesslich lokal verarbeitet. Bestehende `owner_id`-Filter und `expires_at`-Kaskaden bleiben unveraendert.
-
----
-
-## Sicherheitsimplikationen
-
-Kein zusaetzliches Risiko. Regex-Patterns parsen Content lokal und erzeugen keine externen Requests. Extrahierte Entity-Namen durchlaufen `normalized_name`-Normalisierung (lowercase, whitespace collapse). Keine neuen Injection-Vektoren.
+| Option                              | Advantages                                                                    | Disadvantages                                                                                  | Exclusion Reasons                                     |
+| ----------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| A: Rule-Only Extended (chosen)      | Zero cost, deterministic, <1ms/chunk, no new dependencies, trivially testable | Lower recall for entities in free text (Zoom transcripts)                                      | –                                                     |
+| B: Rule + spaCy                     | Good person recognition in prose, local inference                             | 200 MB model dependency, does not recognize domain-specific entities (Decisions, Goals, Risks) | Disproportionate dependency for marginal MVP benefit  |
+| C: Rule + LLM-Selective (Zoom only) | Best quality for transcripts, existing code reusable                          | Still LLM costs, rate limit issues, non-deterministic                                          | Routing complexity, cost/benefit not justified in MVP |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2026-07-16 (4 Monate nach MVP-Start: Extraktionsqualitaet anhand realer Nutzerdaten evaluieren, Entscheidung ueber LLM-NER-Aktivierung treffen)
+### Positive Consequences
+
+- ~$450/month operational cost savings with 20 Early Adopters
+- No rate limit bottleneck (100 calls/user/day irrelevant without LLM-NER)
+- Deterministic, reproducible extraction – identical results on re-processing
+- Faster processing pipeline (~1ms instead of ~2s per chunk)
+- No external API dependency in the NER stage (GDPR advantage: data does not leave the system)
+
+### Negative Consequences / Trade-offs
+
+- Lower extraction quality for unstructured texts (especially Zoom transcripts)
+- Entity types GOAL, RISK, HYPOTHESIS only detectable via keyword heuristics (confidence ~0.85 vs. LLM ~0.8–0.95)
+- Persons in prose without @-mention/email are not recognized
+- Briefings partially compensate through their own LLM call
+
+### Open Questions
+
+- Define threshold: At what recall gap should LLM-NER be activated? (Measurement after 4 weeks of MVP operation)
+- Feature flag granularity: Per user, per source type, or global?
+
+---
+
+## GDPR Implications
+
+Positive impact: Without LLM-NER, no chunk contents leave the system for entity extraction. Personal data is processed exclusively locally. Existing `owner_id` filters and `expires_at` cascades remain unchanged.
+
+---
+
+## Security Implications
+
+No additional risk. Regex patterns parse content locally and generate no external requests. Extracted entity names pass through `normalized_name` normalization (lowercase, whitespace collapse). No new injection vectors.
+
+---
+
+## Revision Date
+
+2026-07-16 (4 months after MVP launch: evaluate extraction quality based on real user data, decide on LLM-NER activation)

@@ -136,9 +136,7 @@ class SAMLHandler:
         session_index = toolkit.get_session_index() or ""
 
         email = self._get_attribute(attrs, self._mapping.email, name_id)
-        display_name = self._get_attribute(
-            attrs, self._mapping.display_name, email
-        )
+        display_name = self._get_attribute(attrs, self._mapping.display_name, email)
         groups: list[str] = []
         if self._mapping.groups:
             groups = attrs.get(self._mapping.groups, [])

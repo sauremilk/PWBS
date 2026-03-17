@@ -43,7 +43,7 @@ class Webhook(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
-    deliveries: Mapped[list["WebhookDelivery"]] = relationship(
+    deliveries: Mapped[list[WebhookDelivery]] = relationship(
         back_populates="webhook",
         lazy="selectin",
         order_by="desc(WebhookDelivery.created_at)",
@@ -78,4 +78,4 @@ class WebhookDelivery(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    webhook: Mapped["Webhook"] = relationship(back_populates="deliveries")
+    webhook: Mapped[Webhook] = relationship(back_populates="deliveries")

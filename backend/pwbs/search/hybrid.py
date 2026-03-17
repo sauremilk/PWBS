@@ -277,14 +277,14 @@ class _FusionCandidate:
     __slots__ = (
         "chunk_id",
         "content",
-        "title",
-        "source_type",
-        "rrf_score",
-        "semantic_score",
-        "keyword_score",
-        "semantic_rank",
-        "keyword_rank",
         "created_at",
+        "keyword_rank",
+        "keyword_score",
+        "rrf_score",
+        "semantic_rank",
+        "semantic_score",
+        "source_type",
+        "title",
     )
 
     def __init__(

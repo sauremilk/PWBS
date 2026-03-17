@@ -1,4 +1,4 @@
-﻿"""Reminders API endpoints (TASK-131).
+"""Reminders API endpoints (TASK-131).
 
 GET    /api/v1/reminders            -- List pending reminders (sorted by urgency)
 PATCH  /api/v1/reminders/{id}       -- Update reminder status

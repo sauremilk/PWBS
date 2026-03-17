@@ -1,4 +1,4 @@
-﻿"""Reminder service -- Follow-up detection and trigger engine (TASK-131).
+"""Reminder service -- Follow-up detection and trigger engine (TASK-131).
 
 Provides:
 1. Follow-up detection: extract follow-up commitments from document content
@@ -12,11 +12,11 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, select
 
 from pwbs.models.reminder import Reminder
 from pwbs.schemas.enums import ReminderStatus, ReminderType, Urgency
@@ -122,7 +122,7 @@ async def create_reminder(
         responsible_person=responsible_person,
         source_document_id=source_document_id,
         reminder_metadata=metadata or {},
-        expires_at=datetime.now(tz=timezone.utc) + timedelta(days=90),
+        expires_at=datetime.now(tz=UTC) + timedelta(days=90),
     )
     db.add(reminder)
     await db.flush()
@@ -177,9 +177,9 @@ async def update_reminder_status(
 
     reminder.status = new_status.value
     if new_status in (ReminderStatus.ACKNOWLEDGED, ReminderStatus.DISMISSED):
-        reminder.resolved_at = datetime.now(tz=timezone.utc)
+        reminder.resolved_at = datetime.now(tz=UTC)
     elif new_status == ReminderStatus.SNOOZED:
-        reminder.due_at = datetime.now(tz=timezone.utc) + timedelta(days=3)
+        reminder.due_at = datetime.now(tz=UTC) + timedelta(days=3)
         reminder.resolved_at = None
 
     await db.flush()
@@ -201,7 +201,7 @@ async def run_trigger_engine(
 
     Called by the daily scheduler job.
     """
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     new_reminders: list[Reminder] = []
 
     # 1. Escalate overdue follow-ups to high urgency

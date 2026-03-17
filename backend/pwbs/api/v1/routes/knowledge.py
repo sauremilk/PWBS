@@ -578,7 +578,7 @@ async def get_patterns(
                             "message": f"pattern_type muss einer von "
                             f"{[t.value for t in PatternType]} sein",
                         },
-                    )
+                    ) from None
                 if pt == PatternType.RECURRING_THEME:
                     patterns = await service.find_recurring_themes(user.id)
                 elif pt == PatternType.CHANGING_ASSUMPTION:

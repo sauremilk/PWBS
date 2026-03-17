@@ -1,4 +1,4 @@
-﻿"""Briefing LLM-Call mit Prompt-Template und strukturiertem Output (TASK-078).
+"""Briefing LLM-Call mit Prompt-Template und strukturiertem Output (TASK-078).
 
 Implements the briefing generation pipeline:
 1. Load prompt template from PromptRegistry
@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -199,19 +199,13 @@ class BriefingGenerator:
         pref_parts: list[str] = []
         if prefs.get("focus_projects"):
             projects = ", ".join(prefs["focus_projects"])
-            pref_parts.append(
-                f"Priorisiere Informationen zu diesen Projekten: {projects}."
-            )
+            pref_parts.append(f"Priorisiere Informationen zu diesen Projekten: {projects}.")
         if prefs.get("priority_topics"):
             topics = ", ".join(prefs["priority_topics"])
-            pref_parts.append(
-                f"Fokussiere besonders auf folgende Themen: {topics}."
-            )
+            pref_parts.append(f"Fokussiere besonders auf folgende Themen: {topics}.")
         if prefs.get("excluded_sources"):
             excluded = ", ".join(prefs["excluded_sources"])
-            pref_parts.append(
-                f"Ignoriere Inhalte aus diesen Quellen: {excluded}."
-            )
+            pref_parts.append(f"Ignoriere Inhalte aus diesen Quellen: {excluded}.")
         if pref_parts:
             system_prompt += "\n\nNutzer-Präferenzen:\n" + "\n".join(pref_parts)
 
@@ -258,7 +252,7 @@ class BriefingGenerator:
             usage=response.usage,
             model=response.model,
             template_id=template.id,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
             word_count=word_count,
         )
 

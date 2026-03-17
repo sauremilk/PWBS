@@ -13,11 +13,9 @@ import httpx
 import pytest
 
 from pwbs.connectors.base import ConnectorConfig
-from pwbs.connectors.oauth import OAuthTokens
 from pwbs.connectors.zoom import (
     _ZOOM_AUTH_URL,
     _ZOOM_TOKEN_URL,
-    ZOOM_SCOPES,
     ZoomConnector,
     ZoomRecordingFile,
     ZoomRecordingObject,

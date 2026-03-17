@@ -1,4 +1,4 @@
-﻿"""Sentry error-tracking integration (TASK-115).
+"""Sentry error-tracking integration (TASK-115).
 
 Initialises the Sentry SDK for FastAPI with:
 - PII scrubbing in `before_send` (no emails, passwords, content)
@@ -18,26 +18,28 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 # PII keys to strip from Sentry event data (aligned with logging.py)
-_PII_KEYS = frozenset({
-    "email",
-    "password",
-    "password_hash",
-    "display_name",
-    "name",
-    "content",
-    "body",
-    "text",
-    "token",
-    "access_token",
-    "refresh_token",
-    "secret",
-    "api_key",
-    "phone",
-    "address",
-    "embedding",
-    "embeddings",
-    "metadata",
-})
+_PII_KEYS = frozenset(
+    {
+        "email",
+        "password",
+        "password_hash",
+        "display_name",
+        "name",
+        "content",
+        "body",
+        "text",
+        "token",
+        "access_token",
+        "refresh_token",
+        "secret",
+        "api_key",
+        "phone",
+        "address",
+        "embedding",
+        "embeddings",
+        "metadata",
+    }
+)
 
 
 def _pseudonymise_user_id(user_id: str) -> str:
@@ -55,10 +57,7 @@ def _scrub_dict(data: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, dict):
             cleaned[key] = _scrub_dict(value)
         elif isinstance(value, list):
-            cleaned[key] = [
-                _scrub_dict(item) if isinstance(item, dict) else item
-                for item in value
-            ]
+            cleaned[key] = [_scrub_dict(item) if isinstance(item, dict) else item for item in value]
         else:
             cleaned[key] = value
     return cleaned

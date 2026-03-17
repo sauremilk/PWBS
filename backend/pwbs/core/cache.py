@@ -1,4 +1,4 @@
-﻿"""Application-level Redis caching utilities (TASK-146).
+"""Application-level Redis caching utilities (TASK-146).
 
 Provides a typed async cache layer on top of the Redis client for
 API response caching, search result caching, and embedding caching.

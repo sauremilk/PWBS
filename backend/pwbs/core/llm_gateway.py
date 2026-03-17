@@ -22,9 +22,9 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "LLMConfig",
     "LLMGateway",
     "LLMProvider",
-    "LLMConfig",
     "LLMRequest",
     "LLMResponse",
     "LLMUsage",
@@ -518,7 +518,7 @@ class LLMGateway:
                 elif not self._is_transient(exc):
                     raise
 
-        assert last_error is not None  # noqa: S101
+        assert last_error is not None
         raise last_error
 
     @staticmethod
@@ -551,10 +551,7 @@ class LLMGateway:
             pass
 
         # Generic timeout / connection errors
-        if isinstance(exc, (TimeoutError, ConnectionError, OSError)):
-            return True
-
-        return False
+        return isinstance(exc, (TimeoutError, ConnectionError, OSError))
 
     @staticmethod
     def _cache_key(request: LLMRequest) -> str:

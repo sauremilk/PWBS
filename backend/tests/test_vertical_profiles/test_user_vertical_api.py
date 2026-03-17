@@ -44,33 +44,25 @@ class TestGetSettingsVerticalProfile:
     @pytest.mark.asyncio
     async def test_returns_default_general(self) -> None:
         user = _make_user()
-        resp = await get_settings_endpoint(
-            response=MagicMock(), user=user, db=AsyncMock()
-        )
+        resp = await get_settings_endpoint(response=MagicMock(), user=user, db=AsyncMock())
         assert resp.vertical_profile == "general"
 
     @pytest.mark.asyncio
     async def test_returns_researcher(self) -> None:
         user = _make_user(vertical_profile="researcher")
-        resp = await get_settings_endpoint(
-            response=MagicMock(), user=user, db=AsyncMock()
-        )
+        resp = await get_settings_endpoint(response=MagicMock(), user=user, db=AsyncMock())
         assert resp.vertical_profile == "researcher"
 
     @pytest.mark.asyncio
     async def test_returns_consultant(self) -> None:
         user = _make_user(vertical_profile="consultant")
-        resp = await get_settings_endpoint(
-            response=MagicMock(), user=user, db=AsyncMock()
-        )
+        resp = await get_settings_endpoint(response=MagicMock(), user=user, db=AsyncMock())
         assert resp.vertical_profile == "consultant"
 
     @pytest.mark.asyncio
     async def test_returns_developer(self) -> None:
         user = _make_user(vertical_profile="developer")
-        resp = await get_settings_endpoint(
-            response=MagicMock(), user=user, db=AsyncMock()
-        )
+        resp = await get_settings_endpoint(response=MagicMock(), user=user, db=AsyncMock())
         assert resp.vertical_profile == "developer"
 
 
@@ -85,9 +77,7 @@ class TestUpdateSettingsVerticalProfile:
         user = _make_user()
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="researcher")
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert user.vertical_profile == "researcher"
         assert resp.vertical_profile == "researcher"
         db.commit.assert_awaited_once()
@@ -97,9 +87,7 @@ class TestUpdateSettingsVerticalProfile:
         user = _make_user()
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="consultant")
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert user.vertical_profile == "consultant"
 
     @pytest.mark.asyncio
@@ -107,9 +95,7 @@ class TestUpdateSettingsVerticalProfile:
         user = _make_user()
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="developer")
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert user.vertical_profile == "developer"
 
     @pytest.mark.asyncio
@@ -117,9 +103,7 @@ class TestUpdateSettingsVerticalProfile:
         user = _make_user(vertical_profile="researcher")
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="general")
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert user.vertical_profile == "general"
 
     @pytest.mark.asyncio
@@ -128,9 +112,7 @@ class TestUpdateSettingsVerticalProfile:
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="astronaut")
         with pytest.raises(Exception) as exc_info:
-            await update_settings(
-                update=update, response=MagicMock(), user=user, db=db
-            )
+            await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert exc_info.value.status_code == 422  # type: ignore[union-attr]
         assert "INVALID_VERTICAL_PROFILE" in str(exc_info.value.detail)  # type: ignore[union-attr]
 
@@ -140,9 +122,7 @@ class TestUpdateSettingsVerticalProfile:
         db = AsyncMock()
         update = UserSettingsUpdate(vertical_profile="")
         with pytest.raises(Exception) as exc_info:
-            await update_settings(
-                update=update, response=MagicMock(), user=user, db=db
-            )
+            await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert exc_info.value.status_code == 422  # type: ignore[union-attr]
 
     @pytest.mark.asyncio
@@ -150,9 +130,7 @@ class TestUpdateSettingsVerticalProfile:
         user = _make_user(vertical_profile="researcher")
         db = AsyncMock()
         update = UserSettingsUpdate()  # vertical_profile=None
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         # Should remain researcher (not overwritten)
         assert resp.vertical_profile == "researcher"
 
@@ -164,9 +142,7 @@ class TestUpdateSettingsVerticalProfile:
             vertical_profile="developer",
             display_name="Bob",
         )
-        resp = await update_settings(
-            update=update, response=MagicMock(), user=user, db=db
-        )
+        resp = await update_settings(update=update, response=MagicMock(), user=user, db=db)
         assert user.vertical_profile == "developer"
         assert user.display_name == "Bob"
         assert resp.vertical_profile == "developer"

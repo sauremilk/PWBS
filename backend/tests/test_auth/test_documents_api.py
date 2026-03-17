@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -11,9 +11,7 @@ import pytest
 from pwbs.api.v1.routes.documents import (
     ChunkDetailResponse,
     ChunkEntityResponse,
-    DocumentDetailResponse,
     DocumentListItem,
-    DocumentListResponse,
     _build_chunk_details,
     _cascade_delete_neo4j,
     _cascade_delete_weaviate,
@@ -61,8 +59,8 @@ def _make_document_orm(
     row.chunk_count = chunk_count
     row.language = language
     row.processing_status = processing_status
-    row.created_at = created_at or datetime(2026, 3, 14, 10, 0, tzinfo=timezone.utc)
-    row.updated_at = updated_at or datetime(2026, 3, 14, 10, 0, tzinfo=timezone.utc)
+    row.created_at = created_at or datetime(2026, 3, 14, 10, 0, tzinfo=UTC)
+    row.updated_at = updated_at or datetime(2026, 3, 14, 10, 0, tzinfo=UTC)
     return row
 
 
@@ -562,8 +560,8 @@ class TestSchemaValidation:
             source_type="notion",
             source_id="pg-1",
             chunk_count=5,
-            created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
-            updated_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2026, 1, 1, tzinfo=UTC),
+            updated_at=datetime(2026, 1, 1, tzinfo=UTC),
         )
         assert item.chunk_count == 5
 
@@ -573,8 +571,8 @@ class TestSchemaValidation:
             source_type="obsidian",
             source_id="file.md",
             chunk_count=1,
-            created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
-            updated_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2026, 1, 1, tzinfo=UTC),
+            updated_at=datetime(2026, 1, 1, tzinfo=UTC),
         )
         assert item.title is None
 

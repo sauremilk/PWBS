@@ -10,36 +10,46 @@ from pwbs.schemas.enums import OrgRole, Permission
 
 # ---- Role-to-permission mapping (cumulative) ----
 
-_VIEWER_PERMISSIONS: frozenset[Permission] = frozenset({
-    Permission.ORG_VIEW,
-    Permission.MEMBERS_VIEW,
-    Permission.CONNECTORS_VIEW,
-    Permission.DOCUMENTS_VIEW_TEAM,
-    Permission.BRIEFINGS_VIEW,
-})
+_VIEWER_PERMISSIONS: frozenset[Permission] = frozenset(
+    {
+        Permission.ORG_VIEW,
+        Permission.MEMBERS_VIEW,
+        Permission.CONNECTORS_VIEW,
+        Permission.DOCUMENTS_VIEW_TEAM,
+        Permission.BRIEFINGS_VIEW,
+    }
+)
 
-_MEMBER_PERMISSIONS: frozenset[Permission] = _VIEWER_PERMISSIONS | frozenset({
-    Permission.BRIEFINGS_GENERATE,
-    Permission.DOCUMENTS_MANAGE_VISIBILITY,
-})
+_MEMBER_PERMISSIONS: frozenset[Permission] = _VIEWER_PERMISSIONS | frozenset(
+    {
+        Permission.BRIEFINGS_GENERATE,
+        Permission.DOCUMENTS_MANAGE_VISIBILITY,
+    }
+)
 
-_MANAGER_PERMISSIONS: frozenset[Permission] = _MEMBER_PERMISSIONS | frozenset({
-    Permission.MEMBERS_INVITE,
-    Permission.MEMBERS_REMOVE,
-    Permission.CONNECTORS_MANAGE,
-    Permission.CONNECTORS_SHARE,
-    Permission.AUDIT_VIEW,
-})
+_MANAGER_PERMISSIONS: frozenset[Permission] = _MEMBER_PERMISSIONS | frozenset(
+    {
+        Permission.MEMBERS_INVITE,
+        Permission.MEMBERS_REMOVE,
+        Permission.CONNECTORS_MANAGE,
+        Permission.CONNECTORS_SHARE,
+        Permission.AUDIT_VIEW,
+    }
+)
 
-_ADMIN_PERMISSIONS: frozenset[Permission] = _MANAGER_PERMISSIONS | frozenset({
-    Permission.MEMBERS_CHANGE_ROLE,
-    Permission.ORG_EDIT,
-    Permission.SSO_MANAGE,
-})
+_ADMIN_PERMISSIONS: frozenset[Permission] = _MANAGER_PERMISSIONS | frozenset(
+    {
+        Permission.MEMBERS_CHANGE_ROLE,
+        Permission.ORG_EDIT,
+        Permission.SSO_MANAGE,
+    }
+)
 
-_OWNER_PERMISSIONS: frozenset[Permission] = _ADMIN_PERMISSIONS | frozenset({
-    Permission.ORG_DELETE,
-})
+_OWNER_PERMISSIONS: frozenset[Permission] = _ADMIN_PERMISSIONS | frozenset(
+    {
+        Permission.ORG_DELETE,
+    }
+)
 
 ROLE_PERMISSIONS: dict[OrgRole, frozenset[Permission]] = {
     OrgRole.VIEWER: _VIEWER_PERMISSIONS,

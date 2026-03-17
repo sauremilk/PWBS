@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from datetime import UTC
 
 from pwbs.queue.celery_app import app
 
@@ -56,7 +57,7 @@ def generate_initial_briefing(self: object, owner_id: str) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("generate_initial_briefing failed: owner_id=%s error=%s", owner_id, exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _generate_initial_briefing_async(owner_id: str) -> dict[str, object]:
@@ -85,9 +86,7 @@ async def _generate_initial_briefing_async(owner_id: str) -> dict[str, object]:
     async with factory() as db:
         # Idempotent check: skip if user already has any briefings
         count_result = await db.execute(
-            select(func.count())
-            .select_from(BriefingORM)
-            .where(BriefingORM.user_id == owner_uuid)
+            select(func.count()).select_from(BriefingORM).where(BriefingORM.user_id == owner_uuid)
         )
         existing_count = count_result.scalar_one()
 
@@ -162,7 +161,7 @@ def generate_morning_briefings(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("generate_morning_briefings failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 @app.task(
@@ -190,7 +189,7 @@ def generate_weekly_briefings(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("generate_weekly_briefings failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _generate_briefings_async(briefing_type: str) -> dict[str, object]:
@@ -343,7 +342,7 @@ def send_briefing_emails(self: object, briefing_type: str = "morning") -> dict[s
         return result
     except Exception as exc:
         logger.error("send_briefing_emails failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
@@ -353,7 +352,7 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
     dispatches it via EmailService.send_briefing_email().
     Idempotency: skips briefings where email_sent_at is already set.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from sqlalchemy import select, update
 
@@ -456,7 +455,7 @@ async def _send_briefing_emails_async(briefing_type: str) -> dict[str, object]:
                     await db.execute(
                         update(Briefing)
                         .where(Briefing.id == briefing.id)
-                        .values(email_sent_at=datetime.now(timezone.utc))
+                        .values(email_sent_at=datetime.now(UTC))
                     )
                     await db.commit()
                 logger.info(
@@ -510,7 +509,7 @@ def run_daily_reminder_triggers(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("run_daily_reminder_triggers failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _run_triggers_async() -> dict[str, object]:

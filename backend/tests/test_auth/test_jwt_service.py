@@ -1,12 +1,11 @@
-﻿"""Tests for JWT authentication service (TASK-081)."""
+"""Tests for JWT authentication service (TASK-081)."""
 
 from __future__ import annotations
 
 import hashlib
-import time
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -20,8 +19,6 @@ from pwbs.services.auth import (
     create_access_token,
     create_refresh_token,
     create_token_pair,
-    revoke_all_user_tokens,
-    revoke_refresh_token,
     validate_access_token,
     validate_refresh_token,
 )
@@ -117,7 +114,7 @@ class TestAccessToken:
         import jwt as jose_jwt
 
         settings = get_settings()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         claims = {
             "sub": str(user_id),
             "exp": now - timedelta(minutes=1),
@@ -189,7 +186,7 @@ class TestValidateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token("valid-token"),
             family_id=uuid.uuid4(),
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
             revoked_at=None,
         )
         result_mock = MagicMock()
@@ -215,8 +212,8 @@ class TestValidateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token("revoked-token"),
             family_id=uuid.uuid4(),
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-            revoked_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(UTC) + timedelta(days=30),
+            revoked_at=datetime.now(UTC),
         )
         result_mock = MagicMock()
         result_mock.scalar_one_or_none.return_value = db_token
@@ -232,7 +229,7 @@ class TestValidateRefreshToken:
             user_id=user_id,
             token_hash=_hash_token("expired-token"),
             family_id=uuid.uuid4(),
-            expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
+            expires_at=datetime.now(UTC) - timedelta(hours=1),
             revoked_at=None,
         )
         result_mock = MagicMock()

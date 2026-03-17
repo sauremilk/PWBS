@@ -11,15 +11,14 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from pwbs.core.exceptions import AuthenticationError
 from pwbs.services.auth import (
     TokenPair,
-    TokenPayload,
     _hash_token,
     create_access_token,
     create_refresh_token,
@@ -85,7 +84,7 @@ class TestValidateAccessToken:
         from pwbs.core.config import get_settings
 
         settings = get_settings()
-        past = datetime.now(timezone.utc) - timedelta(hours=1)
+        past = datetime.now(UTC) - timedelta(hours=1)
         claims = {
             "sub": str(uuid.uuid4()),
             "exp": past,
@@ -105,7 +104,7 @@ class TestValidateAccessToken:
         from pwbs.core.config import get_settings
 
         settings = get_settings()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         claims = {"exp": now + timedelta(hours=1), "iat": now}
         token = _jwt.encode(
             claims,
@@ -161,7 +160,7 @@ class TestValidateRefreshToken:
     async def test_valid_token(self) -> None:
         uid = uuid.uuid4()
         fid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         db_token = MagicMock()
         db_token.user_id = uid
         db_token.family_id = fid
@@ -189,7 +188,7 @@ class TestValidateRefreshToken:
     @pytest.mark.asyncio
     async def test_revoked_token_raises(self) -> None:
         db_token = MagicMock()
-        db_token.revoked_at = datetime.now(timezone.utc)
+        db_token.revoked_at = datetime.now(UTC)
         db_token.family_id = uuid.uuid4()
 
         result_mock = MagicMock()
@@ -204,7 +203,7 @@ class TestValidateRefreshToken:
     async def test_expired_token_raises(self) -> None:
         db_token = MagicMock()
         db_token.revoked_at = None
-        db_token.expires_at = datetime.now(timezone.utc) - timedelta(days=1)
+        db_token.expires_at = datetime.now(UTC) - timedelta(days=1)
 
         result_mock = MagicMock()
         result_mock.scalar_one_or_none.return_value = db_token
@@ -265,7 +264,7 @@ class TestRotateRefreshToken:
     async def test_rotation_revokes_old_and_issues_new(self) -> None:
         uid = uuid.uuid4()
         fid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         old_db_token = MagicMock()
         old_db_token.user_id = uid

@@ -13,12 +13,11 @@ OAuth and OpenAI Embedding API are mocked.
 from __future__ import annotations
 
 import hashlib
-import os
 import uuid
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -27,9 +26,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from pwbs.connectors.google_calendar import GoogleCalendarConnector
 from pwbs.models.chunk import Chunk
-from pwbs.models.entity import Entity, EntityMention
+from pwbs.models.entity import Entity
 from pwbs.processing.chunking import ChunkingConfig, ChunkingService
-from pwbs.processing.embedding import EmbeddingConfig, EmbeddingResult, EmbeddingService
+from pwbs.processing.embedding import EmbeddingResult, EmbeddingService
 from pwbs.processing.ner import RuleBasedNER
 from pwbs.schemas.enums import EntityType
 from pwbs.storage.weaviate import ChunkUpsertRequest, WeaviateChunkStore
@@ -249,7 +248,7 @@ class TestPipelineE2E:
     ) -> None:
         owner_id = test_user
 
-        #  Step 1: Connector  normalize raw events to UDF 
+        #  Step 1: Connector  normalize raw events to UDF
         connector = GoogleCalendarConnector(
             owner_id=owner_id,
             access_token="mock-token",
@@ -263,7 +262,7 @@ class TestPipelineE2E:
         assert len(documents) == 3
         assert all(d.user_id == owner_id for d in documents)
 
-        #  Step 2: Persist documents in PostgreSQL 
+        #  Step 2: Persist documents in PostgreSQL
         from pwbs.models.document import Document
 
         doc_orm_ids: list[uuid.UUID] = []
@@ -271,7 +270,9 @@ class TestPipelineE2E:
             doc_orm = Document(
                 id=doc.id,
                 user_id=owner_id,
-                source_type=doc.source_type.value if hasattr(doc.source_type, "value") else str(doc.source_type),
+                source_type=doc.source_type.value
+                if hasattr(doc.source_type, "value")
+                else str(doc.source_type),
                 source_id=doc.source_id,
                 title=doc.title,
                 content_hash=doc.raw_hash,
@@ -283,13 +284,11 @@ class TestPipelineE2E:
         await db_session.commit()
 
         # Verify documents persisted
-        result = await db_session.execute(
-            select(Document).where(Document.user_id == owner_id)
-        )
+        result = await db_session.execute(select(Document).where(Document.user_id == owner_id))
         persisted_docs = result.scalars().all()
         assert len(persisted_docs) == 3
 
-        #  Step 3: Chunking 
+        #  Step 3: Chunking
         chunking_svc = ChunkingService(ChunkingConfig(max_tokens=512, overlap_tokens=64))
 
         all_chunks = []
@@ -300,7 +299,7 @@ class TestPipelineE2E:
 
         assert len(all_chunks) > 0, "Chunking should produce at least one chunk"
 
-        #  Step 4: Persist chunks in PostgreSQL 
+        #  Step 4: Persist chunks in PostgreSQL
         chunk_orm_list: list[Chunk] = []
         for doc, chunk in all_chunks:
             chunk_id = uuid.uuid4()
@@ -316,7 +315,7 @@ class TestPipelineE2E:
             chunk_orm_list.append(chunk_orm)
         await db_session.commit()
 
-        #  Step 5: Embedding (mocked) 
+        #  Step 5: Embedding (mocked)
         # Generate deterministic embeddings for each chunk
         embedding_results: list[EmbeddingResult] = []
         for i, (doc, chunk) in enumerate(all_chunks):
@@ -329,7 +328,7 @@ class TestPipelineE2E:
                 )
             )
 
-        #  Step 6: Weaviate upsert 
+        #  Step 6: Weaviate upsert
         store = WeaviateChunkStore(weaviate_client)
         store.ensure_collection()
         store.ensure_tenant(owner_id)
@@ -346,7 +345,9 @@ class TestPipelineE2E:
                     embedding=emb_result.embedding,
                     content=chunk.content,
                     title=doc.title,
-                    source_type=doc.source_type.value if hasattr(doc.source_type, "value") else str(doc.source_type),
+                    source_type=doc.source_type.value
+                    if hasattr(doc.source_type, "value")
+                    else str(doc.source_type),
                     language=doc.language,
                     created_at=doc.created_at,
                     chunk_index=chunk.chunk_index,
@@ -361,7 +362,7 @@ class TestPipelineE2E:
             chunk_orm_item.weaviate_id = upsert_result.weaviate_id
         await db_session.commit()
 
-        #  Step 7: NER  extract entities 
+        #  Step 7: NER  extract entities
         ner = RuleBasedNER()
         all_entities: list[tuple[Any, Any]] = []  # (doc, extracted_entities)
 
@@ -370,9 +371,7 @@ class TestPipelineE2E:
             # Adapt participants for NER format
             participants_meta: dict[str, Any] = {}
             if hasattr(doc, "participants") and doc.participants:
-                participants_meta["participants"] = [
-                    {"email": p} for p in doc.participants
-                ]
+                participants_meta["participants"] = [{"email": p} for p in doc.participants]
             combined_meta = {**meta, **participants_meta}
             entities = ner.extract(doc.content, combined_meta)
             all_entities.append((doc, entities))
@@ -387,7 +386,7 @@ class TestPipelineE2E:
             f"Expected PERSON entities, got: {all_entity_types}"
         )
 
-        #  Step 8: Persist entities in PostgreSQL 
+        #  Step 8: Persist entities in PostgreSQL
         for doc, entities in all_entities:
             for extracted in entities:
                 entity_orm = Entity(
@@ -396,24 +395,22 @@ class TestPipelineE2E:
                     entity_type=extracted.entity_type.value,
                     name=extracted.name,
                     normalized_name=extracted.normalized_name,
-                    first_seen=datetime.now(timezone.utc),
-                    last_seen=datetime.now(timezone.utc),
+                    first_seen=datetime.now(UTC),
+                    last_seen=datetime.now(UTC),
                     mention_count=len(extracted.mentions),
                 )
                 db_session.add(entity_orm)
         await db_session.commit()
 
         # Verify entities persisted
-        result = await db_session.execute(
-            select(Entity).where(Entity.user_id == owner_id)
-        )
+        result = await db_session.execute(select(Entity).where(Entity.user_id == owner_id))
         persisted_entities = result.scalars().all()
         assert len(persisted_entities) > 0, "At least one entity should be persisted"
 
         person_entities = [e for e in persisted_entities if e.entity_type == "person"]
         assert len(person_entities) > 0, "At least one Person entity should be persisted"
 
-        #  Step 9: Semantic search 
+        #  Step 9: Semantic search
         from pwbs.search.service import SemanticSearchService
 
         # Create mock embedding service that returns deterministic embeddings
@@ -526,4 +523,6 @@ class TestPipelineE2E:
         # Second upsert (same data)  should overwrite, not duplicate
         r2 = store.upsert_chunks([upsert_req])
         assert r2[0].success
-        assert r1[0].weaviate_id == r2[0].weaviate_id, "Same chunk_id should produce same weaviate_id"
+        assert r1[0].weaviate_id == r2[0].weaviate_id, (
+            "Same chunk_id should produce same weaviate_id"
+        )

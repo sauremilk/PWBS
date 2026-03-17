@@ -1,4 +1,4 @@
-﻿"""Tests for Health-Check endpoint (TASK-114, TASK-199)."""
+"""Tests for Health-Check endpoint (TASK-114, TASK-199)."""
 
 from __future__ import annotations
 

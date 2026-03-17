@@ -1,10 +1,9 @@
-﻿"""Tests for Pattern Recognition Service (TASK-139)."""
+"""Tests for Pattern Recognition Service (TASK-139)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -71,7 +70,8 @@ def _topic_record(
         "contextCount": context_count,
         "firstSeen": first_seen,
         "lastSeen": last_seen,
-        "sources": sources or [
+        "sources": sources
+        or [
             {"id": "doc-1", "title": "Sprint Review", "sourceType": "notion", "date": "2026-03-10"},
             {"id": "doc-2", "title": "Meeting Notes", "sourceType": "zoom", "date": "2026-03-12"},
         ],
@@ -92,9 +92,20 @@ def _hypothesis_record(
         "contextCount": context_count,
         "firstSeen": first_seen,
         "lastSeen": last_seen,
-        "sources": sources or [
-            {"id": "doc-3", "title": "Architecture Review", "sourceType": "notion", "date": "2026-01-15"},
-            {"id": "doc-4", "title": "Perf Test Results", "sourceType": "confluence", "date": "2026-03-10"},
+        "sources": sources
+        or [
+            {
+                "id": "doc-3",
+                "title": "Architecture Review",
+                "sourceType": "notion",
+                "date": "2026-01-15",
+            },
+            {
+                "id": "doc-4",
+                "title": "Perf Test Results",
+                "sourceType": "confluence",
+                "date": "2026-03-10",
+            },
         ],
     }
 
@@ -113,8 +124,14 @@ def _question_record(
         "contextCount": context_count,
         "firstSeen": first_seen,
         "lastSeen": last_seen,
-        "sources": sources or [
-            {"id": "doc-5", "title": "DB Design Meeting", "sourceType": "zoom", "date": "2026-02-01"},
+        "sources": sources
+        or [
+            {
+                "id": "doc-5",
+                "title": "DB Design Meeting",
+                "sourceType": "zoom",
+                "date": "2026-02-01",
+            },
         ],
     }
 
@@ -238,7 +255,10 @@ class TestEmptyResult:
 class TestRecurringThemes:
     @pytest.mark.asyncio
     async def test_finds_recurring_topics(self) -> None:
-        records = [_topic_record(), _topic_record(entity_id="topic-2", entity_name="DSGVO", context_count=4)]
+        records = [
+            _topic_record(),
+            _topic_record(entity_id="topic-2", entity_name="DSGVO", context_count=4),
+        ]
         session = _mock_session({"Topic": records})
         svc = PatternRecognitionService(session)
 
@@ -259,9 +279,13 @@ class TestRecurringThemes:
 
     @pytest.mark.asyncio
     async def test_sources_are_converted(self) -> None:
-        records = [_topic_record(sources=[
-            {"id": "d1", "title": "Doc 1", "sourceType": "notion", "date": "2026-03-10"},
-        ])]
+        records = [
+            _topic_record(
+                sources=[
+                    {"id": "d1", "title": "Doc 1", "sourceType": "notion", "date": "2026-03-10"},
+                ]
+            )
+        ]
         session = _mock_session({"Topic": records})
         svc = PatternRecognitionService(session)
 
@@ -442,7 +466,9 @@ class TestEdgeCases:
 
     @pytest.mark.asyncio
     async def test_source_with_none_id_skipped(self) -> None:
-        records = [_topic_record(sources=[{"id": None, "title": "X", "sourceType": "n", "date": ""}])]
+        records = [
+            _topic_record(sources=[{"id": None, "title": "X", "sourceType": "n", "date": ""}])
+        ]
         session = _mock_session({"Topic": records})
         svc = PatternRecognitionService(session)
 

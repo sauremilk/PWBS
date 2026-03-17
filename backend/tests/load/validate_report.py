@@ -1,4 +1,4 @@
-﻿"""Validate Locust JSON report against TASK-112 thresholds.
+"""Validate Locust JSON report against TASK-112 thresholds.
 
 Usage:
   python -m tests.load.validate_report load_report.json
@@ -58,9 +58,11 @@ def validate_report(
             total_failures = entry.get("num_failures", 0)
             continue
 
-        p95 = entry.get("response_times", {}).get("95%", 0) if isinstance(
-            entry.get("response_times"), dict
-        ) else 0
+        p95 = (
+            entry.get("response_times", {}).get("95%", 0)
+            if isinstance(entry.get("response_times"), dict)
+            else 0
+        )
 
         # Locust JSON format uses different keys depending on version
         if not p95:
@@ -71,9 +73,7 @@ def validate_report(
         threshold = thresholds.get(threshold_key, _DEFAULT_THRESHOLDS.get(threshold_key, 10000))
 
         if p95 > threshold:
-            violations.append(
-                f"THRESHOLD VIOLATION: {name} p95={p95}ms > {threshold}ms ({group})"
-            )
+            violations.append(f"THRESHOLD VIOLATION: {name} p95={p95}ms > {threshold}ms ({group})")
 
     # Error rate check
     if total_requests > 0:

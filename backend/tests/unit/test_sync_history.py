@@ -66,9 +66,7 @@ class TestGetSyncHistory:
         mock_runs_result = MagicMock()
         mock_runs_result.scalars.return_value.all.return_value = [run]
 
-        db.execute = AsyncMock(
-            side_effect=[mock_conn_result, mock_count_result, mock_runs_result]
-        )
+        db.execute = AsyncMock(side_effect=[mock_conn_result, mock_count_result, mock_runs_result])
 
         result = await get_sync_history(
             type="google_calendar",
@@ -99,9 +97,7 @@ class TestGetSyncHistory:
         mock_runs_result = MagicMock()
         mock_runs_result.scalars.return_value.all.return_value = []
 
-        db.execute = AsyncMock(
-            side_effect=[mock_conn_result, mock_count_result, mock_runs_result]
-        )
+        db.execute = AsyncMock(side_effect=[mock_conn_result, mock_count_result, mock_runs_result])
 
         result = await get_sync_history(
             type="google_calendar",

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -22,12 +22,12 @@ from pwbs.models.proactive_insight import InsightPreferences, ProactiveInsight
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "get_preferences",
-    "upsert_preferences",
-    "persist_insights",
-    "get_recent_insights",
-    "submit_feedback",
     "get_negative_entity_ids",
+    "get_preferences",
+    "get_recent_insights",
+    "persist_insights",
+    "submit_feedback",
+    "upsert_preferences",
 ]
 
 # DSGVO: default expiry for insights
@@ -39,9 +39,7 @@ async def get_preferences(
     owner_id: UUID,
 ) -> InsightPreferences | None:
     """Load insight preferences for a user. Returns None if not configured."""
-    stmt = select(InsightPreferences).where(
-        InsightPreferences.owner_id == owner_id
-    )
+    stmt = select(InsightPreferences).where(InsightPreferences.owner_id == owner_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -68,7 +66,7 @@ async def upsert_preferences(
                 "frequency": frequency,
                 "enabled_categories": enabled_categories,
                 "max_insights_per_run": max_insights_per_run,
-                "updated_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(UTC),
             }
         )
         .returning(InsightPreferences)
@@ -83,7 +81,7 @@ async def persist_insights(
     insights: list[InsightResult],
 ) -> list[ProactiveInsight]:
     """Persist generated insights to the database."""
-    expires_at = datetime.now(timezone.utc) + timedelta(days=_DEFAULT_EXPIRY_DAYS)
+    expires_at = datetime.now(UTC) + timedelta(days=_DEFAULT_EXPIRY_DAYS)
     rows: list[ProactiveInsight] = []
 
     for insight in insights:
@@ -135,7 +133,7 @@ async def submit_feedback(
         )
         .values(
             feedback_rating=rating,
-            feedback_at=datetime.now(timezone.utc),
+            feedback_at=datetime.now(UTC),
         )
     )
     result = await db.execute(stmt)
@@ -151,15 +149,12 @@ async def get_negative_entity_ids(
 
     Used to suppress patterns in future insight generation.
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(days=within_days)
-    stmt = (
-        select(ProactiveInsight.pattern_data)
-        .where(
-            ProactiveInsight.owner_id == owner_id,
-            ProactiveInsight.feedback_rating == "not_helpful",
-            ProactiveInsight.feedback_at >= cutoff,
-            ProactiveInsight.pattern_data.isnot(None),
-        )
+    cutoff = datetime.now(UTC) - timedelta(days=within_days)
+    stmt = select(ProactiveInsight.pattern_data).where(
+        ProactiveInsight.owner_id == owner_id,
+        ProactiveInsight.feedback_rating == "not_helpful",
+        ProactiveInsight.feedback_at >= cutoff,
+        ProactiveInsight.pattern_data.isnot(None),
     )
     result = await db.execute(stmt)
     rows = result.scalars().all()

@@ -1,4 +1,4 @@
-﻿"""Tests for pwbs.core.sentry -- Sentry integration (TASK-115)."""
+"""Tests for pwbs.core.sentry -- Sentry integration (TASK-115)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ from pwbs.core.sentry import (
     before_send,
     init_sentry,
 )
-
 
 # ---------------------------------------------------------------------------
 # _pseudonymise_user_id
@@ -74,10 +73,24 @@ class TestScrubDict:
     @pytest.mark.parametrize(
         "key",
         [
-            "email", "password", "password_hash", "display_name", "name",
-            "content", "body", "text", "token", "access_token",
-            "refresh_token", "secret", "api_key", "phone", "address",
-            "embedding", "embeddings", "metadata",
+            "email",
+            "password",
+            "password_hash",
+            "display_name",
+            "name",
+            "content",
+            "body",
+            "text",
+            "token",
+            "access_token",
+            "refresh_token",
+            "secret",
+            "api_key",
+            "phone",
+            "address",
+            "embedding",
+            "embeddings",
+            "metadata",
         ],
     )
     def test_all_pii_keys_scrubbed(self, key: str) -> None:
@@ -117,13 +130,7 @@ class TestBeforeSend:
         event: dict[str, Any] = {
             "exception": {
                 "values": [
-                    {
-                        "stacktrace": {
-                            "frames": [
-                                {"vars": {"password": "s3cret", "count": 5}}
-                            ]
-                        }
-                    }
+                    {"stacktrace": {"frames": [{"vars": {"password": "s3cret", "count": 5}}]}}
                 ]
             }
         }
@@ -135,9 +142,7 @@ class TestBeforeSend:
 
     def test_scrubs_breadcrumbs(self) -> None:
         event: dict[str, Any] = {
-            "breadcrumbs": {
-                "values": [{"data": {"content": "sensitive stuff", "level": "info"}}]
-            }
+            "breadcrumbs": {"values": [{"data": {"content": "sensitive stuff", "level": "info"}}]}
         }
         result = before_send(event, {})
         assert result is not None
@@ -215,7 +220,6 @@ class TestInitSentry:
             patch.dict("sys.modules", {"sentry_sdk": None}),
             patch("pwbs.core.sentry.logger") as mock_logger,
         ):
-            import importlib
             import sys
 
             # Force import to fail by removing the module
@@ -225,6 +229,7 @@ class TestInitSentry:
             try:
                 # Monkey-patch builtins to make import fail
                 import builtins
+
                 original_import = builtins.__import__
 
                 def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
@@ -246,19 +251,21 @@ class TestInitSentry:
 
     def test_valid_dsn_calls_sentry_init(self) -> None:
         mock_sdk = MagicMock()
-        with patch.dict("sys.modules", {
-            "sentry_sdk": mock_sdk,
-            "sentry_sdk.integrations": MagicMock(),
-            "sentry_sdk.integrations.fastapi": MagicMock(),
-            "sentry_sdk.integrations.starlette": MagicMock(),
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sentry_sdk": mock_sdk,
+                "sentry_sdk.integrations": MagicMock(),
+                "sentry_sdk.integrations.fastapi": MagicMock(),
+                "sentry_sdk.integrations.starlette": MagicMock(),
+            },
+        ):
             # Need to reimport to pick up mocked module
-            import importlib
 
-            from pwbs.core import sentry as sentry_mod
 
             # Directly call with mock
             import sentry_sdk
+
             with patch.object(sentry_sdk, "init") as mock_init:
                 init_sentry(
                     dsn="https://key@sentry.io/123",

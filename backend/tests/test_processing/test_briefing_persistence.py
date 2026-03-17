@@ -1,11 +1,11 @@
-﻿"""Tests for BriefingPersistenceService (TASK-080)."""
+"""Tests for BriefingPersistenceService (TASK-080)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -42,7 +42,7 @@ def _make_briefing_orm(
     obj.source_chunks = source_chunks or [uuid.uuid4()]
     obj.source_entities = source_entities
     obj.trigger_context = trigger_context
-    obj.generated_at = generated_at or datetime.now(timezone.utc)
+    obj.generated_at = generated_at or datetime.now(UTC)
     obj.expires_at = expires_at
     return obj
 
@@ -85,14 +85,14 @@ class TestExpiryCalculation:
     def test_morning_24h(self) -> None:
         session = _mock_session()
         svc = BriefingPersistenceService(session)
-        now = datetime(2025, 6, 15, 6, 30, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 6, 30, tzinfo=UTC)
         exp = svc._calculate_expiry(BriefingType.MORNING, now)
         assert exp == now + timedelta(hours=24)
 
     def test_meeting_48h(self) -> None:
         session = _mock_session()
         svc = BriefingPersistenceService(session)
-        now = datetime(2025, 6, 15, 9, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 9, 0, tzinfo=UTC)
         exp = svc._calculate_expiry(BriefingType.MEETING_PREP, now)
         assert exp == now + timedelta(hours=48)
 
@@ -100,7 +100,7 @@ class TestExpiryCalculation:
         session = _mock_session()
         cfg = PersistenceConfig(morning_expiry_hours=6)
         svc = BriefingPersistenceService(session, config=cfg)
-        now = datetime(2025, 6, 15, 6, 30, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 6, 30, tzinfo=UTC)
         exp = svc._calculate_expiry(BriefingType.MORNING, now)
         assert exp == now + timedelta(hours=6)
 
@@ -443,7 +443,7 @@ class TestPersistedBriefing:
             source_chunks=[],
             source_entities=[],
             trigger_context=None,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
             expires_at=None,
         )
         assert pb.is_new is True
@@ -458,7 +458,7 @@ class TestPersistedBriefing:
             source_chunks=[],
             source_entities=[],
             trigger_context=None,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
             expires_at=None,
         )
         with pytest.raises(AttributeError):

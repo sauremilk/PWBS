@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pwbs.processing.chunking import (
     ChunkingConfig,
     ChunkingService,
@@ -122,7 +120,7 @@ class TestParagraph:
 
     def test_max_tokens_respected(self) -> None:
         paras = [
-            "This is paragraph number {}. It has quite a few words to fill tokens.".format(i)
+            f"This is paragraph number {i}. It has quite a few words to fill tokens."
             for i in range(20)
         ]
         text = "\n\n".join(paras)

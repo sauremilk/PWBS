@@ -1,4 +1,4 @@
-﻿"""API-Key authentication dependency for public API routes (TASK-150).
+"""API-Key authentication dependency for public API routes (TASK-150).
 
 Extracts and validates API keys from the ``X-API-Key`` header.
 Returns the owning ``User`` ORM instance for downstream handlers.
@@ -39,10 +39,10 @@ async def get_api_key_user(
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={"code": exc.code, "message": str(exc)},
-            )
+            ) from exc
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "INVALID_API_KEY", "message": "Invalid or revoked API key"},
-        )
+        ) from exc
 
     return user

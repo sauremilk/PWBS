@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "Confidence",
-    "GroundingConfig",
-    "GroundingService",
     "GroundedStatement",
+    "GroundingConfig",
     "GroundingResult",
+    "GroundingService",
     "SourceReference",
     "build_grounding_system_prompt",
     "build_structured_prompt",
@@ -261,11 +261,7 @@ class GroundingService:
 
         # Fuzzy: check if the ref title is a substring of any known title
         # or if any known title is a substring of the ref title
-        for known in self._known_titles:
-            if normalized in known or known in normalized:
-                return True
-
-        return False
+        return any(normalized in known or known in normalized for known in self._known_titles)
 
     @staticmethod
     def _normalize_title(title: str) -> str:

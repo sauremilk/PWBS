@@ -1,10 +1,10 @@
-﻿"""Tests for Work Pattern Analysis Service (TASK-134)."""
+"""Tests for Work Pattern Analysis Service (TASK-134)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -15,13 +15,12 @@ from pwbs.analytics.work_patterns import (
     WorkPatternProfile,
 )
 
-
 # ------------------------------------------------------------------
 # Fixtures
 # ------------------------------------------------------------------
 
 USER_ID = uuid.uuid4()
-NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=UTC)
 
 
 def _make_theme_row(name: str = "Architektur", entity_type: str = "topic", mention_count: int = 10):
@@ -316,10 +315,10 @@ class TestAnalyze:
         decision_rows = [_make_decision_row(NOW - timedelta(days=4), NOW)]
 
         results = [
-            theme_rows,       # extract_top_themes
-            meeting_scalar,   # extract_meeting_load
-            hour_rows,        # extract_preferred_hours
-            decision_rows,    # extract_decision_speed
+            theme_rows,  # extract_top_themes
+            meeting_scalar,  # extract_meeting_load
+            hour_rows,  # extract_preferred_hours
+            decision_rows,  # extract_decision_speed
         ]
 
         # Build mock - each call returns next result
@@ -361,11 +360,11 @@ class TestAnalyzeAndPersist:
     async def test_persists_profile(self) -> None:
         # Build mock session that returns sequential results
         results = [
-            [],    # themes (empty)
-            0,     # meeting count
-            [],    # hours (empty)
-            [],    # decisions (empty)
-            0,     # max version query -> 0 means first profile
+            [],  # themes (empty)
+            0,  # meeting count
+            [],  # hours (empty)
+            [],  # decisions (empty)
+            0,  # max version query -> 0 means first profile
         ]
 
         session = AsyncMock()
@@ -400,11 +399,11 @@ class TestAnalyzeAndPersist:
     @pytest.mark.asyncio
     async def test_increments_version(self) -> None:
         results = [
-            [],    # themes
-            0,     # meetings
-            [],    # hours
-            [],    # decisions
-            3,     # existing max version = 3
+            [],  # themes
+            0,  # meetings
+            [],  # hours
+            [],  # decisions
+            3,  # existing max version = 3
         ]
 
         session = AsyncMock()

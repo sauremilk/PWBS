@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,9 +30,9 @@ class MultiModalResult:
     """Result of multi-modal processing."""
 
     __slots__ = (
-        "source_type",
         "content",
         "metadata",
+        "source_type",
         "title",
     )
 
@@ -144,7 +144,7 @@ class MultiModalPipeline:
             job.progress_percent = 90
             job.status = JobStatus.COMPLETED
             job.progress_percent = 100
-            job.completed_at = datetime.now(tz=timezone.utc)
+            job.completed_at = datetime.now(tz=UTC)
 
         return MultiModalResult(
             source_type="ocr",
@@ -176,7 +176,7 @@ class MultiModalPipeline:
             job.progress_percent = 90
             job.status = JobStatus.COMPLETED
             job.progress_percent = 100
-            job.completed_at = datetime.now(tz=timezone.utc)
+            job.completed_at = datetime.now(tz=UTC)
 
         # Build timestamped transcript text
         timestamped_lines: list[str] = []

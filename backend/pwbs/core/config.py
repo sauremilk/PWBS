@@ -182,11 +182,13 @@ class Settings(BaseSettings):
             if self.environment == "production":
                 if not self.jwt_private_key.get_secret_value():
                     raise ValueError(
-                        "JWT_PRIVATE_KEY must be set in production (RS256 required, no HS256 fallback)"
+                        "JWT_PRIVATE_KEY must be set in production"
+                        " (RS256 required, no HS256 fallback)"
                     )
                 if not self.jwt_public_key:
                     raise ValueError(
-                        "JWT_PUBLIC_KEY must be set in production (RS256 required, no HS256 fallback)"
+                        "JWT_PUBLIC_KEY must be set in production"
+                        " (RS256 required, no HS256 fallback)"
                     )
         return self
 

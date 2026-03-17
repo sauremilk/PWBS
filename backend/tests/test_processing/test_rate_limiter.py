@@ -1,20 +1,18 @@
-﻿"""Tests for pwbs.core.rate_limiter  LLMRateLimiter (TASK-070)."""
+"""Tests for pwbs.core.rate_limiter  LLMRateLimiter (TASK-070)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 
 from pwbs.core.rate_limiter import (
     CostRecord,
-    DailyUsage,
     InMemoryUsageStore,
     LLMRateLimiter,
     RateLimitConfig,
     RateLimitExceededError,
-    TokenBudget,
 )
 
 _USER = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
@@ -89,7 +87,7 @@ class TestDailyCallLimit:
 
         with pytest.raises(RateLimitExceededError) as exc_info:
             await limiter.check_limits(_USER, "briefing.morning")
-        assert _USER == exc_info.value.user_id
+        assert exc_info.value.user_id == _USER
         assert "3 calls/day" in exc_info.value.reason
 
     @pytest.mark.asyncio
@@ -176,7 +174,12 @@ class TestRecordUsage:
     async def test_returns_cost_record(self) -> None:
         limiter = LLMRateLimiter()
         record = await limiter.record_usage(
-            _USER, "briefing.morning", "claude-sonnet-4-20250514", 500, 200, 0.0045,
+            _USER,
+            "briefing.morning",
+            "claude-sonnet-4-20250514",
+            500,
+            200,
+            0.0045,
         )
         assert isinstance(record, CostRecord)
         assert record.user_id == _USER
@@ -193,7 +196,7 @@ class TestRecordUsage:
         await limiter.record_usage(_USER, "test", "claude", 100, 50, 0.001)
         await limiter.record_usage(_USER, "test", "claude", 200, 100, 0.002)
 
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         usage = await store.get_daily_usage(_USER, today)
         assert usage.call_count == 2
         assert usage.total_input_tokens == 300
@@ -255,7 +258,7 @@ class TestInMemoryStore:
     @pytest.mark.asyncio
     async def test_fresh_user_returns_zero(self) -> None:
         store = InMemoryUsageStore()
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         usage = await store.get_daily_usage(_USER, today)
         assert usage.call_count == 0
         assert usage.estimated_cost_usd == 0.0
@@ -302,5 +305,6 @@ class TestRateLimitExceededError:
 
     def test_is_pwbs_error(self) -> None:
         from pwbs.core.exceptions import PWBSError
+
         err = RateLimitExceededError(_USER, "test")
         assert isinstance(err, PWBSError)

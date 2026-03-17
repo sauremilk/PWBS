@@ -1,4 +1,4 @@
-﻿"""Tests for Neo4j Graph Builder (TASK-064)."""
+"""Tests for Neo4j Graph Builder (TASK-064)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ from pwbs.graph.builder import (
     EdgeType,
     GraphBuilder,
     GraphBuilderConfig,
-    GraphBuildResult,
     NodeData,
     NodeLabel,
     _build_edge_query,
@@ -107,7 +106,18 @@ class TestGraphBuilderConfig:
 class TestNodeLabels:
     def test_all_labels(self) -> None:
         labels = {nl.value for nl in NodeLabel}
-        assert labels == {"Person", "Project", "Topic", "Decision", "Meeting", "Document", "Goal", "Risk", "Hypothesis", "OpenQuestion"}
+        assert labels == {
+            "Person",
+            "Project",
+            "Topic",
+            "Decision",
+            "Meeting",
+            "Document",
+            "Goal",
+            "Risk",
+            "Hypothesis",
+            "OpenQuestion",
+        }
 
 
 # ===================================================================
@@ -118,10 +128,22 @@ class TestNodeLabels:
 class TestEdgeTypes:
     def test_all_edge_types_defined(self) -> None:
         expected = {
-            "PARTICIPATED_IN", "WORKS_ON", "MENTIONED_IN", "KNOWS",
-            "HAS_TOPIC", "HAS_DECISION", "DECIDED_IN", "AFFECTS",
-            "SUPERSEDES", "DISCUSSED", "RELATES_TO", "PRODUCED",
-            "MENTIONS", "COVERS", "REFERENCES", "RELATED_TO",
+            "PARTICIPATED_IN",
+            "WORKS_ON",
+            "MENTIONED_IN",
+            "KNOWS",
+            "HAS_TOPIC",
+            "HAS_DECISION",
+            "DECIDED_IN",
+            "AFFECTS",
+            "SUPERSEDES",
+            "DISCUSSED",
+            "RELATES_TO",
+            "PRODUCED",
+            "MENTIONS",
+            "COVERS",
+            "REFERENCES",
+            "RELATED_TO",
         }
         actual = {et.value for et in EdgeType}
         assert actual == expected
@@ -292,7 +314,11 @@ class TestMergeNodes:
         node = _node(properties={"email": "alice@example.com", "role": "CTO"})
         await builder.merge_nodes([node])
         call_args = session.run.call_args
-        params = call_args[1].get("parameters") or call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
+        params = (
+            call_args[1].get("parameters") or call_args[0][1]
+            if len(call_args[0]) > 1
+            else call_args.kwargs.get("parameters", {})
+        )
         assert params.get("email") == "alice@example.com"
         assert params.get("role") == "CTO"
 
@@ -381,7 +407,9 @@ class TestTenantIsolation:
         builder = _builder(session=session)
         await builder.merge_nodes([_node()])
         call_args = session.run.call_args
-        params = call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
+        params = (
+            call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
+        )
         assert params.get("userId") == USER_ID
 
     @pytest.mark.asyncio
@@ -390,7 +418,9 @@ class TestTenantIsolation:
         builder = _builder(session=session)
         await builder.merge_edges([_edge()])
         call_args = session.run.call_args
-        params = call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
+        params = (
+            call_args[0][1] if len(call_args[0]) > 1 else call_args.kwargs.get("parameters", {})
+        )
         assert params.get("userId") == USER_ID
 
 

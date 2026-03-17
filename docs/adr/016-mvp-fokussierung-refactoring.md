@@ -1,110 +1,119 @@
-# ADR-016: MVP-Fokussierung – 5-Schritte-Refactoring
+# ADR-016: MVP Focus – 5-Step Refactoring
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-15
-**Autoren:** Copilot-gestütztes Refactoring
+**Status:** Accepted
+**Date:** 2026-03-15
+**Authors:** Copilot-assisted Refactoring
 
-## Kontext
+## Context
 
-Das PWBS-Backend enthielt 36+ Module, von denen viele für das MVP (Phase 2, 10–20 Early Adopters) nicht benötigt werden. Die Komplexitätskosten durch Teams/RBAC/Billing/Marketplace/SSO/Developer-Module sowie 8 Konnektoren übersteigen den Nutzen für die Phase-2-Zielgruppe deutlich.
+The PWBS backend contained 36+ modules, many of which are not needed for the MVP (Phase 2, 10–20 Early Adopters). The complexity costs of Teams/RBAC/Billing/Marketplace/SSO/Developer modules plus 8 connectors significantly outweigh the benefit for the Phase 2 target audience.
 
-**Ziel:** Maximale Reduktion der aktiven Codebasis ohne Datenverlust oder Breaking Changes.
+**Goal:** Maximum reduction of the active codebase without data loss or breaking changes.
 
-## Entscheidung
+## Decision
 
-5-Schritte-Strategie mit konservativer Herangehensweise (kommentieren statt löschen):
+5-step strategy with a conservative approach (comment out instead of delete):
 
-### Schritt 1: Out-of-Scope Module deaktivieren
+### Step 1: Deactivate Out-of-Scope Modules
 
-**Betroffene Module:** billing, teams, rbac, marketplace, developer, sso
+**Affected Modules:** billing, teams, rbac, marketplace, developer, sso
 
-**Maßnahmen:**
-- Modul-Dateien nach `_deferred/` kopiert (Origale bleiben für Alembic-Import-Integrität)
-- 9 Router-Imports + `include_router`-Aufrufe in `main.py` auskommentiert mit `# DEFERRED: Phase 3`
-- Webhooks-Router deaktiviert (Gmail Pub/Sub + Slack Events)
-- `_deferred/README.md` mit vollständiger Reaktivierungsanleitung erstellt
+**Measures:**
 
-**Bewusste Entscheidung:** `models/__init__.py` behält ALLE 32 ORM-Imports (Alembic Discovery). `schemas/enums.py` bleibt komplett (keine Breaking Changes in Serialisierung).
+- Module files copied to `_deferred/` (originals remain for Alembic import integrity)
+- 9 router imports + `include_router` calls in `main.py` commented out with `# DEFERRED: Phase 3`
+- Webhooks router deactivated (Gmail Pub/Sub + Slack Events)
+- `_deferred/README.md` created with complete reactivation guide
 
-### Schritt 2: Phase-3 Konnektoren deaktivieren
+**Deliberate Decision:** `models/__init__.py` retains ALL 32 ORM imports (Alembic Discovery). `schemas/enums.py` remains complete (no breaking changes in serialization).
 
-**Aktive Kern-4:** Google Calendar, Notion, Zoom, Obsidian
-**Deaktiviert:** Gmail, Slack, Outlook, Google Docs
+### Step 2: Deactivate Phase 3 Connectors
 
-**Maßnahmen:**
-- Konnektor-Dateien nach `_deferred/connectors/` verschoben
-- `integrations/slack/` nach `_deferred/integrations/slack/` verschoben
-- Test-Dateien nach `_deferred/tests/` verschoben
-- In `connectors.py` Route: Phase-3-Einträge in 6+ Dictionaries auskommentiert (`_CONNECTOR_META`, `_AUTH_URLS`, `_SCOPES`, `redirect_uri_map`, `client_id_map`, `client_secret_map`, `token_endpoints`)
+**Active Core 4:** Google Calendar, Notion, Zoom, Obsidian
+**Deactivated:** Gmail, Slack, Outlook, Google Docs
 
-### Schritt 3: Feature Flags – Beibehalten
+**Measures:**
 
-**Analyse-Ergebnis:** Feature-Flags-Service ist bereits MVP-tauglich:
-- ENV-Override (`FEATURE_FLAGS_OVERRIDE`) als höchste Priorität implementiert
-- Kein Business-Logik-Code nutzt Feature Flags
-- Service ist opt-in, kein Overhead
+- Connector files moved to `_deferred/connectors/`
+- `integrations/slack/` moved to `_deferred/integrations/slack/`
+- Test files moved to `_deferred/tests/`
+- In `connectors.py` route: Phase 3 entries in 6+ dictionaries commented out (`_CONNECTOR_META`, `_AUTH_URLS`, `_SCOPES`, `redirect_uri_map`, `client_id_map`, `client_secret_map`, `token_endpoints`)
 
-**Entscheidung:** Keine Änderung nötig.
+### Step 3: Feature Flags – Retained
 
-### Schritt 4: Vertikale Profile – Beibehalten
+**Analysis Result:** Feature flags service is already MVP-ready:
 
-**Analyse-Ergebnis:** Default-Profil "general" ist aktiv:
-- Kein Supplement, keine Speziallogik
-- `entity_priorities`/`ner_focus` definiert aber nirgends implementiert
-- Dormante Konfiguration kostet nichts
+- ENV override (`FEATURE_FLAGS_OVERRIDE`) implemented as highest priority
+- No business logic code uses feature flags
+- Service is opt-in, no overhead
 
-**Entscheidung:** Keine Änderung nötig.
+**Decision:** No changes needed.
 
-### Schritt 5: Datenbank-Architektur – Neo4j optional
+### Step 4: Vertical Profiles – Retained
 
-**Problem:** App crashte wenn Neo4j nicht erreichbar (SinglePointOfFailure).
-**Analyse:** GraphBuilder wird NIE in der Pipeline aufgerufen – kein User-Daten-Write nach Neo4j.
+**Analysis Result:** Default profile "general" is active:
 
-**Maßnahmen:**
-- `neo4j_client.py`: `get_neo4j_driver()` gibt `AsyncDriver | None` zurück; `_init_failed`-Flag für Short-Circuit
-- `main.py` lifespan: Neo4j-Init mit None-Check + Warning-Log
-- `docker-compose.yml`: Neo4j hinter `profiles: ["graph"]` (aktivierbar mit `--profile graph`)
-- Bestehende Fallbacks bestätigt: `NullGraphService` in Briefing, try/except in Knowledge-API
+- No supplement, no special logic
+- `entity_priorities`/`ner_focus` defined but not implemented anywhere
+- Dormant configuration costs nothing
 
-## Geänderte Dateien
+**Decision:** No changes needed.
 
-| Datei | Änderung |
-| --- | --- |
-| `pwbs/api/main.py` | 9 Router deaktiviert, Neo4j-Startup optional |
-| `pwbs/api/v1/routes/connectors.py` | Phase-3-Einträge in 6+ Dictionaries kommentiert |
-| `pwbs/db/neo4j_client.py` | Gibt None zurück bei Fehler, _init_failed-Flag |
-| `docker-compose.yml` | Neo4j hinter `profiles: ["graph"]` |
-| `_deferred/README.md` | Dokumentation mit Reaktivierungsanleitung |
-| `CHANGELOG.md` | Alle 5 Schritte dokumentiert |
+### Step 5: Database Architecture – Neo4j Optional
 
-## Nicht-Geänderte Dateien (bewusst)
+**Problem:** App crashed when Neo4j was unreachable (SinglePointOfFailure).
+**Analysis:** GraphBuilder is NEVER called in the pipeline – no user data writes to Neo4j.
 
-| Datei | Grund |
-| --- | --- |
-| `models/__init__.py` | Alle 32 ORM-Imports bleiben für Alembic |
-| `schemas/enums.py` | SourceType/EntityType komplett für Serialisierungskompatibilität |
-| `api_key_auth.py` | Imports aus developer-Modul (existiert noch am Original-Ort) |
+**Measures:**
 
-## Konsequenzen
+- `neo4j_client.py`: `get_neo4j_driver()` returns `AsyncDriver | None`; `_init_failed` flag for short-circuit
+- `main.py` lifespan: Neo4j init with None check + warning log
+- `docker-compose.yml`: Neo4j behind `profiles: ["graph"]` (activatable with `--profile graph`)
+- Existing fallbacks confirmed: `NullGraphService` in Briefing, try/except in Knowledge API
 
-**Positiv:**
-- Reduzierte aktive Codebasis: ~6 Module + 4 Konnektoren weniger aktiv
-- App startet ohne Neo4j (kein SPOF mehr)
-- Docker-Setup leichtgewichtiger (nur PG + Weaviate + Redis benötigt)
-- Alle Tests bestehen weiterhin
+## Changed Files
 
-**Negativ:**
-- Module existieren doppelt (`pwbs/` + `_deferred/`) für Alembic-Kompatibilität
-- Kommentierte Code-Blöcke in `connectors.py` und `main.py`
+| File                               | Change                                           |
+| ---------------------------------- | ------------------------------------------------ |
+| `pwbs/api/main.py`                 | 9 routers deactivated, Neo4j startup optional    |
+| `pwbs/api/v1/routes/connectors.py` | Phase 3 entries in 6+ dictionaries commented out |
+| `pwbs/db/neo4j_client.py`          | Returns None on error, \_init_failed flag        |
+| `docker-compose.yml`               | Neo4j behind `profiles: ["graph"]`               |
+| `_deferred/README.md`              | Documentation with reactivation guide            |
+| `CHANGELOG.md`                     | All 5 steps documented                           |
 
-**Risiken:**
-- Bei Schema-Änderungen in deferred Models: Alembic sieht weiterhin die originalen Model-Dateien
-- `api_key_auth.py` hängt vom developer-Modul ab (muss bei Löschung inlined werden)
+## Unchanged Files (intentional)
 
-## Reaktivierung
+| File                 | Reason                                                            |
+| -------------------- | ----------------------------------------------------------------- |
+| `models/__init__.py` | All 32 ORM imports remain for Alembic                             |
+| `schemas/enums.py`   | SourceType/EntityType complete for serialization compatibility    |
+| `api_key_auth.py`    | Imports from developer module (still exists at original location) |
 
-Vollständige Anleitung in `_deferred/README.md`. Zusammenfassung:
-1. Dateien zurückverschieben
-2. Router-Imports in `main.py` entkommentieren
-3. Connector-Einträge in `connectors.py` entkommentieren
-4. Tests zurückverschieben und ausführen
+## Consequences
+
+**Positive:**
+
+- Reduced active codebase: ~6 modules + 4 connectors fewer active
+- App starts without Neo4j (no more SPOF)
+- Lighter Docker setup (only PG + Weaviate + Redis required)
+- All tests continue to pass
+
+**Negative:**
+
+- Modules exist in duplicate (`pwbs/` + `_deferred/`) for Alembic compatibility
+- Commented-out code blocks in `connectors.py` and `main.py`
+
+**Risks:**
+
+- For schema changes in deferred models: Alembic still sees the original model files
+- `api_key_auth.py` depends on the developer module (must be inlined if deleted)
+
+## Reactivation
+
+Complete guide in `_deferred/README.md`. Summary:
+
+1. Move files back
+2. Uncomment router imports in `main.py`
+3. Uncomment connector entries in `connectors.py`
+4. Move tests back and run them

@@ -1,11 +1,10 @@
-﻿"""Tests for pwbs.processing.embedding_pipeline (TASK-060)."""
+"""Tests for pwbs.processing.embedding_pipeline (TASK-060)."""
 
 from __future__ import annotations
 
-import asyncio
 import uuid
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -13,7 +12,6 @@ from pwbs.processing.chunking import TextChunk
 from pwbs.processing.embedding import EmbeddingConfig, EmbeddingResult, EmbeddingService
 from pwbs.processing.embedding_pipeline import (
     AuditLogger,
-    BatchResult,
     DocumentStatusUpdater,
     EmbeddingPipelineHandler,
     PipelineConfig,

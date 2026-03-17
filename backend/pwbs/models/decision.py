@@ -44,13 +44,9 @@ class Decision(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     dependencies: Mapped[list] = mapped_column(  # type: ignore[type-arg]
         JSONB, nullable=False, server_default="[]"
     )
-    status: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default="pending"
-    )
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")
     decided_by: Mapped[str | None] = mapped_column(Text, nullable=True)
-    decided_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Optional link to source document
     source_document_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -63,10 +59,8 @@ class Decision(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     neo4j_node_id: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # DSGVO: expiration date
-    expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship(back_populates="decisions")  # noqa: F821
-    source_document: Mapped["Document | None"] = relationship()  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="decisions")  # noqa: F821
+    source_document: Mapped[Document | None] = relationship()  # noqa: F821

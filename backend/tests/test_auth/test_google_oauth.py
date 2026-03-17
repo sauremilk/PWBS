@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -34,7 +34,7 @@ def _make_user(
     u.display_name = "Test User"
     u.password_hash = "hashed"
     u.encryption_key_enc = "encrypted"
-    u.created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    u.created_at = datetime(2026, 1, 1, tzinfo=UTC)
     return u
 
 

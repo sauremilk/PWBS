@@ -17,9 +17,8 @@ import hashlib
 import time
 import uuid
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -33,7 +32,7 @@ from pwbs.core.llm_gateway import LLMProvider, LLMResponse, LLMUsage
 from pwbs.models.briefing import Briefing as BriefingORM
 from pwbs.models.chunk import Chunk
 from pwbs.processing.chunking import ChunkingConfig, ChunkingService
-from pwbs.processing.embedding import EmbeddingConfig, EmbeddingResult, EmbeddingService
+from pwbs.processing.embedding import EmbeddingService
 from pwbs.prompts.registry import PromptRegistry
 from pwbs.schemas.enums import BriefingType as SchemaBriefingType
 from pwbs.search.service import SemanticSearchService
@@ -282,7 +281,9 @@ async def indexed_chunks(
         doc_orm = Document(
             id=doc.id,
             user_id=owner_id,
-            source_type=doc.source_type.value if hasattr(doc.source_type, "value") else str(doc.source_type),
+            source_type=doc.source_type.value
+            if hasattr(doc.source_type, "value")
+            else str(doc.source_type),
             source_id=doc.source_id,
             title=doc.title,
             content_hash=doc.raw_hash,
@@ -334,7 +335,9 @@ async def indexed_chunks(
                 embedding=emb,
                 content=chunk.content,
                 title=doc.title,
-                source_type=doc.source_type.value if hasattr(doc.source_type, "value") else str(doc.source_type),
+                source_type=doc.source_type.value
+                if hasattr(doc.source_type, "value")
+                else str(doc.source_type),
                 language=doc.language,
                 created_at=doc.created_at,
                 chunk_index=chunk.chunk_index,
@@ -443,8 +446,7 @@ class TestBriefingE2E:
         }
 
         known_sources = [
-            {"title": r.title, "source_id": str(r.chunk_id)}
-            for r in search_results[:5]
+            {"title": r.title, "source_id": str(r.chunk_id)} for r in search_results[:5]
         ]
 
         # --- Step 3: Generate briefing with mock LLM ---

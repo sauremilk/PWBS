@@ -1,4 +1,4 @@
-﻿"""Tests for API Middleware Stack (TASK-093)."""
+"""Tests for API Middleware Stack (TASK-093)."""
 
 from __future__ import annotations
 

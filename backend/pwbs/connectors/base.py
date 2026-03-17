@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 from pwbs.core.exceptions import ConnectorError, RateLimitError
-from pwbs.schemas.enums import SourceType  # noqa: TC001 - needed at runtime by Pydantic
+from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
     from uuid import UUID

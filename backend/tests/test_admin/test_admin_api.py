@@ -13,26 +13,25 @@ Tests cover:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from pwbs.api.v1.routes.admin import (
-    _require_org_owner,
-    OrgDashboardResponse,
-    MemberDetailResponse,
-    MemberListResponse,
     InviteRequest,
     InviteResponse,
-    OrgConnectorResponse,
+    MemberDetailResponse,
+    MemberListResponse,
     OrgConnectorListResponse,
+    OrgConnectorResponse,
+    OrgDashboardResponse,
+    _require_org_owner,
 )
-from pwbs.models.organization import Organization, OrganizationMember
 from pwbs.models.connection import Connection
+from pwbs.models.organization import Organization
 from pwbs.models.user import User
 from pwbs.schemas.enums import OrgRole
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -45,7 +44,7 @@ def _make_org(org_id: uuid.UUID | None = None) -> Organization:
     org.name = "Test Org"
     org.slug = "test-org"
     org.description = "A test organization"
-    org.created_at = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    org.created_at = datetime(2025, 1, 1, tzinfo=UTC)
     return org
 
 
@@ -58,7 +57,7 @@ def _make_user(
     u.id = user_id or uuid.uuid4()
     u.email = email
     u.display_name = display_name
-    u.created_at = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    u.created_at = datetime(2025, 1, 1, tzinfo=UTC)
     return u
 
 
@@ -74,7 +73,7 @@ def _make_connection(
     c.source_type = source_type
     c.status = status
     c.organization_id = org_id
-    c.created_at = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    c.created_at = datetime(2025, 1, 1, tzinfo=UTC)
     return c
 
 
@@ -107,7 +106,7 @@ class TestAdminSchemas:
             email="test@example.com",
             display_name="Test",
             role="member",
-            joined_at=datetime(2025, 6, 1, tzinfo=timezone.utc),
+            joined_at=datetime(2025, 6, 1, tzinfo=UTC),
         )
         assert resp.email == "test@example.com"
         assert resp.role == "member"
@@ -139,7 +138,7 @@ class TestAdminSchemas:
             status="active",
             owner_email="test@example.com",
             organization_id=None,
-            created_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2025, 1, 1, tzinfo=UTC),
         )
         assert resp.organization_id is None
 
@@ -308,7 +307,7 @@ class TestConnectorShareLogic:
             status="active",
             owner_email="team@corp.com",
             organization_id=oid,
-            created_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2025, 1, 1, tzinfo=UTC),
         )
         assert resp.organization_id == oid
 
@@ -319,7 +318,7 @@ class TestConnectorShareLogic:
             status="active",
             owner_email="team@corp.com",
             organization_id=None,
-            created_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            created_at=datetime(2025, 1, 1, tzinfo=UTC),
         )
         assert resp.organization_id is None
 
@@ -339,14 +338,14 @@ class TestMemberDetail:
                 email="a@test.com",
                 display_name="Alice",
                 role="owner",
-                joined_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+                joined_at=datetime(2025, 1, 1, tzinfo=UTC),
             ),
             MemberDetailResponse(
                 user_id=uuid.uuid4(),
                 email="b@test.com",
                 display_name="Bob",
                 role="member",
-                joined_at=datetime(2025, 2, 1, tzinfo=timezone.utc),
+                joined_at=datetime(2025, 2, 1, tzinfo=UTC),
             ),
         ]
         resp = MemberListResponse(members=members, count=len(members))

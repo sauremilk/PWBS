@@ -15,9 +15,9 @@ from __future__ import annotations
 import os
 import uuid
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -73,8 +73,8 @@ def mock_user(test_user_id: uuid.UUID) -> MagicMock:
     user.display_name = "Test User"
     user.password_hash = "$argon2id$v=19$m=65536,t=3,p=4$fake"
     user.deletion_scheduled_at = None
-    user.created_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
-    user.updated_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    user.created_at = datetime(2024, 1, 1, tzinfo=UTC)
+    user.updated_at = datetime(2024, 1, 1, tzinfo=UTC)
     return user
 
 

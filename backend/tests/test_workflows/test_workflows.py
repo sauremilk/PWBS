@@ -11,7 +11,7 @@ Sections:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -179,7 +179,7 @@ class TestCRUDSchemas:
     def test_workflow_rule_response_model(self) -> None:
         from pwbs.workflows.schemas import WorkflowRuleResponse
 
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         r = WorkflowRuleResponse(
             id=uuid.uuid4(),
             name="My Rule",
@@ -197,7 +197,7 @@ class TestCRUDSchemas:
     def test_workflow_execution_response_model(self) -> None:
         from pwbs.workflows.schemas import WorkflowExecutionResponse
 
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         e = WorkflowExecutionResponse(
             id=uuid.uuid4(),
             rule_id=uuid.uuid4(),
@@ -212,7 +212,7 @@ class TestCRUDSchemas:
 
     def test_discriminated_union_trigger_parsing(self) -> None:
         """WorkflowRuleCreate correctly parses discriminated trigger union."""
-        from pwbs.workflows.schemas import EmailAction, WorkflowRuleCreate
+        from pwbs.workflows.schemas import WorkflowRuleCreate
 
         rule = WorkflowRuleCreate.model_validate(
             {

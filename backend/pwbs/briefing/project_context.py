@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Protocol, runtime_checkable
 
 import tiktoken
@@ -252,13 +252,15 @@ class ProjectContextAssembler:
         ProjectBriefingContext
             Assembled context ready for prompt template rendering.
         """
-        since = datetime.now(timezone.utc) - timedelta(
+        since = datetime.now(UTC) - timedelta(
             days=self._config.lookback_days,
         )
 
         # Step 1: Fetch project-related documents from PostgreSQL
         documents = await self._fetch_project_documents(
-            user_id, project_name, since,
+            user_id,
+            project_name,
+            since,
         )
 
         # Step 2: Decisions from graph

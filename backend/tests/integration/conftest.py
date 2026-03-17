@@ -35,6 +35,7 @@ os.environ.setdefault("ENCRYPTION_MASTER_KEY", "integration-test-master-key")
 # Session-scoped PostgreSQL engine (Testcontainers)
 # ---------------------------------------------------------------------------
 
+
 @pytest_asyncio.fixture(scope="session")
 async def _pg_engine() -> AsyncGenerator[Any, None]:
     """Start Testcontainer PostgreSQL, run Alembic, yield engine."""
@@ -53,9 +54,8 @@ async def _pg_engine() -> AsyncGenerator[Any, None]:
         pytest.skip("Docker not available for integration tests")
 
     sync_url = container.get_connection_url()
-    async_url = (
-        sync_url.replace("psycopg2", "asyncpg")
-        .replace("postgresql://", "postgresql+asyncpg://")
+    async_url = sync_url.replace("psycopg2", "asyncpg").replace(
+        "postgresql://", "postgresql+asyncpg://"
     )
 
     engine = create_async_engine(async_url, echo=False)
@@ -80,7 +80,9 @@ async def _pg_session(_pg_engine: Any) -> AsyncGenerator[Any, None]:
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
     factory = async_sessionmaker(
-        _pg_engine, class_=AsyncSession, expire_on_commit=False,
+        _pg_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
     async with factory() as session:
         yield session
@@ -90,6 +92,7 @@ async def _pg_session(_pg_engine: Any) -> AsyncGenerator[Any, None]:
 # ---------------------------------------------------------------------------
 # FastAPI app with overridden dependencies
 # ---------------------------------------------------------------------------
+
 
 @pytest_asyncio.fixture()
 async def client(

@@ -7,7 +7,7 @@ computes diffs between snapshots, and manages the rolling window.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -116,7 +116,7 @@ async def capture_snapshot(
         entity_count=len(entity_list),
         relationship_count=len(relationships),
         snapshot_data=snapshot_data,
-        captured_at=datetime.now(tz=timezone.utc),
+        captured_at=datetime.now(tz=UTC),
     )
     db.add(snapshot)
     await db.flush()

@@ -17,8 +17,6 @@ from pwbs.core.exceptions import (
 )
 
 __all__ = [
-    "Settings",
-    "get_settings",
     "AuthenticationError",
     "AuthorizationError",
     "ConfigurationError",
@@ -27,8 +25,10 @@ __all__ = [
     "ExternalServiceError",
     "IngestionError",
     "NotFoundError",
-    "ProcessingError",
     "PWBSError",
+    "ProcessingError",
     "RateLimitError",
+    "Settings",
     "ValidationError",
+    "get_settings",
 ]

@@ -1,4 +1,4 @@
-﻿"""Tests for OpenAPI schema generation and documentation (TASK-119)."""
+"""Tests for OpenAPI schema generation and documentation (TASK-119)."""
 
 from __future__ import annotations
 
@@ -18,18 +18,14 @@ class TestOpenAPISchemaAccessible:
 
     @pytest.mark.asyncio
     async def test_openapi_json_returns_200(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             assert resp.status_code == 200
             assert resp.headers["content-type"] == "application/json"
 
     @pytest.mark.asyncio
     async def test_openapi_json_is_valid_schema(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             schema = resp.json()
             # OpenAPI 3.1 required fields
@@ -42,9 +38,7 @@ class TestOpenAPISchemaAccessible:
 
     @pytest.mark.asyncio
     async def test_openapi_schema_contains_all_paths(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             # Verify key API paths are documented
@@ -63,17 +57,13 @@ class TestSwaggerUIAvailability:
 
     @pytest.mark.asyncio
     async def test_swagger_ui_available_in_dev(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/docs")
             assert resp.status_code == 200
 
     @pytest.mark.asyncio
     async def test_redoc_available_in_dev(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/redoc")
             assert resp.status_code == 200
 
@@ -83,9 +73,7 @@ class TestErrorResponsesDocumented:
 
     @pytest.mark.asyncio
     async def test_auth_routes_have_error_responses(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             # User settings (authenticated) should have 401, 500 responses
@@ -96,9 +84,7 @@ class TestErrorResponsesDocumented:
 
     @pytest.mark.asyncio
     async def test_health_has_common_responses(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             health = paths.get("/api/v1/admin/health", {})
@@ -107,9 +93,7 @@ class TestErrorResponsesDocumented:
 
     @pytest.mark.asyncio
     async def test_error_response_schema_in_components(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             schema = resp.json()
             schemas = schema.get("components", {}).get("schemas", {})
@@ -126,9 +110,7 @@ class TestOpenAPISchemaValidity:
 
     @pytest.mark.asyncio
     async def test_all_paths_have_operations(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             http_methods = {"get", "post", "put", "patch", "delete", "options", "head"}
@@ -138,9 +120,7 @@ class TestOpenAPISchemaValidity:
 
     @pytest.mark.asyncio
     async def test_all_operations_have_responses(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             http_methods = {"get", "post", "put", "patch", "delete"}
@@ -154,9 +134,7 @@ class TestOpenAPISchemaValidity:
 
     @pytest.mark.asyncio
     async def test_schema_has_tags(self, app) -> None:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get("/api/v1/openapi.json")
             paths = resp.json()["paths"]
             http_methods = {"get", "post", "put", "patch", "delete"}

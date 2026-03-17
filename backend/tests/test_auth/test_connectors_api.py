@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -16,7 +16,7 @@ from pwbs.api.v1.routes.connectors import (
 )
 from pwbs.models.connection import Connection
 from pwbs.models.user import User
-from pwbs.schemas.enums import ConnectionStatus, SourceType
+from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
     pass
@@ -33,7 +33,7 @@ def _make_user(user_id: uuid.UUID | None = None) -> User:
     u.id = user_id or uuid.uuid4()
     u.email = "test@example.com"
     u.display_name = "Test User"
-    u.created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    u.created_at = datetime(2026, 1, 1, tzinfo=UTC)
     return u
 
 
@@ -146,7 +146,7 @@ class TestConnectionStatus:
         from pwbs.api.v1.routes.connectors import connection_status
 
         user = _make_user()
-        conn = _make_connection(user.id, watermark=datetime(2026, 3, 1, tzinfo=timezone.utc))
+        conn = _make_connection(user.id, watermark=datetime(2026, 3, 1, tzinfo=UTC))
 
         db = AsyncMock()
 
@@ -478,7 +478,7 @@ class TestTriggerSync:
 
         user = _make_user()
         # Watermark is very recent (< 5 min ago)
-        recent = datetime.now(timezone.utc)
+        recent = datetime.now(UTC)
         conn = _make_connection(user.id, watermark=recent)
         db = AsyncMock()
         find_result = MagicMock()

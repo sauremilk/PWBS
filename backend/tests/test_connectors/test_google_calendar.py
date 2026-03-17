@@ -10,8 +10,6 @@ import httpx
 import pytest
 
 from pwbs.connectors.google_calendar import (
-    _GOOGLE_AUTH_URL,
-    _GOOGLE_TOKEN_URL,
     GOOGLE_CALENDAR_SCOPE,
     GoogleCalendarConnector,
     _decode_cursor,
@@ -753,9 +751,9 @@ class TestNormalizeFetchSinceIntegration:
 # Helpers
 # ---------------------------------------------------------------------------
 
-from pwbs.connectors.base import ConnectorConfig  # noqa: E402
-from pwbs.core.config import get_settings  # noqa: E402
-from pwbs.schemas.enums import SourceType  # noqa: E402
+from pwbs.connectors.base import ConnectorConfig
+from pwbs.core.config import get_settings
+from pwbs.schemas.enums import SourceType
 
 
 def _clear_settings() -> None:

@@ -1,4 +1,4 @@
-﻿"""Auth API endpoints (TASK-086).
+"""Auth API endpoints (TASK-086).
 
 POST /api/v1/auth/register  -- Register new user
 POST /api/v1/auth/login     -- Login with email/password
@@ -97,8 +97,8 @@ class MeResponse(BaseModel):
     response_model=RegisterResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    description="Erstellt einen neuen Benutzeraccount mit E-Mail und Passwort. "
-    "Gibt ein JWT-Token-Paar (Access + Refresh) zurück. E-Mail muss eindeutig sein.",
+    description="Creates a new user account with email and password. "
+    "Returns a JWT token pair (access + refresh). Email must be unique.",
 )
 async def register(
     body: RegisterRequest,
@@ -152,8 +152,8 @@ async def register(
     response_model=LoginResponse,
     status_code=status.HTTP_200_OK,
     summary="Login with email and password",
-    description="Authentifiziert einen Benutzer mit E-Mail und Passwort. "
-    "Gibt ein JWT-Token-Paar zurück. Constant-time Passwortvergleich auch bei unbekanntem Nutzer.",
+    description="Authenticates a user with email and password. "
+    "Returns a JWT token pair. Constant-time password comparison even for unknown users.",
 )
 async def login(
     body: LoginRequest,
@@ -244,7 +244,7 @@ async def login(
     status_code=status.HTTP_200_OK,
     summary="Logout (invalidate refresh token)",
     description=(
-        "Invalidiert das übergebene Refresh-Token. Das Access-Token bleibt bis zum Ablauf gültig."
+        "Invalidates the provided refresh token. The access token remains valid until expiry."
     ),
 )
 async def logout(
@@ -285,8 +285,8 @@ async def logout(
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
     description=(
-        "Gibt das Profil des aktuell authentifizierten Benutzers zurück"
-        " (ID, E-Mail, Anzeigename, Erstelldatum)."
+        "Returns the profile of the currently authenticated user"
+        " (ID, email, display name, creation date)."
     ),
 )
 async def me(

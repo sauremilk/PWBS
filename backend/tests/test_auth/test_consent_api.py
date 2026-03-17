@@ -3,23 +3,21 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import status
 
 from pwbs.api.v1.routes.connectors import (
-    ConsentGrantRequest,
-    ConsentRevokeResponse,
-    ConsentStatusResponse,
     _CONSENT_INFO,
+    ConsentGrantRequest,
+    ConsentStatusResponse,
     get_consent,
     grant_consent,
     revoke_consent,
 )
 from pwbs.audit.audit_service import AuditAction
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -43,7 +41,7 @@ def _make_consent(
     c.owner_id = owner_id
     c.connector_type = connector_type
     c.consent_version = consent_version
-    c.consented_at = datetime(2025, 1, 15, 10, 0, tzinfo=timezone.utc)
+    c.consented_at = datetime(2025, 1, 15, 10, 0, tzinfo=UTC)
     c.revoked_at = revoked_at
     return c
 
@@ -200,6 +198,7 @@ class TestRevokeConsent:
 
         # First call: find consent; second: doc count; third: delete docs; fourth: find connection
         call_count = 0
+
         def side_effect(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -217,9 +216,7 @@ class TestRevokeConsent:
         db.execute = AsyncMock(side_effect=side_effect)
 
         req = _mock_request()
-        resp = await revoke_consent(
-            type="google_calendar", request=req, current_user=user, db=db
-        )
+        resp = await revoke_consent(type="google_calendar", request=req, current_user=user, db=db)
         assert resp.deleted_doc_count == 5
         assert consent.revoked_at is not None
 
@@ -236,9 +233,7 @@ class TestRevokeConsent:
         from fastapi import HTTPException
 
         with pytest.raises(HTTPException) as exc_info:
-            await revoke_consent(
-                type="google_calendar", request=req, current_user=user, db=db
-            )
+            await revoke_consent(type="google_calendar", request=req, current_user=user, db=db)
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -263,7 +258,7 @@ class TestConsentStatusSchema:
             connector_type="notion",
             consented=True,
             consent_version=2,
-            consented_at=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            consented_at=datetime(2025, 1, 1, tzinfo=UTC),
             data_types=["pages"],
             processing_purpose="test",
             llm_providers=["Claude"],

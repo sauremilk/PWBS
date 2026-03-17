@@ -16,7 +16,8 @@ class SlackUserMapping(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "slack_user_mappings"
     __table_args__ = (
         UniqueConstraint(
-            "slack_user_id", "slack_workspace_id",
+            "slack_user_id",
+            "slack_workspace_id",
             name="uq_slack_user_workspace",
         ),
         Index("idx_slack_mapping_pwbs_user", "pwbs_user_id"),

@@ -1,19 +1,17 @@
-﻿"""Tests for Auth API endpoints (TASK-086)."""
+"""Tests for Auth API endpoints (TASK-086)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from pydantic import BaseModel
 
 from pwbs.api.v1.routes.auth import (
     LoginRequest,
     LoginResponse,
     LogoutRequest,
-    LogoutResponse,
     MeResponse,
     RegisterResponse,
 )
@@ -72,7 +70,7 @@ class TestMeResponseSchema:
             user_id=uuid.uuid4(),
             email="test@example.com",
             display_name="Test User",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         assert resp.email == "test@example.com"
 
@@ -305,7 +303,7 @@ class TestMeEndpoint:
         from pwbs.api.v1.routes.auth import me
 
         uid = uuid.uuid4()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         mock_user = MagicMock()
         mock_user.id = uid
         mock_user.email = "test@example.com"

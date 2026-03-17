@@ -29,9 +29,7 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     # Stripe identifiers
     stripe_customer_id: Mapped[str] = mapped_column(Text, nullable=False, index=True)
-    stripe_subscription_id: Mapped[str | None] = mapped_column(
-        Text, nullable=True, unique=True
-    )
+    stripe_subscription_id: Mapped[str | None] = mapped_column(Text, nullable=True, unique=True)
     stripe_price_id: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Plan & status (cached from Stripe)
@@ -53,9 +51,7 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     cohort: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # DSGVO: Ablaufdatum
-    expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship back to user
-    user: Mapped["User"] = relationship(back_populates="subscription")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="subscription")  # noqa: F821

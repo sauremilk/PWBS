@@ -1,4 +1,4 @@
-﻿"""Correlation-ID middleware -- request tracing across all layers (TASK-196).
+"""Correlation-ID middleware -- request tracing across all layers (TASK-196).
 
 Generates or accepts a correlation ID (UUID4) via the `X-Request-ID` header.
 The ID is propagated through `contextvars` so that every log entry within

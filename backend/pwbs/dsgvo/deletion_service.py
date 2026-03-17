@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import delete as sa_delete
@@ -50,7 +50,7 @@ async def schedule_deletion(
     if user.deletion_scheduled_at is not None:
         raise ValueError("Deletion already scheduled")
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     deletion_at = now + timedelta(days=GRACE_PERIOD_DAYS)
     user.deletion_scheduled_at = deletion_at
     await db.flush()
@@ -78,7 +78,7 @@ async def cleanup_expired_accounts(db: AsyncSession) -> int:
 
     Returns the number of accounts deleted.
     """
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     stmt = select(User).where(
         User.deletion_scheduled_at.isnot(None),
         User.deletion_scheduled_at <= now,

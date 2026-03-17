@@ -1,4 +1,4 @@
-﻿"""Tests for Structured JSON-Logging (TASK-113)."""
+"""Tests for Structured JSON-Logging (TASK-113)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-import structlog
 
 from pwbs.core.logging import (
     _PII_KEYS,

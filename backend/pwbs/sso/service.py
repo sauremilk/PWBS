@@ -25,15 +25,15 @@ from pwbs.sso.config import SSOConfig, SSOProvider
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "SSOService",
     "SSOLoginResult",
+    "SSOService",
 ]
 
 
 class SSOLoginResult:
     """Result of a successful SSO login."""
 
-    __slots__ = ("user_id", "email", "display_name", "is_new_user", "org_role")
+    __slots__ = ("display_name", "email", "is_new_user", "org_role", "user_id")
 
     def __init__(
         self,
@@ -115,11 +115,7 @@ class SSOService:
         """Remove SSO config for an organization."""
         from pwbs.models.organization import Organization
 
-        stmt = (
-            update(Organization)
-            .where(Organization.id == org_id)
-            .values(sso_config_enc=None)
-        )
+        stmt = update(Organization).where(Organization.id == org_id).values(sso_config_enc=None)
         result = await self._db.execute(stmt)
         if result.rowcount == 0:  # type: ignore[union-attr]
             raise NotFoundError(f"Organization {org_id} not found")

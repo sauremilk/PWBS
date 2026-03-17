@@ -35,4 +35,4 @@ class Connection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=None,
     )
 
-    user: Mapped["User"] = relationship(back_populates="connections")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="connections")  # noqa: F821

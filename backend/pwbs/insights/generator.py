@@ -44,9 +44,7 @@ PATTERN_TO_CATEGORY: dict[PatternType, str] = {
     PatternType.UNRESOLVED_QUESTION: "trends",
 }
 
-VALID_CATEGORIES: frozenset[str] = frozenset(
-    {"contradictions", "forgotten_topics", "trends"}
-)
+VALID_CATEGORIES: frozenset[str] = frozenset({"contradictions", "forgotten_topics", "trends"})
 
 
 # ── Data types ────────────────────────────────────────────────────────
@@ -253,14 +251,10 @@ class ProactiveInsightGenerator:
     @staticmethod
     def _build_user_prompt(patterns: list[DetectedPattern]) -> str:
         """Build the user prompt from detected patterns."""
-        lines: list[str] = [
-            "Formuliere Insights aus folgenden erkannten Mustern:\n"
-        ]
+        lines: list[str] = ["Formuliere Insights aus folgenden erkannten Mustern:\n"]
         for i, p in enumerate(patterns, 1):
             cat = PATTERN_TO_CATEGORY.get(p.pattern_type, "unknown")
-            source_strs = [
-                f"  - {s.title} ({s.source_type}, {s.date})" for s in p.sources
-            ]
+            source_strs = [f"  - {s.title} ({s.source_type}, {s.date})" for s in p.sources]
             sources_block = "\n".join(source_strs) if source_strs else "  (keine Quellen)"
             lines.append(
                 f"Muster {i} [{cat}]: {p.summary}\n"
@@ -298,9 +292,7 @@ class ProactiveInsightGenerator:
             # Map back to the pattern that generated this insight
             pattern = patterns[idx] if idx < len(patterns) else None
             category = (
-                PATTERN_TO_CATEGORY.get(pattern.pattern_type, "trends")
-                if pattern
-                else "trends"
+                PATTERN_TO_CATEGORY.get(pattern.pattern_type, "trends") if pattern else "trends"
             )
             sources = (
                 [

@@ -17,7 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from pwbs.models.user import User  # noqa: F401
+    from pwbs.models.user import User
 
 
 class Referral(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -62,11 +62,11 @@ class Referral(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    referrer: Mapped["User"] = relationship(
+    referrer: Mapped[User] = relationship(
         foreign_keys=[referrer_id],
         lazy="selectin",
     )
-    referee: Mapped["User | None"] = relationship(
+    referee: Mapped[User | None] = relationship(
         foreign_keys=[referee_id],
         lazy="selectin",
     )

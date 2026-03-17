@@ -281,7 +281,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Kein technischer Stacktrace erreicht den Endnutzer; alle Fehler zeigen deutsche Texte mit Recovery-Aktion |
 | **Abh�ngigkeit**        | �                                                                                                         |
 | **Gesch�tzter Aufwand** | M                                                                                                         |
-| **Status**              | In Arbeit                                                                                                 |
+| **Status**              | Fertig                                                                                                    |
 
 **Beschreibung:** Backend-Fehlercodes in nutzerfreundliche deutsche Texte mit konkreter Recovery-Aktion �bersetzen. Betreffende Komponenten: `ErrorCard` und `ErrorBoundary` in `frontend/src/components/ui/`. Fehlertexte f�r alle Szenarien aus UX_ONBOARDING_SPEC �7 umsetzen: OAuth (Zugriff verweigert, Token-Exchange, Pop-up blockiert), Sync (API down, keine Daten, ung�ltiger Vault), Briefing (LLM-Timeout, LLM-Fehler, Rate-Limit), System (Netzwerk, Session abgelaufen).
 
@@ -393,7 +393,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Nach Wizard-Skip wird ein persistenter, schlie�barer Banner auf dem Dashboard angezeigt |
 | **Abh�ngigkeit**        | �                                                                                       |
 | **Gesch�tzter Aufwand** | XS                                                                                      |
-| **Status**              | Fertig                                                                                   |
+| **Status**              | Fertig                                                                                  |
 
 **Beschreibung:** Wenn der Nutzer den Onboarding-Wizard �berspringt, einen schlie�baren Banner anzeigen: �Verbinde deine erste Quelle, um dein Wissenssystem zu aktivieren." Verhindert, dass Nutzer ohne Konnektor im leeren Dashboard landen.
 
@@ -409,7 +409,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Der 4-Schritt-Wizard (Welcome ? Connect ? Sync ? Briefing) funktioniert End-to-End im Frontend |
 | **Abh�ngigkeit**        | LAUNCH-UX-005, LAUNCH-UX-006                                                                   |
 | **Gesch�tzter Aufwand** | M                                                                                              |
-| **Status**              | Fertig                                        |
+| **Status**              | Fertig                                                                                         |
 
 **Beschreibung:** Den bestehenden Onboarding-Wizard (`onboarding-wizard.tsx`) vollst�ndig integrieren: Auto-Start via `OnboardingGate`, OAuth-Flow-Anbindung, Sync-Polling, Briefing-Anzeige, Abschluss-Markierung. Wireframes: UX_ONBOARDING_SPEC �5.
 
@@ -509,7 +509,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `docs/runbooks/database-migration.md` existiert mit Rollback-Verfahren |
 | **Abh�ngigkeit**        | �                                                                      |
 | **Gesch�tzter Aufwand** | S                                                                      |
-| **Status**              | Fertig                                                                  |
+| **Status**              | Fertig                                                                 |
 
 **Beschreibung:** Runbook f�r Alembic-Migrationen: `alembic upgrade head` im CI vor Deploy, Downgrade-Verfahren, Backup-Pflicht bei destruktiven Migrationen (DROP COLUMN), Snapshot-Restore bei Fehler. Kurzskizze in SUPPORT_OPS �6.1.
 
@@ -645,7 +645,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 3�4 LinkedIn-Posts mit Problem-Fokus ver�ffentlicht |
 | **Abh�ngigkeit**        | �                                                   |
 | **Gesch�tzter Aufwand** | S                                                   |
-| **Status**              | Blockiert: Manuell (LinkedIn-Setup)                                               |
+| **Status**              | Blockiert: Manuell (LinkedIn-Setup)                 |
 
 **Beschreibung:** 3�4 LinkedIn-Posts (je 200�300 W�rter) zu PWBS-relevanten Problemen ver�ffentlichen. Tonalit�t: klar, direkt, ohne Marketing-Floskeln. Themen: fragmentiertes Arbeitswissen, Meeting-Vorbereitung, Datenschutz bei KI-Tools. Nicht verkaufen, sondern Problembewusstsein schaffen.
 
@@ -661,7 +661,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Plugin ist im Obsidian Community Plugin Store eingereicht (Review kann 1�2 Wochen dauern) |
 | **Abh�ngigkeit**        | �                                                                                         |
 | **Gesch�tzter Aufwand** | M                                                                                         |
-| **Status**              | Blockiert: Manuell (Obsidian-Plugin Store)                                                                                     |
+| **Status**              | Blockiert: Manuell (Obsidian-Plugin Store)                                                |
 
 **Beschreibung:** Obsidian-Plugin finalisieren und im Obsidian Community Plugin Store einreichen. Nat�rlicher Akquisitionskanal f�r die Zielgruppe. Review-Prozess: 1�2 Wochen. Plugin-Code unter `obsidian-plugin/`.
 
@@ -677,7 +677,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Alle 6 Exit-Kriterien aus GTM_PLAN �6 sind evaluiert (je Kriterium: erf�llt/nicht erf�llt) |
 | **Abh�ngigkeit**        | LAUNCH-ANA-002 (Core Events), LAUNCH-UX-002 (TTFB), LAUNCH-GTM-001 (Design-Partner aktiv)  |
 | **Gesch�tzter Aufwand** | S                                                                                          |
-| **Status**              | Blockiert: ANA-002 + UX-002 + GTM-001 nicht Fertig                                         |
+| **Status**              | Blockiert: UX-002 + GTM-001 nicht Fertig (ANA-002 erledigt)                                |
 
 **Beschreibung:** Nach 4�6 Wochen Closed Beta alle 6 Exit-Kriterien systematisch evaluieren: (1) = 5 aktive Nutzer, (2) D7-Retention = 60 %, (3) TTFB = 20 Min, (4) kein offener P0-Bug, (5) = 3 Briefings/Nutzer/Woche, (6) 80 % der Nutzer bewerten Briefings als hilfreich. Entscheidung: Open-Beta-�bergang oder Iteration.
 
@@ -697,7 +697,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | README enth�lt aktuelle Projektbeschreibung, Setup-Anleitung und Status |
 | **Abh�ngigkeit**        | �                                                                       |
 | **Gesch�tzter Aufwand** | S                                                                       |
-| **Status**              | Fertig                                                       |
+| **Status**              | Fertig                                                                  |
 
 **Beschreibung:** README.md aktualisieren mit: aktuellem Projektstand (Phase 2 MVP), Setup-Anleitung (Docker Compose), aktiven Features, Link zu CHANGELOG.md.
 
@@ -713,7 +713,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | CHANGELOG.md enth�lt alle �nderungen seit letztem Release |
 | **Abh�ngigkeit**        | �                                                         |
 | **Gesch�tzter Aufwand** | XS                                                        |
-| **Status**              | Fertig                                         |
+| **Status**              | Fertig                                                    |
 
 **Beschreibung:** CHANGELOG.md mit allen �nderungen seit v0.1.0 aktualisieren (MVP-Fokussierung, Test-Performance, ADR-016 und alle weiteren �nderungen). Wird laufend gepflegt.
 

@@ -1,9 +1,9 @@
-﻿"""Tests for QuarterlyContextAssembler (TASK-155)."""
+"""Tests for QuarterlyContextAssembler (TASK-155)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -24,7 +24,7 @@ from pwbs.briefing.quarterly_context import (
 # ------------------------------------------------------------------
 
 OWNER_ID = uuid.uuid4()
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 
 
 def _make_assumption_row(
@@ -234,8 +234,8 @@ class TestQuarterlyBriefingContext:
         assert d["recurring_patterns"] == ["Security comes up in every sprint"]
 
     def test_dates_formatted_as_strings(self) -> None:
-        start = datetime(2026, 1, 1, tzinfo=timezone.utc)
-        end = datetime(2026, 3, 31, tzinfo=timezone.utc)
+        start = datetime(2026, 1, 1, tzinfo=UTC)
+        end = datetime(2026, 3, 31, tzinfo=UTC)
         ctx = QuarterlyBriefingContext(period_start=start, period_end=end)
         d = ctx.to_template_dict()
         assert d["period_start"] == "2026-01-01"

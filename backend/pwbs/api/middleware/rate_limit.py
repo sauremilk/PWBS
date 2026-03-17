@@ -1,4 +1,4 @@
-﻿"""Rate-Limiting middleware -- Redis-backed fixed-window counters (TASK-085).
+"""Rate-Limiting middleware -- Redis-backed fixed-window counters (TASK-085).
 
 Categories:
   auth    -- login/register endpoints, per-IP (5 req/60s)
@@ -37,14 +37,16 @@ _mem_counters: dict[str, collections.deque[float]] = collections.defaultdict(col
 
 # Conservative per-category limits for the in-memory fallback.
 _MEM_FALLBACK_LIMITS: dict[str, tuple[int, int]] = {
-    "auth": (5, 60),       # keep strict (brute-force protection)
-    "sync": (1, 300),      # keep strict
-    "general": (50, 60),   # halved from Redis-backed 100
+    "auth": (5, 60),  # keep strict (brute-force protection)
+    "sync": (1, 300),  # keep strict
+    "general": (50, 60),  # halved from Redis-backed 100
 }
 
 
 def _check_mem_rate_limit(
-    category: str, identifier: str, now: float,
+    category: str,
+    identifier: str,
+    now: float,
 ) -> tuple[bool, int, int, int]:
     """In-memory fixed-window rate check.
 
@@ -197,7 +199,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # In-memory fallback when Redis is unavailable
         if use_fallback:
             allowed, fb_remaining, fb_max, fb_window = _check_mem_rate_limit(
-                category, identifier, now,
+                category,
+                identifier,
+                now,
             )
             remaining = fb_remaining
             max_requests = fb_max

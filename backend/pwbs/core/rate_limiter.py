@@ -1,4 +1,4 @@
-﻿"""Per-user rate limiting and cost control for the LLM Gateway (TASK-070).
+"""Per-user rate limiting and cost control for the LLM Gateway (TASK-070).
 
 Provides:
 
@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any, Protocol
 
 from pwbs.core.exceptions import PWBSError
@@ -261,7 +261,7 @@ class LLMRateLimiter:
         RateLimitExceededError
             If any limit is exceeded.
         """
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         usage = await self._store.get_daily_usage(user_id, today)
 
         # 1. Daily call limit
@@ -319,7 +319,7 @@ class LLMRateLimiter:
         CostRecord
             The logged cost record.
         """
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         usage = await self._store.increment_usage(
             user_id,
             today,
@@ -335,7 +335,7 @@ class LLMRateLimiter:
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             estimated_cost_usd=estimated_cost_usd,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         logger.info(
@@ -364,7 +364,7 @@ class LLMRateLimiter:
         dict
             Keys: `calls_remaining`, `cost_remaining_usd`.
         """
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(UTC).date()
         usage = await self._store.get_daily_usage(user_id, today)
 
         return {

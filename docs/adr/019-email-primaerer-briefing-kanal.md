@@ -1,85 +1,85 @@
-﻿# ADR-019: E-Mail als primärer Briefing-Zustellkanal
+﻿# ADR-019: Email as Primary Briefing Delivery Channel
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-16
-**Entscheider:** Architektur-Review (Tiefenanalyse)
-
----
-
-## Kontext
-
-Briefings werden generiert und im Web-Dashboard angezeigt. Nutzer müssen die App aktiv öffnen, um ihr Morgenbriefing zu lesen. Die PRD-Hypothese (3 Briefing-Abrufe pro Woche) scheitert, wenn Nutzer die App nicht öffnen. E-Mail ist der Kanal, den alle drei Personas morgens als erstes nutzen.
-
-Die E-Mail-Infrastruktur ist durch TASK-177 zu ~80 % implementiert: `EmailService` mit SMTP/SendGrid-Backends, Jinja2-Templates, Celery-Task `send_briefing_emails`, User-Felder `email_briefing_enabled` und `briefing_email_time`, Frontend-Settings-UI. Sechs Lücken verhindern die Nutzung als primären Kanal: Default auf False, fehlendes MarkdownHTML, leere Sources, kein Meeting-Prep-E-Mail, kein Per-User-Timezone, kein Event-basierter Meeting-Trigger.
+**Status:** Accepted
+**Date:** 2026-03-16
+**Decision Makers:** Architecture Review (Deep Analysis)
 
 ---
 
-## Entscheidung
+## Context
 
-Wir schließen die sechs Lücken in der bestehenden TASK-177-Architektur und machen E-Mail zum primären Zustellkanal (opt-out statt opt-in). Das Web-Dashboard bleibt als Detailansicht erhalten. Konkret:
+Briefings are generated and displayed in the web dashboard. Users must actively open the app to read their morning briefing. The PRD hypothesis (3 briefing retrievals per week) fails if users don't open the app. Email is the channel all three personas use first thing in the morning.
 
-1. **Default ändern:** `email_briefing_enabled` Default auf `True` (Alembic-Migration + ORM)
-2. **MarkdownHTML:** `markdown`-Paket für E-Mail-Rendering, Template mit `| safe`
-3. **Sources durchreichen:** Quellenreferenzen aus DB laden statt `sources=[]`
-4. **Meeting-Prep-E-Mail:** `bt_map` erweitern, Chain nach on-demand Generierung
-5. **Idempotenz-Guard:** `briefing_email_sent_at` auf `briefings`-Tabelle
-6. Per-User-Timezone und Event-basierter Meeting-Trigger bleiben Phase-3-Aufgaben
+The email infrastructure is ~80% implemented through TASK-177: `EmailService` with SMTP/SendGrid backends, Jinja2 templates, Celery task `send_briefing_emails`, user fields `email_briefing_enabled` and `briefing_email_time`, frontend settings UI. Six gaps prevent its use as a primary channel: default set to False, missing Markdown→HTML conversion, empty sources, no meeting prep email, no per-user timezone, no event-based meeting trigger.
 
 ---
 
-## Optionen bewertet
+## Decision
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|---|---|---|---|
-| A: Lücken schließen (minimal) | 80 % existiert, isolierte Änderungen, kein neues Modul | Per-User-Timezone bleibt UTC |  **Gewählt** |
-| B: Neuer Delivery-Service | Zukunftssicher für Push | Over-engineering für MVP, verzögert Wirkung | Keine sofortige Engagement-Verbesserung |
-| C: Externer E-Mail-Service | SPF/DKIM out-of-the-box | Vendor-Lock-in, DSGVO-AVV nötig, Kosten | Abhängigkeit von Dritt-Service für Kernfunktion |
+We close the six gaps in the existing TASK-177 architecture and make email the primary delivery channel (opt-out instead of opt-in). The web dashboard remains as a detail view. Specifically:
 
----
-
-## Konsequenzen
-
-### Positive Konsequenzen
-
-- Massiv höhere Engagement-Rate: Briefings landen direkt in der Inbox
-- Aktivierungshürde eliminiert: Nutzer muss keine App öffnen
-- Meeting-Briefings 30 Min. vorher per E-Mail (on-demand Trigger)
-- Quellenreferenzen in E-Mails stärken Erklärbarkeits-Prinzip
-- Minimaler Aufwand: Baut vollständig auf TASK-177 auf
-
-### Negative Konsequenzen / Trade-offs
-
-- Bestandsnutzer erhalten nach Migration E-Mails (Mitigierung: Unsubscribe-Link in jeder E-Mail)
-- MarkdownHTML-Konvertierung muss XSS-sicher implementiert werden (Jinja2-Autoescaping + Markdown safe mode)
-- E-Mail-Duplikate bei Celery-Retry möglich ohne Idempotenz-Guard
-- Per-User-Timezone-Scheduling erst in Phase 3
-
-### Offene Fragen
-
-- Soll der Default-Wechsel nur für neue Registrierungen gelten oder auch Bestandsnutzer updaten?
-- SPF/DKIM/DMARC DNS-Setup: Welche Domain? (pwbs.app? briefings.pwbs.app?)
-- Soll eine Onboarding-E-Mail den Wechsel zum E-Mail-Kanal ankündigen?
+1. **Change Default:** `email_briefing_enabled` default to `True` (Alembic migration + ORM)
+2. **Markdown→HTML:** `markdown` package for email rendering, template with `| safe`
+3. **Pass Sources Through:** Load source references from DB instead of `sources=[]`
+4. **Meeting Prep Email:** Extend `bt_map`, chain after on-demand generation
+5. **Idempotency Guard:** `briefing_email_sent_at` on `briefings` table
+6. Per-user timezone and event-based meeting trigger remain Phase 3 tasks
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Keine neuen PII-Felder.** E-Mails werden an `users.email` gesendet (bereits vorhanden).
-- **Unsubscribe-Link** in jeder E-Mail (bereits im Base-Template implementiert).
-- **Opt-out statt Opt-in:** Rechtsgrundlage Art. 6 Abs. 1b (Vertragserfüllung)  Briefing-Zustellung ist Kernfunktion des Dienstes. Nutzer kann jederzeit deaktivieren.
-- **Keine Tracking-Pixel** in E-Mails (DSGVO-konform).
-
----
-
-## Sicherheitsimplikationen
-
-- **MarkdownHTML:** Muss über sanitized Markdown-Rendering erfolgen (kein raw HTML in Markdown erlauben). `markdown`-Paket mit deaktivierten raw-HTML-Extensions.
-- **Jinja2 Autoescaping:** `| safe` nur nach Markdown-Konvertierung verwenden, nicht auf User-Input.
-- **SMTP-Credentials:** Bereits über ENV-Variablen konfiguriert (SMTP_PASSWORD, SENDGRID_API_KEY).
-- **Idempotenz-Guard:** Verhindert Spam bei Celery-Retries.
+| Option                    | Advantages                                  | Disadvantages                                                        | Exclusion Reasons                                        |
+| ------------------------- | ------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------- |
+| A: Close Gaps (minimal)   | 80% exists, isolated changes, no new module | Per-user timezone remains UTC                                        | **Chosen**                                               |
+| B: New Delivery Service   | Future-proof for push                       | Over-engineering for MVP, delays impact                              | No immediate engagement improvement                      |
+| C: External Email Service | SPF/DKIM out-of-the-box                     | Vendor lock-in, GDPR DPA (Data Processing Agreement) required, costs | Dependency on third-party service for core functionality |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-Phase-3-Start: Per-User-Timezone-Scheduling und Event-basierter Meeting-Trigger evaluieren.
+### Positive Consequences
+
+- Massively higher engagement rate: Briefings land directly in the inbox
+- Activation barrier eliminated: Users don't need to open the app
+- Meeting briefings 30 min. before via email (on-demand trigger)
+- Source references in emails strengthen the explainability principle
+- Minimal effort: Builds entirely on TASK-177
+
+### Negative Consequences / Trade-offs
+
+- Existing users receive emails after migration (mitigation: unsubscribe link in every email)
+- Markdown→HTML conversion must be implemented XSS-safe (Jinja2 autoescaping + Markdown safe mode)
+- Email duplicates possible on Celery retry without idempotency guard
+- Per-user timezone scheduling only in Phase 3
+
+### Open Questions
+
+- Should the default change apply only to new registrations or also update existing users?
+- SPF/DKIM/DMARC DNS setup: Which domain? (pwbs.app? briefings.pwbs.app?)
+- Should an onboarding email announce the switch to the email channel?
+
+---
+
+## GDPR Implications
+
+- **No new PII fields.** Emails are sent to `users.email` (already existing).
+- **Unsubscribe link** in every email (already implemented in base template).
+- **Opt-out instead of opt-in:** Legal basis Art. 6(1)(b) (contract performance) – briefing delivery is a core function of the service. Users can deactivate at any time.
+- **No tracking pixels** in emails (GDPR-compliant).
+
+---
+
+## Security Implications
+
+- **Markdown→HTML:** Must use sanitized Markdown rendering (no raw HTML allowed in Markdown). `markdown` package with disabled raw HTML extensions.
+- **Jinja2 Autoescaping:** `| safe` only used after Markdown conversion, not on user input.
+- **SMTP Credentials:** Already configured via environment variables (SMTP_PASSWORD, SENDGRID_API_KEY).
+- **Idempotency Guard:** Prevents spam on Celery retries.
+
+---
+
+## Revision Date
+
+Phase 3 start: Evaluate per-user timezone scheduling and event-based meeting trigger.

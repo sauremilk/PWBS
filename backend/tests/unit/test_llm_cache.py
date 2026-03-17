@@ -6,19 +6,15 @@ All Redis calls are mocked – no real network access.
 from __future__ import annotations
 
 import json
-import math
 import time
 from unittest.mock import AsyncMock, patch
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
 from pwbs.services.llm_cache import (
     DEFAULT_TTLS,
-    LLM_CACHE_REQUESTS,
     SIMILARITY_THRESHOLD,
-    CachedLLMResponse,
-    CacheResult,
     _cosine_similarity,
     _embedding_hash,
     _filter_hash,

@@ -1,4 +1,4 @@
-﻿"""Security-Headers middleware (TASK-093).
+"""Security-Headers middleware (TASK-093).
 
 Adds defensive HTTP headers to every response:
   - X-Content-Type-Options: nosniff

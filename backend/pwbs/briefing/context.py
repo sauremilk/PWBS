@@ -1,4 +1,4 @@
-﻿"""Morgenbriefing Kontextassemblierung (TASK-076).
+"""Morgenbriefing Kontextassemblierung (TASK-076).
 
 Implements the 5-step context assembly process for morning briefings:
 1. Fetch today's calendar events from stored documents
@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import Protocol, runtime_checkable
 
 import tiktoken
@@ -327,7 +327,7 @@ class MorningContextAssembler:
             target_date.year,
             target_date.month,
             target_date.day,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
         day_end = day_start + timedelta(days=1)
 

@@ -1,4 +1,4 @@
-﻿"""Tests for the reminders module (TASK-131).
+"""Tests for the reminders module (TASK-131).
 
 Tests:
 - extract_followups: follow-up detection from text content
@@ -10,8 +10,8 @@ Tests:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -255,7 +255,7 @@ class TestCreateReminder:
         mock_db.add = MagicMock()
         mock_db.flush = AsyncMock()
 
-        due = datetime.now(tz=timezone.utc) + timedelta(days=3)
+        due = datetime.now(tz=UTC) + timedelta(days=3)
         reminder = await create_reminder(
             mock_db,
             user_id=uuid.uuid4(),
@@ -359,7 +359,7 @@ class TestUpdateReminderStatus:
 
         mock_reminder = MagicMock()
         mock_reminder.status = ReminderStatus.PENDING.value
-        mock_reminder.due_at = datetime.now(tz=timezone.utc)
+        mock_reminder.due_at = datetime.now(tz=UTC)
         mock_reminder.resolved_at = None
 
         mock_result = MagicMock()
@@ -377,7 +377,7 @@ class TestUpdateReminderStatus:
         )
         assert result is not None
         assert result.status == ReminderStatus.SNOOZED.value
-        assert result.due_at > datetime.now(tz=timezone.utc)
+        assert result.due_at > datetime.now(tz=UTC)
         assert result.resolved_at is None
 
     @pytest.mark.asyncio
@@ -472,7 +472,7 @@ class TestAPISchemas:
             "due_at": None,
             "responsible_person": None,
             "source_document_id": None,
-            "created_at": datetime.now(tz=timezone.utc),
+            "created_at": datetime.now(tz=UTC),
             "resolved_at": None,
         }
         resp = ReminderResponse(**data)

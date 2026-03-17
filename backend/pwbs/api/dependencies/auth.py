@@ -1,4 +1,4 @@
-﻿"""Auth dependencies for FastAPI route injection (TASK-086).
+"""Auth dependencies for FastAPI route injection (TASK-086).
 
 Provides `get_current_user` as a FastAPI `Depends` callable that
 extracts and validates the JWT from the `Authorization: Bearer <token>`
@@ -43,7 +43,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "INVALID_TOKEN", "message": "Invalid or expired token"},
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
     stmt = select(User).where(User.id == payload.user_id)
     result = await db.execute(stmt)

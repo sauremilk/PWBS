@@ -52,7 +52,7 @@ def create_weekly_snapshots(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("create_weekly_snapshots failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _create_snapshots_async() -> dict[str, object]:

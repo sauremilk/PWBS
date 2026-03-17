@@ -52,7 +52,7 @@ def generate_proactive_insights(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("generate_proactive_insights failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _generate_insights_async() -> dict[str, object]:
@@ -126,9 +126,7 @@ async def _generate_insights_async() -> dict[str, object]:
 
                 users_processed += 1
         except Exception:
-            logger.exception(
-                "Failed to generate insights for user_id=%s", user.id
-            )
+            logger.exception("Failed to generate insights for user_id=%s", user.id)
 
     return {
         "users_processed": users_processed,

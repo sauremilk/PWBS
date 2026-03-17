@@ -5,8 +5,8 @@ Revises: 0002
 Create Date: 2026-03-14
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers
@@ -19,7 +19,12 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "decisions",
-        sa.Column("id", postgresql.UUID(as_uuid=True), server_default=sa.text("gen_random_uuid()"), nullable=False),
+        sa.Column(
+            "id",
+            postgresql.UUID(as_uuid=True),
+            server_default=sa.text("gen_random_uuid()"),
+            nullable=False,
+        ),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("summary", sa.Text(), nullable=False),
         sa.Column("pro_arguments", postgresql.JSONB(), server_default="[]", nullable=False),
@@ -32,8 +37,12 @@ def upgrade() -> None:
         sa.Column("source_document_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("neo4j_node_id", sa.Text(), nullable=True),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["source_document_id"], ["documents.id"], ondelete="SET NULL"),

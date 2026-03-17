@@ -1,9 +1,9 @@
-﻿"""Tests for Meeting-Vorbereitung Kontextassemblierung (TASK-077)."""
+"""Tests for Meeting-Vorbereitung Kontextassemblierung (TASK-077)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -13,7 +13,6 @@ from pwbs.briefing.meeting_context import (
     MeetingContextAssembler,
     MeetingContextConfig,
     MeetingGraphService,
-    MeetingPrepContext,
     NullMeetingGraphService,
     ParticipantContext,
 )
@@ -25,7 +24,7 @@ from pwbs.search.service import SemanticSearchResult
 
 USER_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 EVENT_ID = "evt-001"
-NOW = datetime(2026, 6, 1, 9, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 6, 1, 9, 0, 0, tzinfo=UTC)
 
 
 # ------------------------------------------------------------------
@@ -376,7 +375,9 @@ class TestSemanticSearch:
         await asm.assemble(USER_ID, EVENT_ID)
 
         call_args = search_svc.search.call_args
-        query = call_args.kwargs.get("query") or call_args[1].get("query", call_args[0][0] if call_args[0] else "")
+        query = call_args.kwargs.get("query") or call_args[1].get(
+            "query", call_args[0][0] if call_args[0] else ""
+        )
         assert "Architecture Review" in query
         assert "Alice" in query
 
@@ -390,10 +391,14 @@ class TestOpenItems:
     @pytest.mark.asyncio
     async def test_open_items_aggregated(self) -> None:
         alice_ctx = ParticipantContext(
-            name="Alice", known=True, open_items=["Item A"],
+            name="Alice",
+            known=True,
+            open_items=["Item A"],
         )
         bob_ctx = ParticipantContext(
-            name="Bob", known=True, open_items=["Item B"],
+            name="Bob",
+            known=True,
+            open_items=["Item B"],
         )
         graph = _make_graph_service(
             known_participants={"Alice": alice_ctx, "Bob": bob_ctx},
@@ -414,10 +419,14 @@ class TestOpenItems:
     @pytest.mark.asyncio
     async def test_duplicate_open_items_deduplicated(self) -> None:
         alice_ctx = ParticipantContext(
-            name="Alice", known=True, open_items=["Shared Item"],
+            name="Alice",
+            known=True,
+            open_items=["Shared Item"],
         )
         bob_ctx = ParticipantContext(
-            name="Bob", known=True, open_items=["Shared Item"],
+            name="Bob",
+            known=True,
+            open_items=["Shared Item"],
         )
         graph = _make_graph_service(
             known_participants={"Alice": alice_ctx, "Bob": bob_ctx},
@@ -450,10 +459,7 @@ class TestTokenBudget:
 
     @pytest.mark.asyncio
     async def test_large_context_trimmed(self) -> None:
-        many_docs = [
-            _make_search_result(content="x " * 300, title=f"Doc {i}")
-            for i in range(30)
-        ]
+        many_docs = [_make_search_result(content="x " * 300, title=f"Doc {i}") for i in range(30)]
         asm = _make_assembler(
             search_results=many_docs,
             config=MeetingContextConfig(token_budget=500),
@@ -465,13 +471,12 @@ class TestTokenBudget:
     @pytest.mark.asyncio
     async def test_documents_trimmed_before_open_items(self) -> None:
         alice_ctx = ParticipantContext(
-            name="Alice", known=True, open_items=["Important item"],
+            name="Alice",
+            known=True,
+            open_items=["Important item"],
         )
         graph = _make_graph_service(known_participants={"Alice": alice_ctx})
-        many_docs = [
-            _make_search_result(content="y " * 200, title=f"Doc {i}")
-            for i in range(20)
-        ]
+        many_docs = [_make_search_result(content="y " * 200, title=f"Doc {i}") for i in range(20)]
         session = _make_session(
             _make_event_row(
                 participants=[{"name": "Alice", "email": "a@x.com"}],

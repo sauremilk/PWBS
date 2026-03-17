@@ -43,9 +43,9 @@ from pwbs.core.llm_gateway import LLMGateway, LLMRequest, LLMUsage
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "StructuredOutputService",
-    "StructuredOutputResult",
     "StructuredOutputError",
+    "StructuredOutputResult",
+    "StructuredOutputService",
 ]
 
 T = TypeVar("T", bound=BaseModel)

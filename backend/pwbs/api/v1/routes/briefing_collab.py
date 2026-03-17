@@ -138,7 +138,7 @@ async def mark_as_read(
     "/{briefing_id}/comments",
     response_model=schemas.CommentResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Inline-Kommentar hinzufügen",
+    summary="Add inline comment",
 )
 async def create_comment(
     briefing_id: uuid.UUID,

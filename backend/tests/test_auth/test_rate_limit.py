@@ -1,4 +1,4 @@
-﻿"""Tests for Rate-Limiting middleware (TASK-085)."""
+"""Tests for Rate-Limiting middleware (TASK-085)."""
 
 from __future__ import annotations
 
@@ -99,9 +99,7 @@ class TestClassifyRequest:
         assert cat == "general"
 
     def test_sync_endpoint(self) -> None:
-        req = _make_request(
-            path="/api/v1/connectors/google-calendar/sync", method="POST"
-        )
+        req = _make_request(path="/api/v1/connectors/google-calendar/sync", method="POST")
         cat, identifier, max_req, window = _classify_request(req)
         assert cat == "sync"
         assert "google-calendar" in identifier
@@ -127,9 +125,7 @@ class TestClassifyRequest:
         assert window == 60
 
     def test_general_with_user_id(self) -> None:
-        req = _make_request(
-            path="/api/v1/search", method="POST", user_id="user-456"
-        )
+        req = _make_request(path="/api/v1/search", method="POST", user_id="user-456")
         cat, identifier, *_ = _classify_request(req)
         assert cat == "general"
         assert identifier == "user-456"
@@ -229,9 +225,7 @@ class TestRateLimitMiddleware:
         """Sync endpoints should block after 1 request in 5 minutes."""
         mock_redis.pipeline().execute = AsyncMock(return_value=[2, True])
 
-        req = _make_request(
-            path="/api/v1/connectors/google-calendar/sync", method="POST"
-        )
+        req = _make_request(path="/api/v1/connectors/google-calendar/sync", method="POST")
 
         with patch(
             "pwbs.api.middleware.rate_limit.get_redis_client",
@@ -242,9 +236,7 @@ class TestRateLimitMiddleware:
         assert result.status_code == 429
 
     @pytest.mark.asyncio
-    async def test_fail_open_on_redis_error(
-        self, middleware: RateLimitMiddleware
-    ) -> None:
+    async def test_fail_open_on_redis_error(self, middleware: RateLimitMiddleware) -> None:
         """Redis failure should fall back to in-memory counters."""
         reset_mem_counters()
         call_next = AsyncMock()
@@ -265,9 +257,7 @@ class TestRateLimitMiddleware:
         assert result.headers["X-RateLimit-Limit"] == "50"
 
     @pytest.mark.asyncio
-    async def test_fail_open_on_pipeline_error(
-        self, middleware: RateLimitMiddleware
-    ) -> None:
+    async def test_fail_open_on_pipeline_error(self, middleware: RateLimitMiddleware) -> None:
         """Redis pipeline error should fall back to in-memory counters."""
         reset_mem_counters()
         redis = MagicMock()

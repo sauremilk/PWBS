@@ -11,8 +11,7 @@ Tests covering:
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timedelta, timezone
-from typing import Any
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -29,8 +28,6 @@ from pwbs.briefing.persistence import (
 )
 from pwbs.briefing.weekly_context import (
     NullWeeklyGraphService,
-    ProjectProgress,
-    TopicSummary,
     WeeklyBriefingConfig,
     WeeklyBriefingContext,
     WeeklyContextAssembler,
@@ -60,26 +57,30 @@ def _mock_session_with_documents(
     documents: list[dict] | None = None,
 ) -> AsyncMock:
     """Create a mock async session that returns documents."""
-    docs = documents if documents is not None else [
-        {
-            "doc_id": str(uuid.uuid4()),
-            "title": "Sprint Planning Notes",
-            "source_type": "notion",
-            "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=timezone.utc),
-        },
-        {
-            "doc_id": str(uuid.uuid4()),
-            "title": "Sprint Review Meeting",
-            "source_type": "zoom",
-            "created_at": datetime(2025, 6, 12, 14, 0, tzinfo=timezone.utc),
-        },
-        {
-            "doc_id": str(uuid.uuid4()),
-            "title": "Sprint Retrospective Notes",
-            "source_type": "notion",
-            "created_at": datetime(2025, 6, 11, 16, 0, tzinfo=timezone.utc),
-        },
-    ]
+    docs = (
+        documents
+        if documents is not None
+        else [
+            {
+                "doc_id": str(uuid.uuid4()),
+                "title": "Sprint Planning Notes",
+                "source_type": "notion",
+                "created_at": datetime(2025, 6, 13, 10, 0, tzinfo=UTC),
+            },
+            {
+                "doc_id": str(uuid.uuid4()),
+                "title": "Sprint Review Meeting",
+                "source_type": "zoom",
+                "created_at": datetime(2025, 6, 12, 14, 0, tzinfo=UTC),
+            },
+            {
+                "doc_id": str(uuid.uuid4()),
+                "title": "Sprint Retrospective Notes",
+                "source_type": "notion",
+                "created_at": datetime(2025, 6, 11, 16, 0, tzinfo=UTC),
+            },
+        ]
+    )
 
     # Build mock rows
     mock_rows = []
@@ -115,8 +116,13 @@ def _make_template() -> MagicMock:
     tpl.system_prompt = "Du bist ein Briefing-Assistent."
     tpl.template = "## Wochenbriefing\n{{ week_start }} – {{ week_end }}"
     tpl.required_context = [
-        "week_start", "week_end", "top_topics", "decisions",
-        "project_progress", "open_items", "recent_documents",
+        "week_start",
+        "week_end",
+        "top_topics",
+        "decisions",
+        "project_progress",
+        "open_items",
+        "recent_documents",
     ]
     tpl.temperature = 0.3
     tpl.max_output_tokens = 1500
@@ -135,12 +141,14 @@ def _make_gateway(
     content: str = "# Wochenzusammenfassung\n\nDie Woche war produktiv. [Quelle: Sprint Notes, 13.06.2025]",
 ) -> AsyncMock:
     gw = AsyncMock()
-    gw.generate = AsyncMock(return_value=LLMResponse(
-        content=content,
-        usage=MOCK_USAGE,
-        provider=LLMProvider.CLAUDE,
-        model="claude-sonnet-4-20250514",
-    ))
+    gw.generate = AsyncMock(
+        return_value=LLMResponse(
+            content=content,
+            usage=MOCK_USAGE,
+            provider=LLMProvider.CLAUDE,
+            model="claude-sonnet-4-20250514",
+        )
+    )
     return gw
 
 
@@ -385,7 +393,9 @@ class TestTokenBudget:
             week_start="08.06.2025",
             week_end="15.06.2025",
             top_topics=[{"name": "sprint", "mentions": 5, "sources": "notion"}],
-            decisions=[{"title": "Use FastAPI", "project": "PWBS", "status": "resolved", "context": ""}],
+            decisions=[
+                {"title": "Use FastAPI", "project": "PWBS", "status": "resolved", "context": ""}
+            ],
             project_progress=[],
             open_items=[],
             recent_documents=[
@@ -413,7 +423,8 @@ class TestNullWeeklyGraphService:
     async def test_returns_empty_decisions(self) -> None:
         svc = NullWeeklyGraphService()
         result = await svc.get_week_decisions(
-            USER_ID, datetime.now(timezone.utc),
+            USER_ID,
+            datetime.now(UTC),
         )
         assert result == []
 
@@ -421,7 +432,8 @@ class TestNullWeeklyGraphService:
     async def test_returns_empty_project_entities(self) -> None:
         svc = NullWeeklyGraphService()
         result = await svc.get_project_entities(
-            USER_ID, datetime.now(timezone.utc),
+            USER_ID,
+            datetime.now(UTC),
         )
         assert result == []
 
@@ -524,7 +536,7 @@ class TestWeeklyBriefingPersistence:
         session.add = MagicMock()
         session.flush = AsyncMock()
         svc = BriefingPersistenceService(session)
-        now = datetime(2025, 6, 15, 17, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 17, 0, tzinfo=UTC)
 
         exp = svc._calculate_expiry(BriefingType.WEEKLY, now)
 
@@ -536,7 +548,7 @@ class TestWeeklyBriefingPersistence:
         session.flush = AsyncMock()
         config = PersistenceConfig(weekly_expiry_hours=72)
         svc = BriefingPersistenceService(session, config)
-        now = datetime(2025, 6, 15, 17, 0, tzinfo=timezone.utc)
+        now = datetime(2025, 6, 15, 17, 0, tzinfo=UTC)
 
         exp = svc._calculate_expiry(BriefingType.WEEKLY, now)
 

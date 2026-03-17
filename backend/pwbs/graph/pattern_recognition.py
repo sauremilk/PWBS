@@ -1,4 +1,4 @@
-﻿"""Mustererkennung ueber Knowledge Graph (TASK-139).
+"""Mustererkennung ueber Knowledge Graph (TASK-139).
 
 Detects patterns in the Neo4j knowledge graph:
 1. Recurring themes: Topics appearing in >N distinct contexts within M days
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
 from uuid import UUID
@@ -103,9 +103,7 @@ class PatternRecognitionConfig:
 class PatternGraphSession(Protocol):
     """Protocol for async Neo4j session/transaction."""
 
-    async def run(
-        self, query: str, parameters: dict[str, Any] | None = None
-    ) -> Any: ...
+    async def run(self, query: str, parameters: dict[str, Any] | None = None) -> Any: ...
 
 
 # ------------------------------------------------------------------
@@ -168,9 +166,7 @@ LIMIT $limit
 class NullPatternGraphService:
     """No-op fallback when Neo4j is unavailable."""
 
-    async def run(
-        self, query: str, parameters: dict[str, Any] | None = None
-    ) -> Any:
+    async def run(self, query: str, parameters: dict[str, Any] | None = None) -> Any:
         return _EmptyResult()
 
 
@@ -221,7 +217,7 @@ class PatternRecognitionService:
         owner_id: UUID,
     ) -> list[DetectedPattern]:
         """Find topics appearing in many distinct contexts recently."""
-        since = datetime.now(tz=timezone.utc)
+        since = datetime.now(tz=UTC)
         since_iso = since.replace(
             day=max(1, since.day),
         )
@@ -254,10 +250,7 @@ class PatternRecognitionService:
             },
         )
         records = await result.data()
-        return [
-            self._to_pattern(r, PatternType.CHANGING_ASSUMPTION)
-            for r in records
-        ]
+        return [self._to_pattern(r, PatternType.CHANGING_ASSUMPTION) for r in records]
 
     async def find_unresolved_questions(
         self,
@@ -273,10 +266,7 @@ class PatternRecognitionService:
             },
         )
         records = await result.data()
-        return [
-            self._to_pattern(r, PatternType.UNRESOLVED_QUESTION)
-            for r in records
-        ]
+        return [self._to_pattern(r, PatternType.UNRESOLVED_QUESTION) for r in records]
 
     async def detect_all_patterns(
         self,

@@ -14,7 +14,7 @@ Usage in route handlers:
 from __future__ import annotations
 
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,16 +51,19 @@ def require_org_permission(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={"code": "INVALID_ORG_ID", "message": "org_id must be a valid UUID"},
-            )
+            ) from None
         try:
             role = await _require_permission(
-                db, org_id=org_id, user_id=user.id, permission=permission,
+                db,
+                org_id=org_id,
+                user_id=user.id,
+                permission=permission,
             )
         except PermissionError as exc:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={"code": "FORBIDDEN", "message": str(exc)},
-            )
+            ) from exc
         return role
 
     return _dependency

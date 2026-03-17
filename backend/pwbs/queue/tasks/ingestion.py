@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -59,7 +59,7 @@ def run_connector(self: object, connection_id: str, owner_id: str) -> dict[str, 
         return result
     except Exception as exc:
         logger.error("run_connector failed: connection_id=%s error=%s", connection_id, exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _run_connector_async(connection_id: str, owner_id: str) -> dict[str, object]:
@@ -135,7 +135,7 @@ async def _run_connector_async(connection_id: str, owner_id: str) -> dict[str, o
 
         # Update watermark
         if sync_result.new_cursor is not None:
-            connection.watermark = datetime.now(timezone.utc)
+            connection.watermark = datetime.now(UTC)
 
         await db.commit()
 
@@ -178,7 +178,7 @@ def run_all_connectors(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("run_all_connectors failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _run_all_connectors_async() -> dict[str, object]:
@@ -222,7 +222,7 @@ def cleanup_expired_documents(self: object) -> dict[str, object]:
         return result
     except Exception as exc:
         logger.error("cleanup_expired_documents failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _cleanup_expired_async() -> dict[str, int]:

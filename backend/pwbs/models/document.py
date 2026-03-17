@@ -30,16 +30,16 @@ class Document(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     processing_status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")
 
     # Multi-tenancy: document visibility within an organization
-    visibility: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default="private"
-    )
+    visibility: Mapped[str] = mapped_column(Text, nullable=False, server_default="private")
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="SET NULL"),
         nullable=True,
     )
 
-    user: Mapped["User"] = relationship(back_populates="documents")  # noqa: F821
-    chunks: Mapped[list["Chunk"]] = relationship(  # noqa: F821
-        back_populates="document", cascade="all, delete-orphan", lazy="selectin",
+    user: Mapped[User] = relationship(back_populates="documents")  # noqa: F821
+    chunks: Mapped[list[Chunk]] = relationship(  # noqa: F821
+        back_populates="document",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )

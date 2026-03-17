@@ -6,7 +6,7 @@ import io
 import json
 import uuid
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -119,12 +119,12 @@ class TestIsExportExpired:
 
     def test_not_expired_when_future(self) -> None:
         export = MagicMock()
-        export.expires_at = datetime.now(tz=timezone.utc) + timedelta(hours=12)
+        export.expires_at = datetime.now(tz=UTC) + timedelta(hours=12)
         assert is_export_expired(export) is False
 
     def test_expired_when_past(self) -> None:
         export = MagicMock()
-        export.expires_at = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+        export.expires_at = datetime.now(tz=UTC) - timedelta(hours=1)
         assert is_export_expired(export) is True
 
 
@@ -238,8 +238,8 @@ class TestCollectors:
         doc.language = "de"
         doc.chunk_count = 0
         doc.processing_status = "done"
-        doc.created_at = datetime.now(tz=timezone.utc)
-        doc.updated_at = datetime.now(tz=timezone.utc)
+        doc.created_at = datetime.now(tz=UTC)
+        doc.updated_at = datetime.now(tz=UTC)
 
         db = _mock_scalars([doc])
         result = await _collect_documents(USER_ID, db)
@@ -282,7 +282,7 @@ class TestCollectors:
         briefing.briefing_type = "morning"
         briefing.title = "Morning"
         briefing.content = "Good morning"
-        briefing.generated_at = datetime.now(tz=timezone.utc)
+        briefing.generated_at = datetime.now(tz=UTC)
 
         db = _mock_scalars([briefing])
         result = await _collect_briefings(USER_ID, db)
@@ -296,7 +296,7 @@ class TestCollectors:
         entry.action = "POST"
         entry.resource_type = "document"
         entry.resource_id = uuid.uuid4()
-        entry.created_at = datetime.now(tz=timezone.utc)
+        entry.created_at = datetime.now(tz=UTC)
 
         db = _mock_scalars([entry])
         result = await _collect_audit_log(USER_ID, db)

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -29,7 +29,7 @@ from pwbs.search.reranker import RerankerConfig, SearchReranker
 FIXTURE_PATH = (
     Path(__file__).parent.parent / "fixtures" / "search_relevance" / "query_document_pairs.json"
 )
-_NOW = datetime(2026, 3, 20, 12, 0, 0, tzinfo=timezone.utc)
+_NOW = datetime(2026, 3, 20, 12, 0, 0, tzinfo=UTC)
 
 
 def _load_benchmark_pairs() -> list[dict]:

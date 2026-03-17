@@ -1,1 +1,1 @@
-﻿"""Vertikale Spezialisierungen fuer Wissensarbeiter (TASK-154)."""
+"""Vertical specializations for knowledge workers (TASK-154)."""

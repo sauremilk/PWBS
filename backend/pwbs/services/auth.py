@@ -1,4 +1,4 @@
-﻿"""JWT authentication service (TASK-081, TASK-084).
+"""JWT authentication service (TASK-081, TASK-084).
 
 Provides access-token generation (RS256-signed) and opaque refresh-token
 management backed by the ``refresh_tokens`` table.
@@ -18,7 +18,7 @@ import hashlib
 import logging
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import jwt
@@ -109,7 +109,7 @@ def create_access_token(user_id: uuid.UUID) -> str:
     Lifetime is configured via `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` (default 15).
     """
     settings = get_settings()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + timedelta(minutes=settings.jwt_access_token_expire_minutes)
 
     claims = {
@@ -142,8 +142,8 @@ def validate_access_token(token: str) -> TokenPayload:
     try:
         return TokenPayload(
             user_id=uuid.UUID(payload["sub"]),
-            exp=datetime.fromtimestamp(payload["exp"], tz=timezone.utc),
-            iat=datetime.fromtimestamp(payload["iat"], tz=timezone.utc),
+            exp=datetime.fromtimestamp(payload["exp"], tz=UTC),
+            iat=datetime.fromtimestamp(payload["iat"], tz=UTC),
         )
     except (KeyError, ValueError) as exc:
         raise AuthenticationError(
@@ -176,7 +176,7 @@ async def create_refresh_token(
     settings = get_settings()
     raw_token = secrets.token_urlsafe(48)
     token_hash = _hash_token(raw_token)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     db_token = RefreshToken(
         user_id=user_id,
@@ -218,9 +218,9 @@ async def validate_refresh_token(
             code="REFRESH_TOKEN_REVOKED",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if db_token.expires_at.tzinfo is None:
-        expires_at = db_token.expires_at.replace(tzinfo=timezone.utc)
+        expires_at = db_token.expires_at.replace(tzinfo=UTC)
     else:
         expires_at = db_token.expires_at
     if now >= expires_at:
@@ -238,7 +238,7 @@ async def revoke_refresh_token(
 ) -> None:
     """Revoke a single refresh token by its plaintext value."""
     token_hash = _hash_token(token)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     await db.execute(
         update(RefreshToken)
         .where(RefreshToken.token_hash == token_hash)
@@ -255,7 +255,7 @@ async def revoke_all_user_tokens(
 
     Returns the number of tokens revoked.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     result = await db.execute(
         update(RefreshToken)
         .where(RefreshToken.user_id == user_id)
@@ -273,7 +273,7 @@ async def _revoke_token_family(
     db: AsyncSession,
 ) -> None:
     """Revoke all tokens in a rotation family (replay-detection helper)."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     await db.execute(
         update(RefreshToken)
         .where(RefreshToken.family_id == family_id)
@@ -334,7 +334,7 @@ async def rotate_refresh_token(
     db_token = await validate_refresh_token(old_token, db)
 
     # Step 2: revoke the consumed token
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     db_token.revoked_at = now
     await db.flush()
 

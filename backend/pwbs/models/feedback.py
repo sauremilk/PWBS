@@ -17,7 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pwbs.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
-    from pwbs.models.user import User  # noqa: F401
+    from pwbs.models.user import User
 
 
 class Feedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -56,4 +56,4 @@ class Feedback(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(lazy="selectin")
+    user: Mapped[User] = relationship(lazy="selectin")

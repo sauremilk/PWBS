@@ -1,1 +1,1 @@
-﻿"""RBAC - Role-Based Access Control for organizations (TASK-153)."""
+"""RBAC - Role-Based Access Control for organizations (TASK-153)."""

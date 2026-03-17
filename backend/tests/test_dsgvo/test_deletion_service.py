@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -56,7 +56,7 @@ class TestScheduleDeletion:
         assert isinstance(result, datetime)
         assert result.tzinfo is not None
         # Should be ~30 days from now
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         delta = result - now
         assert GRACE_PERIOD_DAYS - 1 <= delta.days <= GRACE_PERIOD_DAYS
         assert user.deletion_scheduled_at == result
@@ -78,7 +78,7 @@ class TestScheduleDeletion:
 
     @pytest.mark.asyncio
     async def test_already_scheduled_raises_value_error(self) -> None:
-        future = datetime.now(tz=timezone.utc) + timedelta(days=15)
+        future = datetime.now(tz=UTC) + timedelta(days=15)
         user = _make_user(deletion_scheduled_at=future)
         db = AsyncMock()
 
@@ -98,7 +98,7 @@ class TestScheduleDeletion:
 class TestCancelDeletion:
     @pytest.mark.asyncio
     async def test_cancels_pending_deletion(self) -> None:
-        future = datetime.now(tz=timezone.utc) + timedelta(days=15)
+        future = datetime.now(tz=UTC) + timedelta(days=15)
         user = _make_user(deletion_scheduled_at=future)
         db = AsyncMock()
 
@@ -126,7 +126,7 @@ class TestCancelDeletion:
 class TestCleanupExpiredAccounts:
     @pytest.mark.asyncio
     async def test_deletes_expired_accounts(self) -> None:
-        past = datetime.now(tz=timezone.utc) - timedelta(days=1)
+        past = datetime.now(tz=UTC) - timedelta(days=1)
         user1 = _make_user(user_id=uuid.uuid4(), deletion_scheduled_at=past)
 
         db = AsyncMock()
@@ -159,7 +159,7 @@ class TestCleanupExpiredAccounts:
 
     @pytest.mark.asyncio
     async def test_continues_on_individual_failure(self) -> None:
-        past = datetime.now(tz=timezone.utc) - timedelta(days=1)
+        past = datetime.now(tz=UTC) - timedelta(days=1)
         user1 = _make_user(user_id=uuid.uuid4(), deletion_scheduled_at=past)
         user2 = _make_user(user_id=uuid.uuid4(), deletion_scheduled_at=past)
 

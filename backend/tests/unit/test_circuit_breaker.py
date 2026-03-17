@@ -16,8 +16,7 @@ At least 8 scenarios as required by acceptance criteria:
 from __future__ import annotations
 
 import asyncio
-import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 

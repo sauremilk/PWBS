@@ -1,1 +1,1 @@
-﻿"""PWBS Queue package - Celery + Redis task queue infrastructure (TASK-121)."""
+"""PWBS Queue package - Celery + Redis task queue infrastructure (TASK-121)."""

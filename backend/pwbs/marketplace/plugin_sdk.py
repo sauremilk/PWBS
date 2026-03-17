@@ -115,16 +115,16 @@ class BasePlugin(abc.ABC):
     async def execute(self, context: PluginContext, **kwargs: Any) -> PluginResult:
         """Run the plugin's main logic within a sandboxed context."""
 
-    async def on_install(self, context: PluginContext) -> None:
+    async def on_install(self, context: PluginContext) -> None:  # noqa: B027
         """Hook called once when a user installs the plugin."""
 
-    async def on_activate(self, context: PluginContext) -> None:
+    async def on_activate(self, context: PluginContext) -> None:  # noqa: B027
         """Hook called when the plugin is activated (enabled) for a user."""
 
-    async def on_deactivate(self, context: PluginContext) -> None:
+    async def on_deactivate(self, context: PluginContext) -> None:  # noqa: B027
         """Hook called when the plugin is deactivated (disabled) for a user."""
 
-    async def on_uninstall(self, context: PluginContext) -> None:
+    async def on_uninstall(self, context: PluginContext) -> None:  # noqa: B027
         """Hook called when a user uninstalls the plugin."""
 
     async def validate_config(self, config: dict[str, Any]) -> list[str]:
@@ -174,7 +174,9 @@ class BriefingTemplatePlugin(BasePlugin):
         graph_context = kwargs.get("graph_context")
         try:
             briefing = await self.generate_briefing(
-                context, search_results=search_results, graph_context=graph_context,
+                context,
+                search_results=search_results,
+                graph_context=graph_context,
             )
             return PluginResult(
                 success=True,

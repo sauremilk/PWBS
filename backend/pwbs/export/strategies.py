@@ -155,7 +155,7 @@ class PdfExportStrategy(ExportStrategy):
         except ImportError:
             raise ImportError(
                 "PDF export requires 'weasyprint'. Install it with: pip install weasyprint"
-            )
+            ) from None
         buf = io.BytesIO()
         HTML(string=html_content).write_pdf(buf)
         return buf.getvalue()

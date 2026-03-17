@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -121,7 +121,7 @@ class AssumptionTrackerService:
                 f"Cannot change status from '{assumption.status}' (terminal state)",
                 code="STATUS_TERMINAL",
             )
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         assumption.status = new_status
         assumption.status_changed_at = now
         assumption.status_reason = reason
@@ -139,7 +139,7 @@ class AssumptionTrackerService:
         """Append an evidence entry to the assumption's evidence trail."""
         assumption = await self.get(assumption_id, owner_id)
         entry: dict[str, Any] = {
-            "date": datetime.now(timezone.utc).isoformat(),
+            "date": datetime.now(UTC).isoformat(),
             "note": note,
         }
         if source_id is not None:
@@ -160,7 +160,7 @@ class AssumptionTrackerService:
 
         Returns counts by status and recently changed assumptions.
         """
-        cutoff = datetime.now(timezone.utc).replace(
+        cutoff = datetime.now(UTC).replace(
             day=1, hour=0, minute=0, second=0, microsecond=0
         )
         # Go back N months (approximate)

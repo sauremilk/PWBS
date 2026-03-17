@@ -1,75 +1,75 @@
-# ADR-008: Tauri statt Electron (Desktop-App, Phase 3+)
+# ADR-008: Tauri Instead of Electron (Desktop App, Phase 3+)
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-In Phase 3+ soll eine Desktop-App das PWBS als native Anwendung auf macOS, Windows und Linux bereitstellen. Die Desktop-App ermöglicht Offline-Zugriff, lokale Verschlüsselung ohne Cloud-Abhängigkeit und schnellen Zugriff über die Taskbar. Die Wahl des Desktop-Frameworks beeinflusst Binary-Größe, Speicherverbrauch, Sicherheitsarchitektur und die Möglichkeit, lokale Vault-Operationen durchzuführen.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden **Tauri** statt Electron für die Desktop-App, weil die deutlich kleinere Binary, der geringere Speicherverbrauch und das Rust-Backend lokale Verschlüsselung und Vault-Zugriff ohne Node.js-Overhead ermöglichen.
-
----
-
-## Optionen bewertet
-
-| Option                    | Vorteile                                                                                                                                                                                                                                     | Nachteile                                                                                                                                             | Ausschlussgründe                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Tauri** (gewählt)       | Deutlich kleinere Binary (~10 MB vs. ~150 MB Electron). Geringerer Speicherverbrauch (native WebView statt Chromium). Rust-Backend ermöglicht lokale Verschlüsselung und Vault-Zugriff ohne Node.js. Cross-Platform (macOS, Windows, Linux). | Kleineres Ökosystem als Electron, weniger Plugins. Rust-Kenntnisse für System-Layer erforderlich.                                                     | –                                                    |
-| Electron                  | Größtes Desktop-App-Ökosystem, sehr viele Plugins und Beispiele. Einheitliche Chromium-Basis garantiert konsistentes Rendering.                                                                                                              | ~150 MB Binary pro Platform. Hoher Speicherverbrauch (~200-300 MB RAM). Node.js für System-Layer weniger geeignet für Kryptografie-Operationen.       | Binary-Größe und RAM-Verbrauch inakzeptabel          |
-| Progressive Web App (PWA) | Kein separater Download, funktioniert in jedem Browser, automatische Updates.                                                                                                                                                                | Kein Zugriff auf lokales Filesystem (Vault), eingeschränkte Offline-Fähigkeiten, kein Taskbar/System-Tray. Nicht geeignet für lokale Verschlüsselung. | Fehlender Filesystem-Zugriff und lokale Kryptografie |
+In Phase 3+, a desktop app will provide the PWBS as a native application on macOS, Windows, and Linux. The desktop app enables offline access, local encryption without cloud dependency, and quick access via the taskbar. The choice of desktop framework affects binary size, memory consumption, security architecture, and the ability to perform local vault operations.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- ~10 MB Binary statt ~150 MB (Electron) – schnellerer Download, geringere Systemanforderungen
-- Rust-Backend für System-Layer: native AES-256-GCM-Verschlüsselung, lokaler Key-Vault, Filesystem-Zugriff
-- Desktop-App nutzt dasselbe Web-Frontend (WebView) – kein separates UI-Codebase
-- Geringerer Speicherverbrauch: Native WebView statt eingebettetes Chromium
-- Auto-Updates über Tauri-eigenes Update-System
-
-### Negative Konsequenzen / Trade-offs
-
-- Kleineres Plugin-Ökosystem als Electron (mitigiert: PWBS benötigt wenige Desktop-spezifische Plugins – Hauptfunktionalität läuft im Web-Frontend)
-- Rust-Kenntnisse erforderlich für den System-Layer (mitigiert: System-Layer ist klein und klar abgegrenzt – hauptsächlich Kryptografie und Filesystem-Zugriff)
-- WebView-Rendering kann zwischen Plattformen variieren (macOS: WebKit, Windows: WebView2/Edge, Linux: WebKitGTK) – erfordert Cross-Platform-Testing
-
-### Offene Fragen
-
-- Tauri v2 vs. v1 Entscheidung (v2 bringt Mobile-Support)
-- CI/CD-Pipeline für Cross-Platform-Builds (macOS Agent für Code Signing)
+We use **Tauri** instead of Electron for the desktop app, because the significantly smaller binary, lower memory consumption, and Rust backend enable local encryption and vault access without Node.js overhead.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Lokale Datenhaltung:** Desktop-App kann als DSGVO-Strict-Modus dienen – alle Daten bleiben auf dem lokalen Gerät.
-- **Lokaler Vault:** Rust-Backend ermöglicht lokalen Schlüsselkasten (Keyring-Integration) für DEK-Speicherung ohne Cloud.
-- **Keine Cloud-Abhängigkeit:** Im Offline-Modus werden keine Daten an externe Services übermittelt.
-- **Löschbarkeit:** App-Deinstallation plus lokaler Datenlöschung (AppData-Verzeichnis) entfernt alle Nutzerdaten vollständig.
-
----
-
-## Sicherheitsimplikationen
-
-- Rust-Backend: Memory Safety ohne Garbage Collector – reduziert Risiko von Buffer Overflows und Use-After-Free-Bugs im System-Layer
-- Lokale Verschlüsselung: AES-256-GCM über Rust-Crypto-Libraries (ring, aes-gcm) statt JavaScript-Kryptografie
-- System-Keyring-Integration: DEKs werden im OS-spezifischen Keyring gespeichert (macOS Keychain, Windows Credential Manager, Linux Secret Service)
-- Tauri-IPC-Boundary: Frontend (WebView) hat eingeschränkten Zugriff auf System-APIs – explizites Allowlisting erforderlich
-- Code Signing für alle Distributionen (macOS Notarization, Windows Code Signing)
+| Option                    | Advantages                                                                                                                                                                                                                                 | Disadvantages                                                                                                                                | Exclusion Reasons                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Tauri** (chosen)        | Significantly smaller binary (~10 MB vs. ~150 MB Electron). Lower memory consumption (native WebView instead of Chromium). Rust backend enables local encryption and vault access without Node.js. Cross-platform (macOS, Windows, Linux). | Smaller ecosystem than Electron, fewer plugins. Rust knowledge required for system layer.                                                    | –                                                |
+| Electron                  | Largest desktop app ecosystem, many plugins and examples. Unified Chromium base guarantees consistent rendering.                                                                                                                           | ~150 MB binary per platform. High memory consumption (~200-300 MB RAM). Node.js for system layer less suitable for cryptographic operations. | Binary size and RAM consumption unacceptable     |
+| Progressive Web App (PWA) | No separate download, works in any browser, automatic updates.                                                                                                                                                                             | No access to local filesystem (vault), limited offline capabilities, no taskbar/system tray. Not suitable for local encryption.              | Missing filesystem access and local cryptography |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-09-13 – Bewertung vor Phase-3-Start. Evaluation von Tauri v2 und Cross-Platform-Testing-Ergebnisse.
+### Positive Consequences
+
+- ~10 MB binary instead of ~150 MB (Electron) – faster download, lower system requirements
+- Rust backend for system layer: native AES-256-GCM encryption, local key vault, filesystem access
+- Desktop app uses the same web frontend (WebView) – no separate UI codebase
+- Lower memory consumption: native WebView instead of embedded Chromium
+- Auto-updates via Tauri's built-in update system
+
+### Negative Consequences / Trade-offs
+
+- Smaller plugin ecosystem than Electron (mitigated: PWBS requires few desktop-specific plugins – main functionality runs in the web frontend)
+- Rust knowledge required for the system layer (mitigated: system layer is small and clearly scoped – primarily cryptography and filesystem access)
+- WebView rendering can vary between platforms (macOS: WebKit, Windows: WebView2/Edge, Linux: WebKitGTK) – requires cross-platform testing
+
+### Open Questions
+
+- Tauri v2 vs. v1 decision (v2 brings mobile support)
+- CI/CD pipeline for cross-platform builds (macOS agent for code signing)
+
+---
+
+## GDPR Implications
+
+- **Local Data Storage:** Desktop app can serve as a GDPR strict mode – all data remains on the local device.
+- **Local Vault:** Rust backend enables a local keystore (keyring integration) for DEK storage without cloud.
+- **No Cloud Dependency:** In offline mode, no data is transmitted to external services.
+- **Erasability:** App uninstallation plus local data deletion (AppData directory) completely removes all user data.
+
+---
+
+## Security Implications
+
+- Rust backend: memory safety without garbage collector – reduces risk of buffer overflows and use-after-free bugs in the system layer
+- Local encryption: AES-256-GCM via Rust crypto libraries (ring, aes-gcm) instead of JavaScript cryptography
+- System keyring integration: DEKs are stored in the OS-specific keyring (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+- Tauri IPC boundary: frontend (WebView) has restricted access to system APIs – explicit allowlisting required
+- Code signing for all distributions (macOS notarization, Windows code signing)
+
+---
+
+## Revision Date
+
+2027-09-13 – Assessment before Phase 3 start. Evaluation of Tauri v2 and cross-platform testing results.

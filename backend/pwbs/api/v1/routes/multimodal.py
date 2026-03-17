@@ -116,9 +116,8 @@ async def upload_multimodal_file(
     suffix = ext_map.get(media_type, "")
 
     # Save to temp file (persists until Celery task processes it)
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix, prefix="pwbs_mm_")
-    tmp.write(content)
-    tmp.close()
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, prefix="pwbs_mm_") as tmp:
+        tmp.write(content)
 
     job_id = str(uuid.uuid4())
 

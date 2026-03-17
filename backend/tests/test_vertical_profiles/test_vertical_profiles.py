@@ -11,7 +11,6 @@ from pwbs.briefing.vertical_profiles import (
 )
 from pwbs.schemas.enums import EntityType, VerticalProfile
 
-
 # ---------------------------------------------------------------------------
 # VerticalConfig dataclass
 # ---------------------------------------------------------------------------
@@ -46,17 +45,13 @@ class TestVerticalConfig:
         assert isinstance(cfg.briefing_context_instructions, str)
 
     @pytest.mark.parametrize("profile", list(VerticalProfile))
-    def test_entity_priorities_contain_only_valid_types(
-        self, profile: VerticalProfile
-    ) -> None:
+    def test_entity_priorities_contain_only_valid_types(self, profile: VerticalProfile) -> None:
         cfg = VERTICAL_CONFIGS[profile]
         for et in cfg.entity_priorities:
             assert isinstance(et, EntityType)
 
     @pytest.mark.parametrize("profile", list(VerticalProfile))
-    def test_boosted_entity_types_are_subset_of_priorities(
-        self, profile: VerticalProfile
-    ) -> None:
+    def test_boosted_entity_types_are_subset_of_priorities(self, profile: VerticalProfile) -> None:
         cfg = VERTICAL_CONFIGS[profile]
         prio_set = set(cfg.entity_priorities)
         for et in cfg.boosted_entity_types:

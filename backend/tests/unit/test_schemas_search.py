@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -13,7 +13,7 @@ from pwbs.schemas.connector import Connection
 from pwbs.schemas.enums import ConnectionStatus, SourceType
 from pwbs.schemas.search import SearchFilters, SearchRequest, SearchResponse, SearchResult
 
-_NOW = datetime.now(tz=timezone.utc)
+_NOW = datetime.now(tz=UTC)
 
 
 # ---------------------------------------------------------------------------

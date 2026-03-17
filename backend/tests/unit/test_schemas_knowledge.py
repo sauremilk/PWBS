@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -12,7 +12,7 @@ from pwbs.schemas.document import Chunk
 from pwbs.schemas.enums import EntityType
 from pwbs.schemas.knowledge import Entity, EntityMention
 
-_NOW = datetime.now(tz=timezone.utc)
+_NOW = datetime.now(tz=UTC)
 
 
 # ---------------------------------------------------------------------------

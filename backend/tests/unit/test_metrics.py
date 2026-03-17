@@ -1,4 +1,4 @@
-﻿"""Tests for pwbs.core.metrics -- Prometheus metrics (TASK-116, TASK-166)."""
+"""Tests for pwbs.core.metrics -- Prometheus metrics (TASK-116, TASK-166)."""
 
 from __future__ import annotations
 

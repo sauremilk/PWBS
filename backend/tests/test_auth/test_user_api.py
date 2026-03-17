@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, time, timezone
+from datetime import UTC, datetime, time
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -43,7 +43,7 @@ def _make_audit_log(
     log.action = action
     log.resource_type = resource_type
     log.resource_id = resource_id or uuid.uuid4()
-    log.created_at = created_at or datetime(2024, 6, 1, tzinfo=timezone.utc)
+    log.created_at = created_at or datetime(2024, 6, 1, tzinfo=UTC)
     return log
 
 
@@ -105,7 +105,7 @@ class TestSchemaValidation:
             id=1,
             action="POST",
             resource_type="briefing",
-            created_at=datetime(2024, 6, 1, tzinfo=timezone.utc),
+            created_at=datetime(2024, 6, 1, tzinfo=UTC),
         )
         assert entry.action == "POST"
 
@@ -368,7 +368,7 @@ class TestGetExportStatus:
         export_mock.id = uuid.uuid4()
         export_mock.status = "processing"
         export_mock.file_path = None
-        export_mock.created_at = datetime.now(tz=timezone.utc)
+        export_mock.created_at = datetime.now(tz=UTC)
 
         with patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock):
             resp = await get_export_status(
@@ -391,7 +391,7 @@ class TestGetExportStatus:
         export_mock.id = export_id
         export_mock.status = "completed"
         export_mock.file_path = "/tmp/exports/test.zip"
-        export_mock.created_at = datetime.now(tz=timezone.utc)
+        export_mock.created_at = datetime.now(tz=UTC)
 
         with (
             patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock),
@@ -438,7 +438,7 @@ class TestGetExportStatus:
         export_mock.id = uuid.uuid4()
         export_mock.status = "completed"
         export_mock.file_path = "/tmp/exports/test.zip"
-        export_mock.created_at = datetime.now(tz=timezone.utc)
+        export_mock.created_at = datetime.now(tz=UTC)
 
         with (
             patch("pwbs.api.v1.routes.user.export_service.get_export", return_value=export_mock),
@@ -557,7 +557,7 @@ class TestDeleteAccount:
 
         user = _make_user()
         user.password_hash = "hashed"
-        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=timezone.utc)
+        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=UTC)
         db = AsyncMock()
 
         mock_request = MagicMock()
@@ -613,7 +613,7 @@ class TestCancelDeletion:
         from pwbs.api.v1.routes.user import cancel_deletion
 
         user = _make_user()
-        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=timezone.utc)
+        user.deletion_scheduled_at = datetime(2025, 8, 1, tzinfo=UTC)
         db = AsyncMock()
 
         mock_request = MagicMock()

@@ -1,16 +1,15 @@
-﻿"""Tests for Morning Briefing Context Assembly (TASK-076)."""
+"""Tests for Morning Briefing Context Assembly (TASK-076)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from pwbs.briefing.context import (
     CalendarEvent,
-    GraphQueryService,
     MorningBriefingConfig,
     MorningBriefingContext,
     MorningContextAssembler,
@@ -20,14 +19,13 @@ from pwbs.briefing.context import (
 )
 from pwbs.search.service import SemanticSearchResult
 
-
 # ------------------------------------------------------------------
 # Fixtures
 # ------------------------------------------------------------------
 
 USER_ID = uuid.uuid4()
 TODAY = date(2026, 3, 14)
-NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 3, 14, 10, 0, 0, tzinfo=UTC)
 
 
 def _make_event(
@@ -220,9 +218,20 @@ class TestTokenCounting:
         )
         ctx_large = MorningBriefingContext(
             date="2026-03-14",
-            calendar_events=[{"title": f"Event {i}", "time": "10:00", "participants": []} for i in range(10)],
+            calendar_events=[
+                {"title": f"Event {i}", "time": "10:00", "participants": []} for i in range(10)
+            ],
             participant_histories={},
-            recent_documents=[{"title": f"Doc {i}", "content": f"Long content {i} " * 50, "source": "notion", "date": "2026-03-10", "score": 0.9} for i in range(10)],
+            recent_documents=[
+                {
+                    "title": f"Doc {i}",
+                    "content": f"Long content {i} " * 50,
+                    "source": "notion",
+                    "date": "2026-03-10",
+                    "score": 0.9,
+                }
+                for i in range(10)
+            ],
             pending_decisions=[],
         )
         small_tokens = MorningContextAssembler._count_tokens(ctx_small)
@@ -246,7 +255,9 @@ class TestTokenBudget:
             date="2026-03-14",
             calendar_events=[{"title": "Short", "time": "10:00", "participants": []}],
             participant_histories={},
-            recent_documents=[{"title": "D", "content": "C", "source": "x", "date": "d", "score": 0.1}],
+            recent_documents=[
+                {"title": "D", "content": "C", "source": "x", "date": "d", "score": 0.1}
+            ],
             pending_decisions=[],
         )
         result = assembler._enforce_token_budget(ctx)
@@ -264,7 +275,13 @@ class TestTokenBudget:
             calendar_events=[{"title": "Meeting", "time": "10:00", "participants": []}],
             participant_histories={},
             recent_documents=[
-                {"title": f"Doc {i}", "content": "x " * 100, "source": "n", "date": "d", "score": 0.1}
+                {
+                    "title": f"Doc {i}",
+                    "content": "x " * 100,
+                    "source": "n",
+                    "date": "d",
+                    "score": 0.1,
+                }
                 for i in range(5)
             ],
             pending_decisions=[
@@ -285,8 +302,7 @@ class TestTokenBudget:
         ctx = MorningBriefingContext(
             date="2026-03-14",
             calendar_events=[
-                {"title": f"Event {i}", "time": "10:00", "participants": []}
-                for i in range(5)
+                {"title": f"Event {i}", "time": "10:00", "participants": []} for i in range(5)
             ],
             participant_histories={},
             recent_documents=[],

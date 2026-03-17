@@ -1,4 +1,4 @@
-﻿"""Work pattern analysis service (TASK-134).
+"""Work pattern analysis service (TASK-134).
 
 Analyses user activity over the last N days to extract work patterns:
 1. Top themes (from entity mentions)
@@ -7,14 +7,14 @@ Analyses user activity over the last N days to extract work patterns:
 4. Decision speed (avg days from creation to status=made)
 
 Results are persisted in the user_profiles table with versioning.
-D3 Alleinstellungsmerkmal: Persoenliches Lernmodell.
+D3 differentiator: Personal learning model.
 """
 
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "ThemeInfo",
-    "WorkPatternProfile",
     "WorkPatternAnalyzer",
     "WorkPatternConfig",
+    "WorkPatternProfile",
 ]
 
 
@@ -85,9 +85,7 @@ class WorkPatternProfile:
     avg_meetings_per_week: float = 0.0
     preferred_hours: dict[str, Any] = field(default_factory=dict)
     decision_speed_avg_days: float | None = None
-    analysis_date: datetime = field(
-        default_factory=lambda: datetime.now(tz=timezone.utc)
-    )
+    analysis_date: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 # ------------------------------------------------------------------
@@ -143,17 +141,14 @@ class WorkPatternAnalyzer:
         profile = await self.analyze(user_id)
 
         # Get next version number
-        version_stmt = (
-            select(func.coalesce(func.max(UserProfile.version), 0))
-            .where(UserProfile.user_id == user_id)
+        version_stmt = select(func.coalesce(func.max(UserProfile.version), 0)).where(
+            UserProfile.user_id == user_id
         )
         result = await self._session.execute(version_stmt)
         current_max = result.scalar_one()
         next_version = current_max + 1
 
-        expires_at = datetime.now(tz=timezone.utc) + timedelta(
-            days=self._config.profile_expiry_days
-        )
+        expires_at = datetime.now(tz=UTC) + timedelta(days=self._config.profile_expiry_days)
 
         db_profile = UserProfile(
             user_id=user_id,
@@ -178,9 +173,7 @@ class WorkPatternAnalyzer:
 
     async def extract_top_themes(self, user_id: UUID) -> list[ThemeInfo]:
         """Extract most frequently mentioned entities in the lookback period."""
-        since = datetime.now(tz=timezone.utc) - timedelta(
-            days=self._config.lookback_days
-        )
+        since = datetime.now(tz=UTC) - timedelta(days=self._config.lookback_days)
 
         stmt = (
             select(
@@ -217,17 +210,12 @@ class WorkPatternAnalyzer:
 
     async def extract_meeting_load(self, user_id: UUID) -> float:
         """Calculate average meetings per week in the lookback period."""
-        since = datetime.now(tz=timezone.utc) - timedelta(
-            days=self._config.lookback_days
-        )
+        since = datetime.now(tz=UTC) - timedelta(days=self._config.lookback_days)
 
-        stmt = (
-            select(func.count(Document.id))
-            .where(
-                Document.user_id == user_id,
-                Document.source_type.in_(["google_calendar", "zoom_transcript"]),
-                Document.created_at >= since,
-            )
+        stmt = select(func.count(Document.id)).where(
+            Document.user_id == user_id,
+            Document.source_type.in_(["google_calendar", "zoom_transcript"]),
+            Document.created_at >= since,
         )
 
         result = await self._session.execute(stmt)
@@ -242,9 +230,7 @@ class WorkPatternAnalyzer:
 
     async def extract_preferred_hours(self, user_id: UUID) -> dict[str, Any]:
         """Analyse document creation times to find preferred work hours."""
-        since = datetime.now(tz=timezone.utc) - timedelta(
-            days=self._config.lookback_days
-        )
+        since = datetime.now(tz=UTC) - timedelta(days=self._config.lookback_days)
 
         stmt = (
             select(
@@ -273,9 +259,7 @@ class WorkPatternAnalyzer:
         best_start = 0
         best_count = 0
         for start_hour in range(24):
-            window_count = sum(
-                hour_counts.get((start_hour + h) % 24, 0) for h in range(3)
-            )
+            window_count = sum(hour_counts.get((start_hour + h) % 24, 0) for h in range(3))
             if window_count > best_count:
                 best_count = window_count
                 best_start = start_hour
@@ -292,21 +276,16 @@ class WorkPatternAnalyzer:
 
     async def extract_decision_speed(self, user_id: UUID) -> float | None:
         """Calculate average days from decision creation to resolution."""
-        since = datetime.now(tz=timezone.utc) - timedelta(
-            days=self._config.lookback_days
-        )
+        since = datetime.now(tz=UTC) - timedelta(days=self._config.lookback_days)
 
-        stmt = (
-            select(
-                Decision.created_at,
-                Decision.decided_at,
-            )
-            .where(
-                Decision.user_id == user_id,
-                Decision.status == "made",
-                Decision.decided_at.is_not(None),
-                Decision.created_at >= since,
-            )
+        stmt = select(
+            Decision.created_at,
+            Decision.decided_at,
+        ).where(
+            Decision.user_id == user_id,
+            Decision.status == "made",
+            Decision.decided_at.is_not(None),
+            Decision.created_at >= since,
         )
 
         result = await self._session.execute(stmt)

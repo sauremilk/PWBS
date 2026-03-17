@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -15,7 +15,7 @@ from pwbs.schemas.enums import ContentType, SourceType
 # Fixtures / helpers
 # ---------------------------------------------------------------------------
 
-_NOW = datetime.now(tz=timezone.utc)
+_NOW = datetime.now(tz=UTC)
 _VALID_HASH = "a" * 64  # 64-char hex → valid SHA-256
 
 
@@ -143,9 +143,17 @@ class TestEnums:
 
     def test_source_type_values(self) -> None:
         expected = {
-            "google_calendar", "google_docs", "gmail", "notion",
-            "obsidian", "outlook_mail", "slack", "zoom", "api_upload",
-            "ocr", "audio_transcript",
+            "google_calendar",
+            "google_docs",
+            "gmail",
+            "notion",
+            "obsidian",
+            "outlook_mail",
+            "slack",
+            "zoom",
+            "api_upload",
+            "ocr",
+            "audio_transcript",
         }
         actual = {st.value for st in SourceType}
         assert actual == expected

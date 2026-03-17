@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -174,7 +174,7 @@ async def create_webhook(
     "",
     response_model=WebhookListOut,
     summary="List own webhook subscriptions",
-    description="Gibt alle Webhook-Subscriptions des authentifizierten Nutzers zurück.",
+    description="Returns all webhook subscriptions of the authenticated user.",
 )
 async def list_webhooks(
     response: Response,
@@ -194,7 +194,7 @@ async def list_webhooks(
     "/{webhook_id}",
     response_model=WebhookOut,
     summary="Get webhook details",
-    description="Gibt die Details eines Webhooks zurück (URL, Events, Status, Erstelldatum).",
+    description="Returns webhook details (URL, events, status, creation date).",
 )
 async def get_webhook(
     webhook_id: uuid.UUID,
@@ -214,7 +214,7 @@ async def get_webhook(
     "/{webhook_id}",
     response_model=WebhookOut,
     summary="Update webhook",
-    description="Aktualisiert URL, Events, Beschreibung oder Aktivierungsstatus eines Webhooks.",
+    description="Updates URL, events, description, or activation status of a webhook.",
 )
 async def update_webhook(
     webhook_id: uuid.UUID,
@@ -248,7 +248,7 @@ async def update_webhook(
     "/{webhook_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a webhook",
-    description="Löscht einen Webhook und alle zugehörigen Delivery-Records unwiderruflich.",
+    description="Permanently deletes a webhook and all associated delivery records.",
 )
 async def delete_webhook(
     webhook_id: uuid.UUID,
@@ -268,7 +268,7 @@ async def delete_webhook(
     response_model=DeliveryListOut,
     summary="List recent delivery attempts",
     description=(
-        "Gibt die letzten Zustellversuche für einen Webhook zurück inkl. HTTP-Status und Payload."
+        "Returns recent delivery attempts for a webhook including HTTP status and payload."
     ),
 )
 async def list_deliveries(
@@ -312,7 +312,7 @@ async def list_deliveries(
     "/{webhook_id}/test",
     response_model=DeliveryOut,
     summary="Send a test event to the webhook",
-    description="Sendet ein Test-Event an die Webhook-URL und gibt das Zustellergebnis zurück.",
+    description="Sends a test event to the webhook URL and returns the delivery result.",
 )
 async def test_webhook(
     webhook_id: uuid.UUID,
@@ -328,7 +328,7 @@ async def test_webhook(
 
     test_payload = {
         "event": "test.ping",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "webhook_id": str(webhook.id),
     }
 

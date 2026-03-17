@@ -119,13 +119,13 @@ Open Beta → General Availability:
 
 ### UX (UX)
 
-| ID    | Kriterium                                                                                         | Must/Should | Status | Quelle                                                                | Verantwortlich |
-| ----- | ------------------------------------------------------------------------------------------------- | :---------: | :----: | --------------------------------------------------------------------- | -------------- |
-| UX-01 | Onboarding-Wizard implementiert (Welcome → Connect → Sync → Briefing)                             |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 5 – Wizard existiert, Integration offen | Entwicklung    |
-| UX-02 | Empty States für alle Haupt-Dashboard-Seiten definiert (Briefings, Konnektoren, Suche, Knowledge) |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 6 – Komponente vorhanden, generisch     | Entwicklung    |
-| UX-03 | Error States nutzerfreundlich (keine technischen Stacktraces an Endnutzer)                        |    Must     |   ✅   | UX_ONBOARDING_SPEC: Heuristik 9 – ❌ Kritisch, generische Fehler      | Entwicklung    |
-| UX-04 | Mobile-Responsive (Mindestanforderung: lesbar auf Tablet)                                         |   Should    |   ⏳   | UX_ONBOARDING_SPEC: Abschnitt 8 – responsive ab `md:` Breakpoint      | Entwicklung    |
-| UX-05 | Time-to-First-Briefing ≤ 20 Minuten für 80 % der Nutzer (mit 1-on-1-Onboarding)                   |    Must     |   ❌   | GTM_PLAN: Exit-Kriterium 6, KPI #2                                    | Entwicklung    |
+| ID    | Kriterium                                                                                         | Must/Should | Status | Quelle                                                                        | Verantwortlich |
+| ----- | ------------------------------------------------------------------------------------------------- | :---------: | :----: | ----------------------------------------------------------------------------- | -------------- |
+| UX-01 | Onboarding-Wizard implementiert (Welcome → Connect → Sync → Briefing)                             |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 5 – Wizard existiert, Integration offen         | Entwicklung    |
+| UX-02 | Empty States für alle Haupt-Dashboard-Seiten definiert (Briefings, Konnektoren, Suche, Knowledge) |   Should    |   ✅   | UX_ONBOARDING_SPEC: Abschnitt 6 – Komponente vorhanden, generisch             | Entwicklung    |
+| UX-03 | Error States nutzerfreundlich (keine technischen Stacktraces an Endnutzer)                        |    Must     |   ✅   | UX_ONBOARDING_SPEC: Heuristik 9 – Error-Mapping + ErrorBoundary implementiert | Entwicklung    |
+| UX-04 | Mobile-Responsive (Mindestanforderung: lesbar auf Tablet)                                         |   Should    |   ⏳   | UX_ONBOARDING_SPEC: Abschnitt 8 – responsive ab `md:` Breakpoint              | Entwicklung    |
+| UX-05 | Time-to-First-Briefing ≤ 20 Minuten für 80 % der Nutzer (mit 1-on-1-Onboarding)                   |    Must     |   ❌   | GTM_PLAN: Exit-Kriterium 6, KPI #2                                            | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -152,16 +152,16 @@ Open Beta → General Availability:
 
 ### Operations (OPS)
 
-| ID     | Kriterium                                                                         | Must/Should | Status | Quelle                                                            | Verantwortlich |
-| ------ | --------------------------------------------------------------------------------- | :---------: | :----: | ----------------------------------------------------------------- | -------------- |
-| OPS-01 | Health-Check-Endpoint funktional (`GET /api/v1/admin/health` → 200)               |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.2                                        | Entwicklung    |
-| OPS-02 | Strukturierte Logs aktiv (JSON-Format mit Structlog, Correlation-IDs)             |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.1, workspace-audit: TASK-196             | Entwicklung    |
-| OPS-03 | Error-Tracking aktiv (Sentry oder äquivalent konfiguriert)                        |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 10 #1 – Sentry geplant, nicht konfiguriert | Entwicklung    |
-| OPS-04 | Backup-Strategie dokumentiert (RPO < 1h, RTO < 4h)                                |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7.4 – RPO/RTO definiert                    | Entwicklung    |
-| OPS-05 | Backup-Restore getestet (DR-Runbook praktisch validiert)                          |   Should    |   ❌   | SUPPORT_OPS: Abschnitt 10 #15                                     | Entwicklung    |
-| OPS-06 | Rollback-Verfahren dokumentiert (ECS Task Definition Revision, Alembic Downgrade) |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7 – Verfahren dokumentiert                 | Entwicklung    |
-| OPS-07 | Grafana-Alerting konfiguriert (P0/P1: API Down, Error Rate, DB-Fehler)            |   Should    |   ✅   | SUPPORT_OPS: Abschnitt 10 #2                                      | Entwicklung    |
-| OPS-08 | Deployment-Runbook vorhanden                                                      |   Should    |   ✅   | SUPPORT_OPS: Runbook-Index – „Zu erstellen"                       | Entwicklung    |
+| ID     | Kriterium                                                                         | Must/Should | Status | Quelle                                                                      | Verantwortlich |
+| ------ | --------------------------------------------------------------------------------- | :---------: | :----: | --------------------------------------------------------------------------- | -------------- |
+| OPS-01 | Health-Check-Endpoint funktional (`GET /api/v1/admin/health` → 200)               |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.2                                                  | Entwicklung    |
+| OPS-02 | Strukturierte Logs aktiv (JSON-Format mit Structlog, Correlation-IDs)             |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 3.1, workspace-audit: TASK-196                       | Entwicklung    |
+| OPS-03 | Error-Tracking aktiv (Sentry oder äquivalent konfiguriert)                        |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 10 #1 – Sentry konfiguriert (init_sentry in main.py) | Entwicklung    |
+| OPS-04 | Backup-Strategie dokumentiert (RPO < 1h, RTO < 4h)                                |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7.4 – RPO/RTO definiert                              | Entwicklung    |
+| OPS-05 | Backup-Restore getestet (DR-Runbook praktisch validiert)                          |   Should    |   ❌   | SUPPORT_OPS: Abschnitt 10 #15                                               | Entwicklung    |
+| OPS-06 | Rollback-Verfahren dokumentiert (ECS Task Definition Revision, Alembic Downgrade) |    Must     |   ✅   | SUPPORT_OPS: Abschnitt 7 – Verfahren dokumentiert                           | Entwicklung    |
+| OPS-07 | Grafana-Alerting konfiguriert (P0/P1: API Down, Error Rate, DB-Fehler)            |   Should    |   ✅   | SUPPORT_OPS: Abschnitt 10 #2 – Alert-Rules + Discord-Notifications          | Entwicklung    |
+| OPS-08 | Deployment-Runbook vorhanden                                                      |   Should    |   ✅   | SUPPORT_OPS: Runbook-Index – docs/runbooks/deployment.md                    | Entwicklung    |
 
 **Begründung Must/Should:**
 
@@ -214,7 +214,7 @@ Alle Must-Kriterien der Closed Beta werden vorausgesetzt. Alle Should-Kriterien 
 
 | ID        | Kriterium                                                              | Must/Should | Status | Quelle                                                   | Verantwortlich |
 | --------- | ---------------------------------------------------------------------- | :---------: | :----: | -------------------------------------------------------- | -------------- |
-| SEC-OB-01 | Dependabot oder Renovate für automatische Dependency-Updates aktiviert |    Must     |   ❌   | security-audit.md: Finding A06-F01, SUPPORT_OPS #8       | Entwicklung    |
+| SEC-OB-01 | Dependabot oder Renovate für automatische Dependency-Updates aktiviert |    Must     |   ✅   | security-audit.md: Finding A06-F01, SUPPORT_OPS #8       | Entwicklung    |
 | SEC-OB-02 | Docker-Image-Signierung evaluiert und bei Bedarf implementiert         |   Should    |   ❌   | security-audit.md: Finding A08-F01, LEGAL_COMPLIANCE W-7 | Entwicklung    |
 | SEC-OB-03 | SSRF-Schutz als zentrale URL-Validierungsfunktion implementiert        |   Should    |   ❌   | security-audit.md: Finding A10-F01                       | Entwicklung    |
 
@@ -370,12 +370,12 @@ Formale Freigabe vor jedem Gate-Übergang. Jede Kategorie muss von einer verantw
 
 ### Closed Beta Sign-off
 
-| Kategorie  | Freigegeben von   | Datum      | Anmerkung                                         |
-| ---------- | ----------------- | ---------- | ------------------------------------------------- |
+| Kategorie  | Freigegeben von      | Datum      | Anmerkung                                        |
+| ---------- | -------------------- | ---------- | ------------------------------------------------ |
 | Security   | Automated (Sprint 4) | 2026-03-23 | 8/8 Must ✅, 2/2 Should ✅                       |
-| Legal      |                   |            | 6/7 Must – LEG-04 (AVVs) blockiert                |
-| Quality    |                   |            | 4/5 Must – QA-03 (E2E-Test) manuell ausstehend    |
-| UX         |                   |            | 1/2 Must – UX-05 (TTFB) manuell ausstehend        |
+| Legal      |                      |            | 6/7 Must – LEG-04 (AVVs) blockiert               |
+| Quality    |                      |            | 4/5 Must – QA-03 (E2E-Test) manuell ausstehend   |
+| UX         |                      |            | 1/2 Must – UX-05 (TTFB) manuell ausstehend       |
 | Analytics  | Automated (Sprint 4) | 2026-03-23 | 1/1 Must ✅, 2/2 Should ✅                       |
 | Operations | Automated (Sprint 4) | 2026-03-23 | 5/5 Must ✅, 2/3 Should (OPS-05 DR-Test manuell) |
 | Content    | Automated (Sprint 4) | 2026-03-23 | 1/1 Must ✅, 2/2 Should ✅                       |

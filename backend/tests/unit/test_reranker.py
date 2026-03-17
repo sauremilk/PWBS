@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-
-import pytest
+from datetime import UTC, datetime, timedelta
 
 from pwbs.search.hybrid import HybridSearchResult
 from pwbs.search.reranker import (
@@ -18,7 +16,7 @@ from pwbs.search.reranker import (
 # Fixtures
 # ------------------------------------------------------------------
 
-_NOW = datetime(2026, 3, 20, 12, 0, 0, tzinfo=timezone.utc)
+_NOW = datetime(2026, 3, 20, 12, 0, 0, tzinfo=UTC)
 
 
 def _make_result(
@@ -117,9 +115,13 @@ class TestRerankerBasic:
 class TestRerankerCosineWeight:
     def test_high_semantic_score_wins(self) -> None:
         """Result with higher semantic_score should rank higher."""
-        reranker = SearchReranker(config=RerankerConfig(
-            cosine_weight=0.9, rrf_weight=0.1, recency_boost_pct=0.0,
-        ))
+        reranker = SearchReranker(
+            config=RerankerConfig(
+                cosine_weight=0.9,
+                rrf_weight=0.1,
+                recency_boost_pct=0.0,
+            )
+        )
         low = _make_result(score=0.02, semantic_score=0.5)
         high = _make_result(score=0.01, semantic_score=0.95)
         reranked = reranker.rerank([low, high], top_k=2, now=_NOW)
@@ -136,35 +138,49 @@ class TestRerankerCosineWeight:
 class TestRerankerRecencyBoost:
     def test_recent_doc_boosted(self) -> None:
         """Recent document should outrank older one with same base score."""
-        reranker = SearchReranker(config=RerankerConfig(
-            cosine_weight=0.5, rrf_weight=0.5, recency_boost_pct=0.20,
-            recency_boost_days=7,
-        ))
+        reranker = SearchReranker(
+            config=RerankerConfig(
+                cosine_weight=0.5,
+                rrf_weight=0.5,
+                recency_boost_pct=0.20,
+                recency_boost_days=7,
+            )
+        )
         old_time = (_NOW - timedelta(days=30)).isoformat()
         new_time = _NOW.isoformat()
 
         old_doc = _make_result(
-            score=0.02, semantic_score=0.80, created_at=old_time,
+            score=0.02,
+            semantic_score=0.80,
+            created_at=old_time,
         )
         new_doc = _make_result(
-            score=0.02, semantic_score=0.80, created_at=new_time,
+            score=0.02,
+            semantic_score=0.80,
+            created_at=new_time,
         )
         reranked = reranker.rerank([old_doc, new_doc], top_k=2, now=_NOW)
         assert reranked[0].created_at == new_time
 
     def test_no_recency_boost(self) -> None:
         """With recency_boost_pct=0, order depends only on base scores."""
-        reranker = SearchReranker(config=RerankerConfig(
-            recency_boost_pct=0.0,
-        ))
+        reranker = SearchReranker(
+            config=RerankerConfig(
+                recency_boost_pct=0.0,
+            )
+        )
         old_time = (_NOW - timedelta(days=30)).isoformat()
         new_time = _NOW.isoformat()
 
         old_doc = _make_result(
-            score=0.02, semantic_score=0.95, created_at=old_time,
+            score=0.02,
+            semantic_score=0.95,
+            created_at=old_time,
         )
         new_doc = _make_result(
-            score=0.02, semantic_score=0.80, created_at=new_time,
+            score=0.02,
+            semantic_score=0.80,
+            created_at=new_time,
         )
         reranked = reranker.rerank([old_doc, new_doc], top_k=2, now=_NOW)
         # Higher semantic score wins when no recency boost
@@ -185,8 +201,7 @@ class TestRerankerScoreUpdate:
         """Output should be sorted by score descending."""
         reranker = SearchReranker()
         results = [
-            _make_result(score=0.01 * (i + 1), semantic_score=0.5 + i * 0.05)
-            for i in range(10)
+            _make_result(score=0.01 * (i + 1), semantic_score=0.5 + i * 0.05) for i in range(10)
         ]
         reranked = reranker.rerank(results, top_k=10, now=_NOW)
         scores = [r.score for r in reranked]
@@ -219,7 +234,9 @@ class TestRerankerPreservesMetadata:
         reranker = SearchReranker()
         cid = uuid.uuid4()
         r = _make_result(
-            chunk_id=cid, title="Important", created_at=_NOW.isoformat(),
+            chunk_id=cid,
+            title="Important",
+            created_at=_NOW.isoformat(),
         )
         reranked = reranker.rerank([r], top_k=10, now=_NOW)
         assert reranked[0].chunk_id == cid

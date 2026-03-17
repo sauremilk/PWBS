@@ -1,1 +1,1 @@
-﻿# empty - makes tests/load a Python package
+# empty - makes tests/load a Python package

@@ -1,4 +1,4 @@
-﻿"""Organization and OrganizationMember ORM models (TASK-144).
+"""Organization and OrganizationMember ORM models (TASK-144).
 
 Supports multi-tenancy with team features: organizations have members
 with role-based access (owner, member, viewer). Team members can share
@@ -28,10 +28,12 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     # TASK-161: SSO config (encrypted JSON) — None = SSO not configured
     sso_config_enc: Mapped[dict | None] = mapped_column(  # type: ignore[type-arg]
-        JSONB, nullable=True, default=None,
+        JSONB,
+        nullable=True,
+        default=None,
     )
 
-    members: Mapped[list["OrganizationMember"]] = relationship(
+    members: Mapped[list[OrganizationMember]] = relationship(
         back_populates="organization",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -63,12 +65,10 @@ class OrganizationMember(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    role: Mapped[str] = mapped_column(
-        Text, nullable=False, server_default="member"
-    )
+    role: Mapped[str] = mapped_column(Text, nullable=False, server_default="member")
     joined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    organization: Mapped["Organization"] = relationship(back_populates="members")
-    user: Mapped["User"] = relationship()  # noqa: F821
+    organization: Mapped[Organization] = relationship(back_populates="members")
+    user: Mapped[User] = relationship()  # noqa: F821

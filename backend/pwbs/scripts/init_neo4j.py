@@ -19,15 +19,11 @@ NODE_LABELS = ["Person", "Project", "Topic", "Decision", "Meeting", "Document"]
 
 # Uniqueness constraint on id per label
 _CONSTRAINT_TEMPLATE = (
-    "CREATE CONSTRAINT {name} IF NOT EXISTS "
-    "FOR (n:{label}) REQUIRE n.id IS UNIQUE"
+    "CREATE CONSTRAINT {name} IF NOT EXISTS FOR (n:{label}) REQUIRE n.id IS UNIQUE"
 )
 
 # Composite index on userId for tenant-isolated queries
-_INDEX_TEMPLATE = (
-    "CREATE INDEX {name} IF NOT EXISTS "
-    "FOR (n:{label}) ON (n.userId)"
-)
+_INDEX_TEMPLATE = "CREATE INDEX {name} IF NOT EXISTS FOR (n:{label}) ON (n.userId)"
 
 
 async def ensure_neo4j_schema(uri: str, user: str, password: str) -> None:
@@ -36,14 +32,10 @@ async def ensure_neo4j_schema(uri: str, user: str, password: str) -> None:
         async with driver.session() as session:
             for label in NODE_LABELS:
                 constraint_name = f"constraint_{label.lower()}_id"
-                await session.run(
-                    _CONSTRAINT_TEMPLATE.format(name=constraint_name, label=label)
-                )
+                await session.run(_CONSTRAINT_TEMPLATE.format(name=constraint_name, label=label))
 
                 index_name = f"index_{label.lower()}_userId"
-                await session.run(
-                    _INDEX_TEMPLATE.format(name=index_name, label=label)
-                )
+                await session.run(_INDEX_TEMPLATE.format(name=index_name, label=label))
     finally:
         await driver.close()
 
@@ -62,4 +54,5 @@ async def main() -> None:
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

@@ -23,7 +23,7 @@ from pwbs.processing.multimodal.models import (
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["AudioTranscriber", "WhisperEngine", "DeepgramEngine"]
+__all__ = ["AudioTranscriber", "DeepgramEngine", "WhisperEngine"]
 
 
 @runtime_checkable

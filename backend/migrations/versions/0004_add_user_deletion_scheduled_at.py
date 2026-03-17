@@ -1,12 +1,12 @@
-﻿"""Add deletion_scheduled_at to users table (TASK-105).
+"""Add deletion_scheduled_at to users table (TASK-105).
 
 Revision ID: 0004
 Revises: 0003
 Create Date: 2025-07-11
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "0004"
 down_revision = "0003"

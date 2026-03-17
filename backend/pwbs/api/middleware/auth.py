@@ -1,4 +1,4 @@
-﻿"""Auth middleware -- passive JWT extraction for request context (TASK-093, TASK-113).
+"""Auth middleware -- passive JWT extraction for request context (TASK-093, TASK-113).
 
 Tries to extract a valid JWT from the Authorization header and sets
 `request.state.user_id` if successful.  Does NOT block requests --

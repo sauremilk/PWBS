@@ -10,9 +10,9 @@ Sections:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from pydantic import ValidationError
@@ -98,7 +98,7 @@ class TestSnapshotResponseSchema:
     def test_all_fields(self) -> None:
         from pwbs.snapshots.schemas import SnapshotResponse
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         uid = uuid.uuid4()
         resp = SnapshotResponse(
             id=uid,
@@ -118,11 +118,10 @@ class TestSnapshotDetailResponseSchema:
         from pwbs.snapshots.schemas import (
             SnapshotDetailResponse,
             SnapshotEntity,
-            SnapshotRelationship,
             SnapshotTheme,
         )
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         detail = SnapshotDetailResponse(
             id=uuid.uuid4(),
             label="v1",
@@ -185,7 +184,7 @@ class TestSnapshotDiffSchemas:
     def test_diff_response(self) -> None:
         from pwbs.snapshots.schemas import SnapshotDiffResponse
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         diff = SnapshotDiffResponse(
             snapshot_a_id=uuid.uuid4(),
             snapshot_b_id=uuid.uuid4(),
@@ -225,8 +224,8 @@ class TestComputeDiff:
         snap.trigger = "manual"
         snap.entity_count = entity_count
         snap.relationship_count = relationship_count
-        snap.captured_at = datetime.now(timezone.utc)
-        snap.created_at = datetime.now(timezone.utc)
+        snap.captured_at = datetime.now(UTC)
+        snap.created_at = datetime.now(UTC)
         snap.snapshot_data = {
             "entities": entities or [],
             "relationships": relationships or [],

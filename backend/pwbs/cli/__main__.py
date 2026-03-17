@@ -1,4 +1,4 @@
-﻿"""Entry point for `python -m pwbs.cli` (TASK-198)."""
+"""Entry point for `python -m pwbs.cli` (TASK-198)."""
 
 from __future__ import annotations
 
@@ -36,6 +36,7 @@ def main() -> None:
 
     if args.command == "seed":
         from pwbs.cli.seed import run_seed
+
         run_seed(
             user_email=args.user,
             document_count=args.documents,

@@ -53,7 +53,9 @@ def main() -> None:
     client = weaviate.connect_to_local(host=hostname, port=port)
     try:
         ensure_document_chunk_collection(client)
-        print(f"DocumentChunk collection ready (exists={client.collections.exists(COLLECTION_NAME)})")
+        print(
+            f"DocumentChunk collection ready (exists={client.collections.exists(COLLECTION_NAME)})"
+        )
     finally:
         client.close()
 

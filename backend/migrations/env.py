@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from pwbs.core.config import get_settings
 
 # Import all models so Base.metadata contains all tables
-from pwbs.models import Base  # noqa: F401
+from pwbs.models import Base
 
 config = context.config
 
@@ -37,7 +37,7 @@ def _get_url() -> str:
         if url is None:
             raise RuntimeError(
                 "DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini"
-            )
+            ) from None
         return url
 
 

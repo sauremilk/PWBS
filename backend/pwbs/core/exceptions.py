@@ -1,4 +1,4 @@
-﻿"""PWBS base exceptions.
+"""PWBS base exceptions.
 
 All domain exceptions inherit from PWBSError.
 HTTP-level exceptions use FastAPI HTTPException with structured detail dicts.

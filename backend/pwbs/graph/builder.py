@@ -1,4 +1,4 @@
-﻿"""Neo4j Graph Builder mit MERGE-basierter Idempotenz (TASK-064).
+"""Neo4j Graph Builder mit MERGE-basierter Idempotenz (TASK-064).
 
 Writes extracted entities as nodes and their relationships as edges
 into the Neo4j knowledge graph.  Uses `MERGE` instead of `CREATE`
@@ -20,21 +20,21 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "EdgeData",
+    "EdgeType",
+    "GraphBuildResult",
     "GraphBuilder",
     "GraphBuilderConfig",
-    "GraphBuildResult",
-    "NodeLabel",
-    "EdgeType",
-    "NodeData",
-    "EdgeData",
     "Neo4jSession",
+    "NodeData",
+    "NodeLabel",
 ]
 
 
@@ -379,7 +379,7 @@ class GraphBuilder:
 
     async def _merge_single_node(self, node: NodeData) -> str | None:
         """MERGE a single node and return its Neo4j internal id string."""
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         query = _build_merge_query(node.label, node.properties)
 
         params: dict[str, Any] = {
@@ -395,7 +395,7 @@ class GraphBuilder:
 
     async def _merge_single_edge(self, edge: EdgeData) -> bool:
         """MERGE a single edge. Returns True on success."""
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         query = _build_edge_query(edge)
 
         params: dict[str, Any] = {

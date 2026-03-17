@@ -1,4 +1,4 @@
-﻿"""Chunking-Strategie-Auswahl nach Dokumenttyp (TASK-057).
+"""Chunking strategy selection by document type (TASK-057).
 
 Automatic strategy selection based on `source_type` of the document.
 Mapping is configurable via `StrategyMapping`.
@@ -52,9 +52,7 @@ class StrategyMapping:
     source_type_map: dict[SourceType, ChunkingStrategy] = field(
         default_factory=lambda: dict(_DEFAULT_MAPPING)
     )
-    content_type_map: dict[str, ChunkingStrategy] = field(
-        default_factory=dict
-    )
+    content_type_map: dict[str, ChunkingStrategy] = field(default_factory=dict)
     fallback: ChunkingStrategy = ChunkingStrategy.SEMANTIC
 
 

@@ -1,4 +1,4 @@
-﻿"""Entity-Deduplizierung über normalized_name (TASK-063).
+"""Entity-Deduplizierung über normalized_name (TASK-063).
 
 Persists extracted entities (from TASK-061 rule-based and TASK-062 LLM-based)
 into PostgreSQL using UPSERT logic:
@@ -21,7 +21,7 @@ import logging
 import unicodedata
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 
 from sqlalchemy import text
@@ -33,9 +33,9 @@ from pwbs.schemas.enums import EntityType
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "EntityDeduplicationService",
     "DeduplicationConfig",
     "DeduplicationResult",
+    "EntityDeduplicationService",
     "UpsertedEntity",
     "normalize_name",
 ]
@@ -318,7 +318,7 @@ class EntityDeduplicationService:
         user_id: uuid.UUID,
     ) -> UpsertedEntity:
         """UPSERT entity using ON CONFLICT DO UPDATE."""
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         norm = (
             normalize_name(entity.name)
             if entity.normalized_name == entity.name.lower().strip()

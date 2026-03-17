@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -38,9 +38,7 @@ class TestVerifySlackSignature:
         ts = str(int(time.time()))
         body = b"token=abc&user_id=U123"
         sig_base = f"v0:{ts}:{body.decode()}"
-        expected = "v0=" + hmac.new(
-            secret.encode(), sig_base.encode(), hashlib.sha256
-        ).hexdigest()
+        expected = "v0=" + hmac.new(secret.encode(), sig_base.encode(), hashlib.sha256).hexdigest()
         assert verify_slack_signature(secret, ts, body, expected) is True
 
     def test_invalid_signature(self) -> None:
@@ -162,7 +160,10 @@ class TestFormatSearchBlocks:
         assert "Doc 1" in blocks[2]["text"]["text"]
 
     def test_max_three_results(self) -> None:
-        results = [{"title": f"Doc {i}", "source_type": "x", "score": 0.5, "content": "c"} for i in range(5)]
+        results = [
+            {"title": f"Doc {i}", "source_type": "x", "score": 0.5, "content": "c"}
+            for i in range(5)
+        ]
         blocks = _format_search_blocks(results)
         # header + (divider + section) * 3
         assert len(blocks) == 7
@@ -178,7 +179,7 @@ class TestFormatBriefingBlocks:
         briefing = MagicMock()
         briefing.title = "Morgenbriefing 25.07.2025"
         briefing.content = "Heute stehen 3 Meetings an."
-        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=UTC)
         blocks = _format_briefing_blocks(briefing)
         assert len(blocks) == 4  # header + title + content + context
         assert "Morgenbriefing" in blocks[1]["text"]["text"]
@@ -188,7 +189,7 @@ class TestFormatBriefingBlocks:
         briefing = MagicMock()
         briefing.title = "Long Briefing"
         briefing.content = "x" * 5000
-        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=UTC)
         blocks = _format_briefing_blocks(briefing)
         content_block = blocks[2]["text"]["text"]
         assert len(content_block) < 3100
@@ -243,7 +244,11 @@ class TestDispatchCommand:
         limiter = SlackRateLimiter(max_requests=10, window_seconds=3600)
         with (
             patch("pwbs.integrations.slack.bot.rate_limiter", limiter),
-            patch("pwbs.integrations.slack.bot.handle_search_command", new_callable=AsyncMock, return_value=expected) as mock_search,
+            patch(
+                "pwbs.integrations.slack.bot.handle_search_command",
+                new_callable=AsyncMock,
+                return_value=expected,
+            ) as mock_search,
         ):
             result = await dispatch_command("search DSGVO", "U123", "T456", session)
             mock_search.assert_awaited_once_with("DSGVO", uid, session)
@@ -260,7 +265,11 @@ class TestDispatchCommand:
         limiter = SlackRateLimiter(max_requests=10, window_seconds=3600)
         with (
             patch("pwbs.integrations.slack.bot.rate_limiter", limiter),
-            patch("pwbs.integrations.slack.bot.handle_briefing_command", new_callable=AsyncMock, return_value=expected) as mock_brief,
+            patch(
+                "pwbs.integrations.slack.bot.handle_briefing_command",
+                new_callable=AsyncMock,
+                return_value=expected,
+            ) as mock_brief,
         ):
             result = await dispatch_command("briefing", "U123", "T456", session)
             mock_brief.assert_awaited_once_with(uid, session)
@@ -282,7 +291,9 @@ class TestHandleSearchCommand:
     @pytest.mark.asyncio
     async def test_search_error_returns_graceful_message(self) -> None:
         session = AsyncMock()
-        with patch("pwbs.db.weaviate_client.get_weaviate_client", side_effect=Exception("no weaviate")):
+        with patch(
+            "pwbs.db.weaviate_client.get_weaviate_client", side_effect=Exception("no weaviate")
+        ):
             result = await handle_search_command("test query", uuid.uuid4(), session)
             assert "fehlgeschlagen" in result.text
 
@@ -307,7 +318,7 @@ class TestHandleBriefingCommand:
         briefing = MagicMock()
         briefing.title = "Test Briefing"
         briefing.content = "Inhalt"
-        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=timezone.utc)
+        briefing.generated_at = datetime(2025, 7, 25, 6, 30, tzinfo=UTC)
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = briefing
         session = AsyncMock()
@@ -322,4 +333,3 @@ class TestHandleBriefingCommand:
         session.execute.side_effect = Exception("db error")
         result = await handle_briefing_command(uuid.uuid4(), session)
         assert "konnte nicht geladen" in result.text
-

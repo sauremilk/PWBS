@@ -14,7 +14,6 @@ Scenarios:
 from __future__ import annotations
 
 import math
-import uuid
 from unittest.mock import AsyncMock
 
 import pytest
@@ -23,7 +22,6 @@ from pwbs.briefing.validation import (
     BriefingValidator,
     BriefingValidatorConfig,
     ConfidenceLevel,
-    ValidationResult,
     _cosine_similarity,
     _split_sentences,
 )

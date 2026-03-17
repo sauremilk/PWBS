@@ -20,4 +20,4 @@ class SearchHistory(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     query: Mapped[str] = mapped_column(Text, nullable=False)
     result_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
-    user: Mapped["User"] = relationship(back_populates="search_history_entries")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="search_history_entries")  # noqa: F821

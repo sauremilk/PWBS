@@ -99,12 +99,12 @@ async def _timed_check(name: str, check_fn: Any) -> dict[str, Any]:
 @router.get(
     "/health",
     summary="Health Check",
-    description="Prüft PostgreSQL, Weaviate, Neo4j, Redis und LLM-API parallel "
-    "mit 5s Timeout pro Service. HTTP 200 wenn PostgreSQL und mindestens eine "
-    "Such-Komponente erreichbar sind, HTTP 503 bei PostgreSQL-Ausfall.",
+    description="Checks PostgreSQL, Weaviate, Neo4j, Redis, and LLM API in parallel "
+    "with 5s timeout per service. HTTP 200 when PostgreSQL and at least one "
+    "search component are reachable, HTTP 503 on PostgreSQL failure.",
     responses={
-        200: {"description": "System healthy oder degraded"},
-        503: {"description": "PostgreSQL nicht erreichbar"},
+        200: {"description": "System healthy or degraded"},
+        503: {"description": "PostgreSQL unreachable"},
     },
 )
 async def health_check() -> JSONResponse:
@@ -186,7 +186,7 @@ async def _detailed_timed_check(name: str, check_fn: Any) -> dict[str, Any]:
             "latency_ms": latency_ms,
             "details": "reachable" if ok else "health check failed",
         }
-    except asyncio.TimeoutError:
+    except TimeoutError:
         latency_ms = round((time.monotonic() - start) * 1000, 1)
         return {
             "name": name,
@@ -207,13 +207,13 @@ async def _detailed_timed_check(name: str, check_fn: Any) -> dict[str, Any]:
 @router.get(
     "/health/detailed",
     summary="Detailed Health Check (Admin)",
-    description="Detaillierter Dependency-Check für PostgreSQL, Weaviate, Redis und Neo4j. "
-    "Erfordert Admin-JWT. Neo4j gibt 'unavailable' zurück wenn der Treiber nicht konfiguriert ist.",
+    description="Detailed dependency check for PostgreSQL, Weaviate, Redis, and Neo4j. "
+    "Requires admin JWT. Neo4j returns 'unavailable' when the driver is not configured.",
     responses={
-        200: {"description": "System healthy oder degraded"},
-        401: {"description": "Nicht authentifiziert"},
-        403: {"description": "Keine Admin-Berechtigung"},
-        503: {"description": "PostgreSQL oder Weaviate nicht erreichbar"},
+        200: {"description": "System healthy or degraded"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "No admin privileges"},
+        503: {"description": "PostgreSQL or Weaviate unreachable"},
         **AUTH_RESPONSES,
     },
 )

@@ -1,12 +1,10 @@
-﻿"""Tests for Briefing LLM-Call with Prompt Template (TASK-078)."""
+"""Tests for Briefing LLM-Call with Prompt Template (TASK-078)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -16,7 +14,6 @@ from pwbs.briefing.generator import (
     BriefingLLMResult,
     BriefingType,
 )
-from pwbs.core.grounding import Confidence, GroundedStatement, GroundingResult, SourceReference
 from pwbs.core.llm_gateway import LLMProvider, LLMResponse, LLMUsage
 
 # ------------------------------------------------------------------

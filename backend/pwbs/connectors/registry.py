@@ -15,7 +15,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from pwbs.core.exceptions import ConnectorError, NotFoundError
-from pwbs.schemas.enums import SourceType  # noqa: TC001 - runtime dict key
+from pwbs.schemas.enums import SourceType
 
 if TYPE_CHECKING:
     from uuid import UUID

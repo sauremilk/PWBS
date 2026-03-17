@@ -8,15 +8,12 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
 
 import pytest
 
 from pwbs.services.webhook_outbound import (
     SUPPORTED_EVENTS,
-    DeliveryResult,
     deliver_webhook,
     sign_payload,
 )

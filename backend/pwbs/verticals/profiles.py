@@ -1,4 +1,4 @@
-﻿"""Vertical profile configurations for knowledge workers (TASK-154).
+"""Vertical profile configurations for knowledge workers (TASK-154).
 
 Each vertical profile defines:
 - entity_priorities: Ordered list of EntityTypes the profile cares most about.
@@ -18,9 +18,9 @@ from dataclasses import dataclass
 from pwbs.schemas.enums import EntityType, VerticalProfile
 
 __all__ = [
+    "VERTICAL_PROFILES",
     "VerticalConfig",
     "get_vertical_config",
-    "VERTICAL_PROFILES",
 ]
 
 

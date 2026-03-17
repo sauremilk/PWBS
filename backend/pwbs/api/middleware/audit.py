@@ -1,4 +1,4 @@
-﻿"""Audit middleware -- log all mutating API operations (TASK-093).
+"""Audit middleware -- log all mutating API operations (TASK-093).
 
 Logs POST/PUT/PATCH/DELETE requests with user_id, path, method and
 response status code.  This provides basic audit visibility; full
@@ -20,9 +20,7 @@ _MUTATING_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 
 class AuditMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         if request.method not in _MUTATING_METHODS:
             return await call_next(request)
 

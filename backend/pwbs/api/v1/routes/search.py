@@ -151,11 +151,11 @@ def _to_search_result(enriched: EnrichedSearchResult) -> SearchResult:
     "/",
     response_model=SearchResponse,
     status_code=status.HTTP_200_OK,
-    summary="Hybrid-Suche über alle Nutzerdaten",
+    summary="Hybrid search across all user data",
     responses={
-        400: {"description": "Leere Query"},
-        401: {"description": "Kein gültiges JWT"},
-        422: {"description": "Ungültige Filter"},
+        400: {"description": "Empty query"},
+        401: {"description": "Invalid JWT"},
+        422: {"description": "Invalid filters"},
     },
 )
 async def search(
@@ -250,10 +250,10 @@ async def search(
     "/autocomplete",
     response_model=AutoCompleteResponse,
     status_code=status.HTTP_200_OK,
-    summary="Entity-basierte Auto-Vervollständigung",
+    summary="Entity-based autocomplete",
 )
 async def autocomplete(
-    q: str = Query(min_length=2, description="Suchbegriff (mind. 2 Zeichen)"),
+    q: str = Query(min_length=2, description="Search term (min. 2 characters)"),
     limit: int = Query(default=10, ge=1, le=30),
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
@@ -355,7 +355,7 @@ async def list_saved_searches(
 @router.delete(
     "/saved/{search_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Gespeicherte Suche löschen",
+    summary="Delete saved search",
 )
 async def delete_saved_search(
     search_id: uuid.UUID,
@@ -372,7 +372,7 @@ async def delete_saved_search(
     result = await session.execute(stmt)
     saved = result.scalar_one_or_none()
     if saved is None:
-        raise HTTPException(status_code=404, detail="Gespeicherte Suche nicht gefunden")
+        raise HTTPException(status_code=404, detail="Saved search not found")
 
     await session.delete(saved)
     await session.commit()

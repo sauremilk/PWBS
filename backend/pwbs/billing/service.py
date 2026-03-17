@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Feature limits per plan
 # ---------------------------------------------------------------------------
+
 
 def _get_plan_limits() -> dict[str, dict[str, int | None]]:
     """Return feature limits per plan. None = unlimited."""
@@ -60,14 +61,13 @@ def get_plan_limits() -> dict[str, dict[str, int | None]]:
 # Subscription queries
 # ---------------------------------------------------------------------------
 
+
 async def get_user_subscription(
     db: AsyncSession,
     user_id: uuid.UUID,
 ) -> Subscription | None:
     """Get the subscription record for a user, or None if none exists."""
-    result = await db.execute(
-        select(Subscription).where(Subscription.user_id == user_id)
-    )
+    result = await db.execute(select(Subscription).where(Subscription.user_id == user_id))
     return result.scalar_one_or_none()
 
 
@@ -106,6 +106,7 @@ async def get_user_plan(db: AsyncSession, user_id: uuid.UUID) -> str:
 # Feature gating
 # ---------------------------------------------------------------------------
 
+
 async def check_feature_access(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -139,6 +140,7 @@ async def check_feature_access(
 # Stripe Checkout
 # ---------------------------------------------------------------------------
 
+
 async def create_checkout_session(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -167,6 +169,7 @@ async def create_checkout_session(
         raise ValueError("User already has an active Pro subscription")
 
     import stripe
+
     stripe.api_key = stripe_key
 
     # Get or create Stripe customer
@@ -214,6 +217,7 @@ async def create_checkout_session(
 # Stripe Customer Portal
 # ---------------------------------------------------------------------------
 
+
 async def create_portal_session(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -233,6 +237,7 @@ async def create_portal_session(
         raise ValueError("No Stripe customer found for this user")
 
     import stripe
+
     stripe.api_key = stripe_key
 
     session = stripe.billing_portal.Session.create(
@@ -247,6 +252,7 @@ async def create_portal_session(
 # Webhook signature verification
 # ---------------------------------------------------------------------------
 
+
 def verify_stripe_signature(
     payload: bytes,
     sig_header: str,
@@ -257,6 +263,7 @@ def verify_stripe_signature(
     Raises ValueError if signature is invalid.
     """
     import stripe
+
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
         return dict(event)
@@ -267,6 +274,7 @@ def verify_stripe_signature(
 # ---------------------------------------------------------------------------
 # Webhook event processing (idempotent)
 # ---------------------------------------------------------------------------
+
 
 async def handle_webhook_event(
     db: AsyncSession,
@@ -361,18 +369,14 @@ async def _handle_subscription_updated(
     cancel_at_end = subscription_data.get("cancel_at_period_end", False)
 
     result = await db.execute(
-        select(Subscription).where(
-            Subscription.stripe_subscription_id == stripe_sub_id
-        )
+        select(Subscription).where(Subscription.stripe_subscription_id == stripe_sub_id)
     )
     sub = result.scalar_one_or_none()
 
     if sub is None:
         # Try by customer ID
         result = await db.execute(
-            select(Subscription).where(
-                Subscription.stripe_customer_id == customer_id
-            )
+            select(Subscription).where(Subscription.stripe_customer_id == customer_id)
         )
         sub = result.scalar_one_or_none()
 
@@ -395,9 +399,9 @@ async def _handle_subscription_updated(
     period_start = subscription_data.get("current_period_start")
     period_end = subscription_data.get("current_period_end")
     if period_start:
-        sub.current_period_start = datetime.fromtimestamp(period_start, tz=timezone.utc)
+        sub.current_period_start = datetime.fromtimestamp(period_start, tz=UTC)
     if period_end:
-        sub.current_period_end = datetime.fromtimestamp(period_end, tz=timezone.utc)
+        sub.current_period_end = datetime.fromtimestamp(period_end, tz=UTC)
 
     # Update price ID from items
     items = subscription_data.get("items", {}).get("data", [])
@@ -419,9 +423,7 @@ async def _handle_subscription_deleted(
     stripe_sub_id = subscription_data.get("id", "")
 
     result = await db.execute(
-        select(Subscription).where(
-            Subscription.stripe_subscription_id == stripe_sub_id
-        )
+        select(Subscription).where(Subscription.stripe_subscription_id == stripe_sub_id)
     )
     sub = result.scalar_one_or_none()
 
@@ -452,9 +454,7 @@ async def _handle_payment_succeeded(
         return "ignored:no_subscription"
 
     result = await db.execute(
-        select(Subscription).where(
-            Subscription.stripe_subscription_id == subscription_id
-        )
+        select(Subscription).where(Subscription.stripe_subscription_id == subscription_id)
     )
     sub = result.scalar_one_or_none()
     if sub and sub.status != SubscriptionStatus.ACTIVE:
@@ -475,9 +475,7 @@ async def _handle_payment_failed(
         return "ignored:no_subscription"
 
     result = await db.execute(
-        select(Subscription).where(
-            Subscription.stripe_subscription_id == subscription_id
-        )
+        select(Subscription).where(Subscription.stripe_subscription_id == subscription_id)
     )
     sub = result.scalar_one_or_none()
     if sub:

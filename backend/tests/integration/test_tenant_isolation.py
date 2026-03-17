@@ -7,7 +7,6 @@ User B's resources (connectors, documents, briefings, etc.).
 from __future__ import annotations
 
 import uuid
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient
@@ -111,7 +110,8 @@ class TestExportIsolation:
         # User B tries to access User A's export
         headers_b = await _register_second_user(client)
         resp_b = await client.get(
-            f"/api/v1/user/export/{export_id}", headers=headers_b,
+            f"/api/v1/user/export/{export_id}",
+            headers=headers_b,
         )
         # Should be 404 (not found for this user) or 403
         assert resp_b.status_code in (403, 404)

@@ -61,4 +61,4 @@ class KnowledgeSnapshot(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship()  # noqa: F821
+    user: Mapped[User] = relationship()  # noqa: F821

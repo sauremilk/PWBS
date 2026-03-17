@@ -1,8 +1,9 @@
-﻿"""Generate OpenAPI schema and Postman collection from FastAPI app (TASK-193).
+"""Generate OpenAPI schema and Postman collection from FastAPI app (TASK-193).
 
 Usage:
     python scripts/export_openapi.py
 """
+
 from __future__ import annotations
 
 import json
@@ -15,7 +16,7 @@ os.environ.setdefault("ENCRYPTION_MASTER_KEY", "dGVzdC1lbmNyeXB0aW9uLWtleS0zMg==
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://x:x@localhost/x")
 os.environ.setdefault("DEBUG", "1")
 
-from pwbs.api.main import create_app  # noqa: E402
+from pwbs.api.main import create_app
 
 DOCS_API = Path(__file__).resolve().parent.parent.parent / "docs" / "api"
 
@@ -42,7 +43,8 @@ def main() -> None:
             url_parts = path.strip("/").split("/")
             path_vars = [
                 {"key": p[1:-1], "value": "", "description": p[1:-1]}
-                for p in url_parts if p.startswith("{") and p.endswith("}")
+                for p in url_parts
+                if p.startswith("{") and p.endswith("}")
             ]
             headers = [{"key": "Authorization", "value": "Bearer {{accessToken}}", "type": "text"}]
             if method.upper() in ("POST", "PUT", "PATCH"):
@@ -52,7 +54,12 @@ def main() -> None:
                 "request": {
                     "method": method.upper(),
                     "header": headers,
-                    "url": {"raw": "{{baseUrl}}" + path, "host": ["{{baseUrl}}"], "path": url_parts, "variable": path_vars},
+                    "url": {
+                        "raw": "{{baseUrl}}" + path,
+                        "host": ["{{baseUrl}}"],
+                        "path": url_parts,
+                        "variable": path_vars,
+                    },
                     "description": desc,
                 },
                 "response": [],

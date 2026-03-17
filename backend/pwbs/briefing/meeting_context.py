@@ -1,4 +1,4 @@
-﻿"""Meeting-Vorbereitung Kontextassemblierung (TASK-077).
+"""Meeting-Vorbereitung Kontextassemblierung (TASK-077).
 
 Assembles context for meeting preparation briefings:
 1. Load the target meeting event (title, time, participants)
@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "MeetingContextAssembler",
     "MeetingContextConfig",
-    "MeetingPrepContext",
     "MeetingGraphService",
+    "MeetingPrepContext",
     "NullMeetingGraphService",
     "ParticipantContext",
 ]

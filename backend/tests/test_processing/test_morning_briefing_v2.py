@@ -11,7 +11,7 @@ Validiert die Anforderungen aus briefing-feature.prompt.md:
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -24,12 +24,9 @@ from pwbs.briefing.context import (
     MorningBriefingContext,
     MorningContextAssembler,
     NullGraphService,
-    PendingDecision,
 )
 from pwbs.briefing.generator import (
     BriefingGenerator,
-    BriefingGeneratorConfig,
-    BriefingLLMResult,
     BriefingType,
 )
 from pwbs.core.llm_gateway import LLMProvider, LLMResponse, LLMUsage
@@ -42,7 +39,7 @@ from pwbs.search.service import SemanticSearchResult
 
 USER_ID = uuid.uuid4()
 TODAY = date(2026, 3, 16)
-NOW = datetime(2026, 3, 16, 7, 0, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 3, 16, 7, 0, 0, tzinfo=UTC)
 
 MOCK_USAGE = LLMUsage(
     provider=LLMProvider.CLAUDE,

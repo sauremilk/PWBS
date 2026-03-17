@@ -30,7 +30,7 @@ import os
 import re
 import zipfile
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -105,16 +105,16 @@ def validate_vault_path(vault_path: str) -> tuple[bool, str]:
     """
     p = Path(vault_path)
     if not p.exists():
-        return False, f"Pfad existiert nicht: {vault_path}"
+        return False, f"Path does not exist: {vault_path}"
     if not p.is_dir():
-        return False, f"Pfad ist kein Verzeichnis: {vault_path}"
+        return False, f"Path is not a directory: {vault_path}"
 
     # Check for at least one .md file (non-excluded)
     for md_file in p.rglob(f"*{_MD_SUFFIX}"):
         if not _is_excluded(md_file, p):
             return True, ""
 
-    return False, f"Kein gültiger Obsidian-Vault: keine .md-Dateien gefunden in {vault_path}"
+    return False, f"Not a valid Obsidian vault: no .md files found in {vault_path}"
 
 
 def scan_vault_files(vault_path: Path) -> list[Path]:
@@ -147,8 +147,8 @@ def _file_to_raw(file_path: Path, vault_root: Path) -> dict[str, object]:
         "relative_path": str(relative).replace(os.sep, "/"),
         "absolute_path": str(file_path),
         "content": content,
-        "modified_at": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
-        "created_at": datetime.fromtimestamp(stat.st_ctime, tz=timezone.utc).isoformat(),
+        "modified_at": datetime.fromtimestamp(stat.st_mtime, tz=UTC).isoformat(),
+        "created_at": datetime.fromtimestamp(stat.st_ctime, tz=UTC).isoformat(),
         "size_bytes": stat.st_size,
         "filename": file_path.stem,
     }
@@ -175,7 +175,7 @@ def _parse_frontmatter(content: str) -> tuple[dict[str, object], str]:
     try:
         post = frontmatter.loads(content)
         return dict(post.metadata), post.content
-    except Exception:  # noqa: BLE001
+    except Exception:
         # If parsing fails, return raw content with empty metadata
         return {}, content
 
@@ -231,7 +231,7 @@ class FileEvent:
 
     path: str  # relative to vault root, forward-slash separated
     event_type: str  # "created", "modified", "deleted"
-    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 # ---------------------------------------------------------------------------
@@ -410,7 +410,7 @@ def extract_markdown_from_zip(
         zf = zipfile.ZipFile(io.BytesIO(data))
     except (zipfile.BadZipFile, Exception) as exc:
         raise ConnectorError(
-            f"Ungültiges ZIP-Archiv: {exc}",
+            f"Invalid ZIP archive: {exc}",
             code="OBSIDIAN_INVALID_ZIP",
         ) from exc
 
@@ -430,20 +430,19 @@ def extract_markdown_from_zip(
             total_size += info.file_size
             if total_size > max_uncompressed:
                 raise ConnectorError(
-                    "ZIP überschreitet maximale entpackte Größe"
-                    f" ({max_uncompressed // (1024 * 1024)} MB)",
+                    f"ZIP exceeds maximum unpacked size ({max_uncompressed // (1024 * 1024)} MB)",
                     code="OBSIDIAN_ZIP_TOO_LARGE",
                 )
 
             if len(results) >= max_files:
                 raise ConnectorError(
-                    f"ZIP enthält mehr als {max_files} Markdown-Dateien",
+                    f"ZIP contains more than {max_files} Markdown files",
                     code="OBSIDIAN_TOO_MANY_FILES",
                 )
 
             try:
                 content = zf.read(info.filename).decode("utf-8", errors="replace")
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.warning("Skipping unreadable ZIP entry %r: %s", info.filename, exc)
                 continue
 
@@ -482,7 +481,7 @@ class ObsidianConnector(BaseConnector):
         config: ConnectorConfig,
     ) -> None:
         super().__init__(owner_id=owner_id, connection_id=connection_id, config=config)
-        self._watcher: ObsidianWatcher | None = None if _HAS_WATCHDOG else None
+        self._watcher: ObsidianWatcher | None = None
         self._deleted_paths: set[str] = set()
 
     # ------------------------------------------------------------------
@@ -582,7 +581,7 @@ class ObsidianConnector(BaseConnector):
         for file_path in all_files:
             try:
                 stat = file_path.stat()
-                file_mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+                file_mtime = datetime.fromtimestamp(stat.st_mtime, tz=UTC)
 
                 # Skip files not modified since watermark (incremental sync)
                 if watermark and file_mtime <= watermark:
@@ -595,7 +594,7 @@ class ObsidianConnector(BaseConnector):
                 if latest_mtime is None or file_mtime > latest_mtime:
                     latest_mtime = file_mtime
 
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 relative = str(file_path.relative_to(vault_path)).replace(os.sep, "/")
                 errors.append(
                     SyncError(
@@ -611,7 +610,7 @@ class ObsidianConnector(BaseConnector):
                     "relative_path": deleted_path,
                     "absolute_path": str(vault_path / deleted_path),
                     "content": "",
-                    "modified_at": datetime.now(tz=timezone.utc).isoformat(),
+                    "modified_at": datetime.now(tz=UTC).isoformat(),
                     "created_at": "",
                     "size_bytes": 0,
                     "filename": Path(deleted_path).stem,
@@ -619,7 +618,7 @@ class ObsidianConnector(BaseConnector):
                 }
                 doc = self.normalize(raw_deleted)
                 documents.append(doc)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 errors.append(
                     SyncError(source_id=deleted_path, error=str(exc)),
                 )
@@ -788,7 +787,7 @@ class ObsidianConnector(BaseConnector):
         documents: list[UnifiedDocument] = []
         errors: list[SyncError] = []
         current_source_ids: set[str] = set()
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
 
         for relative_path, content in files:
             current_source_ids.add(relative_path)
@@ -803,7 +802,7 @@ class ObsidianConnector(BaseConnector):
                 }
                 doc = self.normalize(raw)
                 documents.append(doc)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 errors.append(SyncError(source_id=relative_path, error=str(exc)))
 
         # Deletion detection: mark files from previous upload that are absent
@@ -822,7 +821,7 @@ class ObsidianConnector(BaseConnector):
                     }
                     doc = self.normalize(raw_deleted)
                     documents.append(doc)
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     errors.append(SyncError(source_id=deleted_path, error=str(exc)))
 
         return SyncResult(

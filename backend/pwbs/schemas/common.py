@@ -1,4 +1,4 @@
-﻿"""Common API response schemas for OpenAPI documentation (TASK-119).
+"""Common API response schemas for OpenAPI documentation (TASK-119).
 
 Provides a standard `ErrorResponse` model used in `responses=` parameters
 across all API routers to produce consistent error documentation in the

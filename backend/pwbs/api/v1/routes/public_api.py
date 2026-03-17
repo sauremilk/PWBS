@@ -1,4 +1,4 @@
-﻿"""Public API routes -- API-key-authenticated endpoints (TASK-150).
+"""Public API routes -- API-key-authenticated endpoints (TASK-150).
 
 These endpoints are designed for external tool integrations and use
 API-Key authentication (X-API-Key header) instead of JWT.
@@ -161,10 +161,7 @@ async def public_search(
     for doc in docs:
         # Get first chunk content preview if available
         chunk_stmt = (
-            select(Chunk)
-            .where(Chunk.document_id == doc.id)
-            .order_by(Chunk.chunk_index)
-            .limit(1)
+            select(Chunk).where(Chunk.document_id == doc.id).order_by(Chunk.chunk_index).limit(1)
         )
         chunk_result = await db.execute(chunk_stmt)
         first_chunk = chunk_result.scalar_one_or_none()
@@ -203,11 +200,7 @@ async def public_entities(
         stmt = stmt.where(Entity.entity_type == entity_type)
 
     # Count
-    count_stmt = (
-        select(func.count())
-        .select_from(Entity)
-        .where(Entity.user_id == current_user.id)
-    )
+    count_stmt = select(func.count()).select_from(Entity).where(Entity.user_id == current_user.id)
     if entity_type is not None:
         count_stmt = count_stmt.where(Entity.entity_type == entity_type)
     count_result = await db.execute(count_stmt)
@@ -242,9 +235,7 @@ async def public_entity_detail(
     db: AsyncSession = Depends(get_db_session),
 ) -> PublicEntityDetail:
     """Get details for a specific entity."""
-    stmt = select(Entity).where(
-        Entity.id == entity_id, Entity.user_id == current_user.id
-    )
+    stmt = select(Entity).where(Entity.id == entity_id, Entity.user_id == current_user.id)
     result = await db.execute(stmt)
     entity = result.scalar_one_or_none()
 

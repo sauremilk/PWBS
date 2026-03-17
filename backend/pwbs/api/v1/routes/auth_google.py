@@ -125,11 +125,11 @@ async def google_auth_url() -> GoogleAuthUrlResponse:
     "/callback",
     response_model=GoogleCallbackResponse,
     status_code=status.HTTP_200_OK,
-    summary="Google OAuth2 Callback – Code austauschen",
+    summary="Google OAuth2 Callback – exchange code",
     responses={
-        400: {"description": "Ungültiger oder abgelaufener state"},
-        401: {"description": "Google-Authentifizierung fehlgeschlagen"},
-        503: {"description": "Google OAuth nicht konfiguriert"},
+        400: {"description": "Invalid or expired state"},
+        401: {"description": "Google authentication failed"},
+        503: {"description": "Google OAuth not configured"},
     },
 )
 async def google_callback(
@@ -167,7 +167,7 @@ async def google_callback(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={
                 "code": "GOOGLE_EMAIL_MISSING",
-                "message": "Google-Konto hat keine verifizierte E-Mail-Adresse",
+                "message": "Google account has no verified email address",
             },
         )
 
@@ -176,7 +176,7 @@ async def google_callback(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={
                 "code": "GOOGLE_EMAIL_NOT_VERIFIED",
-                "message": "Google E-Mail ist nicht verifiziert",
+                "message": "Google email is not verified",
             },
         )
 
@@ -227,7 +227,7 @@ async def _validate_state(state: str) -> None:
         status_code=status.HTTP_400_BAD_REQUEST,
         detail={
             "code": "INVALID_STATE",
-            "message": "Ungültiger oder abgelaufener state-Parameter",
+            "message": "Invalid or expired state parameter",
         },
     )
 

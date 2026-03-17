@@ -34,10 +34,10 @@ from pwbs.db.redis_client import get_redis_client
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "CacheResult",
-    "CachedLLMResponse",
     "LLM_CACHE_REQUESTS",
     "SIMILARITY_THRESHOLD",
+    "CacheResult",
+    "CachedLLMResponse",
     "llm_cache_get",
     "llm_cache_invalidate_owner",
     "llm_cache_invalidate_type",

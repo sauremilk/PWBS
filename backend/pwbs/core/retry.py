@@ -1,4 +1,4 @@
-﻿"""LLM Gateway Retry-Logik mit Exponential Backoff (TASK-071).
+"""LLM Gateway Retry-Logik mit Exponential Backoff (TASK-071).
 
 Enhanced retry handler for LLM API calls with:
 - Exponential backoff: 1 min -> 5 min -> 25 min (factor 5)
@@ -16,19 +16,20 @@ import asyncio
 import logging
 import random
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "ErrorCategory",
+    "PermanentError",
     "RetryConfig",
+    "RetryExhaustedError",
     "RetryHandler",
     "RetryResult",
-    "RetryExhaustedError",
-    "PermanentError",
-    "ErrorCategory",
 ]
 
 T = TypeVar("T")
@@ -42,9 +43,9 @@ T = TypeVar("T")
 class ErrorCategory(str, Enum):
     """Classification of an error for retry decisions."""
 
-    TRANSIENT = "transient"      # 429, 500+, timeout, connection
-    PERMANENT = "permanent"      # 401, 403, 404, invalid request
-    UNKNOWN = "unknown"          # Unclassified
+    TRANSIENT = "transient"  # 429, 500+, timeout, connection
+    PERMANENT = "permanent"  # 401, 403, 404, invalid request
+    UNKNOWN = "unknown"  # Unclassified
 
 
 class PermanentError(Exception):
@@ -69,8 +70,7 @@ class RetryExhaustedError(Exception):
         self.last_error = last_error
         self.duration_ms = duration_ms
         super().__init__(
-            f"All {attempts} retry attempts exhausted after {duration_ms:.0f}ms: "
-            f"{last_error}"
+            f"All {attempts} retry attempts exhausted after {duration_ms:.0f}ms: {last_error}"
         )
 
 
@@ -227,7 +227,7 @@ class RetryHandler:
                         exc,
                     )
 
-        assert last_error is not None  # noqa: S101
+        assert last_error is not None
         duration_ms = (time.monotonic() - start) * 1000
         raise RetryExhaustedError(total_attempts, last_error, duration_ms)
 
@@ -247,7 +247,7 @@ class RetryHandler:
                 operation(*args, **kwargs),
                 timeout=self._config.call_timeout_seconds,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise TimeoutError(
                 f"LLM call timed out after {self._config.call_timeout_seconds}s"
             ) from None
@@ -263,12 +263,10 @@ class RetryHandler:
         attempt=1: base_delay * factor (300s = 5min)
         attempt=2: base_delay * factor^2 (1500s = 25min)
         """
-        base = self._config.base_delay_seconds * (
-            self._config.backoff_factor ** attempt
-        )
+        base = self._config.base_delay_seconds * (self._config.backoff_factor**attempt)
         # Add jitter: +/- jitter_fraction of the base delay
         jitter_range = base * self._config.jitter_fraction
-        jitter = random.uniform(-jitter_range, jitter_range)  # noqa: S311
+        jitter = random.uniform(-jitter_range, jitter_range)
         return max(0.0, base + jitter)
 
     # ------------------------------------------------------------------
@@ -317,6 +315,7 @@ class RetryHandler:
             from anthropic import (
                 RateLimitError as AnthropicRateLimit,
             )
+
             if isinstance(exc, (AnthropicTimeout, AnthropicRateLimit)):
                 return ErrorCategory.TRANSIENT
             if isinstance(exc, (AnthropicAuth, AnthropicPermission)):
@@ -338,6 +337,7 @@ class RetryHandler:
             from openai import (
                 RateLimitError as OpenAIRateLimit,
             )
+
             if isinstance(exc, (OpenAITimeout, OpenAIRateLimit)):
                 return ErrorCategory.TRANSIENT
             if isinstance(exc, (OpenAIAuth, OpenAIPermission)):

@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "OIDCAuthResult",
-    "OIDCHandler",
     "OIDCCallbackParams",
+    "OIDCHandler",
 ]
 
 

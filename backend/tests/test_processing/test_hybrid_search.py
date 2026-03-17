@@ -1,9 +1,9 @@
-﻿"""Tests for Hybrid Search with RRF Fusion (TASK-074)."""
+"""Tests for Hybrid Search with RRF Fusion (TASK-074)."""
 
 from __future__ import annotations
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -14,7 +14,6 @@ from pwbs.search.hybrid import (
 )
 from pwbs.search.keyword import KeywordSearchResult
 from pwbs.search.service import SemanticSearchResult
-
 
 # ------------------------------------------------------------------
 # Fixtures
@@ -291,7 +290,8 @@ class TestWeighting:
         )
         # Flip weights: keyword heavier
         results = await svc.search(
-            "test", USER_ID,
+            "test",
+            USER_ID,
             semantic_weight=0.25,
             keyword_weight=0.75,
         )
@@ -392,8 +392,16 @@ class TestUserIsolation:
         sem_svc.search.assert_called_once()
         kw_svc.search.assert_called_once()
         # Verify user_id passed
-        assert sem_svc.search.call_args.kwargs.get("user_id") == uid or sem_svc.search.call_args[1].get("user_id") == uid or (len(sem_svc.search.call_args[0]) > 1 and sem_svc.search.call_args[0][1] == uid)
-        assert kw_svc.search.call_args.kwargs.get("user_id") == uid or kw_svc.search.call_args[1].get("user_id") == uid or (len(kw_svc.search.call_args[0]) > 1 and kw_svc.search.call_args[0][1] == uid)
+        assert (
+            sem_svc.search.call_args.kwargs.get("user_id") == uid
+            or sem_svc.search.call_args[1].get("user_id") == uid
+            or (len(sem_svc.search.call_args[0]) > 1 and sem_svc.search.call_args[0][1] == uid)
+        )
+        assert (
+            kw_svc.search.call_args.kwargs.get("user_id") == uid
+            or kw_svc.search.call_args[1].get("user_id") == uid
+            or (len(kw_svc.search.call_args[0]) > 1 and kw_svc.search.call_args[0][1] == uid)
+        )
 
 
 # ------------------------------------------------------------------

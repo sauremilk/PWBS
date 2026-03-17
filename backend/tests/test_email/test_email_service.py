@@ -11,7 +11,6 @@ Tests cover:
 
 from __future__ import annotations
 
-import uuid
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -28,7 +27,6 @@ from pwbs.services.email import (
     SmtpBackend,
     create_email_service,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -94,9 +92,7 @@ class TestWelcomeTemplate:
     @pytest.mark.asyncio
     async def test_contains_dashboard_link(self) -> None:
         svc, backend = _make_service()
-        await svc.send_welcome(
-            "user@example.com", "Max", dashboard_url="https://app.pwbs.app/dash"
-        )
+        await svc.send_welcome("user@example.com", "Max", dashboard_url="https://app.pwbs.app/dash")
         assert "https://app.pwbs.app/dash" in backend.sent[0].html_body
 
     @pytest.mark.asyncio
@@ -110,17 +106,13 @@ class TestPasswordResetTemplate:
     @pytest.mark.asyncio
     async def test_renders_reset_url(self) -> None:
         svc, backend = _make_service()
-        await svc.send_password_reset(
-            "user@example.com", "https://app.pwbs.app/reset?token=abc123"
-        )
+        await svc.send_password_reset("user@example.com", "https://app.pwbs.app/reset?token=abc123")
         assert "https://app.pwbs.app/reset?token=abc123" in backend.sent[0].html_body
 
     @pytest.mark.asyncio
     async def test_renders_expiry(self) -> None:
         svc, backend = _make_service()
-        await svc.send_password_reset(
-            "user@example.com", "https://reset", expires_in_minutes=60
-        )
+        await svc.send_password_reset("user@example.com", "https://reset", expires_in_minutes=60)
         assert "60 Minuten" in backend.sent[0].html_body
 
     @pytest.mark.asyncio
@@ -135,8 +127,10 @@ class TestBriefingNotificationTemplate:
     async def test_renders_briefing_type(self) -> None:
         svc, backend = _make_service()
         await svc.send_briefing_notification(
-            "user@example.com", "Morgenbriefing", "Ihr Tagesbriefing",
-            "https://app.pwbs.app/briefing/1"
+            "user@example.com",
+            "Morgenbriefing",
+            "Ihr Tagesbriefing",
+            "https://app.pwbs.app/briefing/1",
         )
         assert "Morgenbriefing" in backend.sent[0].html_body
 
@@ -144,8 +138,7 @@ class TestBriefingNotificationTemplate:
     async def test_renders_briefing_link(self) -> None:
         svc, backend = _make_service()
         await svc.send_briefing_notification(
-            "user@example.com", "Morgenbriefing", "Titel",
-            "https://app.pwbs.app/briefing/42"
+            "user@example.com", "Morgenbriefing", "Titel", "https://app.pwbs.app/briefing/42"
         )
         assert "https://app.pwbs.app/briefing/42" in backend.sent[0].html_body
 
@@ -153,8 +146,11 @@ class TestBriefingNotificationTemplate:
     async def test_optional_summary(self) -> None:
         svc, backend = _make_service()
         await svc.send_briefing_notification(
-            "user@example.com", "Typ", "Titel",
-            "https://url", briefing_summary="Zusammenfassung hier"
+            "user@example.com",
+            "Typ",
+            "Titel",
+            "https://url",
+            briefing_summary="Zusammenfassung hier",
         )
         assert "Zusammenfassung hier" in backend.sent[0].html_body
 
@@ -196,9 +192,7 @@ class TestDsgvoCompliance:
     @pytest.mark.asyncio
     async def test_briefing_contains_footer(self) -> None:
         svc, backend = _make_service()
-        await svc.send_briefing_notification(
-            "user@example.com", "Test", "Titel", "https://url"
-        )
+        await svc.send_briefing_notification("user@example.com", "Test", "Titel", "https://url")
         body = backend.sent[0].html_body
         assert "Einstellungen" in body
         assert "Impressum" in body

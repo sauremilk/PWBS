@@ -1,4 +1,4 @@
-﻿"""Add api_keys table (TASK-150).
+"""Add api_keys table (TASK-150).
 
 Revision ID: 0014
 Revises: 0013

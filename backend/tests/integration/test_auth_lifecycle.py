@@ -66,7 +66,9 @@ class TestRegister:
 
 class TestLogin:
     async def test_login_success(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         resp = await client.post(
             "/api/v1/auth/login",
@@ -82,7 +84,9 @@ class TestLogin:
         assert body["token_type"] == "bearer"
 
     async def test_login_wrong_password(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         resp = await client.post(
             "/api/v1/auth/login",
@@ -134,7 +138,9 @@ class TestMe:
 
 class TestRefresh:
     async def test_refresh_rotates_tokens(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         resp = await client.post(
             "/api/v1/auth/refresh",
@@ -148,18 +154,22 @@ class TestRefresh:
         assert body["refresh_token"] != registered_user["refresh_token"]
 
     async def test_reuse_of_rotated_token_rejected(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         old_rt = registered_user["refresh_token"]
         # First rotation succeeds
         resp1 = await client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": old_rt},
+            "/api/v1/auth/refresh",
+            json={"refresh_token": old_rt},
         )
         assert resp1.status_code == 200
 
         # Second use of same old token should be rejected (replay detection)
         resp2 = await client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": old_rt},
+            "/api/v1/auth/refresh",
+            json={"refresh_token": old_rt},
         )
         assert resp2.status_code == 401
 
@@ -178,7 +188,9 @@ class TestRefresh:
 
 class TestLogout:
     async def test_logout_invalidates_refresh_token(
-        self, client: AsyncClient, registered_user: dict[str, Any],
+        self,
+        client: AsyncClient,
+        registered_user: dict[str, Any],
     ) -> None:
         headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
         resp = await client.post(

@@ -14,10 +14,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
-from dataclasses import asdict
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -121,7 +118,7 @@ class TestCategoryMapping:
             assert pt in PATTERN_TO_CATEGORY
 
     def test_valid_categories_complete(self) -> None:
-        assert VALID_CATEGORIES == {"contradictions", "forgotten_topics", "trends"}
+        assert {"contradictions", "forgotten_topics", "trends"} == VALID_CATEGORIES
 
     def test_category_constants(self) -> None:
         assert InsightCategory.CONTRADICTIONS == "contradictions"
@@ -152,23 +149,17 @@ class TestPatternFiltering:
             _make_pattern(PatternType.RECURRING_THEME),
         ]
         # Only allow contradictions
-        result = gen._filter_patterns(
-            patterns, {"contradictions"}, frozenset()
-        )
+        result = gen._filter_patterns(patterns, {"contradictions"}, frozenset())
         assert len(result) == 1
         assert result[0].pattern_type == PatternType.CHANGING_ASSUMPTION
 
     def test_filters_by_min_context(self) -> None:
-        gen = self._make_generator(
-            InsightGeneratorConfig(min_pattern_context_count=3)
-        )
+        gen = self._make_generator(InsightGeneratorConfig(min_pattern_context_count=3))
         patterns = [
             _make_pattern(context_count=2),
             _make_pattern(context_count=5, entity_id="ent-2"),
         ]
-        result = gen._filter_patterns(
-            patterns, set(VALID_CATEGORIES), frozenset()
-        )
+        result = gen._filter_patterns(patterns, set(VALID_CATEGORIES), frozenset())
         assert len(result) == 1
         assert result[0].entity_id == "ent-2"
 
@@ -178,9 +169,7 @@ class TestPatternFiltering:
             _make_pattern(entity_id="ent-bad"),
             _make_pattern(entity_id="ent-good"),
         ]
-        result = gen._filter_patterns(
-            patterns, set(VALID_CATEGORIES), frozenset({"ent-bad"})
-        )
+        result = gen._filter_patterns(patterns, set(VALID_CATEGORIES), frozenset({"ent-bad"}))
         assert len(result) == 1
         assert result[0].entity_id == "ent-good"
 
@@ -226,9 +215,11 @@ class TestPromptBuilding:
 class TestResponseParsing:
     def test_parses_valid_json_array(self) -> None:
         patterns = [_make_pattern()]
-        content = json.dumps([
-            {"title": "Insight A", "content": "Body A"},
-        ])
+        content = json.dumps(
+            [
+                {"title": "Insight A", "content": "Body A"},
+            ]
+        )
         results = ProactiveInsightGenerator._parse_response(content, patterns)
         assert len(results) == 1
         assert results[0].title == "Insight A"
@@ -242,16 +233,12 @@ class TestResponseParsing:
         assert results[0].title == "Single"
 
     def test_invalid_json_returns_empty(self) -> None:
-        results = ProactiveInsightGenerator._parse_response(
-            "not json", [_make_pattern()]
-        )
+        results = ProactiveInsightGenerator._parse_response("not json", [_make_pattern()])
         assert results == []
 
     def test_empty_title_skipped(self) -> None:
         content = json.dumps([{"title": "", "content": "Body"}])
-        results = ProactiveInsightGenerator._parse_response(
-            content, [_make_pattern()]
-        )
+        results = ProactiveInsightGenerator._parse_response(content, [_make_pattern()])
         assert results == []
 
     def test_sources_mapped_from_pattern(self) -> None:
@@ -283,10 +270,12 @@ class TestResponseParsing:
 
     def test_extra_items_beyond_patterns_get_defaults(self) -> None:
         patterns = [_make_pattern()]
-        content = json.dumps([
-            {"title": "A", "content": "X"},
-            {"title": "B", "content": "Y"},
-        ])
+        content = json.dumps(
+            [
+                {"title": "A", "content": "X"},
+                {"title": "B", "content": "Y"},
+            ]
+        )
         results = ProactiveInsightGenerator._parse_response(content, patterns)
         assert len(results) == 2
         # Second item has no matching pattern → defaults to 'trends'
@@ -309,10 +298,12 @@ class TestGenerateFlow:
         ]
         pattern_svc = _make_pattern_service(patterns)
         llm = _make_llm_gateway(
-            json.dumps([
-                {"title": "T1", "content": "C1"},
-                {"title": "T2", "content": "C2"},
-            ])
+            json.dumps(
+                [
+                    {"title": "T1", "content": "C1"},
+                    {"title": "T2", "content": "C2"},
+                ]
+            )
         )
         gen = ProactiveInsightGenerator(pattern_svc, llm)
 
@@ -325,15 +316,10 @@ class TestGenerateFlow:
     @pytest.mark.asyncio
     async def test_max_insights_cap(self) -> None:
         """AC1: Max 3 per day."""
-        patterns = [
-            _make_pattern(entity_id=f"e{i}", context_count=10 - i)
-            for i in range(5)
-        ]
+        patterns = [_make_pattern(entity_id=f"e{i}", context_count=10 - i) for i in range(5)]
         pattern_svc = _make_pattern_service(patterns)
         llm = _make_llm_gateway(
-            json.dumps([
-                {"title": f"T{i}", "content": f"C{i}"} for i in range(3)
-            ])
+            json.dumps([{"title": f"T{i}", "content": f"C{i}"} for i in range(3)])
         )
         gen = ProactiveInsightGenerator(
             pattern_svc, llm, InsightGeneratorConfig(max_insights_per_run=3)
@@ -352,9 +338,7 @@ class TestGenerateFlow:
         """AC3: Each insight contains sources with at least one reference."""
         patterns = [_make_pattern(sources=[_make_source(1), _make_source(2)])]
         pattern_svc = _make_pattern_service(patterns)
-        llm = _make_llm_gateway(
-            json.dumps([{"title": "T", "content": "C"}])
-        )
+        llm = _make_llm_gateway(json.dumps([{"title": "T", "content": "C"}]))
         gen = ProactiveInsightGenerator(pattern_svc, llm)
 
         results = await gen.generate(USER_ID)
@@ -415,14 +399,10 @@ class TestCategoryPreferences:
             _make_pattern(PatternType.UNRESOLVED_QUESTION, entity_id="e3"),
         ]
         pattern_svc = _make_pattern_service(patterns)
-        llm = _make_llm_gateway(
-            json.dumps([{"title": "T", "content": "C"}])
-        )
+        llm = _make_llm_gateway(json.dumps([{"title": "T", "content": "C"}]))
         gen = ProactiveInsightGenerator(pattern_svc, llm)
 
-        results = await gen.generate(
-            USER_ID, enabled_categories=["contradictions"]
-        )
+        results = await gen.generate(USER_ID, enabled_categories=["contradictions"])
 
         # LLM prompt should only have the contradiction pattern
         prompt = llm.generate.call_args[0][0].user_prompt
@@ -437,9 +417,7 @@ class TestCategoryPreferences:
         llm = _make_llm_gateway()
         gen = ProactiveInsightGenerator(pattern_svc, llm)
 
-        results = await gen.generate(
-            USER_ID, enabled_categories=["invalid_cat"]
-        )
+        results = await gen.generate(USER_ID, enabled_categories=["invalid_cat"])
 
         assert results == []
 
@@ -458,9 +436,7 @@ class TestFeedbackSuppression:
             _make_pattern(entity_id="good-ent", context_count=3),
         ]
         pattern_svc = _make_pattern_service(patterns)
-        llm = _make_llm_gateway(
-            json.dumps([{"title": "T", "content": "C"}])
-        )
+        llm = _make_llm_gateway(json.dumps([{"title": "T", "content": "C"}]))
         gen = ProactiveInsightGenerator(pattern_svc, llm)
 
         results = await gen.generate(
@@ -562,10 +538,9 @@ class TestOrmModels:
 
 class TestCeleryTask:
     def test_task_is_registered(self) -> None:
-        from pwbs.queue.celery_app import app
-
         # Import triggers task registration
         import pwbs.queue.tasks.insights  # noqa: F401
+        from pwbs.queue.celery_app import app
 
         task_name = "pwbs.queue.tasks.insights.generate_proactive_insights"
         assert task_name in app.tasks

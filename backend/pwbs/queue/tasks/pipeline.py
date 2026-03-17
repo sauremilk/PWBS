@@ -1,4 +1,4 @@
-﻿"""Processing pipeline orchestration (TASK-122).
+"""Processing pipeline orchestration (TASK-122).
 
 Orchestrates the processing chain via Celery signatures:
   Ingestion -> Chunking+Embedding -> NER/Entity Extraction -> (Initial Briefing)
@@ -30,9 +30,7 @@ logger = logging.getLogger(__name__)
     default_retry_delay=60,
     queue="processing.embed",
 )
-def process_documents(
-    self: object, document_ids: list[str], owner_id: str
-) -> dict[str, object]:
+def process_documents(self: object, document_ids: list[str], owner_id: str) -> dict[str, object]:
     """Dispatch the full processing pipeline for a batch of documents.
 
     Pipeline chain:
@@ -72,4 +70,3 @@ def process_documents(
         "pipeline_steps": ["embedding", "extraction", "initial_briefing_check"],
         "status": "dispatched",
     }
-

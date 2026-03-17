@@ -1,4 +1,4 @@
-﻿"""Locust load-test scenarios for PWBS API (TASK-112).
+"""Locust load-test scenarios for PWBS API (TASK-112).
 
 Simulates 20 concurrent users with three scenario groups:
   1. Dashboard load (GET briefings + connectors status)
@@ -22,12 +22,9 @@ Usage:
 
 from __future__ import annotations
 
-import json
-import os
 import uuid
 
 from locust import HttpUser, between, tag, task
-
 
 # ---------------------------------------------------------------------------
 # Auth helper -- login once per simulated user
@@ -147,7 +144,7 @@ class SearchUser(PWBSUser):
     def search_hybrid(self) -> None:
         import random
 
-        query = random.choice(self._QUERIES)  # noqa: S311
+        query = random.choice(self._QUERIES)
         self.client.post(
             "/api/v1/search/",
             json={"query": query, "mode": "hybrid", "top_k": 10},

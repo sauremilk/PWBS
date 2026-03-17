@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import (
@@ -561,7 +561,7 @@ async def generate_briefing(
     # Rate-limit check: ensure no briefing was generated in the last N seconds
     from datetime import timedelta
 
-    cutoff = datetime.now(timezone.utc) - timedelta(seconds=_GENERATE_COOLDOWN_SECONDS)
+    cutoff = datetime.now(UTC) - timedelta(seconds=_GENERATE_COOLDOWN_SECONDS)
     recent_stmt = (
         select(func.count())
         .select_from(BriefingORM)

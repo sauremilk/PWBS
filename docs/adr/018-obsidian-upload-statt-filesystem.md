@@ -1,86 +1,86 @@
-﻿# ADR-018: Obsidian-Konnektor von Filesystem-Watcher auf Upload-basierte Ingestion umstellen
+﻿# ADR-018: Obsidian Connector – Switch from Filesystem Watcher to Upload-Based Ingestion
 
-**Status:** Vorgeschlagen
-**Datum:** 2026-03-16
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Der Obsidian-Konnektor (TASK-051/052) verwendet `watchdog` für File-System-Watching und direkten Filesystem-Zugriff via `Path.stat()` und `scan_vault_files()`. Dies setzt voraus, dass das Backend auf der gleichen Maschine läuft wie der Obsidian-Vault des Nutzers. Die geplante Deployment-Topologie (ECS Fargate, ADR-001/006) ist ein containerisierter Cloud-Service ohne Zugriff auf lokale Nutzer-Dateisysteme. Der Obsidian-Konnektor ist damit der einzige der Kern-4-Konnektoren, der architektonisch inkompatibel mit dem Produktions-Deployment ist.
-
-Ohne diese Entscheidung kann PWBS nicht mit Obsidian-Daten in der Cloud-Umgebung arbeiten, oder Nutzer wären gezwungen, das Backend lokal zu betreiben  was dem Web-App-Modell widerspricht.
+**Status:** Proposed
+**Date:** 2026-03-16
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir werden den Obsidian-Konnektor von Filesystem-basiertem Zugriff (watchdog + lokales Scanning) auf Upload-basierte Ingestion umstellen, weil dies Cloud-Deployment-Kompatibilität herstellt, den bestehenden Markdown-Parser und die `normalize()`-Logik vollständig wiederverwendet, und Forward-Kompatibilität mit der Desktop-App (Tauri, Phase 3) gewährleistet, deren `SyncEngine` bereits einen Push-to-API-Mechanismus implementiert hat.
+The Obsidian connector (TASK-051/052) uses `watchdog` for file system watching and direct filesystem access via `Path.stat()` and `scan_vault_files()`. This requires the backend to run on the same machine as the user's Obsidian vault. The planned deployment topology (ECS Fargate, ADR-001/006) is a containerized cloud service without access to local user filesystems. The Obsidian connector is thus the only one of the Core 4 connectors that is architecturally incompatible with the production deployment.
 
-Konkret:
-
-1. **Neuer Endpunkt:** `POST /api/v1/connectors/obsidian/upload` akzeptiert ZIP-Archive oder einzelne Markdown-Dateien (multipart/form-data).
-2. **Filesystem-Watcher entfernen:** `ObsidianWatcher`, `ObsidianFileHandler` und die `watchdog`-Abhängigkeit werden aus dem aktiven MVP-Code entfernt (Code bleibt für Desktop-App-Nutzung in Phase 3 erhalten).
-3. **`fetch_since()` refaktorieren:** Arbeitet auf hochgeladenem Content statt auf direktem Dateisystem-Scan.
-4. **Content-Hash-Dedup:** Bereits vorhandene Dokumente werden per Content-Hash erkannt, nur geänderte/neue Dateien werden verarbeitet.
-5. **Löscherkennung:** Dateien, die in einem neuen Upload fehlen, werden als gelöscht markiert.
-6. **Frontend:** Vault-Pfad-Eingabefeld wird durch Drag-and-Drop/File-Upload-Komponente ersetzt.
+Without this decision, PWBS cannot work with Obsidian data in the cloud environment, or users would be forced to run the backend locally – which contradicts the web app model.
 
 ---
 
-## Optionen bewertet
+## Decision
 
-| Option | Vorteile | Nachteile | Ausschlussgründe |
-|--------|----------|-----------|-------------------|
-| A: Nur Upload-Konnektor | Cloud-kompatibel, einfach, existierender Parser wiederverwendbar | Kein automatisches Syncing, UX-Friction | Kein expliziter Migrationspfad zur Desktop-App |
-| B: Obsidian nach `_deferred/` verschieben (Phase 3) | Sauberer architektonischer Schnitt, kein Kompromiss bei UX | Kern-4  Kern-3, Obsidian-Hypothese im MVP nicht testbar, Beta-Tester mit Obsidian-Fokus unversorgt | Persona Lena" verliert MVP-Zugang vollständig |
-| **C: Hybrid  Upload jetzt + Desktop-Watcher in Phase 3 (gewählt)** | Cloud-kompatibel, Kern-4 bleibt erhalten, Forward-kompatibel mit Tauri SyncEngine, bestehender Parser wiederverwendbar, Hypothese testbar | Zwei Sync-Modi müssen langfristig koexistieren (Upload + Auto-Sync), Upload-UX inferior zu Auto-Sync |  |
+We will switch the Obsidian connector from filesystem-based access (watchdog + local scanning) to upload-based ingestion, because this establishes cloud deployment compatibility, fully reuses the existing Markdown parser and `normalize()` logic, and ensures forward compatibility with the desktop app (Tauri, Phase 3), whose `SyncEngine` has already implemented a push-to-API mechanism.
 
----
+Specifically:
 
-## Konsequenzen
-
-### Positive Konsequenzen
-
-- **Cloud-Deployment-Kompatibilität:** Kein Filesystem-Zugriff im Backend nötig  ECS Fargate funktioniert sofort.
-- **Kern-4 bleibt komplett:** Obsidian ist weiterhin als Konnektor verfügbar, die Hypothese ist testbar.
-- **Forward-Kompatibilität:** Die Tauri Desktop-App (`SyncEngine` in `desktop-app/src-tauri/src/offline/sync.rs`) nutzt denselben Upload/Push-Endpunkt transparent  kein zusätzlicher Backend-Code nötig.
-- **Sicherheit:** Kein Server braucht Zugriff auf lokale Dateisysteme. Alle Daten kommen über authentifizierte API-Calls.
-- **~400 LOC weniger** im aktiven Backend (Watcher-Code wird aus dem Hot-Path entfernt).
-
-### Negative Konsequenzen / Trade-offs
-
-- **Kein Auto-Sync im MVP:** Nutzer müssen Vault-Inhalte manuell hochladen (alle 12 Tage). Persona Lena hat höhere Friction als bei Real-Time-Watcher.
-- **Upload-Größenlimit:** Große Vaults (>50 MB, >5.000 Dateien) benötigen Batching oder höhere Limits.
-- **ZIP-Sicherheit:** Neuer Angriffsvektor (ZIP-Bombs, Path-Traversal) muss mitigiert werden.
-
-### Offene Fragen
-
-- Soll der Upload-Endpunkt auch von der Public API (`/api/v1/public/...`) erreichbar sein, oder nur über JWT-Auth?
-- Maximale Upload-Größe: 50 MB ausreichend für typische Obsidian-Vaults?
-- Soll ein Obsidian Community Plugin" als alternativer Push-Kanal evaluiert werden (Plugin synct direkt zur PWBS-API)?
+1. **New Endpoint:** `POST /api/v1/connectors/obsidian/upload` accepts ZIP archives or individual Markdown files (multipart/form-data).
+2. **Remove Filesystem Watcher:** `ObsidianWatcher`, `ObsidianFileHandler`, and the `watchdog` dependency are removed from the active MVP code (code is retained for desktop app usage in Phase 3).
+3. **Refactor `fetch_since()`:** Operates on uploaded content instead of direct filesystem scanning.
+4. **Content Hash Dedup:** Already existing documents are detected via content hash; only changed/new files are processed.
+5. **Deletion Detection:** Files missing from a new upload are marked as deleted.
+6. **Frontend:** Vault path input field is replaced by a drag-and-drop/file upload component.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-- **Keine Änderung:** Hochgeladene Markdown-Dateien durchlaufen dieselbe UDF-Pipeline wie bisher. `owner_id`, `expires_at` und Löschbarkeit bleiben identisch.
-- **Upload-Daten:** Werden nach Verarbeitung nicht als Rohdatei gespeichert, nur die extrahierten `UnifiedDocument`-Objekte mit vollständiger DSGVO-Metadatenstruktur.
-- **Delete-Cascade:** Bei Connector-Disconnect werden alle aus Uploads stammenden Dokumente gelöscht (bestehende CASCADE-Logik).
-
----
-
-## Sicherheitsimplikationen
-
-- **ZIP-Bomb-Schutz:** Maximale entpackte Größe limitieren (z.B. 200 MB), Maximale Dateianzahl (5.000), Abbruch bei Überschreitung.
-- **Path-Traversal:** Alle Pfade in ZIP-Archiven werden sanitized  keine `../`-Pfade, nur `.md`-Dateien extrahiert.
-- **Rate Limiting:** Upload-Endpunkt erhält eigenes Rate-Limit (z.B. 5 Uploads/Stunde/User) wegen großer Payloads.
-- **Auth:** Endpunkt hinter bestehender JWT-Middleware, `owner_id` aus Token.
-- **Keine neuen externen Calls:** Upload ist rein eingehend, kein SSRF-Risiko.
+| Option                                                           | Advantages                                                                                                                  | Disadvantages                                                                                          | Exclusion Reasons                         |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| A: Upload Connector Only                                         | Cloud-compatible, simple, existing parser reusable                                                                          | No automatic syncing, UX friction                                                                      | No explicit migration path to desktop app |
+| B: Move Obsidian to `_deferred/` (Phase 3)                       | Clean architectural cut, no UX compromise                                                                                   | Core 4 → Core 3, Obsidian hypothesis not testable in MVP, beta testers with Obsidian focus unsupported | Persona "Lena" loses MVP access entirely  |
+| **C: Hybrid – Upload now + Desktop Watcher in Phase 3 (chosen)** | Cloud-compatible, Core 4 preserved, forward-compatible with Tauri SyncEngine, existing parser reusable, hypothesis testable | Two sync modes must coexist long-term (upload + auto-sync), upload UX inferior to auto-sync            | –                                         |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-Phase 3  Desktop-App-Release (voraussichtlich Q3 2026). Dann prüfen ob Upload-Modus beibehalten oder durch Auto-Sync via Tauri ersetzt wird.
+### Positive Consequences
+
+- **Cloud Deployment Compatibility:** No filesystem access needed in backend – ECS Fargate works immediately.
+- **Core 4 Remains Complete:** Obsidian is still available as a connector, the hypothesis is testable.
+- **Forward Compatibility:** The Tauri desktop app (`SyncEngine` in `desktop-app/src-tauri/src/offline/sync.rs`) uses the same upload/push endpoint transparently – no additional backend code needed.
+- **Security:** No server needs access to local filesystems. All data comes through authenticated API calls.
+- **~400 LOC fewer** in the active backend (watcher code removed from the hot path).
+
+### Negative Consequences / Trade-offs
+
+- **No Auto-Sync in MVP:** Users must manually upload vault contents (every 1–2 days). Persona "Lena" has higher friction than with a real-time watcher.
+- **Upload Size Limit:** Large vaults (>50 MB, >5,000 files) require batching or higher limits.
+- **ZIP Security:** New attack vector (ZIP bombs, path traversal) must be mitigated.
+
+### Open Questions
+
+- Should the upload endpoint also be accessible from the public API (`/api/v1/public/...`), or only via JWT auth?
+- Maximum upload size: Is 50 MB sufficient for typical Obsidian vaults?
+- Should an "Obsidian Community Plugin" be evaluated as an alternative push channel (plugin syncs directly to the PWBS API)?
+
+---
+
+## GDPR Implications
+
+- **No Change:** Uploaded Markdown files pass through the same UDF pipeline as before. `owner_id`, `expires_at`, and deletability remain identical.
+- **Upload Data:** Not stored as raw files after processing; only the extracted `UnifiedDocument` objects with complete GDPR metadata structure.
+- **Delete Cascade:** On connector disconnect, all documents from uploads are deleted (existing CASCADE logic).
+
+---
+
+## Security Implications
+
+- **ZIP Bomb Protection:** Limit maximum unpacked size (e.g., 200 MB), maximum file count (5,000), abort on exceeding limits.
+- **Path Traversal:** All paths in ZIP archives are sanitized – no `../` paths, only `.md` files extracted.
+- **Rate Limiting:** Upload endpoint receives its own rate limit (e.g., 5 uploads/hour/user) due to large payloads.
+- **Auth:** Endpoint behind existing JWT middleware, `owner_id` from token.
+- **No New External Calls:** Upload is purely inbound, no SSRF risk.
+
+---
+
+## Revision Date
+
+Phase 3 – Desktop App Release (expected Q3 2026). Then evaluate whether upload mode is retained or replaced by auto-sync via Tauri.

@@ -1,4 +1,4 @@
-﻿"""Developer Portal API routes (TASK-150).
+"""Developer Portal API routes (TASK-150).
 
 Key management:
   GET    /api/v1/developer/keys             List user's API keys
@@ -55,9 +55,7 @@ class CreateKeyRequest(BaseModel):
     rate_limit_per_minute: int = Field(
         default=60, ge=1, le=1000, description="Max requests per minute"
     )
-    expires_at: datetime | None = Field(
-        default=None, description="Optional expiry (ISO-8601)"
-    )
+    expires_at: datetime | None = Field(default=None, description="Optional expiry (ISO-8601)")
 
 
 class ApiKeyResponse(BaseModel):
@@ -77,6 +75,7 @@ class ApiKeyResponse(BaseModel):
 
 class ApiKeyCreatedResponse(ApiKeyResponse):
     """Returned only on creation -- includes the raw key (shown once)."""
+
     raw_key: str
 
 
@@ -165,7 +164,7 @@ async def create_key(
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={"code": exc.code, "message": str(exc)},
-        )
+        ) from exc
 
     resp = ApiKeyCreatedResponse.model_validate(api_key)
     resp.raw_key = raw_key
@@ -190,7 +189,7 @@ async def delete_key(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": exc.code, "message": str(exc)},
-        )
+        ) from exc
     return MessageResponse(message="API key revoked")
 
 
@@ -211,7 +210,7 @@ async def key_usage(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": exc.code, "message": str(exc)},
-        )
+        ) from exc
     return UsageStatsResponse(**stats)
 
 

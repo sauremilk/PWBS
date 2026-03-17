@@ -1,4 +1,4 @@
-﻿"""Tests for Entity-Deduplizierung (TASK-063)."""
+"""Tests for Entity-Deduplizierung (TASK-063)."""
 
 from __future__ import annotations
 
@@ -10,9 +10,7 @@ import pytest
 
 from pwbs.processing.entity_dedup import (
     DeduplicationConfig,
-    DeduplicationResult,
     EntityDeduplicationService,
-    UpsertedEntity,
     _fuzzy_ratio,
     normalize_name,
 )
@@ -192,7 +190,9 @@ class TestUpsertNew:
             config=DeduplicationConfig(fuzzy_enabled=False),
         )
         result = await svc.deduplicate_and_persist(
-            [_entity()], USER_ID, CHUNK_ID,
+            [_entity()],
+            USER_ID,
+            CHUNK_ID,
         )
         assert len(result.upserted) == 1
         assert result.upserted[0].is_new is True
@@ -201,7 +201,9 @@ class TestUpsertNew:
     async def test_mention_created(self) -> None:
         svc = _make_service(config=DeduplicationConfig(fuzzy_enabled=False))
         result = await svc.deduplicate_and_persist(
-            [_entity()], USER_ID, CHUNK_ID,
+            [_entity()],
+            USER_ID,
+            CHUNK_ID,
         )
         assert result.mentions_created == 1
 
@@ -220,7 +222,9 @@ class TestUpsertExisting:
             config=DeduplicationConfig(fuzzy_enabled=False),
         )
         result = await svc.deduplicate_and_persist(
-            [_entity()], USER_ID, CHUNK_ID,
+            [_entity()],
+            USER_ID,
+            CHUNK_ID,
         )
         assert result.upserted[0].is_new is False
         assert result.upserted[0].merged_with is not None
@@ -241,7 +245,9 @@ class TestFuzzyMatching:
         )
         entity = _entity(name="Thomas K.", entity_type=EntityType.PERSON)
         result = await svc.deduplicate_and_persist(
-            [entity], USER_ID, CHUNK_ID,
+            [entity],
+            USER_ID,
+            CHUNK_ID,
         )
         assert result.fuzzy_merges == 1
 
@@ -253,7 +259,9 @@ class TestFuzzyMatching:
         )
         entity = _entity(name="Thomas K.")
         result = await svc.deduplicate_and_persist(
-            [entity], USER_ID, CHUNK_ID,
+            [entity],
+            USER_ID,
+            CHUNK_ID,
         )
         assert result.fuzzy_merges == 0
 
@@ -265,7 +273,9 @@ class TestFuzzyMatching:
         )
         entity = _entity(name="Kubernetes", entity_type=EntityType.TOPIC)
         result = await svc.deduplicate_and_persist(
-            [entity], USER_ID, CHUNK_ID,
+            [entity],
+            USER_ID,
+            CHUNK_ID,
         )
         assert result.fuzzy_merges == 0
 
@@ -277,7 +287,9 @@ class TestFuzzyMatching:
         )
         entity = _entity(name="Alice Smith")
         result = await svc.deduplicate_and_persist(
-            [entity], USER_ID, CHUNK_ID,
+            [entity],
+            USER_ID,
+            CHUNK_ID,
         )
         # Exact match returns None from _find_fuzzy_match  no fuzzy merge
         assert result.fuzzy_merges == 0
@@ -337,7 +349,9 @@ class TestErrorHandling:
             config=DeduplicationConfig(fuzzy_enabled=False),
         )
         result = await svc.deduplicate_and_persist(
-            [_entity()], USER_ID, CHUNK_ID,
+            [_entity()],
+            USER_ID,
+            CHUNK_ID,
         )
         assert len(result.errors) == 1
         assert "DB error" in result.errors[0]

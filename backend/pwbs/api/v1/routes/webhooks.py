@@ -84,12 +84,9 @@ async def gmail_pubsub_webhook(request: Request) -> Response:
     # The email is stored in connection.config["gmail_email"].
     factory = get_session_factory()
     async with factory() as db:
-        stmt = (
-            select(Connection)
-            .where(
-                Connection.source_type == SourceType.GMAIL.value,
-                Connection.status == ConnectionStatus.ACTIVE.value,
-            )
+        stmt = select(Connection).where(
+            Connection.source_type == SourceType.GMAIL.value,
+            Connection.status == ConnectionStatus.ACTIVE.value,
         )
         result = await db.execute(stmt)
         connections = result.scalars().all()

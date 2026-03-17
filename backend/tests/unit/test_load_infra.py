@@ -1,4 +1,4 @@
-﻿"""Tests for load-test infrastructure (TASK-112).
+"""Tests for load-test infrastructure (TASK-112).
 
 Tests the load-test tooling itself (threshold validation, endpoint
 classification, Locust user definitions), NOT the actual load against
@@ -12,7 +12,6 @@ import importlib
 import pytest
 
 from tests.load.validate_report import (
-    _DEFAULT_THRESHOLDS,
     _classify_endpoint,
     validate_report,
 )
@@ -163,7 +162,9 @@ class TestValidateReport:
             },
         ]
         # Strict threshold: 200ms
-        violations = validate_report(report, {"api_general_p95_ms": 200, "max_error_rate_percent": 1.0})
+        violations = validate_report(
+            report, {"api_general_p95_ms": 200, "max_error_rate_percent": 1.0}
+        )
         assert len(violations) == 1
 
     def test_empty_report(self) -> None:

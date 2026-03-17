@@ -21,7 +21,9 @@ pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
 class TestDocuments:
     async def test_list_documents_empty(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/documents/", headers=auth_headers)
         assert resp.status_code == 200
@@ -30,20 +32,26 @@ class TestDocuments:
         assert items == []
 
     async def test_get_nonexistent_document(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         fake_id = str(uuid.uuid4())
         resp = await client.get(
-            f"/api/v1/documents/{fake_id}", headers=auth_headers,
+            f"/api/v1/documents/{fake_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 404
 
     async def test_delete_nonexistent_document(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         fake_id = str(uuid.uuid4())
         resp = await client.delete(
-            f"/api/v1/documents/{fake_id}", headers=auth_headers,
+            f"/api/v1/documents/{fake_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 404
 
@@ -59,32 +67,42 @@ class TestDocuments:
 
 class TestBriefings:
     async def test_list_briefings_empty(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/briefings/", headers=auth_headers)
         assert resp.status_code == 200
 
     async def test_get_latest_briefings(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/briefings/latest", headers=auth_headers)
         assert resp.status_code == 200
 
     async def test_get_nonexistent_briefing(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         fake_id = str(uuid.uuid4())
         resp = await client.get(
-            f"/api/v1/briefings/{fake_id}", headers=auth_headers,
+            f"/api/v1/briefings/{fake_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 404
 
     async def test_delete_nonexistent_briefing(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         fake_id = str(uuid.uuid4())
         resp = await client.delete(
-            f"/api/v1/briefings/{fake_id}", headers=auth_headers,
+            f"/api/v1/briefings/{fake_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 404
 
@@ -100,22 +118,29 @@ class TestBriefings:
 
 class TestKnowledge:
     async def test_list_entities_empty(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/knowledge/entities", headers=auth_headers)
         assert resp.status_code == 200
 
     async def test_get_nonexistent_entity(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         fake_id = str(uuid.uuid4())
         resp = await client.get(
-            f"/api/v1/knowledge/entities/{fake_id}", headers=auth_headers,
+            f"/api/v1/knowledge/entities/{fake_id}",
+            headers=auth_headers,
         )
         assert resp.status_code == 404
 
     async def test_list_decisions_empty(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         resp = await client.get("/api/v1/knowledge/decisions", headers=auth_headers)
         assert resp.status_code == 200
@@ -133,12 +158,15 @@ class TestKnowledge:
 class TestSearch:
     async def test_search_requires_auth(self, client: AsyncClient) -> None:
         resp = await client.post(
-            "/api/v1/search/", json={"query": "test"},
+            "/api/v1/search/",
+            json={"query": "test"},
         )
         assert resp.status_code == 401
 
     async def test_search_empty_results(
-        self, client: AsyncClient, auth_headers: dict[str, str],
+        self,
+        client: AsyncClient,
+        auth_headers: dict[str, str],
     ) -> None:
         """With no indexed documents, search should return empty results."""
         resp = await client.post(

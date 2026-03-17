@@ -1,4 +1,4 @@
-﻿"""Briefing-Persistierung in PostgreSQL (TASK-080).
+"""Briefing-Persistierung in PostgreSQL (TASK-080).
 
 Service for persisting generated briefings to the `briefings` table.
 Handles:
@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import delete, select
@@ -139,7 +139,7 @@ class BriefingPersistenceService:
         PersistedBriefing
             The persisted briefing with server-set fields.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expires_at = self._calculate_expiry(briefing_type, now)
         bid = briefing_id or uuid.uuid4()
         entities = source_entities or []
@@ -291,7 +291,7 @@ class BriefingPersistenceService:
             stmt = stmt.where(BriefingORM.briefing_type == briefing_type.value)
 
         if not include_expired:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             stmt = stmt.where((BriefingORM.expires_at.is_(None)) | (BriefingORM.expires_at > now))
 
         stmt = stmt.order_by(BriefingORM.generated_at.desc()).limit(limit)
@@ -305,7 +305,7 @@ class BriefingPersistenceService:
 
         Returns the count of deleted briefings.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         stmt = (
             delete(BriefingORM)
             .where(

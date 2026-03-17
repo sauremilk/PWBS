@@ -55,7 +55,7 @@ def extract_entities(self: object, document_ids: list[str], owner_id: str) -> di
         return result
     except Exception as exc:
         logger.error("extract_entities failed: %s", exc)
-        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+        raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
 
 async def _extract_entities_async(document_ids: list[str], owner_id: str) -> dict[str, object]:

@@ -24,9 +24,7 @@ def upgrade() -> None:
             server_default=sa.func.gen_random_uuid(),
             nullable=False,
         ),
-        sa.Column(
-            "owner_id", postgresql.UUID(as_uuid=True), nullable=False
-        ),
+        sa.Column("owner_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("provider", sa.Text(), nullable=False),
         sa.Column("model", sa.Text(), nullable=False),
         sa.Column("input_tokens", sa.Integer(), server_default="0", nullable=False),

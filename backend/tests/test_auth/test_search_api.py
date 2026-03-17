@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -33,7 +33,7 @@ def _make_user(user_id: uuid.UUID | None = None) -> User:
     u.id = user_id or uuid.uuid4()
     u.email = "test@example.com"
     u.display_name = "Test User"
-    u.created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    u.created_at = datetime(2026, 1, 1, tzinfo=UTC)
     return u
 
 
@@ -74,7 +74,7 @@ def _make_enriched_result(
             chunk_id=cid,
             doc_title=doc_title,
             source_type=source_type,
-            date=date or datetime(2026, 3, 1, 12, 0, tzinfo=timezone.utc),
+            date=date or datetime(2026, 3, 1, 12, 0, tzinfo=UTC),
             relevance=min(score, 1.0),
         ),
         original_url="https://notion.so/abc123",
@@ -107,19 +107,19 @@ class TestApplyFilters:
         assert SourceType.GOOGLE_CALENDAR not in types
 
     def test_filter_by_date_from(self) -> None:
-        old = _make_enriched_result(date=datetime(2025, 1, 1, tzinfo=timezone.utc))
-        new = _make_enriched_result(date=datetime(2026, 6, 1, tzinfo=timezone.utc))
+        old = _make_enriched_result(date=datetime(2025, 1, 1, tzinfo=UTC))
+        new = _make_enriched_result(date=datetime(2026, 6, 1, tzinfo=UTC))
 
-        filters = SearchFilters(date_from=datetime(2026, 1, 1, tzinfo=timezone.utc))
+        filters = SearchFilters(date_from=datetime(2026, 1, 1, tzinfo=UTC))
         filtered = _apply_filters([old, new], filters)
         assert len(filtered) == 1
         assert filtered[0].source_ref.date.year == 2026
 
     def test_filter_by_date_to(self) -> None:
-        old = _make_enriched_result(date=datetime(2025, 1, 1, tzinfo=timezone.utc))
-        new = _make_enriched_result(date=datetime(2026, 6, 1, tzinfo=timezone.utc))
+        old = _make_enriched_result(date=datetime(2025, 1, 1, tzinfo=UTC))
+        new = _make_enriched_result(date=datetime(2026, 6, 1, tzinfo=UTC))
 
-        filters = SearchFilters(date_to=datetime(2025, 6, 1, tzinfo=timezone.utc))
+        filters = SearchFilters(date_to=datetime(2025, 6, 1, tzinfo=UTC))
         filtered = _apply_filters([old, new], filters)
         assert len(filtered) == 1
         assert filtered[0].source_ref.date.year == 2025
@@ -127,20 +127,20 @@ class TestApplyFilters:
     def test_combined_filters(self) -> None:
         r1 = _make_enriched_result(
             source_type=SourceType.NOTION,
-            date=datetime(2026, 3, 1, tzinfo=timezone.utc),
+            date=datetime(2026, 3, 1, tzinfo=UTC),
         )
         r2 = _make_enriched_result(
             source_type=SourceType.GOOGLE_CALENDAR,
-            date=datetime(2026, 3, 1, tzinfo=timezone.utc),
+            date=datetime(2026, 3, 1, tzinfo=UTC),
         )
         r3 = _make_enriched_result(
             source_type=SourceType.NOTION,
-            date=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            date=datetime(2025, 1, 1, tzinfo=UTC),
         )
 
         filters = SearchFilters(
             source_types=[SourceType.NOTION],
-            date_from=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            date_from=datetime(2026, 1, 1, tzinfo=UTC),
         )
         filtered = _apply_filters([r1, r2, r3], filters)
         assert len(filtered) == 1
@@ -258,7 +258,13 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test query", limit=10)
             response = MagicMock()
-            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            result = await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         assert isinstance(result, SearchResponse)
         assert len(result.results) == 1
@@ -289,7 +295,13 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="nothing", limit=10)
             response = MagicMock()
-            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            result = await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         assert isinstance(result, SearchResponse)
         assert len(result.results) == 0
@@ -317,7 +329,13 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test", limit=5)
             response = MagicMock()
-            await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         mock_hybrid.search.assert_called_once_with(
             query="test",
@@ -358,7 +376,13 @@ class TestSearchEndpoint:
                 filters=SearchFilters(source_types=[SourceType.NOTION]),
             )
             response = MagicMock()
-            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            result = await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         assert len(result.results) == 1
         assert result.results[0].source_type == SourceType.NOTION
@@ -384,7 +408,13 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test", limit=25)
             response = MagicMock()
-            await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         mock_hybrid.search.assert_called_once_with(
             query="test",
@@ -416,7 +446,13 @@ class TestSearchEndpoint:
 
             body = SearchRequest(query="test")
             response = MagicMock()
-            result = await search(body=body, request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")), response=response, user=user, session=session)
+            result = await search(
+                body=body,
+                request=MagicMock(headers={}, client=MagicMock(host="127.0.0.1")),
+                response=response,
+                user=user,
+                session=session,
+            )
 
         assert len(result.sources) == 1
         assert result.sources[0].chunk_id == cid

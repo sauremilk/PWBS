@@ -1,10 +1,8 @@
-﻿"""Tests for user registration service (TASK-082)."""
+"""Tests for user registration service (TASK-082)."""
 
 from __future__ import annotations
 
-import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError
@@ -13,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from pwbs.core.config import get_settings
 from pwbs.core.exceptions import AuthenticationError
 from pwbs.models.user import User
-from pwbs.services.auth import TokenPair, validate_access_token
+from pwbs.services.auth import TokenPair
 from pwbs.services.user import (
     RegisterRequest,
     _generate_encrypted_dek,

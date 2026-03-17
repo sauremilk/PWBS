@@ -1,71 +1,71 @@
-# ADR-006: Modularer Monolith statt Microservices (MVP)
+# ADR-006: Modular Monolith Instead of Microservices (MVP)
 
-**Status:** Akzeptiert
-**Datum:** 2026-03-13
-**Entscheider:** PWBS Core Team
-
----
-
-## Kontext
-
-Das PWBS wird in Phase 2 (MVP) von einem kleinen Team (2–5 Entwickler) gebaut. Die Architektur muss schnelle Iterationszyklen ermöglichen und gleichzeitig eine spätere Aufteilung in Services unterstützen (Phase 3+). Die Wahl zwischen Monolith und Microservices beeinflusst Entwicklungsgeschwindigkeit, Deployment-Komplexität, Testing-Aufwand und die Fähigkeit, Modul-Grenzen sauber zu enforced.
+**Status:** Accepted
+**Date:** 2026-03-13
+**Decision Makers:** PWBS Core Team
 
 ---
 
-## Entscheidung
+## Context
 
-Wir verwenden einen **modularen Monolithen** im MVP, bei dem Module über definierte Python-Interfaces kommunizieren (nicht über HTTP). Service-Split erfolgt erst in Phase 3 über Celery + Redis.
-
----
-
-## Optionen bewertet
-
-| Option                           | Vorteile                                                                                                                                                                                                                                                      | Nachteile                                                                                                                                         | Ausschlussgründe                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| **Modularer Monolith** (gewählt) | 2–5 Entwickler können einen Monolithen deutlich schneller iterieren. Kein Overhead durch Service-Mesh, distributed Tracing, API-Contracts. Modul-Grenzen im Code erzwingen Separation of Concerns durch Python-Interfaces. Einfaches Debugging (ein Prozess). | Späterer Service-Split erfordert Refactoring. Alle Module teilen sich einen Prozess – ein Memory Leak betrifft alle.                              | –                                       |
-| Microservices ab Start           | Unabhängiges Deployment pro Service, technologische Flexibilität, unabhängige Skalierung.                                                                                                                                                                     | Massiver Overhead für kleines Team: Service-Mesh, distributed Tracing, API-Contracts, Inter-Service-Auth. Deutlich langsamere Entwicklung im MVP. | Zu hoher Overhead für MVP-Team          |
-| Serverless Functions             | Pay-per-Use, automatische Skalierung, kein Server-Management.                                                                                                                                                                                                 | Cold-Start-Latenz problematisch für Echtzeit-Suche. Schwierige lokale Entwicklung. Vendor Lock-in (AWS Lambda). State-Management komplex.         | Cold-Start-Latenz und State-Komplexität |
+The PWBS is being built in Phase 2 (MVP) by a small team (2\u20135 developers). The architecture must enable fast iteration cycles while also supporting a later split into services (Phase 3+). The choice between monolith and microservices affects development speed, deployment complexity, testing effort, and the ability to cleanly enforce module boundaries.
 
 ---
 
-## Konsequenzen
+## Decision
 
-### Positive Konsequenzen
-
-- Schnelle Iterationszyklen: Ein Deployment-Artefakt, ein Docker-Container, ein Log-Stream
-- Einfaches Debugging: Breakpoints über Modulgrenzen hinweg, kein Netzwerk-Overhead zwischen Modulen
-- Python-Interfaces als Modul-Grenzen: `await ingestion_agent.run(context)` statt `httpx.post("/api/internal/process")`
-- Transaktionen über Modulgrenzen: Ein DB-Commit kann Änderungen aus Ingestion + Processing atomar persistieren
-- Testbarkeit: Unit-Tests mocken Interfaces, keine Service-Stubs oder Container nötig
-
-### Negative Konsequenzen / Trade-offs
-
-- Service-Split in Phase 3 erfordert Refactoring der Modul-Kommunikation (mitigiert: Module kommunizieren über definierte Interfaces, nicht über globalen State – der Übergang zu Message-Queues ist ein Interface-Swap, kein Rewrite)
-- Ein fehlerhaftes Modul kann den gesamten Prozess beeinflussen (mitigiert: Error-Isolation via try/except auf Modul-Ebene, Health-Checks)
-- Keine unabhängige Skalierung einzelner Module (mitigiert: MVP-Skala erfordert keine unabhängige Skalierung)
-
-### Offene Fragen
-
-- Definieren, welche Module als Erste in Phase 3 zu eigenständigen Services werden (Kandidaten: IngestionAgent, ProcessingAgent)
-- Monitoring-Strategie für Modul-Level-Metriken innerhalb des Monolithen
+We use a **modular monolith** in the MVP, where modules communicate via defined Python interfaces (not via HTTP). Service split occurs only in Phase 3 via Celery + Redis.
 
 ---
 
-## DSGVO-Implikationen
+## Options Evaluated
 
-Keine direkten DSGVO-Implikationen durch die Monolith-Entscheidung. Alle DSGVO-Maßnahmen (owner_id-Filter, Verschlüsselung, Löschkaskaden) werden auf Modul-Ebene implementiert, unabhängig von der Deployment-Topologie. Der Monolith vereinfacht sogar die DSGVO-Compliance, da Datenflüsse innerhalb eines Prozesses leichter auditierbar sind als über Service-Grenzen hinweg.
-
----
-
-## Sicherheitsimplikationen
-
-- Ein Prozess = eine Angriffsfläche (statt N Services mit jeweils eigenen Endpoints)
-- Alle Module teilen sich die gleiche Authentifizierungs-Middleware – keine vergessenen Auth-Checks auf internen Endpoints
-- Nachteil: Kompromittierung eines Moduls gefährdet alle Module im gleichen Prozess (mitigiert: Module haben keinen direkten DB-Zugriff auf andere Module – nur über Interfaces)
-- Secrets-Management ist einfacher (ein .env statt N)
+| Option                            | Advantages                                                                                                                                                                                                                                                          | Disadvantages                                                                                                                                            | Exclusion Reasons                          |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Modular Monolith** (chosen)     | 2\u20135 developers can iterate on a monolith significantly faster. No overhead from service mesh, distributed tracing, API contracts. Module boundaries in code enforce separation of concerns through Python interfaces. Simple debugging (single process).              | Later service split requires refactoring. All modules share one process \u2013 a memory leak affects all.                                                     | \u2013                                          |
+| Microservices from the start      | Independent deployment per service, technological flexibility, independent scaling.                                                                                                                                                                                  | Massive overhead for a small team: service mesh, distributed tracing, API contracts, inter-service auth. Significantly slower development in MVP.        | Too much overhead for MVP team             |
+| Serverless Functions              | Pay-per-use, automatic scaling, no server management.                                                                                                                                                                                                                | Cold-start latency problematic for real-time search. Difficult local development. Vendor lock-in (AWS Lambda). State management is complex.              | Cold-start latency and state complexity    |
 
 ---
 
-## Revisionsdatum
+## Consequences
 
-2027-06-13 – Bewertung des Service-Split-Bedarfs nach MVP-Launch. Trigger: Wenn unabhängige Skalierung oder unabhängige Deployment-Zyklen für einzelne Module erforderlich werden.
+### Positive Consequences
+
+- Fast iteration cycles: one deployment artifact, one Docker container, one log stream
+- Simple debugging: breakpoints across module boundaries, no network overhead between modules
+- Python interfaces as module boundaries: wait ingestion_agent.run(context) instead of httpx.post(\x22/api/internal/process\x22)
+- Transactions across module boundaries: a single DB commit can atomically persist changes from ingestion + processing
+- Testability: unit tests mock interfaces, no service stubs or containers needed
+
+### Negative Consequences / Trade-offs
+
+- Service split in Phase 3 requires refactoring of module communication (mitigated: modules communicate via defined interfaces, not via global state \u2013 the transition to message queues is an interface swap, not a rewrite)
+- A faulty module can affect the entire process (mitigated: error isolation via try/except at the module level, health checks)
+- No independent scaling of individual modules (mitigated: MVP scale does not require independent scaling)
+
+### Open Questions
+
+- Define which modules will be the first to become standalone services in Phase 3 (candidates: IngestionAgent, ProcessingAgent)
+- Monitoring strategy for module-level metrics within the monolith
+
+---
+
+## GDPR Implications
+
+No direct GDPR implications from the monolith decision. All GDPR measures (owner_id filters, encryption, delete cascades) are implemented at the module level, independent of the deployment topology. The monolith actually simplifies GDPR compliance, as data flows within a single process are easier to audit than across service boundaries.
+
+---
+
+## Security Implications
+
+- One process = one attack surface (instead of N services each with their own endpoints)
+- All modules share the same authentication middleware \u2013 no forgotten auth checks on internal endpoints
+- Disadvantage: compromise of one module endangers all modules in the same process (mitigated: modules have no direct DB access to other modules \u2013 only via interfaces)
+- Secrets management is simpler (one .env instead of N)
+
+---
+
+## Revision Date
+
+2027-06-13 \u2013 Assessment of service split needs after MVP launch. Trigger: when independent scaling or independent deployment cycles for individual modules become necessary.

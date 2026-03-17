@@ -61,9 +61,7 @@ class ConvertReferralResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-async def get_or_create_referral_code(
-    db: AsyncSession, user_id: uuid.UUID
-) -> str:
+async def get_or_create_referral_code(db: AsyncSession, user_id: uuid.UUID) -> str:
     """Return existing referral code or create a new one (idempotent)."""
     stmt = select(Referral).where(
         Referral.referrer_id == user_id,
@@ -190,9 +188,7 @@ async def convert_referral(
         )
 
     # Check if current user already has a referral from someone
-    existing_stmt = select(Referral).where(
-        Referral.referee_id == current_user.id
-    )
+    existing_stmt = select(Referral).where(Referral.referee_id == current_user.id)
     existing_result = await db.execute(existing_stmt)
     if existing_result.scalar_one_or_none() is not None:
         raise HTTPException(

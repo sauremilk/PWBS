@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol, runtime_checkable
 
 import tiktoken
@@ -222,7 +222,7 @@ class QuarterlyContextAssembler:
 
     async def assemble(self, owner_id: uuid.UUID) -> QuarterlyBriefingContext:
         """Assemble quarterly review context for the given user."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         period_end = now
         period_start = now - timedelta(days=self._config.lookback_days)
 

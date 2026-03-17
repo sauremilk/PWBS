@@ -1,11 +1,11 @@
-﻿"""Tests for AssumptionTrackerService (TASK-155)."""
+"""Tests for AssumptionTrackerService (TASK-155)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -50,8 +50,8 @@ def _make_assumption(
     a.evidence = evidence or []
     a.source_decision_id = source_decision_id
     a.source_document_id = source_document_id
-    a.created_at = created_at or datetime.now(timezone.utc)
-    a.updated_at = updated_at or datetime.now(timezone.utc)
+    a.created_at = created_at or datetime.now(UTC)
+    a.updated_at = updated_at or datetime.now(UTC)
     return a
 
 
@@ -379,7 +379,7 @@ class TestAddEvidence:
 class TestGetTimeline:
     @pytest.mark.asyncio
     async def test_returns_timeline_dict(self) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         assumptions = [
             _make_assumption(
                 status="open",

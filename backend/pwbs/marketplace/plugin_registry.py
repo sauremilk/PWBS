@@ -165,7 +165,7 @@ class PluginRegistry:
                 plugin.execute(context, **kwargs),
                 timeout=timeout,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Plugin %s timed out after %.1fs", plugin_id, timeout)
             return PluginResult(
                 success=False,

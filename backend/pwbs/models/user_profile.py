@@ -1,4 +1,4 @@
-﻿"""User work profile ORM model (TASK-134).
+"""User work profile ORM model (TASK-134).
 
 Stores analysed work patterns for briefing personalisation.
 Versioned: each weekly analysis creates a new row so trends can
@@ -47,4 +47,4 @@ class UserProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationship
-    user: Mapped["User"] = relationship(back_populates="profiles")  # noqa: F821
+    user: Mapped[User] = relationship(back_populates="profiles")  # noqa: F821

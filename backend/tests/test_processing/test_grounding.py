@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pwbs.core.grounding import (
     Confidence,
-    GroundedStatement,
     GroundingConfig,
-    GroundingResult,
     GroundingService,
-    SourceReference,
     build_grounding_system_prompt,
     build_structured_prompt,
 )

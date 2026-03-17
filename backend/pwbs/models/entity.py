@@ -38,8 +38,8 @@ class Entity(UUIDPrimaryKeyMixin, Base):
     mention_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
     neo4j_node_id: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    user: Mapped["User"] = relationship(back_populates="entities")  # noqa: F821
-    mentions: Mapped[list["EntityMention"]] = relationship(
+    user: Mapped[User] = relationship(back_populates="entities")  # noqa: F821
+    mentions: Mapped[list[EntityMention]] = relationship(
         back_populates="entity",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -58,5 +58,5 @@ class EntityMention(Base):
     confidence: Mapped[float] = mapped_column(Float, nullable=False, server_default="1.0")
     extraction_method: Mapped[str] = mapped_column(Text, nullable=False, server_default="rule")
 
-    entity: Mapped["Entity"] = relationship(back_populates="mentions")
-    chunk: Mapped["Chunk"] = relationship(back_populates="entity_mentions")  # noqa: F821
+    entity: Mapped[Entity] = relationship(back_populates="mentions")
+    chunk: Mapped[Chunk] = relationship(back_populates="entity_mentions")  # noqa: F821

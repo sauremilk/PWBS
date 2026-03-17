@@ -1,9 +1,9 @@
-﻿"""Tests for BriefingSourceValidator (TASK-079)."""
+"""Tests for BriefingSourceValidator (TASK-079)."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -12,7 +12,6 @@ import pytest
 from pwbs.briefing.validation import (
     _SOURCE_REF_RE,
     BriefingSourceValidator,
-    SourceValidationResult,
     ValidatedReference,
 )
 
@@ -31,7 +30,7 @@ def _make_doc(
     return {
         "doc_id": doc_id,
         "title": title,
-        "created_at": created_at or datetime(2025, 1, 15, tzinfo=timezone.utc),
+        "created_at": created_at or datetime(2025, 1, 15, tzinfo=UTC),
         "chunk_ids": [uuid.uuid4() for _ in range(chunk_count)],
     }
 
@@ -391,7 +390,7 @@ class TestValidateFlow:
     async def test_documents_with_no_chunks(self) -> None:
         """Documents with no chunks should match but return empty chunk list."""
         doc_id = uuid.uuid4()
-        now = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        now = datetime(2025, 1, 15, tzinfo=UTC)
         row = _make_row(doc_id, "Lonely Doc", now, None)
 
         session = AsyncMock()

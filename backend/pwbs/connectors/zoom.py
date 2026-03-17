@@ -36,7 +36,7 @@ import json
 import logging
 import re
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
@@ -81,7 +81,7 @@ ZOOM_SCOPES = (
 
 def _raise_for_rate_limit(response: httpx.Response) -> None:
     """Raise ``RateLimitError`` on HTTP 429."""
-    if response.status_code == 429:  # noqa: PLR2004
+    if response.status_code == 429:
         retry_after = int(response.headers.get("Retry-After", "60"))
         raise RateLimitError(
             f"Zoom API rate limited: {response.text}",
@@ -315,7 +315,7 @@ def _parse_vtt(vtt_content: str) -> tuple[str, list[str]]:
             potential_speaker = stripped[:colon_idx].strip()
             # Speaker names are typically short and don't contain timestamps
             if (
-                len(potential_speaker) < 100  # noqa: PLR2004
+                len(potential_speaker) < 100
                 and not _VTT_TIMESTAMP_RE.match(potential_speaker)
                 and not potential_speaker.isdigit()
             ):
@@ -369,7 +369,7 @@ def _parse_srt(srt_content: str) -> tuple[str, list[str]]:
         if colon_idx > 0:
             potential_speaker = stripped[:colon_idx].strip()
             if (
-                len(potential_speaker) < 100  # noqa: PLR2004
+                len(potential_speaker) < 100
                 and not _SRT_TIMESTAMP_RE.match(potential_speaker)
                 and not potential_speaker.isdigit()
             ):
@@ -606,11 +606,11 @@ class ZoomConnector(BaseConnector):
 
         _raise_for_rate_limit(response)
 
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != 200:
             error_body: dict[str, str] = {}
             try:
                 error_body = response.json()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
             error_reason = error_body.get(
                 "reason",
@@ -702,7 +702,7 @@ class ZoomConnector(BaseConnector):
 
         _raise_for_rate_limit(response)
 
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != 200:
             raise ConnectorError(
                 f"Zoom transcript download failed: HTTP {response.status_code}",
                 code="ZOOM_TRANSCRIPT_DOWNLOAD_FAILED",
@@ -735,9 +735,9 @@ class ZoomConnector(BaseConnector):
 
         # Default to 30 days back for initial sync
         if not watermark:
-            watermark = (datetime.now(tz=timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+            watermark = (datetime.now(tz=UTC) - timedelta(days=30)).strftime("%Y-%m-%d")
 
-        today = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
         params: dict[str, str | int] = {
             "from": watermark,
@@ -762,7 +762,7 @@ class ZoomConnector(BaseConnector):
 
         _raise_for_rate_limit(response)
 
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != 200:
             raise ConnectorError(
                 f"Zoom recordings API error: HTTP {response.status_code} — {response.text}",
                 code="ZOOM_RECORDINGS_API_ERROR",
@@ -827,7 +827,7 @@ class ZoomConnector(BaseConnector):
                 doc = self.normalize(raw)  # type: ignore[arg-type]
                 documents.append(doc)
                 self._processed_recording_ids.add(meeting_uuid)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 errors.append(
                     SyncError(
                         source_id=meeting_uuid,
@@ -1020,7 +1020,7 @@ class ZoomConnector(BaseConnector):
             doc = self.normalize(raw)  # type: ignore[arg-type]
             documents.append(doc)
             self._processed_recording_ids.add(meeting_uuid)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             errors.append(
                 SyncError(
                     source_id=meeting_uuid,
@@ -1050,7 +1050,7 @@ class ZoomConnector(BaseConnector):
                     headers={"Authorization": f"Bearer {access_token}"},
                 )
                 _raise_for_rate_limit(response)
-                return response.status_code == 200  # noqa: PLR2004
+                return response.status_code == 200
         except httpx.RequestError:
             logger.warning(
                 "Health check failed — network error: connection_id=%s",
