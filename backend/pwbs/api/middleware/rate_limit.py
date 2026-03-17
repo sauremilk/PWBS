@@ -5,13 +5,15 @@ Categories:
   sync    -- connector sync, per-identifier:connector (1 req/300s)
   general -- everything else, per-user or per-IP (100 req/60s)
 
-On Redis failure the middleware **fails open**: requests are allowed through
-and a warning is logged.
+On Redis failure the middleware falls back to **in-memory counters** with
+conservative limits.  This ensures rate limiting is never fully bypassed.
 """
 
 from __future__ import annotations
 
+import collections
 import logging
+import threading
 import time
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -26,6 +28,48 @@ logger = logging.getLogger(__name__)
 # Circuit breaker: skip Redis for _CB_COOLDOWN seconds after a failure.
 _redis_last_failure: float = 0.0
 _CB_COOLDOWN = 60  # seconds
+
+# ---------------------------------------------------------------------------
+# In-memory fallback (active when Redis is unavailable)
+# ---------------------------------------------------------------------------
+_mem_lock = threading.Lock()
+_mem_counters: dict[str, collections.deque[float]] = collections.defaultdict(collections.deque)
+
+# Conservative per-category limits for the in-memory fallback.
+_MEM_FALLBACK_LIMITS: dict[str, tuple[int, int]] = {
+    "auth": (5, 60),       # keep strict (brute-force protection)
+    "sync": (1, 300),      # keep strict
+    "general": (50, 60),   # halved from Redis-backed 100
+}
+
+
+def _check_mem_rate_limit(
+    category: str, identifier: str, now: float,
+) -> tuple[bool, int, int, int]:
+    """In-memory fixed-window rate check.
+
+    Returns ``(allowed, remaining, max_requests, window_seconds)``.
+    """
+    max_requests, window = _MEM_FALLBACK_LIMITS.get(category, (50, 60))
+    key = f"{category}:{identifier}"
+
+    with _mem_lock:
+        dq = _mem_counters[key]
+        cutoff = now - window
+        while dq and dq[0] < cutoff:
+            dq.popleft()
+
+        if len(dq) >= max_requests:
+            return False, 0, max_requests, window
+
+        dq.append(now)
+        return True, max_requests - len(dq), max_requests, window
+
+
+def reset_mem_counters() -> None:
+    """Clear all in-memory counters (used in tests)."""
+    with _mem_lock:
+        _mem_counters.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -107,11 +151,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         remaining = max_requests
 
-        try:
-            global _redis_last_failure
-            if time.time() - _redis_last_failure < _CB_COOLDOWN:
-                pass  # skip Redis – circuit breaker open
-            else:
+        global _redis_last_failure
+        use_fallback = time.time() - _redis_last_failure < _CB_COOLDOWN
+
+        if not use_fallback:
+            try:
                 redis = get_redis_client()
                 pipe = redis.pipeline()
                 pipe.incr(redis_key)
@@ -141,13 +185,49 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                             "Retry-After": str(retry_after),
                         },
                     )
-        except Exception:
-            _redis_last_failure = time.time()
-            logger.warning(
-                "Rate limiting unavailable (Redis error); failing open for %s:%s",
-                category,
-                identifier,
+            except Exception:
+                _redis_last_failure = time.time()
+                use_fallback = True
+                logger.warning(
+                    "Rate limiting Redis failure; switching to in-memory fallback for %s:%s",
+                    category,
+                    identifier,
+                )
+
+        # In-memory fallback when Redis is unavailable
+        if use_fallback:
+            allowed, fb_remaining, fb_max, fb_window = _check_mem_rate_limit(
+                category, identifier, now,
             )
+            remaining = fb_remaining
+            max_requests = fb_max
+            reset_at = now + fb_window
+
+            if not allowed:
+                retry_after = max(1, int(fb_window))
+                logger.info(
+                    "In-memory rate limit exceeded for %s:%s",
+                    category,
+                    identifier,
+                )
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "code": "RATE_LIMIT_EXCEEDED",
+                        "message": "Too many requests",
+                        "detail": {
+                            "limit": fb_max,
+                            "window_seconds": fb_window,
+                            "retry_after": retry_after,
+                        },
+                    },
+                    headers={
+                        "X-RateLimit-Limit": str(fb_max),
+                        "X-RateLimit-Remaining": "0",
+                        "X-RateLimit-Reset": str(int(reset_at)),
+                        "Retry-After": str(retry_after),
+                    },
+                )
 
         response = await call_next(request)
 

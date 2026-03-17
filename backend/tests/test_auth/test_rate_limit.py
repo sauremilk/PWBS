@@ -9,9 +9,12 @@ import pytest
 
 from pwbs.api.middleware.rate_limit import (
     RateLimitMiddleware,
+    _check_mem_rate_limit,
     _classify_request,
     _get_client_ip,
+    reset_mem_counters,
 )
+import pwbs.api.middleware.rate_limit as _rl_mod
 
 
 # ---------------------------------------------------------------------------
@@ -139,6 +142,12 @@ class TestClassifyRequest:
 
 
 class TestRateLimitMiddleware:
+    @pytest.fixture(autouse=True)
+    def _reset_circuit_breaker(self) -> None:
+        """Reset module-level circuit breaker state between tests."""
+        _rl_mod._redis_last_failure = 0.0
+        reset_mem_counters()
+
     @pytest.fixture()
     def middleware(self) -> RateLimitMiddleware:
         dummy_app = AsyncMock()
@@ -237,7 +246,8 @@ class TestRateLimitMiddleware:
     async def test_fail_open_on_redis_error(
         self, middleware: RateLimitMiddleware
     ) -> None:
-        """Redis failure should let requests through (fail-open)."""
+        """Redis failure should fall back to in-memory counters."""
+        reset_mem_counters()
         call_next = AsyncMock()
         response = MagicMock()
         response.headers = {}
@@ -252,14 +262,15 @@ class TestRateLimitMiddleware:
             result = await middleware.dispatch(req, call_next)
 
         call_next.assert_awaited_once()
-        # Headers still present with default values
-        assert result.headers["X-RateLimit-Limit"] == "100"
+        # In-memory fallback uses conservative general limit (50)
+        assert result.headers["X-RateLimit-Limit"] == "50"
 
     @pytest.mark.asyncio
     async def test_fail_open_on_pipeline_error(
         self, middleware: RateLimitMiddleware
     ) -> None:
-        """Redis pipeline error should also fail open."""
+        """Redis pipeline error should fall back to in-memory counters."""
+        reset_mem_counters()
         redis = MagicMock()
         pipe = MagicMock()
         pipe.incr = MagicMock(return_value=pipe)
@@ -281,6 +292,8 @@ class TestRateLimitMiddleware:
             result = await middleware.dispatch(req, call_next)
 
         call_next.assert_awaited_once()
+        # In-memory fallback active
+        assert result.headers["X-RateLimit-Limit"] == "50"
 
     @pytest.mark.asyncio
     async def test_429_response_body_structure(
@@ -322,3 +335,108 @@ class TestRateLimitMiddleware:
 
         for header in ("X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"):
             assert header in result.headers, f"Missing header: {header}"
+
+
+# ---------------------------------------------------------------------------
+# In-memory rate-limit fallback (_check_mem_rate_limit)
+# ---------------------------------------------------------------------------
+
+
+class TestInMemoryRateLimitFallback:
+    """Tests for the in-memory fixed-window fallback used when Redis is down."""
+
+    def setup_method(self) -> None:
+        reset_mem_counters()
+
+    def test_allows_under_limit(self) -> None:
+        now = time.time()
+        allowed, remaining, max_req, window = _check_mem_rate_limit("general", "user-1", now)
+        assert allowed is True
+        assert remaining == 49  # 50 - 1
+        assert max_req == 50
+        assert window == 60
+
+    def test_blocks_at_limit(self) -> None:
+        now = time.time()
+        # Fill up to limit
+        for _ in range(50):
+            _check_mem_rate_limit("general", "user-1", now)
+        # 51st request must be blocked
+        allowed, remaining, _, _ = _check_mem_rate_limit("general", "user-1", now)
+        assert allowed is False
+        assert remaining == 0
+
+    def test_auth_category_blocks_at_5(self) -> None:
+        now = time.time()
+        for _ in range(5):
+            _check_mem_rate_limit("auth", "10.0.0.1", now)
+        allowed, _, max_req, window = _check_mem_rate_limit("auth", "10.0.0.1", now)
+        assert allowed is False
+        assert max_req == 5
+        assert window == 60
+
+    def test_sync_category_blocks_at_1(self) -> None:
+        now = time.time()
+        _check_mem_rate_limit("sync", "user:gcal", now)
+        allowed, _, max_req, window = _check_mem_rate_limit("sync", "user:gcal", now)
+        assert allowed is False
+        assert max_req == 1
+        assert window == 300
+
+    def test_entries_expire_after_window(self) -> None:
+        now = time.time()
+        # Fill up to limit
+        for _ in range(50):
+            _check_mem_rate_limit("general", "user-1", now)
+        # Advance past window
+        future = now + 61
+        allowed, remaining, _, _ = _check_mem_rate_limit("general", "user-1", future)
+        assert allowed is True
+        assert remaining == 49
+
+    def test_separate_identifiers_isolated(self) -> None:
+        now = time.time()
+        for _ in range(50):
+            _check_mem_rate_limit("general", "user-A", now)
+        # Different user is not affected
+        allowed, _, _, _ = _check_mem_rate_limit("general", "user-B", now)
+        assert allowed is True
+
+    def test_reset_clears_all(self) -> None:
+        now = time.time()
+        for _ in range(50):
+            _check_mem_rate_limit("general", "user-1", now)
+        reset_mem_counters()
+        allowed, _, _, _ = _check_mem_rate_limit("general", "user-1", now)
+        assert allowed is True
+
+    @pytest.mark.asyncio
+    async def test_middleware_blocks_at_fallback_limit(self) -> None:
+        """Full middleware integration: 51st request with Redis down returns 429."""
+        import pwbs.api.middleware.rate_limit as rl_mod
+
+        reset_mem_counters()
+        # Force circuit breaker open
+        rl_mod._redis_last_failure = time.time()
+
+        dummy_app = AsyncMock()
+        middleware = RateLimitMiddleware(dummy_app)
+
+        call_next = AsyncMock()
+        response = MagicMock()
+        response.headers = {}
+        call_next.return_value = response
+
+        # Send 50 requests (all should pass)
+        for _ in range(50):
+            req = _make_request(client_host="10.0.0.1")
+            await middleware.dispatch(req, call_next)
+
+        # 51st should be blocked
+        req = _make_request(client_host="10.0.0.1")
+        result = await middleware.dispatch(req, call_next)
+        assert result.status_code == 429
+
+        # Cleanup
+        rl_mod._redis_last_failure = 0.0
+        reset_mem_counters()
