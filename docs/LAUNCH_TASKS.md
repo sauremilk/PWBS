@@ -313,7 +313,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei Sync > 2 Min oder LLM-Fehler wird ein vorbereitetes Demo-Briefing angezeigt |
 | **Abh�ngigkeit**        | �                                                                               |
 | **Gesch�tzter Aufwand** | M                                                                               |
-| **Status**              | In Arbeit                                                                           |
+| **Status**              | Fertig                                                                           |
 
 **Beschreibung:** Demo-Briefing-Template erstellen, das die Briefing-Struktur und den Nutzen demonstriert. Wird angezeigt bei: Sync-Timeout, LLM-Fehler, zu wenig Daten. Sobald das echte Briefing verf�gbar ist, ersetzt es das Demo-Briefing. Verhindert Onboarding-Abbr�che bei langen Wartezeiten.
 

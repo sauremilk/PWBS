@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Calendar, ChevronRight, Loader2, Plus } from "lucide-react";
-import { useBriefingList, useGenerateBriefing } from "@/hooks/use-briefings";
+import { FileText, Calendar, ChevronRight, Loader2, Plus, Sparkles } from "lucide-react";
+import { useBriefingList, useGenerateBriefingWithFallback } from "@/hooks/use-briefings";
 import { trackFirstBriefing } from "@/lib/analytics";
 import BriefingPreferencesPanel from "@/components/briefings/briefing-preferences";
-import type { BriefingType, BriefingListItem } from "@/types/api";
+import type { BriefingType, BriefingListItem, BriefingDetailResponse } from "@/types/api";
 
 const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
   morning: "Morgen-Briefing",
@@ -43,9 +43,33 @@ function BriefingRow({ item }: { item: BriefingListItem }) {
   );
 }
 
+function DemoBriefingBanner({ briefing }: { briefing: BriefingDetailResponse }) {
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+      <div className="mb-2 flex items-center gap-2">
+        <Sparkles aria-hidden="true" className="h-4 w-4 text-amber-600" />
+        <span className="text-sm font-semibold text-amber-800">
+          Demo-Briefing – Vorschau
+        </span>
+      </div>
+      <p className="mb-3 text-xs text-amber-700">
+        So sieht ein echtes Briefing aus. Sobald deine Datenquellen verbunden sind,
+        erhältst du personalisierte Inhalte.
+      </p>
+      <div className="rounded-lg border border-amber-100 bg-white p-4">
+        <h3 className="mb-1 text-sm font-semibold text-text">{briefing.title}</h3>
+        <p className="line-clamp-4 text-sm text-text-secondary whitespace-pre-line">
+          {briefing.content.slice(0, 300)}…
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function BriefingsPage() {
   const { data, isLoading } = useBriefingList({ limit: 50 });
-  const generate = useGenerateBriefing();
+  const { startGeneration, isPending, demoBriefing, isShowingDemo } =
+    useGenerateBriefingWithFallback();
 
   return (
     <div className="space-y-6">
@@ -59,9 +83,9 @@ export default function BriefingsPage() {
         <button
           onClick={() => {
             trackFirstBriefing("morning");
-            generate.mutate({ type: "morning" });
+            startGeneration("morning");
           }}
-          disabled={generate.isPending}
+          disabled={isPending}
           className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 disabled:opacity-50"
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
@@ -70,6 +94,10 @@ export default function BriefingsPage() {
       </div>
 
       <BriefingPreferencesPanel />
+
+      {isShowingDemo && demoBriefing && (
+        <DemoBriefingBanner briefing={demoBriefing} />
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12" role="status">
