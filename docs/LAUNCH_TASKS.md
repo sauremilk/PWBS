@@ -161,7 +161,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Consent-Banner wird angezeigt, PostHog JS-SDK wird nur bei Opt-in geladen |
 | **Abh�ngigkeit**        | LAUNCH-LEG-001 (DSE muss existieren, damit Banner darauf verlinken kann)  |
 | **Gesch�tzter Aufwand** | S                                                                         |
-| **Status**              | Offen                                                                     |
+| **Status**              | Fertig                                                                     |
 
 **Beschreibung:** TDDDG � 25-konformer Consent-Banner implementieren. �Ablehnen" gleichwertig prominent wie �Akzeptieren". Consent in `localStorage` speichern. Bei Ablehnung: `posthog-js` nicht laden. Nur f�r Client-Side-Analytics relevant (Server-Side-Events laufen unter Art. 6 Abs. 1 lit. b DSGVO ohne Consent). Spezifikation: TRACKING_PLAN �7.7.
 

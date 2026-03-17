@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.exceptions import AuthenticationError, ValidationError
+from pwbs.core.posthog import capture as posthog_capture
 from pwbs.db.postgres import get_db_session
 from pwbs.models.user import User
 from pwbs.services.auth import (
@@ -129,6 +130,8 @@ async def register(
     )
     await db.commit()
 
+    posthog_capture(str(payload.user_id), "auth_user_registered")
+
     return RegisterResponse(
         user_id=payload.user_id,
         access_token=pair.access_token,
@@ -188,6 +191,9 @@ async def login(
         ip_address=ip,
     )
     await db.commit()
+
+    posthog_capture(str(user.id), "auth_user_logged_in")
+
     return LoginResponse(
         access_token=pair.access_token,
         refresh_token=pair.refresh_token,
@@ -231,6 +237,8 @@ async def logout(
         ip_address=get_client_ip(request),
     )
     await db.commit()
+
+    posthog_capture(str(current_user.id), "auth_user_logged_out")
 
     return LogoutResponse()
 

@@ -30,6 +30,7 @@ from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.connectors.oauth import OAuthTokens, encrypt_tokens
 from pwbs.core.config import get_settings
+from pwbs.core.posthog import capture as posthog_capture
 from pwbs.db.postgres import get_db_session
 from pwbs.models.connection import Connection
 from pwbs.models.connector_consent import ConnectorConsent
@@ -560,6 +561,12 @@ async def oauth_callback(
         connection.id,
     )
 
+    posthog_capture(
+        str(current_user.id),
+        "connector_connected",
+        {"source_type": source_type.value, "method": "oauth"},
+    )
+
     return CallbackResponse(
         connection_id=connection.id,
         status=ConnectionStatus.ACTIVE.value,
@@ -764,6 +771,12 @@ async def configure_connector(
         current_user.id,
         connection.id,
         body.vault_path,
+    )
+
+    posthog_capture(
+        str(current_user.id),
+        "connector_connected",
+        {"source_type": source_type.value, "method": "config"},
     )
 
     return ConfigResponse(
@@ -1289,6 +1302,12 @@ async def disconnect(
         current_user.id,
         source_type.value,
         deleted_doc_count,
+    )
+
+    posthog_capture(
+        str(current_user.id),
+        "connector_disconnected",
+        {"source_type": source_type.value},
     )
 
     return DisconnectResponse(

@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pwbs.api.dependencies.auth import get_current_user
 from pwbs.audit.audit_service import AuditAction, get_client_ip, log_event
 from pwbs.core.config import get_settings
+from pwbs.core.posthog import capture as posthog_capture
 from pwbs.db.postgres import get_db_session
 from pwbs.db.weaviate_client import get_weaviate_client
 from pwbs.models.entity import Entity
@@ -225,6 +226,12 @@ async def search(
         metadata={"result_count": len(results)},
     )
     await session.commit()
+
+    posthog_capture(
+        str(user_id),
+        "search_executed",
+        {"result_count": len(results)},
+    )
 
     return SearchResponse(
         results=results,

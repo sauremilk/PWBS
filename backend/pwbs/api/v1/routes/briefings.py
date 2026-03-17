@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pwbs.api.dependencies.auth import get_current_user
+from pwbs.core.posthog import capture as posthog_capture
 from pwbs.db.postgres import get_db_session
 from pwbs.models.briefing import Briefing as BriefingORM
 from pwbs.models.briefing_feedback import BriefingFeedback
@@ -528,6 +529,12 @@ async def _run_briefing_generation(
             briefing_type.value,
             user_id,
         )
+
+        posthog_capture(
+            str(user_id),
+            "briefing_generated",
+            {"briefing_type": briefing_type.value},
+        )
     except Exception:
         logger.exception(
             "Briefing generation failed: id=%s type=%s user=%s",
@@ -638,6 +645,12 @@ async def submit_feedback(
     )
     await db.execute(upsert_stmt)
     await db.flush()
+
+    posthog_capture(
+        str(user.id),
+        "briefing_feedback_given",
+        {"briefing_id": str(briefing_id), "rating": body.rating},
+    )
 
     return FeedbackResponse(
         briefing_id=briefing_id,
