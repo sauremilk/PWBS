@@ -613,7 +613,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 90-Sekunden-Screencast ist fertig: Register ? Konnektor ? Briefing |
 | **Abh�ngigkeit**        | �                                                                  |
 | **Gesch�tzter Aufwand** | M                                                                  |
-| **Status**              | Offen                                                              |
+| **Status**              | Blockiert: Storyboard fertig, Screencast-Aufnahme manuell erforderlich                                                              |
 
 **Beschreibung:** 90-Sekunden-Screencast produzieren, der den Kern-Flow zeigt: Registrierung ? Konnektor verbinden ? erstes Briefing. Deutsch mit englischen Untertiteln. Wird auf Landing Page, ProductHunt-Listing und Social Media eingesetzt. Spezifikation: GTM_PLAN �9 Tabelle �Vor dem Launch".
 
