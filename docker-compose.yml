@@ -40,7 +40,7 @@ services:
 
   #  PostgreSQL
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.8-alpine
     ports:
       - "5432:5432"
     environment:
@@ -98,7 +98,7 @@ services:
 
 #  Redis (AOF persistence enabled for queue reliability – TASK-121)
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     ports:
       - "6379:6379"
     volumes:
@@ -226,6 +226,31 @@ services:
     command: npm run dev
     restart: unless-stopped
 
+  # ── Ollama (Lokales LLM – kostenlos, kein API-Key noetig) ────────
+  # Activate with: docker compose --profile ollama up -d
+  # Nach dem Start: docker compose exec ollama ollama pull llama3.1
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # GPU-Support (NVIDIA): Kommentar entfernen wenn GPU vorhanden
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
   # ── Monitoring (TASK-166) ──────────────────────────────────────────
   # Activate with: docker compose --profile monitoring up -d
   prometheus:
@@ -311,6 +336,7 @@ volumes:
   weaviate_data:
   neo4j_data:
   redis_data:
+  ollama_data:
   prometheus_data:
   grafana_data:
   plausible_db_data:

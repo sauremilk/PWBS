@@ -40,6 +40,45 @@ cargo tauri build
 
 Das Binary liegt unter `src-tauri/target/release/bundle/`.
 
+## Release & Distribution
+
+Releases werden automatisiert ueber GitHub Actions erstellt:
+
+```bash
+# Neues Release taggen (loest CI/CD-Pipeline aus)
+git tag desktop-v0.1.0
+git push origin desktop-v0.1.0
+```
+
+Der Workflow `.github/workflows/desktop-release.yml` baut automatisch:
+
+| Platform              | Installer           |
+| --------------------- | ------------------- |
+| Windows (x64)         | `.exe` (NSIS)       |
+| macOS (Intel)         | `.dmg`              |
+| macOS (Apple Silicon) | `.dmg`              |
+| Linux (x64)           | `.AppImage`, `.deb` |
+
+Artefakte werden als GitHub Release publiziert inkl. `latest.json` fuer den Auto-Updater.
+
+### Secrets (in GitHub Repository Settings konfigurieren)
+
+| Secret                               | Beschreibung                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
+| `TAURI_SIGNING_PRIVATE_KEY`          | Tauri Updater-Signaturschluessel (generiert mit `cargo tauri signer generate`) |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Passwort fuer den Signaturschluessel                                           |
+| `APPLE_CERTIFICATE`                  | Base64-kodiertes Apple Developer Certificate (.p12)                            |
+| `APPLE_CERTIFICATE_PASSWORD`         | Passwort des Zertifikats                                                       |
+| `KEYCHAIN_PASSWORD`                  | Temporaeres Keychain-Passwort fuer CI                                          |
+
+### Updater-Schluessel generieren
+
+```bash
+cargo tauri signer generate -w ~/.tauri/pwbs.key
+```
+
+Den Public Key in `tauri.conf.json` unter `plugins.updater.pubkey` eintragen.
+
 ## Projektstruktur
 
 ```
@@ -64,10 +103,11 @@ desktop-app/
 ### System Tray
 
 Kontextmenue mit:
-- **Dashboard oeffnen**  Hauptfenster zeigen, Navigation zu `/`
-- **Suche**  Navigation zu `/search`
-- **Heutiges Briefing**  Navigation zu `/briefings`
-- **Beenden**  App schliessen
+
+- **Dashboard oeffnen** Hauptfenster zeigen, Navigation zu `/`
+- **Suche** Navigation zu `/search`
+- **Heutiges Briefing** Navigation zu `/briefings`
+- **Beenden** App schliessen
 
 Linksklick auf das Tray-Icon zeigt/fokussiert das Hauptfenster.
 
@@ -76,11 +116,11 @@ Linksklick auf das Tray-Icon zeigt/fokussiert das Hauptfenster.
 IPC-Command `send_notification` fuer Frontend-Integration:
 
 ```typescript
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from "@tauri-apps/api/core";
 
-await invoke('send_notification', {
-  title: 'Neues Morgenbriefing',
-  body: 'Dein Briefing fuer heute ist bereit.'
+await invoke("send_notification", {
+  title: "Neues Morgenbriefing",
+  body: "Dein Briefing fuer heute ist bereit.",
 });
 ```
 
@@ -125,5 +165,6 @@ const results = await invoke('offline_search', {
 ```
 
 Umgebungsvariablen:
+
 - `PWBS_API_URL`: Backend-URL (Standard: `http://localhost:8000`)
 - `PWBS_OBSIDIAN_VAULT`: Pfad zum Obsidian-Vault-Verzeichnis (optional)

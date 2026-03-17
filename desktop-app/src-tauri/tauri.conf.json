@@ -44,7 +44,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://releases.pwbs.app/{{target}}/{{arch}}/{{current_version}}"
+        "https://github.com/sauremilk/PWBS/releases/latest/download/latest.json"
       ],
       "pubkey": ""
     }
