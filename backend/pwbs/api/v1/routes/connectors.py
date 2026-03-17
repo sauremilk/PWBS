@@ -473,6 +473,12 @@ async def get_auth_url(
         f"&access_type=offline"
     )
 
+    posthog_capture(
+        str(current_user.id),
+        "connector_oauth_started",
+        {"source_type": source_type.value},
+    )
+
     return AuthUrlResponse(auth_url=base_url + params, state=state)
 
 
