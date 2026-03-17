@@ -133,18 +133,41 @@ class CoherenceBreakpoint:
 # ------------------------------------------------------------------
 
 # Abbreviations that should NOT trigger a sentence split.
-_ABBREVIATIONS = frozenset({
-    "dr", "mr", "mrs", "ms", "prof", "inc", "ltd", "jr", "sr",
-    "vs", "etc", "ca", "bzw", "vgl", "nr", "abs", "art",
-    "st", "ft", "approx", "dept", "est", "govt", "assn",
-})
+_ABBREVIATIONS = frozenset(
+    {
+        "dr",
+        "mr",
+        "mrs",
+        "ms",
+        "prof",
+        "inc",
+        "ltd",
+        "jr",
+        "sr",
+        "vs",
+        "etc",
+        "ca",
+        "bzw",
+        "vgl",
+        "nr",
+        "abs",
+        "art",
+        "st",
+        "ft",
+        "approx",
+        "dept",
+        "est",
+        "govt",
+        "assn",
+    }
+)
 
 # Matches a potential sentence boundary: punctuation [.!?] followed by
 # whitespace and an uppercase letter (or digit, or end-of-string).
 _BOUNDARY_CANDIDATE_RE = re.compile(
-    r'([.!?])'
+    r"([.!?])"
     r'(["\')]?\s+)'
-    r'(?=[A-ZÄÖÜ\d])',
+    r"(?=[A-ZÄÖÜ\d])",
     re.MULTILINE,
 )
 
@@ -173,7 +196,7 @@ def segment_sentences(text: str) -> list[str]:
         # Skip if this is a decimal point (digit.digit pattern like 3.14)
         if match.group(1) == "." and punct_pos > 0 and text[punct_pos - 1].isdigit():
             # Only skip if the next non-space char is also a digit
-            rest = text[punct_pos + 1:].lstrip()
+            rest = text[punct_pos + 1 :].lstrip()
             if rest and rest[0].isdigit():
                 continue
 
@@ -300,8 +323,7 @@ def detect_breakpoints(
     for i in range(1, n - 1):
         # Local minimum: lower than both neighbours
         is_local_min = (
-            similarities[i] < similarities[i - 1]
-            and similarities[i] < similarities[i + 1]
+            similarities[i] < similarities[i - 1] and similarities[i] < similarities[i + 1]
         )
 
         # Below adaptive threshold
@@ -404,8 +426,7 @@ class SemanticCoherenceChunker:
 
         # Pairwise cosine similarities
         similarities = [
-            cosine_similarity(embeddings[i], embeddings[i + 1])
-            for i in range(len(embeddings) - 1)
+            cosine_similarity(embeddings[i], embeddings[i + 1]) for i in range(len(embeddings) - 1)
         ]
 
         # Detect breakpoints
@@ -457,27 +478,27 @@ class SemanticCoherenceChunker:
         for bp_pos in bp_positions:
             group_sents = sentences[group_start:bp_pos]
             group_sims = similarities[group_start : bp_pos - 1] if bp_pos - 1 > group_start else []
-            groups.append(_SentenceGroup(
-                sentences=group_sents,
-                start_index=group_start,
-                avg_coherence=statistics.mean(group_sims) if group_sims else 1.0,
-            ))
+            groups.append(
+                _SentenceGroup(
+                    sentences=group_sents,
+                    start_index=group_start,
+                    avg_coherence=statistics.mean(group_sims) if group_sims else 1.0,
+                )
+            )
             group_start = bp_pos
 
         # Trailing group
         trailing = sentences[group_start:]
         if trailing:
             end = len(sentences) - 1
-            trailing_sims = (
-                similarities[group_start:end]
-                if end > group_start
-                else []
+            trailing_sims = similarities[group_start:end] if end > group_start else []
+            groups.append(
+                _SentenceGroup(
+                    sentences=trailing,
+                    start_index=group_start,
+                    avg_coherence=statistics.mean(trailing_sims) if trailing_sims else 1.0,
+                )
             )
-            groups.append(_SentenceGroup(
-                sentences=trailing,
-                start_index=group_start,
-                avg_coherence=statistics.mean(trailing_sims) if trailing_sims else 1.0,
-            ))
 
         return groups
 
@@ -579,12 +600,14 @@ class SemanticCoherenceChunker:
                 sentences = list(overlap_sents) + sentences
 
             text = " ".join(sentences)
-            chunks.append(CoherenceChunk(
-                content=text,
-                chunk_index=idx,
-                token_count=self._count_tokens(text),
-                avg_coherence=group.avg_coherence,
-            ))
+            chunks.append(
+                CoherenceChunk(
+                    content=text,
+                    chunk_index=idx,
+                    token_count=self._count_tokens(text),
+                    avg_coherence=group.avg_coherence,
+                )
+            )
 
         return chunks
 
@@ -617,12 +640,14 @@ class SemanticCoherenceChunker:
         while pos < total:
             end = min(pos + self._config.max_tokens, total)
             window = tokens[pos:end]
-            chunks.append(CoherenceChunk(
-                content=self._enc.decode(window),
-                chunk_index=len(chunks),
-                token_count=len(window),
-                avg_coherence=1.0,
-            ))
+            chunks.append(
+                CoherenceChunk(
+                    content=self._enc.decode(window),
+                    chunk_index=len(chunks),
+                    token_count=len(window),
+                    avg_coherence=1.0,
+                )
+            )
             if end >= total:
                 break
             pos += step
@@ -669,4 +694,3 @@ class _SentenceGroup:
     sentences: list[str]
     start_index: int
     avg_coherence: float
-

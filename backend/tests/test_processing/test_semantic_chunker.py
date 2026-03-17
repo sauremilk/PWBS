@@ -46,9 +46,7 @@ def _make_embed_fn(sentence_vectors: dict[str, list[float]] | None = None):
             else:
                 # Hash-based deterministic vector
                 h = hash(t) & 0xFFFF_FFFF
-                vec = [
-                    math.sin(h + i * 0.7) for i in range(_DIM)
-                ]
+                vec = [math.sin(h + i * 0.7) for i in range(_DIM)]
                 result.append(vec)
         return result
 
@@ -235,6 +233,7 @@ class TestSemanticCoherenceChunkerBasic:
     @pytest.mark.asyncio
     async def test_token_count_matches_content(self) -> None:
         import tiktoken
+
         enc = tiktoken.get_encoding("cl100k_base")
 
         chunker = SemanticCoherenceChunker(
@@ -291,25 +290,29 @@ class TestCoherenceDetectsTopicShifts:
         than a multi-topic document of the same length."""
         # All vectors point in roughly the same direction
         uniform_vectors: dict[str, list[float]] = {}
-        for i, sent in enumerate([
-            "Python is great. ",
-            "Python has many libraries. ",
-            "Python is used in data science. ",
-            "Python supports async programming. ",
-            "Python has a large community. ",
-            "Python is dynamically typed. ",
-        ]):
+        for i, sent in enumerate(
+            [
+                "Python is great. ",
+                "Python has many libraries. ",
+                "Python is used in data science. ",
+                "Python supports async programming. ",
+                "Python has a large community. ",
+                "Python is dynamically typed. ",
+            ]
+        ):
             uniform_vectors[sent.strip()] = _unit_vec(i * 2)  # very close angles
 
         diverse_vectors: dict[str, list[float]] = {}
-        for i, sent in enumerate([
-            "Python is great. ",
-            "The ocean is deep. ",
-            "Music soothes the soul. ",
-            "Quantum physics is complex. ",
-            "Cooking requires patience. ",
-            "Stars are far away. ",
-        ]):
+        for i, sent in enumerate(
+            [
+                "Python is great. ",
+                "The ocean is deep. ",
+                "Music soothes the soul. ",
+                "Quantum physics is complex. ",
+                "Cooking requires patience. ",
+                "Stars are far away. ",
+            ]
+        ):
             diverse_vectors[sent.strip()] = _unit_vec(i * 30)  # widely spread
 
         config = CoherenceChunkerConfig(
@@ -336,6 +339,7 @@ class TestTokenBoundsEnforced:
     @pytest.mark.asyncio
     async def test_max_tokens_respected(self) -> None:
         import tiktoken
+
         enc = tiktoken.get_encoding("cl100k_base")
 
         config = CoherenceChunkerConfig(max_tokens=40, overlap_sentences=0)

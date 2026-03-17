@@ -253,9 +253,7 @@ class Neo4jGraphQueryService:
                 )
             )
 
-        logger.info(
-            "get_pending_decisions: owner=%s returned=%d", owner_id, len(results)
-        )
+        logger.info("get_pending_decisions: owner=%s returned=%d", owner_id, len(results))
         return results
 
 
@@ -353,7 +351,7 @@ class Neo4jProjectGraphService:
 
         milestones: list[ProjectMilestone] = []
         for row in rows:
-            for evt in (row.get("events") or []):
+            for evt in row.get("events") or []:
                 if not evt or not evt.get("title"):
                     continue
                 milestones.append(

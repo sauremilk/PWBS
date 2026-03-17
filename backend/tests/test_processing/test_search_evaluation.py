@@ -254,7 +254,11 @@ class TestSearchEvaluator:
 
         async def perfect_search(query: str, top_k: int) -> list[str]:
             if query == "test":
-                return ["a", "b"] if dataset.queries[0].relevant_ids == frozenset({"a", "b"}) else ["c", "d"]
+                return (
+                    ["a", "b"]
+                    if dataset.queries[0].relevant_ids == frozenset({"a", "b"})
+                    else ["c", "d"]
+                )
             return []
 
         # Patch: each query has query="test", so we need a different approach
@@ -302,9 +306,7 @@ class TestSearchEvaluator:
             return ["a"]
 
         evaluator = SearchEvaluator(dataset)
-        report = await evaluator.evaluate(
-            trivial_search, top_k=10, config_name="test-config"
-        )
+        report = await evaluator.evaluate(trivial_search, top_k=10, config_name="test-config")
 
         summary = report.summary()
         assert "test-config" in summary

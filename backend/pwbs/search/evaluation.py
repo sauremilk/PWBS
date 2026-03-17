@@ -137,9 +137,7 @@ class EvalReport:
             "-" * 50,
         ]
         for m in self.metrics:
-            lines.append(
-                f"{m.name:<20} {m.mean:>8.4f} {m.median:>8.4f} {m.std:>8.4f}"
-            )
+            lines.append(f"{m.name:<20} {m.mean:>8.4f} {m.median:>8.4f} {m.std:>8.4f}")
         return "\n".join(lines)
 
     def metric_by_name(self, name: str) -> MetricResult | None:
