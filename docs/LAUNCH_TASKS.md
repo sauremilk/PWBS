@@ -529,7 +529,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | PostHog ist als Docker-Compose-Service erreichbar mit EU-Datenresidenz |
 | **Abhängigkeit**        | –                                                                      |
 | **Geschätzter Aufwand** | M                                                                      |
-| **Status**              | In Arbeit                                                                  |
+| **Status**              | Fertig                                                                  |
 
 **Beschreibung:** PostHog Self-Hosted als Docker-Compose-Service aufsetzen (posthog + clickhouse). IP-Anonymisierung aktivieren (`anonymize_ips: true`). `posthog-python` SDK als Backend-Dependency installieren und im FastAPI-Lifespan initialisieren. Voraussetzung für alle Analytics-Events.
 
