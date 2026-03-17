@@ -48,9 +48,45 @@ Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/spec/v2.0.0
 
 ### ✨ Features
 
-### 🐛 Fixes
+- Onboarding-Wizard mit 4-Schritt-Flow: Welcome → Connector → Sync → Briefing (LAUNCH-UX-009)
+- Sync-Fortschrittsanzeige im Onboarding-Wizard mit Echtzeit-Status (LAUNCH-UX-004)
+- Onboarding-Fortschritt persistent in localStorage gespeichert (LAUNCH-UX-005)
+- Wizard Zurück-Navigation auf allen Schritten inkl. Briefing (LAUNCH-UX-006)
+- Skip-Banner nach Wizard-Abbruch: persistent, dismissible, mit CTA (LAUNCH-UX-008)
+- 10 spezifische Empty States mit motivierenden CTAs für alle Dashboard-Seiten (LAUNCH-UX-007)
+- Nutzerfreundliche Error-Seiten mit MappedErrorCard auf allen Dashboard-Routen (LAUNCH-UX-001)
+- Demo-Briefing Fallback für neue Nutzer ohne Datenquellen (LAUNCH-UX-003)
+- Auto-generiertes Initial-Briefing nach erstem Connector-Sync (feat: pipeline)
+- PostHog Self-Hosted Analytics mit pseudonymisierten User-IDs (LAUNCH-ANA-001)
+- Server-Side Core Events: connector_oauth_started, briefing_generated etc. (LAUNCH-ANA-002)
+- PostHog identify() mit User Properties (LAUNCH-ANA-003)
 
-### ⚡ Performance
+### 🔒 Security
+
+- Security Audit CI-Job mit pip-audit + npm audit (LAUNCH-REL-001)
+- RSA-Key-Guard: Produktionsstart blockiert ohne gültige JWT-Keys (LAUNCH-REL-002)
+- Alembic-Head-Validierung im Release-Prozess (LAUNCH-REL-004)
+- Content-Security-Policy Header implementiert (LAUNCH-REL-005)
+- CORS auf explizite Methoden und Header eingeschränkt (LAUNCH-REL-006)
+- Rate-Limit In-Memory Fallback statt Fail-Open bei Redis-Ausfall (fix: security)
+- Audit-Trail für alle sicherheitsrelevanten Aktionen (LAUNCH-LEG-005)
+
+### 📚 Docs
+
+- ADR-016: MVP-Fokussierung – 5-Schritte-Refactoring dokumentiert (`docs/adr/016-mvp-fokussierung-refactoring.md`)
+- AGB / Nutzungsbedingungen erstellt (LAUNCH-LEG-003)
+- Impressum erstellt (LAUNCH-LEG-002)
+- Datenschutzerklärung erstellt (LAUNCH-LEG-001)
+- Deployment-Runbook (`docs/runbooks/deployment.md`) (LAUNCH-OPS-003)
+- Database-Migration-Runbook mit Rollback-Verfahren (`docs/runbooks/database-migration.md`) (LAUNCH-OPS-006)
+- DR-Testprotokoll erstellt (`docs/runbooks/disaster-recovery.md`) (LAUNCH-OPS-004)
+- GTM-Storyboard für Produkt-Demo-Video (LAUNCH-GTM-002)
+
+### 🔧 Ops
+
+- Sentry-Integration verifiziert und SENTRY_DSN konfiguriert (LAUNCH-OPS-001)
+- Grafana-Alerting für P0/P1-Alerts → Discord (LAUNCH-OPS-002)
+- Dependabot aktiviert für pip und npm (LAUNCH-OPS-005)
 
 #### Test-Suite Performance: von ∞ Timeout auf 72s
 - **Root Cause 1:** DB-Singletons (Redis, Weaviate) wurden in Tests nicht gemockt → echte Verbindungsversuche → Timeout

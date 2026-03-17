@@ -645,7 +645,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | 3�4 LinkedIn-Posts mit Problem-Fokus ver�ffentlicht |
 | **Abh�ngigkeit**        | �                                                   |
 | **Gesch�tzter Aufwand** | S                                                   |
-| **Status**              | Offen                                               |
+| **Status**              | Blockiert: Manuell (LinkedIn-Setup)                                               |
 
 **Beschreibung:** 3�4 LinkedIn-Posts (je 200�300 W�rter) zu PWBS-relevanten Problemen ver�ffentlichen. Tonalit�t: klar, direkt, ohne Marketing-Floskeln. Themen: fragmentiertes Arbeitswissen, Meeting-Vorbereitung, Datenschutz bei KI-Tools. Nicht verkaufen, sondern Problembewusstsein schaffen.
 
@@ -661,7 +661,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Plugin ist im Obsidian Community Plugin Store eingereicht (Review kann 1�2 Wochen dauern) |
 | **Abh�ngigkeit**        | �                                                                                         |
 | **Gesch�tzter Aufwand** | M                                                                                         |
-| **Status**              | Offen                                                                                     |
+| **Status**              | Blockiert: Manuell (Obsidian-Plugin Store)                                                                                     |
 
 **Beschreibung:** Obsidian-Plugin finalisieren und im Obsidian Community Plugin Store einreichen. Nat�rlicher Akquisitionskanal f�r die Zielgruppe. Review-Prozess: 1�2 Wochen. Plugin-Code unter `obsidian-plugin/`.
 
@@ -697,7 +697,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | README enth�lt aktuelle Projektbeschreibung, Setup-Anleitung und Status |
 | **Abh�ngigkeit**        | �                                                                       |
 | **Gesch�tzter Aufwand** | S                                                                       |
-| **Status**              | Offen (in Arbeit)                                                       |
+| **Status**              | Fertig                                                       |
 
 **Beschreibung:** README.md aktualisieren mit: aktuellem Projektstand (Phase 2 MVP), Setup-Anleitung (Docker Compose), aktiven Features, Link zu CHANGELOG.md.
 
@@ -713,7 +713,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | CHANGELOG.md enth�lt alle �nderungen seit letztem Release |
 | **Abh�ngigkeit**        | �                                                         |
 | **Gesch�tzter Aufwand** | XS                                                        |
-| **Status**              | Offen (in Arbeit)                                         |
+| **Status**              | Fertig                                         |
 
 **Beschreibung:** CHANGELOG.md mit allen �nderungen seit v0.1.0 aktualisieren (MVP-Fokussierung, Test-Performance, ADR-016 und alle weiteren �nderungen). Wird laufend gepflegt.
 

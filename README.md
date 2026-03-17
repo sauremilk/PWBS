@@ -4,6 +4,8 @@
 
 A cognitive infrastructure that continuously ingests data from heterogeneous personal sources, builds a semantic knowledge model, and delivers context-aware briefings at the right moment — so knowledge workers spend less time remembering and more time deciding.
 
+> **Status:** Phase 2 (MVP) — Closed Beta preparation. Core features (4 connectors, hybrid search, briefing generation, GDPR-compliant pipeline) are functional. See [ROADMAP.md](ROADMAP.md) for the full phase plan.
+
 ---
 
 ## For Hiring Managers
@@ -15,6 +17,7 @@ This codebase is a working demonstration of senior-level full-stack engineering 
 - **[AGENTS.md](AGENTS.md)** — Agentic system design: six specialized agents (Ingestion, Processing, Briefing, Search, Graph, Scheduler) with explicit contracts, failure modes, and graceful degradation patterns.
 
 **Scope at a glance:**
+
 - Multi-agent orchestration built on Celery + Redis — autonomous, safe-by-design, stateless workers
 - End-to-end platform: Python backend · Next.js frontend · Tauri desktop · React Native mobile · Chrome extension · Obsidian plugin
 - Production practices throughout: pre-commit hooks, Docker Compose + Helm, Terraform IaC, Alembic migrations, ~140-file pytest suite, Prometheus + Grafana observability
@@ -47,7 +50,7 @@ This codebase is a working demonstration of senior-level full-stack engineering 
 | **Embeddings**     | OpenAI `text-embedding-3-small` (cloud), `all-MiniLM-L6-v2` via Sentence Transformers (local) |
 | **Frontend**       | Next.js (App Router), React, TypeScript, Tailwind CSS                                         |
 | **Infrastructure** | Docker Compose (local), Vercel (frontend), AWS ECS Fargate + RDS + ElastiCache (backend)      |
-| **Task queue**     | Celery + Redis (active in MVP: ingestion, processing, briefing queues)                         |
+| **Task queue**     | Celery + Redis (active in MVP: ingestion, processing, briefing queues)                        |
 | **Migrations**     | Alembic                                                                                       |
 | **Testing**        | pytest, pytest-asyncio                                                                        |
 
