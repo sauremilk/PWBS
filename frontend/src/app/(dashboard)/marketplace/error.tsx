@@ -2,7 +2,7 @@
 
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
-export default function SectionError({
+export default function MarketplaceError({
   error,
   reset,
 }: {

@@ -86,14 +86,14 @@ export function ChangelogButton() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={handleOpen}
-        className="relative rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="relative rounded-md p-2 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
         aria-label={`Neuigkeiten${unreadCount ? ` (${unreadCount} neu)` : ""}`}
         aria-expanded={open}
         aria-haspopup="true"
       >
         <Megaphone className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-500 px-1 text-[10px] font-bold text-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -107,17 +107,17 @@ export function ChangelogButton() {
 function ChangelogPanel({ entries }: { entries: ChangelogEntry[] }) {
   return (
     <div
-      className="absolute right-0 top-full z-50 mt-2 w-96 max-h-[32rem] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+      className="absolute right-0 top-full z-50 mt-2 w-96 max-h-[32rem] overflow-y-auto rounded-xl border border-border bg-surface shadow-lg"
       role="dialog"
       aria-label="Neuigkeiten"
     >
-      <div className="sticky top-0 border-b border-gray-200 bg-white px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-900">Neuigkeiten</h3>
+      <div className="sticky top-0 border-b border-border bg-surface px-4 py-3">
+        <h3 className="text-sm font-semibold text-text">Neuigkeiten</h3>
       </div>
 
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-border/50">
         {entries.length === 0 && (
-          <p className="py-6 text-center text-sm text-gray-500">
+          <p className="py-6 text-center text-sm text-text-tertiary">
             Keine Eintraege vorhanden.
           </p>
         )}
@@ -125,21 +125,21 @@ function ChangelogPanel({ entries }: { entries: ChangelogEntry[] }) {
         {entries.map((entry) => (
           <div key={entry.version} className="px-4 py-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-text">
                 {entry.title}
               </span>
-              <span className="ml-2 shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+              <span className="ml-2 shrink-0 rounded bg-surface-secondary px-1.5 py-0.5 text-xs text-text-secondary">
                 v{entry.version}
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-gray-500">{entry.date}</p>
+            <p className="mt-0.5 text-xs text-text-tertiary">{entry.date}</p>
             <ul className="mt-2 space-y-1">
               {entry.entries.map((line, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2 text-sm text-gray-700"
+                  className="flex items-start gap-2 text-sm text-text-secondary"
                 >
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
                   {line}
                 </li>
               ))}

@@ -10,7 +10,7 @@ interface ReminderCardProps {
 }
 
 const TYPE_CONFIG = {
-  follow_up: { icon: Clock, label: "Follow-up", color: "text-blue-600" },
+  follow_up: { icon: Clock, label: "Follow-up", color: "text-indigo-600" },
   inactive_topic: {
     icon: AlertTriangle,
     label: "Inaktives Thema",
@@ -26,7 +26,7 @@ const TYPE_CONFIG = {
 const URGENCY_BADGE = {
   high: "bg-red-100 text-red-700",
   medium: "bg-amber-100 text-amber-700",
-  low: "bg-gray-100 text-gray-700",
+  low: "bg-surface-secondary text-text-secondary",
 } as const;
 
 function timeAgo(dateString: string): string {
@@ -51,7 +51,7 @@ export function ReminderCard({
   const Icon = config.icon;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+    <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -68,25 +68,25 @@ export function ReminderCard({
             {reminder.urgency}
           </span>
         </div>
-        <span className="text-xs text-gray-500 whitespace-nowrap">
+        <span className="text-xs text-text-tertiary whitespace-nowrap">
           {timeAgo(reminder.created_at)}
         </span>
       </div>
 
       {/* Content */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">
+        <h4 className="text-sm font-semibold text-text">
           {reminder.title}
         </h4>
         {reminder.description && (
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+          <p className="mt-1 text-sm text-text-secondary line-clamp-2">
             {reminder.description}
           </p>
         )}
       </div>
 
       {/* Context info */}
-      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-3 text-xs text-text-tertiary">
         {reminder.due_at && (
           <span className="flex items-center gap-1">
             <Clock aria-hidden="true" className="h-3 w-3" />
@@ -109,21 +109,21 @@ export function ReminderCard({
         <button
           onClick={() => onAction(reminder.id, "acknowledged")}
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           Noch relevant
         </button>
         <button
           onClick={() => onAction(reminder.id, "dismissed")}
           disabled={isPending}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
         >
           Erledigt
         </button>
         <button
           onClick={() => onAction(reminder.id, "snoozed")}
           disabled={isPending}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
         >
           Später erinnern
         </button>

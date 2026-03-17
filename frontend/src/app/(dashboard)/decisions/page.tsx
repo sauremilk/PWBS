@@ -33,13 +33,13 @@ export default function DecisionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Entscheidungen</h1>
+      <h1 className="text-2xl font-bold text-text">Entscheidungen</h1>
 
       {/* Status Filter Tabs */}
       <div
         role="tablist"
         aria-label="Status-Filter"
-        className="flex gap-1 rounded-lg bg-gray-100 p-1"
+        className="flex gap-1 rounded-xl bg-surface-secondary p-1"
       >
         {STATUS_FILTERS.map((f) => (
           <button
@@ -52,8 +52,8 @@ export default function DecisionsPage() {
             }}
             className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
               statusFilter === f.value
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-surface text-text shadow-sm"
+                : "text-text-secondary hover:text-text"
             }`}
           >
             {f.label}

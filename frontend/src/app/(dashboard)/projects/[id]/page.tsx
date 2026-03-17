@@ -10,14 +10,14 @@ function ProjectBriefingCard({ item }: { item: BriefingListItem }) {
   return (
     <Link
       href={`/briefings/${item.id}`}
-      className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm"
+      className="flex items-center gap-4 rounded-lg border border-border bg-surface p-4 transition-shadow hover:shadow-sm"
     >
-      <FileText className="h-5 w-5 flex-shrink-0 text-blue-600" />
+      <FileText className="h-5 w-5 flex-shrink-0 text-indigo-600" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-gray-900">
+        <p className="truncate text-sm font-semibold text-text">
           {item.title}
         </p>
-        <p className="mt-0.5 text-xs text-gray-500">
+        <p className="mt-0.5 text-xs text-text-tertiary">
           {new Date(item.generated_at).toLocaleDateString("de-DE", {
             day: "2-digit",
             month: "long",
@@ -60,28 +60,28 @@ export default function ProjectDetailPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          className="rounded-md p-1.5 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary"
           aria-label="Zurück"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{projectName}</h1>
+        <h1 className="text-2xl font-bold text-text">{projectName}</h1>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-border bg-surface p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-text">
               Projekt-Briefing
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-text-tertiary">
               On-Demand-Briefing mit Entscheidungen, Timeline und Beteiligten.
             </p>
           </div>
           <button
             onClick={handleGenerate}
             disabled={generate.isPending}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             {generate.isPending ? (
               <>
@@ -112,12 +112,12 @@ export default function ProjectDetailPage() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">
+        <h2 className="mb-3 text-lg font-semibold text-text">
           Bisherige Projekt-Briefings
         </h2>
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
           </div>
         ) : projectBriefings && projectBriefings.length > 0 ? (
           <div className="space-y-2">
@@ -126,9 +126,9 @@ export default function ProjectDetailPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
+          <div className="rounded-lg border border-border bg-surface p-6 text-center">
             <FileText className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-tertiary">
               Noch keine Briefings für dieses Projekt.
             </p>
           </div>

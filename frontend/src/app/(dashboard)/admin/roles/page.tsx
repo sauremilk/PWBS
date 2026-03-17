@@ -49,8 +49,8 @@ const ROLE_COLORS: Record<string, string> = {
   owner: "bg-purple-100 text-purple-800",
   admin: "bg-red-100 text-red-800",
   manager: "bg-amber-100 text-amber-800",
-  member: "bg-blue-100 text-blue-800",
-  viewer: "bg-gray-100 text-gray-800",
+  member: "bg-indigo-100 text-indigo-800",
+  viewer: "bg-surface-secondary text-text",
 };
 
 const PERM_LABELS: Record<string, string> = {
@@ -155,13 +155,13 @@ export default function RolesPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+      <h1 className="mb-6 text-2xl font-bold text-text">
         Rollen & Berechtigungen
       </h1>
 
       {/* Org selector */}
       <div className="mb-6 flex items-center gap-3">
-        <label htmlFor="org-id" className="text-sm font-medium text-gray-700">
+        <label htmlFor="org-id" className="text-sm font-medium text-text-secondary">
           Organisations-ID:
         </label>
         <input
@@ -170,7 +170,7 @@ export default function RolesPage() {
           value={orgId}
           onChange={(e) => setOrgId(e.target.value.trim())}
           placeholder="UUID der Organisation"
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-md border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
 
@@ -181,7 +181,7 @@ export default function RolesPage() {
       )}
 
       {/* Tabs */}
-      <div role="tablist" aria-label="Berechtigungsverwaltung" className="mb-6 flex gap-1 rounded-lg bg-gray-100 p-1">
+      <div role="tablist" aria-label="Berechtigungsverwaltung" className="mb-6 flex gap-1 rounded-lg bg-surface-secondary p-1">
         {(["roles", "members", "audit"] as const).map((tab) => (
           <button
             key={tab}
@@ -190,8 +190,8 @@ export default function RolesPage() {
             onClick={() => setActiveTab(tab)}
             className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === tab
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-surface text-text shadow-sm"
+                : "text-text-secondary hover:text-text"
             }`}
           >
             {tab === "roles" ? "Rollenübersicht" : tab === "members" ? "Mitglieder" : "Audit-Log"}
@@ -199,28 +199,28 @@ export default function RolesPage() {
         ))}
       </div>
 
-      {loading && <p role="status" className="text-sm text-gray-500">Laden</p>}
+      {loading && <p role="status" className="text-sm text-text-tertiary">Laden</p>}
 
       {/* Roles tab */}
       {activeTab === "roles" && (
         <div className="space-y-4">
           {roles.map((r) => (
-            <div key={r.role} className="rounded-lg border border-gray-200 p-4">
+            <div key={r.role} className="rounded-lg border border-border p-4">
               <div className="mb-2 flex items-center gap-2">
                 <span
                   className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                    ROLE_COLORS[r.role] ?? "bg-gray-100 text-gray-800"
+                    ROLE_COLORS[r.role] ?? "bg-surface-secondary text-text"
                   }`}
                 >
                   {ROLE_LABELS[r.role] ?? r.role}
                 </span>
-                <span className="text-xs text-gray-500">Rang {r.rank}</span>
+                <span className="text-xs text-text-tertiary">Rang {r.rank}</span>
               </div>
               <div className="flex flex-wrap gap-1">
                 {r.permissions.map((p) => (
                   <span
                     key={p}
-                    className="rounded bg-gray-50 px-2 py-0.5 text-xs text-gray-600"
+                    className="rounded bg-surface-secondary px-2 py-0.5 text-xs text-text-secondary"
                   >
                     {PERM_LABELS[p] ?? p}
                   </span>
@@ -229,7 +229,7 @@ export default function RolesPage() {
             </div>
           ))}
           {roles.length === 0 && !loading && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-tertiary">
               Gib eine Organisations-ID ein, um Rollen zu laden.
             </p>
           )}
@@ -242,23 +242,23 @@ export default function RolesPage() {
           {members.map((m) => (
             <div
               key={m.user_id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
+              className="flex items-center justify-between rounded-lg border border-border p-4"
             >
               <div>
-                <p className="font-medium text-gray-900">{m.display_name}</p>
-                <p className="text-sm text-gray-500">{m.email}</p>
+                <p className="font-medium text-text">{m.display_name}</p>
+                <p className="text-sm text-text-tertiary">{m.email}</p>
               </div>
               <div className="flex items-center gap-3">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    ROLE_COLORS[m.role] ?? "bg-gray-100 text-gray-800"
+                    ROLE_COLORS[m.role] ?? "bg-surface-secondary text-text"
                   }`}
                 >
                   {ROLE_LABELS[m.role] ?? m.role}
                 </span>
                 <button
                   onClick={() => fetchMemberPermissions(m.user_id)}
-                  className="rounded-md border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                  className="rounded-md border border-border px-3 py-1 text-xs text-text-secondary hover:bg-surface-secondary"
                 >
                   Berechtigungen
                 </button>
@@ -268,11 +268,11 @@ export default function RolesPage() {
 
           {/* Selected member permissions */}
           {selectedMember && (
-            <div className="mt-4 rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-              <h3 className="mb-2 font-medium text-gray-900">
+            <div className="mt-4 rounded-lg border-2 border-indigo-200 bg-indigo-50 p-4">
+              <h3 className="mb-2 font-medium text-text">
                 Berechtigungen für {selectedMember.user_id.slice(0, 8)}
               </h3>
-              <p className="mb-2 text-sm text-gray-600">
+              <p className="mb-2 text-sm text-text-secondary">
                 Rolle:{" "}
                 <span className="font-medium">
                   {ROLE_LABELS[selectedMember.role ?? ""] ?? selectedMember.role ?? "Kein Mitglied"}
@@ -282,7 +282,7 @@ export default function RolesPage() {
                 {selectedMember.permissions.map((p) => (
                   <span
                     key={p}
-                    className="rounded bg-white px-2 py-0.5 text-xs text-gray-700 shadow-sm"
+                    className="rounded bg-surface px-2 py-0.5 text-xs text-text-secondary shadow-sm"
                   >
                     {PERM_LABELS[p] ?? p}
                   </span>
@@ -290,7 +290,7 @@ export default function RolesPage() {
               </div>
               <button
                 onClick={() => setSelectedMember(null)}
-                className="mt-2 text-xs text-blue-600 hover:underline"
+                className="mt-2 text-xs text-indigo-600 hover:underline"
               >
                 Schließen
               </button>
@@ -298,7 +298,7 @@ export default function RolesPage() {
           )}
 
           {members.length === 0 && !loading && (
-            <p className="text-sm text-gray-500">Keine Mitglieder gefunden.</p>
+            <p className="text-sm text-text-tertiary">Keine Mitglieder gefunden.</p>
           )}
         </div>
       )}
@@ -309,17 +309,17 @@ export default function RolesPage() {
           {auditLog.map((e) => (
             <div
               key={e.id}
-              className="rounded-lg border border-gray-200 px-4 py-3"
+              className="rounded-lg border border-border px-4 py-3"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text">
                   {e.action.replace("_", " ")}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-text-tertiary">
                   {new Date(e.created_at).toLocaleString("de-DE")}
                 </span>
               </div>
-              <div className="mt-1 text-xs text-gray-500">
+              <div className="mt-1 text-xs text-text-tertiary">
                 {e.metadata_?.old_role && (
                   <span>
                     {ROLE_LABELS[e.metadata_.old_role] ?? e.metadata_.old_role} {" "}
@@ -329,7 +329,7 @@ export default function RolesPage() {
                   {ROLE_LABELS[e.metadata_?.new_role ?? ""] ?? e.metadata_?.new_role ?? ""}
                 </span>
                 {e.metadata_?.target_user_id && (
-                  <span className="ml-2 text-gray-500">
+                  <span className="ml-2 text-text-tertiary">
                     Nutzer: {e.metadata_.target_user_id.slice(0, 8)}
                   </span>
                 )}
@@ -337,7 +337,7 @@ export default function RolesPage() {
             </div>
           ))}
           {auditLog.length === 0 && !loading && (
-            <p className="text-sm text-gray-500">Keine Einträge im Audit-Log.</p>
+            <p className="text-sm text-text-tertiary">Keine Einträge im Audit-Log.</p>
           )}
         </div>
       )}

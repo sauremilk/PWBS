@@ -22,7 +22,11 @@ const TYPE_CONFIG: Record<
   string,
   { icon: typeof Users; color: string; label: string }
 > = {
-  Person: { icon: Users, color: "bg-blue-100 text-blue-800", label: "Person" },
+  Person: {
+    icon: Users,
+    color: "bg-indigo-100 text-indigo-800",
+    label: "Person",
+  },
   Project: {
     icon: FolderKanban,
     color: "bg-green-100 text-green-800",
@@ -80,7 +84,7 @@ export default function EntityDetailPage({
 
   const typeConfig = TYPE_CONFIG[entity.type] ?? {
     icon: Hash,
-    color: "bg-gray-100 text-gray-800",
+    color: "bg-surface-secondary text-text",
     label: entity.type,
   };
   const TypeIcon = typeConfig.icon;
@@ -91,7 +95,7 @@ export default function EntityDetailPage({
       <div>
         <button
           onClick={() => router.back()}
-          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
+          className="mb-4 flex items-center gap-1 text-sm text-text-tertiary hover:text-text"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurück
@@ -104,10 +108,8 @@ export default function EntityDetailPage({
                 <TypeIcon aria-hidden="true" className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {entity.name}
-                </h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-3xl font-bold text-text">{entity.name}</h1>
+                <p className="text-sm text-text-tertiary">
                   {typeConfig.label} · {entity.mention_count} Erwähnung
                   {entity.mention_count !== 1 ? "en" : ""}
                 </p>
@@ -116,7 +118,7 @@ export default function EntityDetailPage({
           </div>
           <Link
             href={`/knowledge?view=graph&entity=${encodeURIComponent(entity.id)}`}
-            className="flex items-center gap-1.5 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
           >
             <Network aria-hidden="true" className="h-4 w-4" />
             Im Graph anzeigen
@@ -126,18 +128,18 @@ export default function EntityDetailPage({
 
       {/* Timeline */}
       {(entity.first_seen || entity.last_seen) && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+        <div className="rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <Calendar aria-hidden="true" className="h-5 w-5" />
             Zeitleiste
           </h2>
           <div className="flex gap-8">
             {entity.first_seen && (
               <div>
-                <p className="text-xs font-medium uppercase text-gray-500">
+                <p className="text-xs font-medium uppercase text-text-tertiary">
                   Erstmals gesehen
                 </p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text">
                   {new Date(entity.first_seen).toLocaleDateString("de-DE", {
                     year: "numeric",
                     month: "long",
@@ -148,10 +150,10 @@ export default function EntityDetailPage({
             )}
             {entity.last_seen && (
               <div>
-                <p className="text-xs font-medium uppercase text-gray-500">
+                <p className="text-xs font-medium uppercase text-text-tertiary">
                   Zuletzt gesehen
                 </p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text">
                   {new Date(entity.last_seen).toLocaleDateString("de-DE", {
                     year: "numeric",
                     month: "long",
@@ -166,15 +168,15 @@ export default function EntityDetailPage({
 
       {/* Related entities */}
       {entity.related_entities.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className="rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 text-lg font-semibold text-text">
             Verknüpfte Entitäten ({entity.related_entities.length})
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {entity.related_entities.map((rel: RelatedEntityItem) => {
               const relConfig = TYPE_CONFIG[rel.type] ?? {
                 icon: Hash,
-                color: "bg-gray-100 text-gray-800",
+                color: "bg-surface-secondary text-text",
                 label: rel.type,
               };
               const RelIcon = relConfig.icon;
@@ -182,16 +184,14 @@ export default function EntityDetailPage({
                 <Link
                   key={rel.id}
                   href={`/knowledge/${encodeURIComponent(rel.id)}`}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 rounded-lg border border-border p-3 hover:bg-surface-secondary transition-colors"
                 >
                   <div className={`rounded-md p-1.5 ${relConfig.color}`}>
                     <RelIcon aria-hidden="true" className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-gray-900">
-                      {rel.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="truncate font-medium text-text">{rel.name}</p>
+                    <p className="text-xs text-text-tertiary">
                       {rel.relation ?? relConfig.label} · {rel.mention_count}{" "}
                       Erwähnung
                       {rel.mention_count !== 1 ? "en" : ""}
@@ -205,12 +205,12 @@ export default function EntityDetailPage({
       )}
 
       {/* Documents */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+      <div className="rounded-lg border border-border bg-surface p-6">
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
           <FileText aria-hidden="true" className="h-5 w-5" />
           Zugehörige Dokumente
           {documentsData && (
-            <span className="text-sm font-normal text-gray-500">
+            <span className="text-sm font-normal text-text-tertiary">
               ({documentsData.total})
             </span>
           )}
@@ -231,31 +231,31 @@ export default function EntityDetailPage({
         )}
 
         {documentsData && documentsData.documents.length === 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-tertiary">
             Keine verknüpften Dokumente gefunden.
           </p>
         )}
 
         {documentsData && documentsData.documents.length > 0 && (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-border">
             {documentsData.documents.map((doc: EntityDocumentItem) => (
               <Link
                 key={doc.id}
                 href={`/documents/${encodeURIComponent(doc.id)}`}
-                className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                className="flex items-center justify-between py-3 hover:bg-surface-secondary -mx-2 px-2 rounded transition-colors"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-gray-900">
+                  <p className="truncate font-medium text-text">
                     {doc.title ?? "Unbenanntes Dokument"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-tertiary">
                     {doc.source_type} ·{" "}
                     {new Date(doc.created_at).toLocaleDateString("de-DE")}
                   </p>
                 </div>
                 <ExternalLink
                   aria-hidden="true"
-                  className="h-4 w-4 flex-shrink-0 text-gray-400"
+                  className="h-4 w-4 flex-shrink-0 text-text-tertiary"
                 />
               </Link>
             ))}

@@ -42,7 +42,7 @@ function OrgSelector({
     return (
       <div
         role="status"
-        className="flex items-center gap-2 text-sm text-gray-500"
+        className="flex items-center gap-2 text-sm text-text-tertiary"
       >
         <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Organisationen laden…
@@ -52,9 +52,9 @@ function OrgSelector({
 
   if (!data?.items.length) {
     return (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-tertiary">
         Keine Organisationen gefunden. Erstellen Sie eine über den{" "}
-        <a href="/admin/onboarding" className="text-blue-600 underline">
+        <a href="/admin/onboarding" className="text-indigo-600 underline">
           Onboarding-Wizard
         </a>
         .
@@ -66,7 +66,7 @@ function OrgSelector({
     <select
       value={selectedId ?? ""}
       onChange={(e) => onSelect(e.target.value)}
-      className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       aria-label="Organisation auswählen"
     >
       <option value="" disabled>
@@ -95,14 +95,14 @@ function StatCard({
   value: number | undefined;
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5">
+    <div className="rounded-xl border border-border bg-surface p-5">
       <div className="flex items-center gap-3">
-        <div className="rounded-md bg-blue-50 p-2">
-          <Icon aria-hidden="true" className="h-5 w-5 text-blue-600" />
+        <div className="rounded-md bg-indigo-50 p-2">
+          <Icon aria-hidden="true" className="h-5 w-5 text-indigo-600" />
         </div>
         <div>
-          <p className="text-sm text-gray-500">{label}</p>
-          <p className="text-2xl font-bold text-gray-900">{value ?? "–"}</p>
+          <p className="text-sm text-text-tertiary">{label}</p>
+          <p className="text-2xl font-bold text-text">{value ?? "–"}</p>
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@ function InviteForm({ orgId }: { orgId: string }) {
       <div className="flex-1">
         <label
           htmlFor="invite-email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           E-Mail-Adresse
         </label>
@@ -143,13 +143,13 @@ function InviteForm({ orgId }: { orgId: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="nutzer@firma.de"
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
       <div>
         <label
           htmlFor="invite-role"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Rolle
         </label>
@@ -159,7 +159,7 @@ function InviteForm({ orgId }: { orgId: string }) {
           onChange={(e) =>
             setRole(e.target.value as "owner" | "member" | "viewer")
           }
-          className="mt-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         >
           <option value="member">Mitglied</option>
           <option value="viewer">Betrachter</option>
@@ -169,7 +169,7 @@ function InviteForm({ orgId }: { orgId: string }) {
       <button
         type="submit"
         disabled={invite.isPending}
-        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
       >
         {invite.isPending ? (
           <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
@@ -196,7 +196,7 @@ function MembersTable({ orgId }: { orgId: string }) {
     return (
       <div
         role="status"
-        className="flex items-center gap-2 py-4 text-sm text-gray-500"
+        className="flex items-center gap-2 py-4 text-sm text-text-tertiary"
       >
         <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Mitglieder laden…
@@ -205,7 +205,7 @@ function MembersTable({ orgId }: { orgId: string }) {
   }
 
   if (!data?.members.length) {
-    return <p className="py-4 text-sm text-gray-500">Keine Mitglieder.</p>;
+    return <p className="py-4 text-sm text-text-tertiary">Keine Mitglieder.</p>;
   }
 
   const roleLabel: Record<string, string> = {
@@ -217,7 +217,7 @@ function MembersTable({ orgId }: { orgId: string }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="border-b border-gray-200 text-gray-500">
+        <thead className="border-b border-border text-text-tertiary">
           <tr>
             <th className="py-2 pr-4 font-medium">Name</th>
             <th className="py-2 pr-4 font-medium">E-Mail</th>
@@ -225,19 +225,19 @@ function MembersTable({ orgId }: { orgId: string }) {
             <th className="py-2 font-medium">Beitritt</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border/50">
           {data.members.map((m) => (
             <tr key={m.user_id}>
-              <td className="py-2 pr-4 font-medium text-gray-900">
+              <td className="py-2 pr-4 font-medium text-text">
                 {m.display_name}
               </td>
-              <td className="py-2 pr-4 text-gray-600">{m.email}</td>
+              <td className="py-2 pr-4 text-text-secondary">{m.email}</td>
               <td className="py-2 pr-4">
-                <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                <span className="inline-block rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-medium text-text-secondary">
                   {roleLabel[m.role] ?? m.role}
                 </span>
               </td>
-              <td className="py-2 text-gray-600">
+              <td className="py-2 text-text-secondary">
                 {new Date(m.joined_at).toLocaleDateString("de-DE")}
               </td>
             </tr>
@@ -261,7 +261,7 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
     return (
       <div
         role="status"
-        className="flex items-center gap-2 py-4 text-sm text-gray-500"
+        className="flex items-center gap-2 py-4 text-sm text-text-tertiary"
       >
         <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
         Konnektoren laden…
@@ -270,13 +270,15 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
   }
 
   if (!data?.connectors.length) {
-    return <p className="py-4 text-sm text-gray-500">Keine Konnektoren.</p>;
+    return (
+      <p className="py-4 text-sm text-text-tertiary">Keine Konnektoren.</p>
+    );
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="border-b border-gray-200 text-gray-500">
+        <thead className="border-b border-border text-text-tertiary">
           <tr>
             <th className="py-2 pr-4 font-medium">Typ</th>
             <th className="py-2 pr-4 font-medium">Status</th>
@@ -285,12 +287,12 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
             <th className="py-2 font-medium">Aktion</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border/50">
           {data.connectors.map((c) => {
             const isShared = c.organization_id === orgId;
             return (
               <tr key={c.id}>
-                <td className="py-2 pr-4 font-medium text-gray-900">
+                <td className="py-2 pr-4 font-medium text-text">
                   {c.source_type}
                 </td>
                 <td className="py-2 pr-4">
@@ -298,20 +300,22 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
                     className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
                       c.status === "active"
                         ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-700"
+                        : "bg-surface-secondary text-text-secondary"
                     }`}
                   >
                     {c.status}
                   </span>
                 </td>
-                <td className="py-2 pr-4 text-gray-600">{c.owner_email}</td>
+                <td className="py-2 pr-4 text-text-secondary">
+                  {c.owner_email}
+                </td>
                 <td className="py-2 pr-4">
                   {isShared ? (
                     <span className="inline-flex items-center gap-1 text-green-600">
                       <Share2 aria-hidden="true" className="h-3 w-3" /> Ja
                     </span>
                   ) : (
-                    <span className="text-gray-500">Nein</span>
+                    <span className="text-text-tertiary">Nein</span>
                   )}
                 </td>
                 <td className="py-2">
@@ -328,7 +332,7 @@ function ConnectorsTable({ orgId }: { orgId: string }) {
                     <button
                       onClick={() => share.mutate(c.id)}
                       disabled={share.isPending}
-                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
                     >
                       <Share2 aria-hidden="true" className="h-3 w-3" />
                       Teilen
@@ -357,14 +361,14 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Shield aria-hidden="true" className="h-7 w-7 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Admin-Dashboard</h1>
+          <Shield aria-hidden="true" className="h-7 w-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-text">Admin-Dashboard</h1>
         </div>
         <OrgSelector selectedId={orgId} onSelect={setOrgId} />
       </div>
 
       {!orgId && (
-        <p className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500">
+        <p className="rounded-xl border border-border bg-surface-secondary p-8 text-center text-text-tertiary">
           Wählen Sie eine Organisation aus, um das Dashboard anzuzeigen.
         </p>
       )}
@@ -397,10 +401,8 @@ export default function AdminDashboardPage() {
 
           {/* Members */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Mitglieder
-            </h2>
-            <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-lg font-semibold text-text">Mitglieder</h2>
+            <div className="space-y-4 rounded-xl border border-border bg-surface p-5">
               <InviteForm orgId={orgId} />
               <MembersTable orgId={orgId} />
             </div>
@@ -408,10 +410,10 @@ export default function AdminDashboardPage() {
 
           {/* Connectors */}
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            <h2 className="mb-4 text-lg font-semibold text-text">
               Konnektoren
             </h2>
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="rounded-xl border border-border bg-surface p-5">
               <ConnectorsTable orgId={orgId} />
             </div>
           </section>

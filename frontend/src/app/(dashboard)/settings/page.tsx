@@ -60,7 +60,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-center py-12" role="status">
           <Loader2
             aria-hidden="true"
-            className="h-8 w-8 animate-spin text-gray-400"
+            className="h-8 w-8 animate-spin text-text-tertiary"
           />
           <span className="sr-only">Wird geladen</span>
         </div>
@@ -82,11 +82,11 @@ function SettingsContent() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Einstellungen</h1>
+      <h1 className="text-2xl font-bold text-text">Einstellungen</h1>
 
       {/* Tab Navigation */}
       <div
-        className="flex gap-1 border-b border-gray-200"
+        className="flex gap-1 border-b border-border"
         role="tablist"
         aria-label="Einstellungen"
       >
@@ -98,8 +98,8 @@ function SettingsContent() {
             aria-selected={activeTab === tab.id}
             className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-text-tertiary hover:border-border hover:text-text-secondary"
             }`}
           >
             {tab.icon}
@@ -109,7 +109,7 @@ function SettingsContent() {
       </div>
 
       {/* Tab Content */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-xl border border-border bg-surface p-6">
         {activeTab === "profile" && <ProfileTab />}
         {activeTab === "notifications" && <NotificationsTab />}
         {activeTab === "privacy" && <PrivacyTab />}
@@ -153,7 +153,7 @@ function ProfileTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ function ProfileTab() {
       <div>
         <label
           htmlFor="display-name"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Anzeigename
         </label>
@@ -172,14 +172,14 @@ function ProfileTab() {
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
 
       <div>
         <label
           htmlFor="timezone"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Zeitzone
         </label>
@@ -187,7 +187,7 @@ function ProfileTab() {
           id="timezone"
           value={timezone}
           onChange={(e) => setTimezone(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         >
           <option value="Europe/Berlin">Europe/Berlin</option>
           <option value="Europe/Vienna">Europe/Vienna</option>
@@ -199,7 +199,7 @@ function ProfileTab() {
       <div>
         <label
           htmlFor="language"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Sprache
         </label>
@@ -207,7 +207,7 @@ function ProfileTab() {
           id="language"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         >
           <option value="de">Deutsch</option>
           <option value="en">English</option>
@@ -219,7 +219,7 @@ function ProfileTab() {
           type="checkbox"
           checked={autoGenerate}
           onChange={(e) => setAutoGenerate(e.target.checked)}
-          className="rounded border-gray-300"
+          className="rounded border-border accent-indigo-600"
         />
         Briefings automatisch generieren
       </label>
@@ -227,7 +227,7 @@ function ProfileTab() {
       <button
         onClick={handleSave}
         disabled={update.isPending}
-        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
       >
         {update.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -270,7 +270,7 @@ function NotificationsTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
       </div>
     );
   }
@@ -279,10 +279,8 @@ function NotificationsTab() {
     <div className="space-y-6 max-w-md">
       {/* E-Mail Briefing */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">
-          E-Mail Briefings
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="text-sm font-semibold text-text">E-Mail Briefings</h3>
+        <p className="mt-1 text-sm text-text-tertiary">
           Erhalte tägliche Briefings per E-Mail zu deinem gewünschten Zeitpunkt.
         </p>
       </div>
@@ -292,7 +290,7 @@ function NotificationsTab() {
           type="checkbox"
           checked={emailEnabled}
           onChange={(e) => setEmailEnabled(e.target.checked)}
-          className="rounded border-gray-300"
+          className="rounded border-border accent-indigo-600"
         />
         E-Mail-Briefings aktiviert
       </label>
@@ -301,7 +299,7 @@ function NotificationsTab() {
         <div>
           <label
             htmlFor="briefing-time"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-text-secondary"
           >
             Briefing-Zeitpunkt
           </label>
@@ -310,17 +308,15 @@ function NotificationsTab() {
             type="time"
             value={briefingTime}
             onChange={(e) => setBriefingTime(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       )}
 
       {/* Erinnerungsfrequenz */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">
-          Erinnerungsfrequenz
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="text-sm font-semibold text-text">Erinnerungsfrequenz</h3>
+        <p className="mt-1 text-sm text-text-tertiary">
           Bestimme, wie oft du proaktive Erinnerungen und
           Follow-up-Benachrichtigungen erhalten möchtest.
         </p>
@@ -353,8 +349,8 @@ function NotificationsTab() {
             aria-label={opt.label}
             className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
               frequency === opt.value
-                ? "border-blue-600 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-indigo-600 bg-indigo-50"
+                : "border-border hover:border-indigo-200"
             }`}
           >
             <input
@@ -367,10 +363,8 @@ function NotificationsTab() {
               className="mt-0.5"
             />
             <div>
-              <span className="text-sm font-medium text-gray-900">
-                {opt.label}
-              </span>
-              <p className="text-xs text-gray-500">{opt.desc}</p>
+              <span className="text-sm font-medium text-text">{opt.label}</span>
+              <p className="text-xs text-text-tertiary">{opt.desc}</p>
             </div>
           </label>
         ))}
@@ -379,7 +373,7 @@ function NotificationsTab() {
       <button
         onClick={handleSave}
         disabled={update.isPending}
-        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
       >
         {update.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -410,17 +404,15 @@ function PrivacyTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">
-          Transparenzbericht
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="text-sm font-semibold text-text">Transparenzbericht</h3>
+        <p className="mt-1 text-sm text-text-tertiary">
           Detaillierte Übersicht über gespeicherte Daten und KI-Nutzung (DSGVO
           Art. 15).
         </p>
         <div className="mt-3">
           <a
             href="/settings/data"
-            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
           >
             <Database className="h-4 w-4" />
             Transparenzbericht anzeigen
@@ -428,8 +420,8 @@ function PrivacyTab() {
         </div>
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">Datenexport</h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="text-sm font-semibold text-text">Datenexport</h3>
+        <p className="mt-1 text-sm text-text-tertiary">
           Exportiere alle deine Daten als JSON-Datei (DSGVO Art. 20).
         </p>
         <div className="mt-3 flex items-center gap-3">
@@ -439,7 +431,7 @@ function PrivacyTab() {
               startExport.isPending ||
               (!!exportId && exportStatus?.status !== "completed")
             }
-            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
           >
             {startExport.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -449,7 +441,7 @@ function PrivacyTab() {
             Daten exportieren
           </button>
           {exportStatus && exportStatus.status !== "completed" && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-text-tertiary">
               Export wird erstellt\u2026
             </span>
           )}
@@ -457,7 +449,7 @@ function PrivacyTab() {
             exportStatus.download_url && (
               <a
                 href={exportStatus.download_url}
-                className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
+                className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:underline"
                 download
               >
                 <Download className="h-4 w-4" />
@@ -526,7 +518,7 @@ function AccountTab() {
         <h3 className="text-sm font-semibold text-red-900">
           Account l\u00f6schen
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-text-tertiary">
           Dein Account und alle Daten werden nach einer 30-Tage-Karenzzeit
           unwiderruflich gel\u00f6scht.
         </p>
@@ -546,7 +538,7 @@ function AccountTab() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
-            className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+            className="mx-4 w-full max-w-md rounded-xl bg-surface p-6 shadow-xl"
           >
             <h2
               id="delete-dialog-title"
@@ -554,7 +546,7 @@ function AccountTab() {
             >
               Account endg\u00fcltig l\u00f6schen
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-text-secondary">
               Alle deine Daten werden nach 30 Tagen unwiderruflich
               gel\u00f6scht. Innerhalb der Karenzzeit kannst du die
               L\u00f6schung abbrechen.
@@ -565,7 +557,7 @@ function AccountTab() {
                 type="checkbox"
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
-                className="mt-0.5 rounded border-gray-300"
+                className="mt-0.5 rounded border-border"
               />
               Ich verstehe, dass diese Aktion nicht r\u00fcckg\u00e4ngig gemacht
               werden kann.
@@ -574,7 +566,7 @@ function AccountTab() {
             <div className="mt-3">
               <label
                 htmlFor="delete-password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-text-secondary"
               >
                 Passwort zur Best\u00e4tigung
               </label>
@@ -583,7 +575,7 @@ function AccountTab() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                 autoComplete="current-password"
               />
             </div>
@@ -604,7 +596,7 @@ function AccountTab() {
                   setPassword("");
                   setConfirmed(false);
                 }}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
               >
                 Abbrechen
               </button>

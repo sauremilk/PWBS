@@ -18,18 +18,17 @@ function BriefingRow({ item }: { item: BriefingListItem }) {
   return (
     <Link
       href={`/briefings/${item.id}`}
-      className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm"
+      className="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5"
     >
-      <FileText
-        aria-hidden="true"
-        className="h-5 w-5 flex-shrink-0 text-blue-600"
-      />
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-100">
+        <FileText aria-hidden="true" className="h-5 w-5 text-indigo-600" />
+      </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-gray-900">
+        <p className="truncate text-sm font-semibold text-text group-hover:text-indigo-600">
           {item.title}
         </p>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-          <span className="rounded bg-gray-100 px-1.5 py-0.5 font-medium">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
+          <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 font-medium text-indigo-600">
             {BRIEFING_TYPE_LABELS[item.briefing_type]}
           </span>
           <Calendar aria-hidden="true" className="h-3 w-3" />
@@ -38,7 +37,7 @@ function BriefingRow({ item }: { item: BriefingListItem }) {
       </div>
       <ChevronRight
         aria-hidden="true"
-        className="h-5 w-5 flex-shrink-0 text-gray-400"
+        className="h-5 w-5 flex-shrink-0 text-text-tertiary transition-transform group-hover:translate-x-0.5 group-hover:text-indigo-600"
       />
     </Link>
   );
@@ -49,16 +48,21 @@ export default function BriefingsPage() {
   const generate = useGenerateBriefing();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Briefings</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-text">Briefings</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            Deine KI-generierten Wissens-Briefings
+          </p>
+        </div>
         <button
           onClick={() => {
             trackFirstBriefing("morning");
             generate.mutate({ type: "morning" });
           }}
           disabled={generate.isPending}
-          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 disabled:opacity-50"
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
           Neues Briefing
@@ -71,7 +75,7 @@ export default function BriefingsPage() {
         <div className="flex items-center justify-center py-12" role="status">
           <Loader2
             aria-hidden="true"
-            className="h-8 w-8 animate-spin text-gray-400"
+            className="h-8 w-8 animate-spin text-text-tertiary"
           />
           <span className="sr-only">Wird geladen</span>
         </div>
@@ -82,15 +86,14 @@ export default function BriefingsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <FileText
-            aria-hidden="true"
-            className="mx-auto mb-3 h-10 w-10 text-gray-300"
-          />
-          <h3 className="mb-1 text-sm font-semibold text-gray-900">
+        <div className="rounded-xl border border-border bg-surface p-12 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
+            <FileText aria-hidden="true" className="h-6 w-6 text-indigo-600" />
+          </div>
+          <h3 className="mb-1 text-sm font-semibold text-text">
             Noch keine Briefings
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             Erstelle dein erstes Briefing, um loszulegen.
           </p>
         </div>

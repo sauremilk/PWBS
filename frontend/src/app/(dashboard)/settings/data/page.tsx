@@ -41,19 +41,19 @@ function SourceCard({
   };
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div className="rounded-lg border border-border bg-surface p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText aria-hidden="true" className="h-4 w-4 text-blue-500" />
-          <span className="font-medium text-gray-900 dark:text-gray-100">
+          <FileText aria-hidden="true" className="h-4 w-4 text-indigo-500" />
+          <span className="font-medium text-text">
             {source.source_type}
           </span>
         </div>
-        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+        <span className="text-lg font-bold text-text">
           {source.document_count}
         </span>
       </div>
-      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className="mt-2 text-xs text-text-tertiary">
         <div>
           {"&#196;ltestes: "}
           {formatDate(source.oldest_document)}
@@ -67,7 +67,7 @@ function SourceCard({
 function LlmUsageTable({ entries }: { entries: LlmUsageEntry[] }) {
   if (entries.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-text-tertiary">
         Keine LLM-Aufrufe protokolliert.
       </p>
     );
@@ -77,23 +77,23 @@ function LlmUsageTable({ entries }: { entries: LlmUsageEntry[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 dark:border-gray-700">
-            <th className="py-2 text-left font-medium text-gray-600 dark:text-gray-300">
+          <tr className="border-b border-border">
+            <th className="py-2 text-left font-medium text-text-secondary">
               Zeitpunkt
             </th>
-            <th className="py-2 text-left font-medium text-gray-600 dark:text-gray-300">
+            <th className="py-2 text-left font-medium text-text-secondary">
               Provider
             </th>
-            <th className="py-2 text-left font-medium text-gray-600 dark:text-gray-300">
+            <th className="py-2 text-left font-medium text-text-secondary">
               Modell
             </th>
-            <th className="py-2 text-right font-medium text-gray-600 dark:text-gray-300">
+            <th className="py-2 text-right font-medium text-text-secondary">
               Input
             </th>
-            <th className="py-2 text-right font-medium text-gray-600 dark:text-gray-300">
+            <th className="py-2 text-right font-medium text-text-secondary">
               Output
             </th>
-            <th className="py-2 text-left font-medium text-gray-600 dark:text-gray-300">
+            <th className="py-2 text-left font-medium text-text-secondary">
               Zweck
             </th>
           </tr>
@@ -102,24 +102,24 @@ function LlmUsageTable({ entries }: { entries: LlmUsageEntry[] }) {
           {entries.map((e) => (
             <tr
               key={e.id}
-              className="border-b border-gray-100 dark:border-gray-800"
+              className="border-b border-border"
             >
-              <td className="py-2 text-gray-700 dark:text-gray-300">
+              <td className="py-2 text-text-secondary">
                 {formatDate(e.created_at)}
               </td>
-              <td className="py-2 text-gray-700 dark:text-gray-300">
+              <td className="py-2 text-text-secondary">
                 {e.provider}
               </td>
-              <td className="py-2 text-gray-700 dark:text-gray-300">
+              <td className="py-2 text-text-secondary">
                 {e.model}
               </td>
-              <td className="py-2 text-right text-gray-700 dark:text-gray-300">
+              <td className="py-2 text-right text-text-secondary">
                 {formatTokens(e.input_tokens)}
               </td>
-              <td className="py-2 text-right text-gray-700 dark:text-gray-300">
+              <td className="py-2 text-right text-text-secondary">
                 {formatTokens(e.output_tokens)}
               </td>
-              <td className="py-2 text-gray-500 dark:text-gray-400">
+              <td className="py-2 text-text-tertiary">
                 {e.purpose}
               </td>
             </tr>
@@ -144,7 +144,7 @@ export default function DataTransparencyPage() {
       <div role="status" className="flex items-center justify-center py-12">
         <Loader2
           aria-hidden="true"
-          className="h-8 w-8 animate-spin text-gray-400"
+          className="h-8 w-8 animate-spin text-text-tertiary"
         />
         <span className="sr-only">Wird geladen</span>
       </div>
@@ -164,10 +164,10 @@ export default function DataTransparencyPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl font-bold text-text">
           Datentransparenz
         </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-text-tertiary">
           {
             "&#220;bersicht &#252;ber Ihre gespeicherten Daten und KI-Nutzung (DSGVO Art. 15)."
           }
@@ -177,8 +177,8 @@ export default function DataTransparencyPage() {
       {/* Document overview */}
       <section>
         <div className="flex items-center gap-2 mb-4">
-          <Database aria-hidden="true" className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <Database aria-hidden="true" className="h-5 w-5 text-indigo-600" />
+          <h2 className="text-lg font-semibold text-text">
             Dokumente ({report?.total_documents ?? 0} gesamt)
           </h2>
         </div>
@@ -189,7 +189,7 @@ export default function DataTransparencyPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">Keine Dokumente vorhanden.</p>
+          <p className="text-sm text-text-tertiary">Keine Dokumente vorhanden.</p>
         )}
       </section>
 
@@ -197,7 +197,7 @@ export default function DataTransparencyPage() {
       <section>
         <div className="flex items-center gap-2 mb-4">
           <RefreshCw aria-hidden="true" className="h-5 w-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold text-text">
             Verbindungen
           </h2>
         </div>
@@ -206,12 +206,12 @@ export default function DataTransparencyPage() {
             {report.connections.map((c) => (
               <div
                 key={c.source_type}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+                className="flex items-center justify-between rounded-lg border border-border bg-surface p-3"
               >
-                <span className="font-medium text-gray-900 dark:text-gray-100">
+                <span className="font-medium text-text">
                   {c.source_type}
                 </span>
-                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-4 text-sm text-text-tertiary">
                   <span
                     className={
                       c.status === "active"
@@ -227,7 +227,7 @@ export default function DataTransparencyPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-tertiary">
             Keine Verbindungen konfiguriert.
           </p>
         )}
@@ -237,7 +237,7 @@ export default function DataTransparencyPage() {
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Cpu aria-hidden="true" className="h-5 w-5 text-purple-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold text-text">
             KI-Nutzung (Zusammenfassung)
           </h2>
         </div>
@@ -246,27 +246,27 @@ export default function DataTransparencyPage() {
             {report.llm_provider_usage.map((u) => (
               <div
                 key={`${u.provider}-${u.model}`}
-                className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+                className="rounded-lg border border-border bg-surface p-4"
               >
-                <div className="font-medium text-gray-900 dark:text-gray-100">
+                <div className="font-medium text-text">
                   {u.provider} / {u.model}
                 </div>
-                <div className="mt-2 grid grid-cols-3 gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <div className="mt-2 grid grid-cols-3 gap-2 text-sm text-text-tertiary">
                   <div>
                     <span className="block text-xs">Aufrufe</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="font-semibold text-text">
                       {u.call_count}
                     </span>
                   </div>
                   <div>
                     <span className="block text-xs">Input-Tokens</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="font-semibold text-text">
                       {formatTokens(u.total_input_tokens)}
                     </span>
                   </div>
                   <div>
                     <span className="block text-xs">Output-Tokens</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="font-semibold text-text">
                       {formatTokens(u.total_output_tokens)}
                     </span>
                   </div>
@@ -275,7 +275,7 @@ export default function DataTransparencyPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-tertiary">
             Keine KI-Aufrufe protokolliert.
           </p>
         )}
@@ -286,27 +286,27 @@ export default function DataTransparencyPage() {
         <button
           onClick={() => setLlmExpanded(!llmExpanded)}
           aria-expanded={llmExpanded}
-          className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white p-4 text-left dark:border-gray-700 dark:bg-gray-800"
+          className="flex w-full items-center justify-between rounded-lg border border-border bg-surface p-4 text-left"
         >
           <div className="flex items-center gap-2">
             <Cpu aria-hidden="true" className="h-5 w-5 text-purple-600" />
-            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <span className="text-lg font-semibold text-text">
               LLM-Audit-Log ({llmUsage?.total ?? 0} Eintr&#228;ge)
             </span>
           </div>
           {llmExpanded ? (
-            <ChevronUp aria-hidden="true" className="h-5 w-5 text-gray-500" />
+            <ChevronUp aria-hidden="true" className="h-5 w-5 text-text-tertiary" />
           ) : (
-            <ChevronDown aria-hidden="true" className="h-5 w-5 text-gray-500" />
+            <ChevronDown aria-hidden="true" className="h-5 w-5 text-text-tertiary" />
           )}
         </button>
         {llmExpanded && (
-          <div className="mt-2 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="mt-2 rounded-lg border border-border bg-surface p-4">
             {llmLoading ? (
               <div role="status">
                 <Loader2
                   aria-hidden="true"
-                  className="h-6 w-6 animate-spin text-gray-400"
+                  className="h-6 w-6 animate-spin text-text-tertiary"
                 />
                 <span className="sr-only">Wird geladen</span>
               </div>

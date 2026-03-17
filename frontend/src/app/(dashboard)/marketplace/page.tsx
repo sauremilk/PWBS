@@ -42,11 +42,11 @@ export default function MarketplacePage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Marketplace</h1>
+        <h1 className="text-2xl font-bold text-text">Marketplace</h1>
         <div className="flex items-center gap-2">
           <SlidersHorizontal
             aria-hidden="true"
-            className="h-4 w-4 text-gray-400"
+            className="h-4 w-4 text-text-tertiary"
           />
           <select
             value={sort}
@@ -54,7 +54,7 @@ export default function MarketplacePage() {
               setSort(e.target.value as SortField);
               setPage(0);
             }}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700"
+            className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-text-secondary"
             aria-label="Sortierung"
           >
             {SORT_OPTIONS.map((o) => (
@@ -71,7 +71,7 @@ export default function MarketplacePage() {
         <div className="relative flex-1">
           <Search
             aria-hidden="true"
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary"
           />
           <input
             type="search"
@@ -81,7 +81,7 @@ export default function MarketplacePage() {
               setSearch(e.target.value);
               setPage(0);
             }}
-            className="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-border py-2 pl-9 pr-3 text-sm placeholder:text-text-tertiary focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             aria-label="Plugins durchsuchen"
           />
         </div>
@@ -95,8 +95,8 @@ export default function MarketplacePage() {
               }}
               className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                 category === cat.value
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-surface-secondary text-text-secondary hover:bg-surface-secondary"
               }`}
             >
               {cat.label}
@@ -111,7 +111,7 @@ export default function MarketplacePage() {
           {Array.from({ length: 6 }, (_, i) => (
             <div
               key={i}
-              className="h-44 animate-pulse rounded-lg border border-gray-200 bg-gray-50"
+              className="h-44 animate-pulse rounded-lg border border-border bg-surface-secondary"
             />
           ))}
         </div>
@@ -135,17 +135,17 @@ export default function MarketplacePage() {
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
               >
                 Zurück
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-text-secondary">
                 Seite {page + 1} von {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
               >
                 Weiter
               </button>

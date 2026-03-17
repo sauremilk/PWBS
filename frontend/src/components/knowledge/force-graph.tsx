@@ -185,7 +185,7 @@ export function ForceGraph({
       ref={svgRef}
       width={width}
       height={height}
-      className="border border-gray-200 rounded-lg bg-white"
+      className="border border-border rounded-lg bg-surface"
       role="img"
       aria-label="Knowledge-Graph-Visualisierung"
     />
@@ -202,7 +202,7 @@ export function GraphLegend() {
             className="inline-block h-3 w-3 rounded-full"
             style={{ backgroundColor: color }}
           />
-          <span className="text-gray-600">{type}</span>
+          <span className="text-text-secondary">{type}</span>
         </div>
       ))}
     </div>

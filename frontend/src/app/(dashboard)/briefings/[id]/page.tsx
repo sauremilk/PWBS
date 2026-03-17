@@ -26,25 +26,25 @@ const BRIEFING_TYPE_LABELS: Record<BriefingType, string> = {
 
 function SourceCard({ source }: { source: SourceRefResponse }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-secondary p-3">
       <FileText
         aria-hidden="true"
-        className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400"
+        className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-tertiary"
       />
       <div className="min-w-0 flex-1">
         <Link
           href={`/documents/${source.chunk_id}`}
-          className="text-sm font-medium text-blue-600 hover:underline"
+          className="text-sm font-medium text-indigo-600 hover:underline"
         >
           {source.doc_title}
         </Link>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-          <span className="rounded bg-gray-200 px-1.5 py-0.5 font-medium">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
+          <span className="rounded bg-surface-secondary px-1.5 py-0.5 font-medium">
             {source.source_type}
           </span>
           <Calendar aria-hidden="true" className="h-3 w-3" />
           <span>{new Date(source.date).toLocaleDateString("de-DE")}</span>
-          <span className="ml-auto text-xs font-medium text-blue-700">
+          <span className="ml-auto text-xs font-medium text-indigo-700">
             {Math.round(source.relevance * 100)}%
           </span>
         </div>
@@ -52,7 +52,7 @@ function SourceCard({ source }: { source: SourceRefResponse }) {
       <a
         href={`/documents/${source.chunk_id}`}
         aria-label="Original öffnen"
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+        className="flex-shrink-0 text-text-tertiary hover:text-text-secondary"
       >
         <ExternalLink aria-hidden="true" className="h-4 w-4" />
       </a>
@@ -95,7 +95,7 @@ export default function BriefingDetailPage() {
       <div role="status" className="flex items-center justify-center py-12">
         <Loader2
           aria-hidden="true"
-          className="h-8 w-8 animate-spin text-gray-400"
+          className="h-8 w-8 animate-spin text-text-tertiary"
         />
         <span className="sr-only">Wird geladen</span>
       </div>
@@ -104,13 +104,13 @@ export default function BriefingDetailPage() {
 
   if (!briefing) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <h3 className="text-sm font-semibold text-gray-900">
+      <div className="rounded-lg border border-border bg-surface p-8 text-center">
+        <h3 className="text-sm font-semibold text-text">
           Briefing nicht gefunden
         </h3>
         <button
           onClick={() => router.push("/briefings")}
-          className="mt-3 text-sm text-blue-600 hover:underline"
+          className="mt-3 text-sm text-indigo-600 hover:underline"
         >
           Zur\u00fcck zur \u00dcbersicht
         </button>
@@ -124,14 +124,14 @@ export default function BriefingDetailPage() {
       <div>
         <button
           onClick={() => router.push("/briefings")}
-          className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zur\u00fcck
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{briefing.title}</h1>
-        <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
-          <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium">
+        <h1 className="text-2xl font-bold text-text">{briefing.title}</h1>
+        <div className="mt-1 flex items-center gap-2 text-sm text-text-tertiary">
+          <span className="rounded bg-surface-secondary px-2 py-0.5 text-xs font-medium">
             {BRIEFING_TYPE_LABELS[briefing.briefing_type]}
           </span>
           <Calendar aria-hidden="true" className="h-4 w-4" />
@@ -149,14 +149,14 @@ export default function BriefingDetailPage() {
       </div>
 
       {/* Briefing Content */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <article className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
+      <div className="rounded-lg border border-border bg-surface p-6">
+        <article className="prose prose-sm max-w-none prose-headings:text-text prose-p:text-text-secondary prose-a:text-indigo-600">
           <ReactMarkdown
             components={{
               a: ({ href, children, ...props }) => (
                 <Link
                   href={href ?? "#"}
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-indigo-600 underline hover:text-indigo-800"
                   {...props}
                 >
                   {children}
@@ -170,8 +170,8 @@ export default function BriefingDetailPage() {
       </div>
 
       {/* Feedback */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="mb-3 text-sm font-medium text-gray-700">
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <p className="mb-3 text-sm font-medium text-text-secondary">
           War dieses Briefing hilfreich?
         </p>
         <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export default function BriefingDetailPage() {
             className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors ${
               feedbackSent === "positive"
                 ? "border-green-300 bg-green-50 text-green-700"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                : "border-border text-text-secondary hover:bg-surface-secondary"
             } disabled:opacity-50`}
           >
             <ThumbsUp aria-hidden="true" className="h-4 w-4" />
@@ -195,7 +195,7 @@ export default function BriefingDetailPage() {
             className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors ${
               feedbackSent === "negative"
                 ? "border-red-300 bg-red-50 text-red-700"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                : "border-border text-text-secondary hover:bg-surface-secondary"
             } disabled:opacity-50`}
           >
             <ThumbsDown aria-hidden="true" className="h-4 w-4" />
@@ -206,7 +206,7 @@ export default function BriefingDetailPage() {
           <div className="mt-3 space-y-2">
             <label
               htmlFor="feedback-comment"
-              className="flex items-center gap-1 text-sm text-gray-600"
+              className="flex items-center gap-1 text-sm text-text-secondary"
             >
               <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
               Was k\u00f6nnte verbessert werden?
@@ -216,13 +216,13 @@ export default function BriefingDetailPage() {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               placeholder="Optionaler Kommentar\u2026"
             />
             <button
               onClick={submitComment}
               disabled={feedback.isPending}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               Absenden
             </button>
@@ -238,7 +238,7 @@ export default function BriefingDetailPage() {
       {/* Sources */}
       {briefing.sources.length > 0 && (
         <div>
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">
+          <h2 className="mb-3 text-lg font-semibold text-text">
             Quellen ({briefing.sources.length})
           </h2>
           <div className="space-y-2">

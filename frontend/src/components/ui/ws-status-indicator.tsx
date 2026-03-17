@@ -26,7 +26,7 @@ export function WsStatusIndicator({ status }: WsStatusIndicatorProps) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-gray-400" title="Offline – Polling-Modus">
+    <div className="flex items-center gap-1.5 text-xs text-text-tertiary" title="Offline – Polling-Modus">
       <WifiOff className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Offline</span>
     </div>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -43,22 +43,22 @@ function ArgumentList({
   iconColor: string;
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700">
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-text-secondary">
         <Icon aria-hidden="true" className={`h-4 w-4 ${iconColor}`} />
         {title}
-        <span className="text-xs font-normal text-gray-500">
+        <span className="text-xs font-normal text-text-tertiary">
           ({items.length})
         </span>
       </h3>
       {items.length === 0 ? (
-        <p className="text-xs text-gray-500 italic">Keine Einträge</p>
+        <p className="text-xs text-text-tertiary italic">Keine Einträge</p>
       ) : (
         <ul className="space-y-2">
           {items.map((item, i) => (
             <li
               key={i}
-              className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700"
+              className="rounded-md bg-surface-secondary px-3 py-2 text-sm text-text-secondary"
             >
               {item}
             </li>
@@ -82,14 +82,14 @@ function MetadataList({
 }) {
   if (items.length === 0) return null;
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-text-secondary">
         <Icon aria-hidden="true" className={`h-4 w-4 ${iconColor}`} />
         {title}
       </h3>
       <ul className="space-y-1">
         {items.map((item, i) => (
-          <li key={i} className="text-sm text-gray-600">
+          <li key={i} className="text-sm text-text-secondary">
             &bull; {item}
           </li>
         ))}
@@ -135,16 +135,16 @@ export function DecisionDetail({ id }: { id: string }) {
       <div className="flex items-start gap-3">
         <button
           onClick={() => router.push("/decisions")}
-          className="mt-1 rounded p-1 text-gray-400 hover:text-gray-600"
+          className="mt-1 rounded p-1 text-text-tertiary hover:text-text-secondary"
           aria-label="Zurück zur Übersicht"
         >
           <ArrowLeft aria-hidden="true" className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-gray-900">
+          <h1 className="text-xl font-bold text-text">
             {decision.summary}
           </h1>
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-text-tertiary">
             {decision.decided_by && (
               <span>Entschieden von: {decision.decided_by}</span>
             )}
@@ -173,8 +173,8 @@ export function DecisionDetail({ id }: { id: string }) {
                     disabled={updateMutation.isPending}
                     className={`rounded-lg px-2 py-1 text-xs font-medium transition ${
                       decision.status === opt.value
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-surface-secondary text-text-secondary hover:bg-surface-secondary"
                     }`}
                   >
                     <OptIcon
@@ -187,7 +187,7 @@ export function DecisionDetail({ id }: { id: string }) {
               })}
               <button
                 onClick={() => setEditingStatus(false)}
-                className="ml-1 rounded p-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 rounded p-1 text-text-tertiary hover:text-text-secondary"
                 aria-label="Status-Bearbeitung abbrechen"
               >
                 <X aria-hidden="true" className="h-4 w-4" />
@@ -197,7 +197,7 @@ export function DecisionDetail({ id }: { id: string }) {
             <button
               onClick={() => setEditingStatus(true)}
               aria-expanded={editingStatus}
-              className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+              className="inline-flex items-center gap-1 rounded-lg bg-surface-secondary px-2.5 py-1 text-xs font-medium text-text-secondary hover:bg-surface-secondary"
             >
               {currentStatus && (
                 <currentStatus.icon aria-hidden="true" className="h-3 w-3" />
@@ -205,7 +205,7 @@ export function DecisionDetail({ id }: { id: string }) {
               {currentStatus?.label ?? decision.status}
               <Pencil
                 aria-hidden="true"
-                className="ml-1 h-3 w-3 text-gray-500"
+                className="ml-1 h-3 w-3 text-text-tertiary"
               />
             </button>
           )}
@@ -245,7 +245,7 @@ export function DecisionDetail({ id }: { id: string }) {
       </div>
 
       {/* Timestamps */}
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-text-tertiary">
         Zuletzt aktualisiert:{" "}
         {new Date(decision.updated_at).toLocaleString("de-DE")}
       </div>

@@ -58,16 +58,16 @@ function StepIndicator({ current }: { current: WizardStep }) {
           <div key={step.key} className="flex items-center gap-2">
             {idx > 0 && (
               <div
-                className={`h-px w-8 ${isDone ? "bg-blue-600" : "bg-gray-200"}`}
+                className={`h-px w-8 ${isDone ? "bg-indigo-600" : "bg-surface-secondary"}`}
               />
             )}
             <div
               className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium ${
                 isActive
-                  ? "bg-blue-100 text-blue-700"
+                  ? "bg-indigo-100 text-indigo-700"
                   : isDone
                     ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
+                    : "bg-surface-secondary text-text-tertiary"
               }`}
             >
               <Icon aria-hidden="true" className="h-4 w-4" />
@@ -95,16 +95,16 @@ function StepOrg({
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-text">
         Organisation erstellen
       </h2>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-tertiary">
         Geben Sie den Namen Ihres Teams oder Unternehmens ein.
       </p>
       <div>
         <label
           htmlFor="org-name"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Name *
         </label>
@@ -116,13 +116,13 @@ function StepOrg({
           value={name}
           onChange={(e) => onChange("name", e.target.value)}
           placeholder="z.B. Acme Consulting"
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
       <div>
         <label
           htmlFor="org-desc"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-text-secondary"
         >
           Beschreibung
         </label>
@@ -132,7 +132,7 @@ function StepOrg({
           value={description}
           onChange={(e) => onChange("description", e.target.value)}
           placeholder="Kurze Beschreibung der Organisation…"
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
     </div>
@@ -156,10 +156,10 @@ function StepMembers({
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-text">
         Team-Mitglieder einladen
       </h2>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-tertiary">
         Fügen Sie E-Mail-Adressen Ihrer Kollegen hinzu (3–10 empfohlen).
         Mitglieder müssen bereits einen PWBS-Account besitzen.
       </p>
@@ -173,12 +173,12 @@ function StepMembers({
               value={inv.email}
               onChange={(e) => onChange(idx, "email", e.target.value)}
               placeholder="nutzer@firma.de"
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 rounded-md border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
             <select
               value={inv.role}
               onChange={(e) => onChange(idx, "role", e.target.value)}
-              className="rounded-md border border-gray-300 px-2 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-md border border-border px-2 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               aria-label="Rolle auswählen"
             >
               <option value="member">Mitglied</option>
@@ -188,7 +188,7 @@ function StepMembers({
             <button
               type="button"
               onClick={() => onRemove(idx)}
-              className="rounded p-1 text-gray-500 hover:bg-red-50 hover:text-red-600"
+              className="rounded p-1 text-text-tertiary hover:bg-red-50 hover:text-red-600"
               aria-label="Eintrag entfernen"
             >
               <Trash2 aria-hidden="true" className="h-4 w-4" />
@@ -201,7 +201,7 @@ function StepMembers({
         type="button"
         onClick={onAdd}
         disabled={invites.length >= 10}
-        className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary disabled:opacity-50"
       >
         <Plus aria-hidden="true" className="h-4 w-4" />
         Weiteres Mitglied
@@ -239,10 +239,10 @@ function StepConnectors({
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-text">
         Konnektoren auswählen
       </h2>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-tertiary">
         Wählen Sie die Datenquellen, die Ihr Team nutzen soll. Die
         OAuth-Verbindung wird nach Abschluss des Wizards hergestellt.
       </p>
@@ -258,12 +258,12 @@ function StepConnectors({
               aria-pressed={isSelected}
               className={`flex flex-col items-start rounded-lg border p-4 text-left transition-colors ${
                 isSelected
-                  ? "border-blue-300 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  ? "border-indigo-300 bg-indigo-50"
+                  : "border-border hover:border-border hover:bg-surface-secondary"
               }`}
             >
-              <span className="font-medium text-gray-900">{conn.label}</span>
-              <span className="text-sm text-gray-500">{conn.description}</span>
+              <span className="font-medium text-text">{conn.label}</span>
+              <span className="text-sm text-text-tertiary">{conn.description}</span>
             </button>
           );
         })}
@@ -287,29 +287,29 @@ function StepConfirm({
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Zusammenfassung</h2>
-      <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-5">
+      <h2 className="text-lg font-semibold text-text">Zusammenfassung</h2>
+      <div className="space-y-3 rounded-lg border border-border bg-surface-secondary p-5">
         <div className="flex items-center gap-3">
-          <Building2 aria-hidden="true" className="h-5 w-5 text-blue-600" />
+          <Building2 aria-hidden="true" className="h-5 w-5 text-indigo-600" />
           <span className="text-sm">
             Organisation: <strong>{orgName}</strong>
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Users aria-hidden="true" className="h-5 w-5 text-blue-600" />
+          <Users aria-hidden="true" className="h-5 w-5 text-indigo-600" />
           <span className="text-sm">
             {inviteCount} Mitglied{inviteCount !== 1 ? "er" : ""} einladen
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Cable aria-hidden="true" className="h-5 w-5 text-blue-600" />
+          <Cable aria-hidden="true" className="h-5 w-5 text-indigo-600" />
           <span className="text-sm">
             {connectorCount} Konnektor{connectorCount !== 1 ? "en" : ""}{" "}
             aktivieren
           </span>
         </div>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-tertiary">
         Klicken Sie auf &quot;Abschließen&quot;, um die Organisation zu
         erstellen und die Einladungen zu versenden.
       </p>
@@ -426,15 +426,15 @@ export default function OnboardingWizardPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">B2B-Onboarding</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-text">B2B-Onboarding</h1>
+        <p className="mt-1 text-sm text-text-tertiary">
           Richten Sie Ihr Team in wenigen Schritten ein.
         </p>
       </div>
 
       <StepIndicator current={step} />
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-border bg-surface p-6">
         {step === "org" && (
           <StepOrg
             name={orgName}
@@ -479,7 +479,7 @@ export default function OnboardingWizardPage() {
           type="button"
           onClick={goBack}
           disabled={currentIdx === 0}
-          className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:invisible"
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:invisible"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurück
@@ -490,7 +490,7 @@ export default function OnboardingWizardPage() {
             type="button"
             onClick={() => finalize.mutate()}
             disabled={finalize.isPending}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             {finalize.isPending ? (
               <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
@@ -504,7 +504,7 @@ export default function OnboardingWizardPage() {
             type="button"
             onClick={goNext}
             disabled={!canProceed()}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             Weiter
             <ArrowRight aria-hidden="true" className="h-4 w-4" />

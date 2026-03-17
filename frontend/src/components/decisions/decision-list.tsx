@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<
   revised: {
     label: "Revidiert",
     icon: RotateCcw,
-    className: "bg-blue-100 text-blue-800",
+    className: "bg-indigo-100 text-indigo-800",
   },
 };
 
@@ -49,14 +49,14 @@ function DecisionCard({ decision }: { decision: DecisionListItem }) {
   return (
     <Link
       href={`/decisions/${decision.id}`}
-      className="block rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+      className="block rounded-lg border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-gray-900">
+          <h3 className="truncate text-sm font-medium text-text">
             {decision.summary}
           </h3>
-          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+          <div className="mt-1 flex items-center gap-3 text-xs text-text-tertiary">
             {decision.decided_by && <span>von {decision.decided_by}</span>}
             <span>
               {new Date(decision.created_at).toLocaleDateString("de-DE")}
@@ -89,12 +89,12 @@ export function DecisionList({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-tertiary">
           {total} Entscheidung{total !== 1 ? "en" : ""}
         </p>
         <Link
           href="/decisions/new"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
           Neue Entscheidung
@@ -102,13 +102,13 @@ export function DecisionList({
       </div>
 
       {decisions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm text-text-tertiary">
             Noch keine Entscheidungen erfasst.
           </p>
           <Link
             href="/decisions/new"
-            className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+            className="mt-2 inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
           >
             <Plus aria-hidden="true" className="h-4 w-4" />
             Erste Entscheidung erstellen
@@ -127,18 +127,18 @@ export function DecisionList({
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="rounded p-1 text-gray-500 hover:text-gray-600 disabled:opacity-30"
+            className="rounded p-1 text-text-tertiary hover:text-text-secondary disabled:opacity-30"
             aria-label="Vorherige Seite"
           >
             <ChevronLeft aria-hidden="true" className="h-5 w-5" />
           </button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-text-secondary">
             Seite {page} von {totalPages}
           </span>
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="rounded p-1 text-gray-500 hover:text-gray-600 disabled:opacity-30"
+            className="rounded p-1 text-text-tertiary hover:text-text-secondary disabled:opacity-30"
             aria-label="Nächste Seite"
           >
             <ChevronRight aria-hidden="true" className="h-5 w-5" />

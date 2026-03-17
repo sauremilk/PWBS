@@ -2,7 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Bell, Loader2 } from "lucide-react";
-import { useReminders, useReminderCount, useUpdateReminderStatus } from "@/hooks/use-reminders";
+import {
+  useReminders,
+  useReminderCount,
+  useUpdateReminderStatus,
+} from "@/hooks/use-reminders";
 import { ReminderCard } from "@/components/reminders/reminder-card";
 import type { ReminderStatus } from "@/types/api";
 
@@ -20,7 +24,8 @@ export function NotificationBell() {
     }
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [open]);
 
@@ -39,7 +44,7 @@ export function NotificationBell() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="relative rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="relative rounded-md p-2 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
         aria-label={`Erinnerungen${count ? ` (${count} offen)` : ""}`}
         aria-expanded={open}
         aria-haspopup="true"
@@ -67,15 +72,15 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="absolute right-0 top-full z-50 mt-2 w-96 max-h-[32rem] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+      className="absolute right-0 top-full z-50 mt-2 w-96 max-h-[32rem] overflow-y-auto rounded-xl border border-border bg-surface shadow-lg"
       role="dialog"
       aria-label="Erinnerungen"
     >
-      <div className="sticky top-0 border-b border-gray-200 bg-white px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-900">
+      <div className="sticky top-0 border-b border-border bg-surface px-4 py-3">
+        <h3 className="text-sm font-semibold text-text">
           Erinnerungen
           {data && data.count > 0 && (
-            <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            <span className="ml-2 rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-text-secondary">
               {data.count}
             </span>
           )}
@@ -85,12 +90,12 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
       <div className="p-3 space-y-3">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-text-tertiary" />
           </div>
         )}
 
         {!isLoading && (!data || data.items.length === 0) && (
-          <p className="py-6 text-center text-sm text-gray-500">
+          <p className="py-6 text-center text-sm text-text-tertiary">
             Keine offenen Erinnerungen.
           </p>
         )}

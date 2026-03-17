@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -35,7 +35,7 @@ function ListEditor({
     <div>
       <label
         htmlFor={inputId}
-        className="mb-1 block text-sm font-medium text-gray-700"
+        className="mb-1 block text-sm font-medium text-text-secondary"
       >
         {label}
       </label>
@@ -52,12 +52,12 @@ function ListEditor({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
         <button
           type="button"
           onClick={add}
-          className="rounded-lg border border-gray-300 px-2 py-1.5 text-gray-600 hover:bg-gray-50"
+          className="rounded-lg border border-border px-2 py-1.5 text-text-secondary hover:bg-surface-secondary"
           aria-label="Eintrag hinzufügen"
         >
           <Plus aria-hidden="true" className="h-4 w-4" />
@@ -68,13 +68,13 @@ function ListEditor({
           {items.map((item, i) => (
             <li
               key={i}
-              className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-1.5 text-sm"
+              className="flex items-center justify-between rounded-md bg-surface-secondary px-3 py-1.5 text-sm"
             >
-              <span className="text-gray-700">{item}</span>
+              <span className="text-text-secondary">{item}</span>
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="ml-2 text-gray-400 hover:text-red-500"
+                className="ml-2 text-text-tertiary hover:text-red-500"
                 aria-label="Eintrag entfernen"
               >
                 <X aria-hidden="true" className="h-3.5 w-3.5" />
@@ -122,19 +122,19 @@ export function DecisionForm() {
         <button
           type="button"
           onClick={() => router.push("/decisions")}
-          className="rounded p-1 text-gray-400 hover:text-gray-600"
+          className="rounded p-1 text-text-tertiary hover:text-text-secondary"
           aria-label="Zurück zur Übersicht"
         >
           <ArrowLeft aria-hidden="true" className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Neue Entscheidung</h1>
+        <h1 className="text-xl font-bold text-text">Neue Entscheidung</h1>
       </div>
 
       {/* Summary */}
       <div>
         <label
           htmlFor="summary"
-          className="mb-1 block text-sm font-medium text-gray-700"
+          className="mb-1 block text-sm font-medium text-text-secondary"
         >
           Zusammenfassung *
         </label>
@@ -146,7 +146,7 @@ export function DecisionForm() {
           maxLength={2000}
           rows={3}
           placeholder="Was wurde entschieden?"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
 
@@ -155,7 +155,7 @@ export function DecisionForm() {
         <div>
           <label
             htmlFor="status"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-text-secondary"
           >
             Status
           </label>
@@ -163,7 +163,7 @@ export function DecisionForm() {
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as DecisionStatus)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="pending">Ausstehend</option>
             <option value="made">Entschieden</option>
@@ -173,7 +173,7 @@ export function DecisionForm() {
         <div>
           <label
             htmlFor="decidedBy"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1 block text-sm font-medium text-text-secondary"
           >
             Entschieden von
           </label>
@@ -183,7 +183,7 @@ export function DecisionForm() {
             value={decidedBy}
             onChange={(e) => setDecidedBy(e.target.value)}
             placeholder="Name oder Rolle"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
@@ -225,7 +225,7 @@ export function DecisionForm() {
         <button
           type="submit"
           disabled={!summary.trim() || createMutation.isPending}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           {createMutation.isPending && (
             <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />

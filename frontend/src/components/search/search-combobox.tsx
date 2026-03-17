@@ -91,7 +91,7 @@ export function SearchCombobox({
     <div ref={wrapperRef} className="relative">
       <SearchIcon
         aria-hidden="true"
-        className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+        className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-tertiary"
       />
       <input
         ref={inputRef}
@@ -105,20 +105,20 @@ export function SearchCombobox({
         onChange={handleInputChange}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-lg border border-border bg-surface py-3 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-surface shadow-lg">
           {/* Tabs */}
-          <div className="flex border-b border-gray-100">
+          <div className="flex border-b border-border/50">
             <button
               type="button"
               onClick={() => setActiveTab("suggestions")}
               className={`flex-1 px-3 py-2 text-xs font-medium ${
                 activeTab === "suggestions"
-                  ? "border-b-2 border-blue-500 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-indigo-500 text-indigo-600"
+                  : "text-text-tertiary hover:text-text-secondary"
               }`}
             >
               <SearchIcon aria-hidden className="mr-1 inline h-3 w-3" />
@@ -129,8 +129,8 @@ export function SearchCombobox({
               onClick={() => setActiveTab("history")}
               className={`flex-1 px-3 py-2 text-xs font-medium ${
                 activeTab === "history"
-                  ? "border-b-2 border-blue-500 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-indigo-500 text-indigo-600"
+                  : "text-text-tertiary hover:text-text-secondary"
               }`}
             >
               <Clock aria-hidden className="mr-1 inline h-3 w-3" />
@@ -141,8 +141,8 @@ export function SearchCombobox({
               onClick={() => setActiveTab("saved")}
               className={`flex-1 px-3 py-2 text-xs font-medium ${
                 activeTab === "saved"
-                  ? "border-b-2 border-blue-500 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-indigo-500 text-indigo-600"
+                  : "text-text-tertiary hover:text-text-secondary"
               }`}
             >
               <Bookmark aria-hidden className="mr-1 inline h-3 w-3" />
@@ -152,7 +152,12 @@ export function SearchCombobox({
 
           {/* Suggestions panel */}
           {activeTab === "suggestions" && suggestions.length > 0 && (
-            <ul id="search-listbox" role="listbox" aria-label="Suchvorschläge" className="max-h-60 overflow-y-auto py-1">
+            <ul
+              id="search-listbox"
+              role="listbox"
+              aria-label="Suchvorschläge"
+              className="max-h-60 overflow-y-auto py-1"
+            >
               {suggestions.map((item) => (
                 <li
                   key={item.entity_id}
@@ -160,13 +165,15 @@ export function SearchCombobox({
                   aria-selected="false"
                   tabIndex={0}
                   onClick={() => selectSuggestion(item)}
-                  onKeyDown={(e) => { if (e.key === "Enter") selectSuggestion(item); }}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") selectSuggestion(item);
+                  }}
+                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-surface-secondary"
                 >
-                  <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                  <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-xs text-text-tertiary">
                     {item.entity_type}
                   </span>
-                  <span className="text-gray-900">{item.name}</span>
+                  <span className="text-text">{item.name}</span>
                 </li>
               ))}
             </ul>
@@ -181,12 +188,17 @@ export function SearchCombobox({
                   role="menuitem"
                   tabIndex={0}
                   onClick={() => selectHistory(item)}
-                  onKeyDown={(e) => { if (e.key === "Enter") selectHistory(item); }}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") selectHistory(item);
+                  }}
+                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-surface-secondary"
                 >
-                  <Clock aria-hidden className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="flex-1 text-gray-900">{item.query}</span>
-                  <span className="text-xs text-gray-400">
+                  <Clock
+                    aria-hidden
+                    className="h-3.5 w-3.5 text-text-tertiary"
+                  />
+                  <span className="flex-1 text-text">{item.query}</span>
+                  <span className="text-xs text-text-tertiary">
                     {item.result_count} Ergebnis
                     {item.result_count !== 1 ? "se" : ""}
                   </span>
@@ -201,18 +213,21 @@ export function SearchCombobox({
               {savedItems.map((item) => (
                 <li
                   key={item.id}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-surface-secondary"
                 >
-                  <Bookmark aria-hidden className="h-3.5 w-3.5 text-gray-400" />
+                  <Bookmark
+                    aria-hidden
+                    className="h-3.5 w-3.5 text-text-tertiary"
+                  />
                   <button
                     type="button"
                     onClick={() => selectSaved(item)}
                     className="flex flex-1 flex-col text-left"
                   >
-                    <span className="font-medium text-gray-900">
-                      {item.name}
+                    <span className="font-medium text-text">{item.name}</span>
+                    <span className="text-xs text-text-tertiary">
+                      {item.query}
                     </span>
-                    <span className="text-xs text-gray-500">{item.query}</span>
                   </button>
                   <button
                     type="button"
@@ -221,7 +236,7 @@ export function SearchCombobox({
                       deleteSaved.mutate(item.id);
                     }}
                     aria-label={`Gespeicherte Suche "${item.name}" löschen`}
-                    className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    className="rounded p-1 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary"
                   >
                     <X aria-hidden className="h-3.5 w-3.5" />
                   </button>
@@ -232,7 +247,7 @@ export function SearchCombobox({
 
           {/* Empty state */}
           {!hasContent && (
-            <p className="px-3 py-4 text-center text-sm text-gray-400">
+            <p className="px-3 py-4 text-center text-sm text-text-tertiary">
               {activeTab === "suggestions" &&
                 value.length < 2 &&
                 "Mindestens 2 Zeichen eingeben…"}

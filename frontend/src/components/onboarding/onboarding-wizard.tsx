@@ -50,16 +50,16 @@ function StepIndicator({ current }: { current: WizardStep }) {
           <div key={step.key} className="flex items-center gap-2">
             {idx > 0 && (
               <div
-                className={`h-px w-6 sm:w-10 ${isDone ? "bg-blue-600" : "bg-gray-200"}`}
+                className={`h-px w-6 sm:w-10 ${isDone ? "bg-indigo-600" : "bg-surface-secondary"}`}
               />
             )}
             <div
               className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium sm:px-3 sm:py-1.5 sm:text-sm ${
                 isActive
-                  ? "bg-blue-100 text-blue-700"
+                  ? "bg-indigo-100 text-indigo-700"
                   : isDone
                     ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
+                    : "bg-surface-secondary text-text-tertiary"
               }`}
             >
               {isDone ? (
@@ -83,23 +83,23 @@ function StepIndicator({ current }: { current: WizardStep }) {
 function StepWelcome({ onNext }: { onNext: () => void }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
-        <Sparkles className="h-8 w-8 text-blue-600" />
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100">
+        <Sparkles className="h-8 w-8 text-indigo-600" />
       </div>
-      <h2 className="mb-3 text-2xl font-bold text-gray-900">
+      <h2 className="mb-3 text-2xl font-bold text-text">
         Willkommen bei PWBS
       </h2>
-      <p className="mb-2 max-w-md text-gray-600">
+      <p className="mb-2 max-w-md text-text-secondary">
         Dein Persoenliches Wissens-Betriebssystem verbindet deine Datenquellen,
         analysiert Zusammenhaenge und liefert dir taeglich kontextbezogene Briefings.
       </p>
-      <p className="mb-8 max-w-md text-sm text-gray-500">
+      <p className="mb-8 max-w-md text-sm text-text-tertiary">
         In wenigen Schritten verbindest du deine erste Datenquelle und erhaeltst
         dein erstes Briefing. Das dauert weniger als 5 Minuten.
       </p>
       <button
         onClick={onNext}
-        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
         Los geht&apos;s
         <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -140,7 +140,7 @@ function StepConnector({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12" role="status">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
         <span className="sr-only">Lade Konnektoren...</span>
       </div>
     );
@@ -148,10 +148,10 @@ function StepConnector({
 
   return (
     <div className="flex flex-col items-center text-center">
-      <h2 className="mb-2 text-xl font-bold text-gray-900">
+      <h2 className="mb-2 text-xl font-bold text-text">
         Verbinde deine erste Datenquelle
       </h2>
-      <p className="mb-6 max-w-md text-sm text-gray-600">
+      <p className="mb-6 max-w-md text-sm text-text-secondary">
         Waehle eine Datenquelle aus, um dein Wissens-Betriebssystem zu fuellen.
         Du kannst spaeter weitere Quellen hinzufuegen.
       </p>
@@ -162,13 +162,13 @@ function StepConnector({
             key={ct.type}
             onClick={() => connectOAuth.mutate(ct.type)}
             disabled={connectOAuth.isPending}
-            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 text-left transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="flex items-center gap-3 rounded-lg border border-border bg-surface p-4 text-left transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            <Cable aria-hidden="true" className="h-5 w-5 text-gray-500" />
+            <Cable aria-hidden="true" className="h-5 w-5 text-text-tertiary" />
             <div>
-              <p className="text-sm font-medium text-gray-900">{ct.name}</p>
+              <p className="text-sm font-medium text-text">{ct.name}</p>
               {ct.description && (
-                <p className="text-xs text-gray-500">{ct.description}</p>
+                <p className="text-xs text-text-tertiary">{ct.description}</p>
               )}
             </div>
           </button>
@@ -178,14 +178,14 @@ function StepConnector({
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurueck
         </button>
         <button
           onClick={onNext}
-          className="text-sm text-gray-500 underline hover:text-gray-700"
+          className="text-sm text-text-tertiary underline hover:text-text-secondary"
         >
           Ueberspringen
         </button>
@@ -224,7 +224,7 @@ function StepSync({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12" role="status">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
         <span className="sr-only">Lade Status...</span>
       </div>
     );
@@ -232,10 +232,10 @@ function StepSync({
 
   return (
     <div className="flex flex-col items-center text-center">
-      <h2 className="mb-2 text-xl font-bold text-gray-900">
+      <h2 className="mb-2 text-xl font-bold text-text">
         Daten werden synchronisiert
       </h2>
-      <p className="mb-6 max-w-md text-sm text-gray-600">
+      <p className="mb-6 max-w-md text-sm text-text-secondary">
         {isSyncing
           ? "Deine Daten werden importiert. Das kann einen Moment dauern..."
           : activeConnections.length > 0
@@ -247,35 +247,35 @@ function StepSync({
         {activeConnections.map((c: ConnectionStatus) => (
           <div
             key={c.type}
-            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3"
+            className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3"
           >
             {c.status === "syncing" ? (
-              <RefreshCw aria-hidden="true" className="h-4 w-4 animate-spin text-blue-500" />
+              <RefreshCw aria-hidden="true" className="h-4 w-4 animate-spin text-indigo-500" />
             ) : (
               <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-green-500" />
             )}
-            <span className="text-sm font-medium text-gray-700">{c.type}</span>
-            <span className="ml-auto text-xs text-gray-500">
+            <span className="text-sm font-medium text-text-secondary">{c.type}</span>
+            <span className="ml-auto text-xs text-text-tertiary">
               {c.doc_count} Dokumente
             </span>
           </div>
         ))}
         {activeConnections.length === 0 && (
-          <p className="text-sm text-gray-400">Keine aktiven Verbindungen.</p>
+          <p className="text-sm text-text-tertiary">Keine aktiven Verbindungen.</p>
         )}
       </div>
 
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary"
         >
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Zurueck
         </button>
         <button
           onClick={onNext}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
           Weiter
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -317,10 +317,10 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100">
         <FileText className="h-8 w-8 text-green-600" />
       </div>
-      <h2 className="mb-2 text-xl font-bold text-gray-900">
+      <h2 className="mb-2 text-xl font-bold text-text">
         Dein erstes Briefing
       </h2>
-      <p className="mb-6 max-w-md text-sm text-gray-600">
+      <p className="mb-6 max-w-md text-sm text-text-secondary">
         {generated
           ? "Dein Briefing wurde erstellt! Du kannst es jetzt ansehen."
           : "Generiere jetzt dein erstes Morgenbriefing basierend auf deinen verbundenen Daten."}
@@ -331,7 +331,7 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
           <button
             onClick={handleGenerate}
             disabled={generate.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
           >
             {generate.isPending ? (
               <>
@@ -347,7 +347,7 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
           </button>
           <button
             onClick={handleFinish}
-            className="text-sm text-gray-500 underline hover:text-gray-700"
+            className="text-sm text-text-tertiary underline hover:text-text-secondary"
           >
             Ueberspringen
           </button>
@@ -401,11 +401,11 @@ export function OnboardingWizard() {
       aria-modal="true"
       aria-label="Onboarding-Wizard"
     >
-      <div className="relative mx-4 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl sm:p-10">
+      <div className="relative mx-4 w-full max-w-2xl rounded-2xl bg-surface p-6 shadow-2xl sm:p-10">
         {/* Skip / Close */}
         <button
           onClick={handleSkip}
-          className="absolute right-4 top-4 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="absolute right-4 top-4 rounded-full p-1.5 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary"
           aria-label="Onboarding ueberspringen"
         >
           <X aria-hidden="true" className="h-5 w-5" />

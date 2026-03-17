@@ -23,8 +23,8 @@ const STATUS_CONFIG: Record<
 > = {
   success: { icon: CheckCircle2, color: "text-green-500", label: "Erfolgreich" },
   failed: { icon: XCircle, color: "text-red-500", label: "Fehlgeschlagen" },
-  running: { icon: Loader2, color: "text-blue-500", label: "Läuft" },
-  pending: { icon: Clock, color: "text-gray-400", label: "Wartend" },
+  running: { icon: Loader2, color: "text-indigo-500", label: "Läuft" },
+  pending: { icon: Clock, color: "text-text-tertiary", label: "Wartend" },
 };
 
 function formatDate(dateStr: string | null): string {
@@ -53,13 +53,13 @@ function RunRow({ run }: { run: SyncRunItem }) {
   const hasErrors = run.error_count > 0 && run.errors_json?.length;
 
   return (
-    <div className="border-b border-gray-100 last:border-0 dark:border-gray-800">
+    <div className="border-b border-border last:border-0">
       <button
         type="button"
         onClick={() => hasErrors && setExpanded(!expanded)}
         className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
           hasErrors
-            ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+            ? "cursor-pointer hover:bg-surface-secondary"
             : "cursor-default"
         }`}
         aria-expanded={hasErrors ? expanded : false}
@@ -70,22 +70,22 @@ function RunRow({ run }: { run: SyncRunItem }) {
           }`}
         />
 
-        <span className="flex-1 text-gray-700 dark:text-gray-300">
+        <span className="flex-1 text-text-secondary">
           {formatDate(run.started_at)}
         </span>
 
-        <span className="flex items-center gap-1 text-xs text-gray-500">
+        <span className="flex items-center gap-1 text-xs text-text-tertiary">
           <FileText className="h-3.5 w-3.5" />
           {run.document_count}
         </span>
 
-        <span className="w-16 text-right text-xs text-gray-400">
+        <span className="w-16 text-right text-xs text-text-tertiary">
           {formatDuration(run.duration_seconds)}
         </span>
 
         {hasErrors ? (
           <ChevronDown
-            className={`h-4 w-4 text-gray-400 transition-transform ${
+            className={`h-4 w-4 text-text-tertiary transition-transform ${
               expanded ? "rotate-180" : ""
             }`}
           />
@@ -95,7 +95,7 @@ function RunRow({ run }: { run: SyncRunItem }) {
       </button>
 
       {expanded && hasErrors && (
-        <div className="border-t border-gray-100 bg-red-50/50 px-4 py-3 dark:border-gray-800 dark:bg-red-900/10">
+        <div className="border-t border-border bg-red-50/50 px-4 py-3 dark:bg-red-900/10">
           <div className="flex items-center gap-2 text-xs font-medium text-red-700 dark:text-red-400">
             <AlertTriangle className="h-3.5 w-3.5" />
             {run.error_count} Fehler
@@ -124,7 +124,7 @@ export function SyncHistoryAccordion({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-6 text-sm text-gray-400">
+      <div className="flex items-center justify-center py-6 text-sm text-text-tertiary">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         Lade Sync-Verlauf...
       </div>
@@ -133,15 +133,15 @@ export function SyncHistoryAccordion({
 
   if (!data || data.runs.length === 0) {
     return (
-      <div className="py-6 text-center text-sm text-gray-400">
+      <div className="py-6 text-center text-sm text-text-tertiary">
         Noch kein Sync durchgeführt
       </div>
     );
   }
 
   return (
-    <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="bg-gray-50 px-4 py-2 text-xs font-medium text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
+    <div className="mt-3 overflow-hidden rounded-lg border border-border">
+      <div className="bg-surface-secondary px-4 py-2 text-xs font-medium text-text-tertiary">
         Letzte Syncs ({data.total} insgesamt)
       </div>
       {data.runs.map((run) => (

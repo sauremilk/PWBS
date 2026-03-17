@@ -14,20 +14,22 @@ export function Header({ title }: HeaderProps) {
 
   return (
     <header
-      className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6"
+      className="flex h-14 items-center justify-between border-b border-border bg-surface px-4 sm:px-6"
       role="banner"
     >
       <div className="flex items-center gap-3">
         <button
           onClick={toggle}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-surface-secondary hover:text-text md:hidden"
           aria-label="Navigation oeffnen"
         >
           <Menu aria-hidden="true" className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+        {title && (
+          <h1 className="text-base font-semibold text-text">{title}</h1>
+        )}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
         <ChangelogButton />
         <NotificationBell />
       </div>

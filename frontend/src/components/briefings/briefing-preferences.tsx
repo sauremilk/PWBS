@@ -30,20 +30,20 @@ function TagInput({
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
+      <label className="mb-1 block text-sm font-medium text-text-secondary">
         {label}
       </label>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+            className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700"
           >
             {tag}
             <button
               type="button"
               onClick={() => onChange(value.filter((t) => t !== tag))}
-              className="ml-0.5 rounded-full p-0.5 hover:bg-blue-100"
+              className="ml-0.5 rounded-full p-0.5 hover:bg-indigo-100"
               aria-label={`${tag} entfernen`}
             >
               <X aria-hidden="true" className="h-3 w-3" />
@@ -63,14 +63,14 @@ function TagInput({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 rounded-md border border-border px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
         <button
           type="button"
           onClick={addTag}
           disabled={!input.trim()}
           aria-label="Hinzufügen"
-          className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-sm text-text-secondary hover:bg-surface-secondary disabled:opacity-40"
         >
           <Plus aria-hidden="true" className="h-3.5 w-3.5" />
         </button>
@@ -107,19 +107,19 @@ export default function BriefingPreferencesPanel() {
   if (isLoading) return null;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <div className="rounded-lg border border-border bg-surface">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
         aria-expanded={open ? "true" : "false"}
       >
-        <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-          <Settings aria-hidden="true" className="h-4 w-4 text-gray-500" />
+        <span className="flex items-center gap-2 text-sm font-semibold text-text">
+          <Settings aria-hidden="true" className="h-4 w-4 text-text-tertiary" />
           Briefing-Personalisierung
         </span>
         <span
-          className={`text-xs text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-xs text-text-tertiary transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         >
           ▾
@@ -127,7 +127,7 @@ export default function BriefingPreferencesPanel() {
       </button>
 
       {open && (
-        <div className="space-y-4 border-t border-gray-100 px-4 py-4">
+        <div className="space-y-4 border-t border-border px-4 py-4">
           <TagInput
             label="Fokus-Projekte"
             value={focusProjects}
@@ -151,7 +151,7 @@ export default function BriefingPreferencesPanel() {
               type="button"
               onClick={handleSave}
               disabled={update.isPending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {update.isPending && (
                 <Loader2

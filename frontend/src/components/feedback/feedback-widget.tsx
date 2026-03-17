@@ -82,7 +82,7 @@ export function FeedbackWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         aria-label="Feedback geben"
       >
         <MessageSquarePlus className="h-5 w-5" />
@@ -109,17 +109,15 @@ export function FeedbackWidget() {
             role="dialog"
             aria-modal="true"
             aria-label="Feedback senden"
-            className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-900"
+            className="relative z-10 w-full max-w-md rounded-xl bg-surface p-6 shadow-2xl"
           >
             {/* Header */}
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Feedback
-              </h2>
+              <h2 className="text-lg font-semibold text-text">Feedback</h2>
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+                className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-secondary hover:text-text-secondary"
                 aria-label="Schließen"
               >
                 <X className="h-5 w-5" />
@@ -129,7 +127,7 @@ export function FeedbackWidget() {
             {submitted ? (
               <div className="py-8 text-center">
                 <ThumbsUp className="mx-auto mb-3 h-8 w-8 text-green-500" />
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-sm text-text-secondary">
                   Danke für dein Feedback!
                 </p>
               </div>
@@ -144,8 +142,8 @@ export function FeedbackWidget() {
                       onClick={() => setFeedbackType(value)}
                       className={`flex flex-1 flex-col items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
                         feedbackType === value
-                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                          : "border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400"
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                          : "border-border text-text-tertiary hover:border-indigo-200"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -162,7 +160,7 @@ export function FeedbackWidget() {
                   rows={4}
                   maxLength={5000}
                   required
-                  className="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                  className="mb-3 w-full resize-none rounded-lg border border-border bg-surface-secondary p-3 text-sm text-text placeholder:text-text-tertiary focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
 
                 {error && (
@@ -174,12 +172,12 @@ export function FeedbackWidget() {
                 <button
                   type="submit"
                   disabled={submitting || !message.trim()}
-                  className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? "Wird gesendet..." : "Absenden"}
                 </button>
 
-                <p className="mt-2 text-center text-xs text-gray-400">
+                <p className="mt-2 text-center text-xs text-text-tertiary">
                   Kontext (URL, Browser) wird automatisch angehängt
                 </p>
               </form>

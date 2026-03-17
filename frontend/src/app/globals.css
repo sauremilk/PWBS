@@ -1,3 +1,118 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   PWBS Design System – CSS Custom Properties
+   ============================================================ */
+
+@layer base {
+  :root {
+    /* Brand */
+    --color-brand: 99 102 241;       /* indigo-500 */
+    --color-brand-dark: 79 70 229;   /* indigo-600 */
+    --color-brand-light: 129 140 248; /* indigo-400 */
+
+    /* Surfaces */
+    --color-surface: 255 255 255;
+    --color-surface-secondary: 249 250 251;  /* gray-50 */
+    --color-surface-elevated: 255 255 255;
+
+    /* Sidebar */
+    --color-sidebar: 15 23 42;        /* slate-900 */
+    --color-sidebar-hover: 30 41 59;  /* slate-800 */
+    --color-sidebar-active: 51 65 85; /* slate-700 */
+    --color-sidebar-text: 203 213 225; /* slate-300 */
+    --color-sidebar-text-active: 255 255 255;
+
+    /* Text */
+    --color-text: 15 23 42;           /* slate-900 */
+    --color-text-secondary: 100 116 139; /* slate-500 */
+    --color-text-tertiary: 148 163 184; /* slate-400 */
+
+    /* Borders */
+    --color-border: 226 232 240;      /* slate-200 */
+    --color-border-light: 241 245 249; /* slate-100 */
+
+    /* Status */
+    --color-success: 34 197 94;
+    --color-warning: 245 158 11;
+    --color-error: 239 68 68;
+    --color-info: 59 130 246;
+  }
+
+  .dark {
+    --color-brand: 129 140 248;       /* indigo-400 */
+    --color-brand-dark: 99 102 241;
+    --color-brand-light: 165 180 252;
+
+    --color-surface: 15 23 42;         /* slate-900 */
+    --color-surface-secondary: 30 41 59; /* slate-800 */
+    --color-surface-elevated: 30 41 59;
+
+    --color-sidebar: 2 6 23;           /* slate-950 */
+    --color-sidebar-hover: 15 23 42;
+    --color-sidebar-active: 30 41 59;
+    --color-sidebar-text: 148 163 184;
+    --color-sidebar-text-active: 255 255 255;
+
+    --color-text: 241 245 249;         /* slate-100 */
+    --color-text-secondary: 148 163 184;
+    --color-text-tertiary: 100 116 139;
+
+    --color-border: 51 65 85;          /* slate-700 */
+    --color-border-light: 30 41 59;
+
+    --color-success: 74 222 128;
+    --color-warning: 251 191 36;
+    --color-error: 248 113 113;
+    --color-info: 96 165 250;
+  }
+
+  /* Smooth transitions on theme switch */
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    @apply bg-surface text-text antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Global smooth transitions */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Disable transitions for animations & transforms */
+  .animate-spin, .animate-pulse, [class*="animate-"] {
+    transition: none !important;
+  }
+}
+
+/* ============================================================
+   Custom Scrollbar
+   ============================================================ */
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-border));
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-text-tertiary));
+  }
+}

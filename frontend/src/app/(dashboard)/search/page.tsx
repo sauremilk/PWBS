@@ -29,27 +29,31 @@ const SOURCE_TYPE_OPTIONS: { value: SourceType; label: string }[] = [
 
 function ResultCard({ result }: { result: SearchResult }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm">
-      <div className="mb-2 flex items-center gap-2 text-xs text-gray-500">
+    <div className="rounded-xl border border-border bg-surface p-4 transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5">
+      <div className="mb-2 flex items-center gap-2 text-xs text-text-tertiary">
         <FileText aria-hidden="true" className="h-3.5 w-3.5" />
-        <span className="font-medium">{result.source_type}</span>
+        <span className="font-medium text-text-secondary">
+          {result.source_type}
+        </span>
         <span>·</span>
         <Calendar aria-hidden="true" className="h-3.5 w-3.5" />
         <span>{new Date(result.date).toLocaleDateString("de-DE")}</span>
-        <span className="ml-auto rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">
+        <span className="ml-auto rounded-md bg-indigo-50 px-1.5 py-0.5 text-xs font-semibold text-indigo-600">
           {Math.round(result.score * 100)}%
         </span>
       </div>
-      <h3 className="mb-1 text-sm font-semibold text-gray-900">
+      <h3 className="mb-1 text-sm font-semibold text-text">
         {result.doc_title}
       </h3>
-      <p className="text-sm text-gray-600 line-clamp-3">{result.content}</p>
+      <p className="text-sm text-text-secondary line-clamp-3">
+        {result.content}
+      </p>
       {result.entities.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {result.entities.map((e) => (
             <span
               key={e}
-              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+              className="rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-text-secondary"
             >
               {e}
             </span>
@@ -67,7 +71,7 @@ export default function SearchPage() {
         <div role="status" className="flex items-center justify-center py-12">
           <Loader2
             aria-hidden="true"
-            className="h-8 w-8 animate-spin text-gray-400"
+            className="h-8 w-8 animate-spin text-text-tertiary"
           />
           <span className="sr-only">Wird geladen</span>
         </div>
@@ -150,15 +154,12 @@ function SearchContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900">Suche</h1>
+      <h1 className="text-2xl font-bold text-text">Suche</h1>
 
       {/* Search Input — Combobox with auto-complete, history, saved */}
       <div className="flex gap-2">
         <div className="flex-1">
-          <SearchCombobox
-            value={query}
-            onChange={handleQueryChange}
-          />
+          <SearchCombobox value={query} onChange={handleQueryChange} />
         </div>
         {query.length > 0 && (
           <button
@@ -170,7 +171,7 @@ function SearchContent() {
               }
             }}
             title="Suche speichern"
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary"
           >
             <Bookmark aria-hidden className="h-4 w-4" />
             <span className="hidden sm:inline">Speichern</span>
@@ -181,7 +182,7 @@ function SearchContent() {
         <div className="flex justify-end">
           <Loader2
             aria-hidden="true"
-            className="h-5 w-5 animate-spin text-gray-400"
+            className="h-5 w-5 animate-spin text-text-tertiary"
           />
         </div>
       )}
@@ -191,7 +192,7 @@ function SearchContent() {
         <button
           onClick={() => setShowFilters(!showFilters)}
           aria-expanded={showFilters}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-secondary"
         >
           <Filter aria-hidden="true" className="h-4 w-4" />
           Filter
@@ -199,7 +200,7 @@ function SearchContent() {
         {filters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1 rounded-md text-sm text-gray-500 hover:text-gray-700"
+            className="inline-flex items-center gap-1 rounded-md text-sm text-text-tertiary hover:text-text-secondary"
           >
             <X aria-hidden="true" className="h-4 w-4" />
             Filter entfernen
@@ -209,11 +210,11 @@ function SearchContent() {
 
       {/* Filter Panel */}
       {showFilters && (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="rounded-xl border border-border bg-surface p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
               <fieldset>
-                <legend className="mb-2 text-sm font-medium text-gray-700">
+                <legend className="mb-2 text-sm font-medium text-text-secondary">
                   Quelltyp
                 </legend>
                 <div className="space-y-1">
@@ -226,7 +227,7 @@ function SearchContent() {
                         type="checkbox"
                         checked={sourceTypes.includes(opt.value)}
                         onChange={() => toggleSourceType(opt.value)}
-                        className="rounded border-gray-300"
+                        className="rounded border-border accent-indigo-600"
                       />
                       {opt.label}
                     </label>
@@ -237,7 +238,7 @@ function SearchContent() {
             <div>
               <label
                 htmlFor="filter-date-from"
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-medium text-text-secondary"
               >
                 Von
               </label>
@@ -249,13 +250,13 @@ function SearchContent() {
                   setDateFrom(e.target.value);
                   syncUrl(query, sourceTypes, e.target.value, dateTo);
                 }}
-                className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm"
               />
             </div>
             <div>
               <label
                 htmlFor="filter-date-to"
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-medium text-text-secondary"
               >
                 Bis
               </label>
@@ -267,7 +268,7 @@ function SearchContent() {
                   setDateTo(e.target.value);
                   syncUrl(query, sourceTypes, dateFrom, e.target.value);
                 }}
-                className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm"
               />
             </div>
           </div>
@@ -276,11 +277,11 @@ function SearchContent() {
 
       {/* LLM-generated Answer */}
       {data?.answer && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <h2 className="mb-1 text-sm font-semibold text-blue-800">
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+          <h2 className="mb-1 text-sm font-semibold text-indigo-800">
             KI-Zusammenfassung
           </h2>
-          <p className="text-sm text-blue-900">{data.answer}</p>
+          <p className="text-sm text-indigo-900">{data.answer}</p>
         </div>
       )}
 
@@ -289,13 +290,13 @@ function SearchContent() {
         <div role="status" className="flex items-center justify-center py-12">
           <Loader2
             aria-hidden="true"
-            className="h-8 w-8 animate-spin text-gray-400"
+            className="h-8 w-8 animate-spin text-text-tertiary"
           />
           <span className="sr-only">Wird geladen</span>
         </div>
       ) : data && data.results.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-tertiary">
             {data.results.length} Ergebnis
             {data.results.length !== 1 ? "se" : ""}
           </p>
@@ -304,15 +305,15 @@ function SearchContent() {
           ))}
         </div>
       ) : query.length > 0 && !isLoading ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
           <SearchIcon
             aria-hidden="true"
-            className="mx-auto mb-3 h-10 w-10 text-gray-300"
+            className="mx-auto mb-3 h-10 w-10 text-text-tertiary"
           />
-          <h3 className="mb-1 text-sm font-semibold text-gray-900">
+          <h3 className="mb-1 text-sm font-semibold text-text">
             Keine Ergebnisse gefunden
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-tertiary">
             Versuche andere Suchbegriffe oder entferne Filter.
           </p>
         </div>

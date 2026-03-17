@@ -119,10 +119,8 @@ function KnowledgeContent() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Knowledge Explorer
-          </h1>
-          <p className="mt-1 text-gray-500">
+          <h1 className="text-3xl font-bold text-text">Knowledge Explorer</h1>
+          <p className="mt-1 text-text-tertiary">
             Entitäten, Beziehungen und Wissensgraph erkunden
           </p>
         </div>
@@ -131,15 +129,15 @@ function KnowledgeContent() {
         <div
           role="group"
           aria-label="Ansicht"
-          className="flex items-center gap-1 rounded-lg border border-gray-200 p-1"
+          className="flex items-center gap-1 rounded-lg border border-border p-1"
         >
           <button
             onClick={() => handleViewChange("list")}
             aria-pressed={viewMode === "list"}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               viewMode === "list"
-                ? "bg-gray-900 text-white"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-indigo-600 text-white"
+                : "text-text-secondary hover:text-text"
             }`}
           >
             <List aria-hidden="true" className="h-4 w-4" />
@@ -150,8 +148,8 @@ function KnowledgeContent() {
             aria-pressed={viewMode === "graph"}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               viewMode === "graph"
-                ? "bg-gray-900 text-white"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-indigo-600 text-white"
+                : "text-text-secondary hover:text-text"
             }`}
           >
             <Network aria-hidden="true" className="h-4 w-4" />
@@ -171,8 +169,8 @@ function KnowledgeContent() {
                 onClick={() => handleTypeChange(value)}
                 className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   typeFilter === value
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-surface-secondary text-text-secondary hover:bg-indigo-50"
                 }`}
               >
                 <Icon aria-hidden="true" className="h-4 w-4" />
@@ -180,7 +178,7 @@ function KnowledgeContent() {
               </button>
             ))}
             {entityData && (
-              <span className="ml-auto text-sm text-gray-500">
+              <span className="ml-auto text-sm text-text-tertiary">
                 {entityData.total} Entität{entityData.total !== 1 ? "en" : ""}
               </span>
             )}
@@ -204,25 +202,25 @@ function KnowledgeContent() {
           {entityData && entityData.entities.length === 0 && <EmptyEntities />}
 
           {entityData && entityData.entities.length > 0 && (
-            <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="overflow-hidden rounded-xl border border-border bg-surface">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-surface-secondary">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">
                       Typ
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">
                       Erwähnungen
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">
                       Zuletzt gesehen
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-border">
                   {entityData.entities.map((entity: EntityListItem) => (
                     <EntityRow key={entity.id} entity={entity} />
                   ))}
@@ -237,18 +235,18 @@ function KnowledgeContent() {
               <button
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft aria-hidden="true" className="h-4 w-4" />
                 Zurück
               </button>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-text-tertiary">
                 Seite {page} von {totalPages}
               </span>
               <button
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= totalPages}
-                className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Weiter
                 <ChevronRight aria-hidden="true" className="h-4 w-4" />
@@ -266,7 +264,7 @@ function KnowledgeContent() {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="graph-depth"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-text-secondary"
               >
                 Tiefe:
               </label>
@@ -274,7 +272,7 @@ function KnowledgeContent() {
                 id="graph-depth"
                 value={graphDepth}
                 onChange={(e) => setGraphDepth(Number(e.target.value))}
-                className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+                className="rounded-md border border-border bg-surface px-2 py-1 text-sm"
               >
                 <option value={1}>1</option>
                 <option value={2}>2</option>
@@ -287,7 +285,7 @@ function KnowledgeContent() {
                   setGraphEntityId(undefined);
                   updateUrl({ entity: "" });
                 }}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-indigo-600 hover:text-indigo-800"
               >
                 Gesamten Graph anzeigen
               </button>
@@ -308,15 +306,15 @@ function KnowledgeContent() {
           )}
 
           {graphData && graphData.nodes.length === 0 && (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+            <div className="rounded-xl border-2 border-dashed border-border p-12 text-center">
               <Network
                 aria-hidden="true"
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-text-tertiary"
               />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+              <h3 className="mt-2 text-sm font-medium text-text">
                 Keine Graph-Daten
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Es wurden noch keine Entitäten und Beziehungen extrahiert.
               </p>
             </div>
@@ -334,21 +332,21 @@ function KnowledgeContent() {
 
           {/* Show entity info below graph when entity selected */}
           {graphEntityId && graphData && (
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-medium text-text">
                     {graphData.nodes.find((n) => n.id === graphEntityId)
                       ?.name ?? "Entität"}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-tertiary">
                     Typ:{" "}
                     {graphData.nodes.find((n) => n.id === graphEntityId)?.type}
                   </p>
                 </div>
                 <Link
                   href={`/knowledge/${encodeURIComponent(graphEntityId)}`}
-                  className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800"
+                  className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
                 >
                   Details anzeigen
                 </Link>
@@ -370,18 +368,18 @@ function EntityRow({ entity }: { entity: EntityListItem }) {
   };
 
   const typeColor: Record<string, string> = {
-    Person: "bg-blue-100 text-blue-800",
+    Person: "bg-indigo-100 text-indigo-800",
     Project: "bg-green-100 text-green-800",
     Topic: "bg-amber-100 text-amber-800",
     Decision: "bg-red-100 text-red-800",
   };
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
+    <tr className="hover:bg-surface-secondary transition-colors">
       <td className="px-6 py-4">
         <Link
           href={`/knowledge/${encodeURIComponent(entity.id)}`}
-          className="font-medium text-gray-900 hover:text-blue-600"
+          className="font-medium text-text hover:text-indigo-600"
         >
           {entity.name}
         </Link>
@@ -389,16 +387,16 @@ function EntityRow({ entity }: { entity: EntityListItem }) {
       <td className="px-6 py-4">
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            typeColor[entity.type] ?? "bg-gray-100 text-gray-800"
+            typeColor[entity.type] ?? "bg-surface-secondary text-text"
           }`}
         >
           {typeLabel[entity.type] ?? entity.type}
         </span>
       </td>
-      <td className="px-6 py-4 text-right text-sm text-gray-700">
+      <td className="px-6 py-4 text-right text-sm text-text-secondary">
         {entity.mention_count}
       </td>
-      <td className="px-6 py-4 text-right text-sm text-gray-500">
+      <td className="px-6 py-4 text-right text-sm text-text-tertiary">
         {entity.last_seen
           ? new Date(entity.last_seen).toLocaleDateString("de-DE")
           : "–"}
