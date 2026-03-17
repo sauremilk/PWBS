@@ -27,10 +27,8 @@ export class PwbsSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "PWBS – Einstellungen" });
-
     // Connection section
-    containerEl.createEl("h3", { text: "Verbindung" });
+    new Setting(containerEl).setName("Verbindung").setHeading();
 
     new Setting(containerEl)
       .setName("API URL")
@@ -84,7 +82,7 @@ export class PwbsSettingTab extends PluginSettingTab {
     );
 
     // Sync section
-    containerEl.createEl("h3", { text: "Synchronisation" });
+    new Setting(containerEl).setName("Synchronisation").setHeading();
 
     new Setting(containerEl)
       .setName("Ausgeschlossene Ordner")
@@ -117,7 +115,7 @@ export class PwbsSettingTab extends PluginSettingTab {
       );
 
     // Info section
-    containerEl.createEl("h3", { text: "Über PWBS" });
+    new Setting(containerEl).setName("Info").setHeading();
     containerEl.createEl("p", {
       text: "PWBS verwandelt dein Wissen in kontextbezogene Briefings – morgens, vor Meetings oder für Projekte.",
       cls: "setting-item-description",

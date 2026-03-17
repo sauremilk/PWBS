@@ -131,7 +131,7 @@ export class BriefingView extends ItemView {
     const wrapper = container.createEl("div", { cls: "pwbs-briefing" });
 
     const meta = wrapper.createEl("div", { cls: "pwbs-meta" });
-    const date = new Date(briefing.created_at);
+    const date = new Date(briefing.generated_at);
     meta.createEl("span", {
       text: date.toLocaleDateString("de-DE", {
         weekday: "long",
@@ -141,7 +141,7 @@ export class BriefingView extends ItemView {
       cls: "pwbs-date",
     });
     meta.createEl("span", {
-      text: briefing.type.replace("_", " "),
+      text: briefing.briefing_type.replace("_", " "),
       cls: "pwbs-type",
     });
 
@@ -156,7 +156,7 @@ export class BriefingView extends ItemView {
       const list = sources.createEl("ul");
       for (const src of briefing.sources) {
         list.createEl("li", {
-          text: `${src.title} (${src.source_type})`,
+          text: `${src.doc_title} (${src.source_type})`,
         });
       }
     }

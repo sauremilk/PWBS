@@ -30,10 +30,14 @@ export class VaultSync {
 
     const result = await this.api.uploadVault(zipData);
 
-    new Notice(
-      `PWBS: ${result.documents_count} Docs synced` +
-        (result.deleted_count > 0 ? `, ${result.deleted_count} entfernt` : ""),
-    );
+    let msg = `PWBS: ${result.document_count} Docs synced`;
+    if (result.deleted_count > 0) {
+      msg += `, ${result.deleted_count} entfernt`;
+    }
+    if (result.error_count > 0) {
+      msg += ` (${result.error_count} Fehler)`;
+    }
+    new Notice(msg);
 
     return result;
   }
