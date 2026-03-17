@@ -93,7 +93,8 @@ class CircuitBreaker:
     @property
     def state(self) -> CircuitState:
         """Current state, accounting for automatic open -> half-open transition."""
-        if self._state == CircuitState.OPEN and time.monotonic() - self._opened_at >= self._recovery_timeout:
+        if self._state == CircuitState.OPEN:  # noqa: SIM102
+            if time.monotonic() - self._opened_at >= self._recovery_timeout:
                 self._state = CircuitState.HALF_OPEN
                 logger.info(
                     "Circuit '%s' transitioned to HALF_OPEN after %.0fs recovery timeout",

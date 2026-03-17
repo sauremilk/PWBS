@@ -438,14 +438,14 @@ async def share_connector(
 @router.delete(
     "/{org_id}/connectors/{conn_id}/share",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def unshare_connector(
     org_id: uuid.UUID,
     conn_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Remove org-wide sharing from a connector. Owner-only."""
     await _require_org_owner(db, org_id, user.id)
 
@@ -466,3 +466,4 @@ async def unshare_connector(
     await db.commit()
 
     logger.info("Unshared connector %s from org %s", conn_id, org_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

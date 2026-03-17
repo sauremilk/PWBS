@@ -262,7 +262,6 @@ class TestInitSentry:
         ):
             # Need to reimport to pick up mocked module
 
-
             # Directly call with mock
             import sentry_sdk
 

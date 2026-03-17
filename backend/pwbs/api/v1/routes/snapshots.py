@@ -201,17 +201,17 @@ async def get_snapshot_diff(
 @router.delete(
     "/{snapshot_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_model=None,
+    response_class=Response,
     summary="Delete a snapshot",
 )
 async def delete_snapshot(
     snapshot_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Delete a snapshot."""
     snapshot = await _get_snapshot_or_404(snapshot_id, db)
     _check_snapshot_ownership(snapshot, user.id)
     await db.delete(snapshot)
     await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

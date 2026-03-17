@@ -160,9 +160,7 @@ class AssumptionTrackerService:
 
         Returns counts by status and recently changed assumptions.
         """
-        cutoff = datetime.now(UTC).replace(
-            day=1, hour=0, minute=0, second=0, microsecond=0
-        )
+        cutoff = datetime.now(UTC).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         # Go back N months (approximate)
         for _ in range(months):
             prev = cutoff.replace(day=1) - __import__("datetime").timedelta(days=1)

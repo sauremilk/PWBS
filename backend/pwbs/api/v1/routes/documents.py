@@ -309,13 +309,12 @@ async def get_document(
 # ---------------------------------------------------------------------------
 
 
-@router.delete("/{document_id}", status_code=204)
+@router.delete("/{document_id}", status_code=204, response_class=Response)
 async def delete_document(
     document_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Delete a document with cascaded cleanup across all storage layers.
 
     1. PostgreSQL: Delete document + chunks (ON DELETE CASCADE)
@@ -347,3 +346,4 @@ async def delete_document(
             DocumentORM.user_id == user.id,
         )
     )
+    return Response(status_code=204)

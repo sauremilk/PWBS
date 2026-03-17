@@ -199,21 +199,21 @@ async def update_workflow_rule(
 @router.delete(
     "/{rule_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_model=None,
+    response_class=Response,
     summary="Delete a workflow rule",
 )
 async def delete_workflow_rule(
     rule_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Delete a workflow rule and all its execution history."""
     rule = await _get_rule_or_404(rule_id, db)
     _check_rule_ownership(rule, user.id)
 
     await db.delete(rule)
     await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get(

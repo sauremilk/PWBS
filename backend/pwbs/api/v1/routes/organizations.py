@@ -227,14 +227,17 @@ async def add_org_member(
     return MemberResponse.model_validate(member)
 
 
-@router.delete("/{org_id}/members/{member_user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{org_id}/members/{member_user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 async def remove_org_member(
     org_id: uuid.UUID,
     member_user_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Remove a member from an organization. Requires MEMBERS_REMOVE permission."""
     try:
         await require_permission(
@@ -270,6 +273,7 @@ async def remove_org_member(
         action="member_removed",
     )
     await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch("/{org_id}/members/{member_user_id}", response_model=MemberResponse)

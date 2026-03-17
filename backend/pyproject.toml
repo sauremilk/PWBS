@@ -99,6 +99,8 @@ ignore = [
 "tests/**/*.py" = ["A002", "B017", "N806", "E741", "E402", "SIM117", "SIM102", "B007", "RUF012", "E501"]
 # Connectors-Route verwendet `type` als Query-Parameter (public API)
 "pwbs/api/v1/routes/connectors.py" = ["A002"]
+# __all__ ist absichtlich nach Kategorie (nicht alphabetisch) sortiert
+"pwbs/connectors/__init__.py" = ["RUF022"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["pwbs"]

@@ -663,13 +663,12 @@ async def submit_feedback(
 # ---------------------------------------------------------------------------
 
 
-@router.delete("/{briefing_id}", status_code=204)
+@router.delete("/{briefing_id}", status_code=204, response_class=Response)
 async def delete_briefing(
     briefing_id: uuid.UUID,
-    response: Response,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> Response:
     """Delete a briefing (owner only)."""
     stmt = select(BriefingORM).where(BriefingORM.id == briefing_id)
     result = await db.execute(stmt)
@@ -689,3 +688,4 @@ async def delete_briefing(
             BriefingORM.user_id == user.id,
         )
     )
+    return Response(status_code=204)
