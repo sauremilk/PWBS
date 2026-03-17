@@ -409,7 +409,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Der 4-Schritt-Wizard (Welcome ? Connect ? Sync ? Briefing) funktioniert End-to-End im Frontend |
 | **Abh�ngigkeit**        | LAUNCH-UX-005, LAUNCH-UX-006                                                                   |
 | **Gesch�tzter Aufwand** | M                                                                                              |
-| **Status**              | Offen (Wizard-Komponenten vorhanden, Integration offen)                                        |
+| **Status**              | Fertig                                        |
 
 **Beschreibung:** Den bestehenden Onboarding-Wizard (`onboarding-wizard.tsx`) vollst�ndig integrieren: Auto-Start via `OnboardingGate`, OAuth-Flow-Anbindung, Sync-Polling, Briefing-Anzeige, Abschluss-Markierung. Wireframes: UX_ONBOARDING_SPEC �5.
 
