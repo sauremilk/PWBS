@@ -74,6 +74,16 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=None,
         server_default=None,
     )
+    onboarding_step: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        default=None,
+    )
+    onboarding_completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
 
     # Relationships
     connections: Mapped[list["Connection"]] = relationship(  # noqa: F821

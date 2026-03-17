@@ -13,6 +13,8 @@ import type {
   LlmUsageResponse,
   BriefingPreferencesResponse,
   BriefingPreferencesUpdate,
+  OnboardingStateResponse,
+  OnboardingStateUpdate,
 } from "@/types/api";
 
 export async function getSettings(): Promise<UserSettingsResponse> {
@@ -94,4 +96,14 @@ export async function updateBriefingPreferences(
     "/user/briefing-preferences",
     data,
   );
+}
+
+export async function getOnboardingState(): Promise<OnboardingStateResponse> {
+  return apiClient.get<OnboardingStateResponse>("/user/onboarding");
+}
+
+export async function updateOnboardingState(
+  data: OnboardingStateUpdate,
+): Promise<OnboardingStateResponse> {
+  return apiClient.patch<OnboardingStateResponse>("/user/onboarding", data);
 }

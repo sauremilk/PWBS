@@ -547,6 +547,16 @@ export interface UserSettingsUpdate {
   vertical_profile?: string;
 }
 
+export interface OnboardingStateResponse {
+  step: string | null;
+  completed: boolean;
+}
+
+export interface OnboardingStateUpdate {
+  step?: string;
+  completed?: boolean;
+}
+
 export interface ExportStartResponse {
   export_id: string;
   status: string;

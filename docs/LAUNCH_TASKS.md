@@ -261,7 +261,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `allow_methods` und `allow_headers` enthalten nur tats�chlich genutzte Werte |
 | **Abh�ngigkeit**        | �                                                                            |
 | **Gesch�tzter Aufwand** | XS                                                                           |
-| **Status**              | Offen                                                                        |
+| **Status**              | Fertig                                                                        |
 
 **Beschreibung:** CORS-Konfiguration in der FastAPI-App von `allow_methods=["*"]` auf die tats�chlich genutzten HTTP-Methoden und Header einschr�nken. Senkt theoretisches Attack-Surface (Finding A05-F02).
 

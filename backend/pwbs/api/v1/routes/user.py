@@ -8,13 +8,15 @@ DELETE /api/v1/user/account            -- Initiate account deletion (30-day grac
 POST   /api/v1/user/account/cancel-deletion -- Cancel pending deletion
 GET    /api/v1/user/audit-log          -- Last 100 audit log entries (no PII)
 GET    /api/v1/user/security           -- Encryption status per storage layer
+GET    /api/v1/user/onboarding         -- Current onboarding state
+PATCH  /api/v1/user/onboarding         -- Update onboarding step / mark complete
 """
 
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -911,3 +913,71 @@ async def get_llm_usage(
     ]
 
     return LlmUsageResponse(entries=entries, total=total)
+
+
+# ---------------------------------------------------------------------------
+# Onboarding state (LAUNCH-UX-005)
+# ---------------------------------------------------------------------------
+
+_VALID_ONBOARDING_STEPS = {"welcome", "connector", "sync", "briefing"}
+
+
+class OnboardingStateResponse(BaseModel):
+    """Current onboarding state."""
+
+    step: str | None = None
+    completed: bool
+
+
+class OnboardingStateUpdate(BaseModel):
+    """Update onboarding step or mark as completed."""
+
+    step: str | None = None
+    completed: bool | None = None
+
+
+@router.get("/onboarding", response_model=OnboardingStateResponse)
+async def get_onboarding_state(
+    response: Response,
+    user: User = Depends(get_current_user),
+) -> OnboardingStateResponse:
+    """Return current onboarding state."""
+    return OnboardingStateResponse(
+        step=user.onboarding_step,
+        completed=user.onboarding_completed_at is not None,
+    )
+
+
+@router.patch("/onboarding", response_model=OnboardingStateResponse)
+async def update_onboarding_state(
+    update: OnboardingStateUpdate,
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> OnboardingStateResponse:
+    """Update onboarding step or mark as completed."""
+    if update.step is not None:
+        if update.step not in _VALID_ONBOARDING_STEPS:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "INVALID_ONBOARDING_STEP",
+                    "message": (
+                        f"Invalid step: {update.step}. "
+                        f"Must be one of: {', '.join(sorted(_VALID_ONBOARDING_STEPS))}"
+                    ),
+                },
+            )
+        user.onboarding_step = update.step
+
+    if update.completed is True and user.onboarding_completed_at is None:
+        user.onboarding_completed_at = datetime.now(timezone.utc)
+        user.onboarding_step = None
+
+    await db.commit()
+    await db.refresh(user)
+
+    return OnboardingStateResponse(
+        step=user.onboarding_step,
+        completed=user.onboarding_completed_at is not None,
+    )
