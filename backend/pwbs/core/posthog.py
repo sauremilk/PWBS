@@ -64,6 +64,24 @@ def capture(
     )
 
 
+def identify(
+    user_id: str,
+    properties: dict[str, object],
+) -> None:
+    """Set user properties on PostHog (pseudonymised).
+
+    Call after login to sync user metadata like connected_sources_count.
+    No-op if PostHog is disabled.
+    """
+    if _client is None:
+        return
+
+    _client.identify(  # type: ignore[union-attr]
+        distinct_id=_pseudonymise(user_id),
+        properties=properties,
+    )
+
+
 def shutdown() -> None:
     """Flush pending events and shut down the PostHog client."""
     if _client is None:

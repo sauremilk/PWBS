@@ -561,7 +561,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei Login wird `posthog.identify()` aufgerufen und User Properties (`connected_sources_count`, `total_briefings_generated`) werden aktualisiert |
 | **Abh�ngigkeit**        | LAUNCH-ANA-001                                                                                                                                  |
 | **Gesch�tzter Aufwand** | S                                                                                                                                               |
-| **Status**              | Offen                                                                                                                                           |
+| **Status**              | Fertig                                                                                                                                           |
 
 **Beschreibung:** PostHog `identify()` bei Login implementieren. User Properties setzen und bei Konnektor- und Briefing-Events aktualisieren: `connected_sources_count`, `total_briefings_generated`, `first_briefing_at`, `account_created_at`, `plan` (= "beta"). Erm�glicht Kohortenanalyse und Retention-Tracking.
 
