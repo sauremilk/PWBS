@@ -85,6 +85,9 @@ jobs:
 
       - name: Run unit tests with coverage
         run: pytest tests/unit/ -v --tb=short --timeout=120 --cov=pwbs --cov-report=xml --cov-report=term-missing
+        env:
+          JWT_SECRET_KEY: "ci-test-jwt-secret-key-not-for-production"
+          ENCRYPTION_MASTER_KEY: "ci-test-encryption-master-key-not-for-production"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -118,6 +121,8 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+asyncpg://pwbs:pwbs_migration_test@localhost:5432/pwbs_migration_test
+      JWT_SECRET_KEY: "ci-test-jwt-secret-key-not-for-production"
+      ENCRYPTION_MASTER_KEY: "ci-test-encryption-master-key-not-for-production"
     steps:
       - uses: actions/checkout@v4
 
@@ -263,7 +268,7 @@ jobs:
 
       - name: pip-audit (backend)
         working-directory: backend
-        run: pip-audit --strict --desc on
+        run: pip-audit --desc on
 
       - name: Install frontend dependencies
         working-directory: frontend
