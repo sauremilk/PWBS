@@ -345,7 +345,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Nach Wizard-Abbruch und R�ckkehr wird der Wizard am letzten abgeschlossenen Schritt fortgesetzt |
 | **Abh�ngigkeit**        | �                                                                                               |
 | **Gesch�tzter Aufwand** | S                                                                                               |
-| **Status**              | Offen                                                                                           |
+| **Status**              | Fertig                                                                                           |
 
 **Beschreibung:** Onboarding-State im User-Profil (Backend) persistieren. `OnboardingGate` pr�ft beim Laden den gespeicherten Schritt und setzt dort fort. Verhindert Frustration bei versehentlichem Tab-Schlie�en.
 

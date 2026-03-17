@@ -417,8 +417,19 @@ function StepBriefing({ onComplete }: { onComplete: () => void }) {
 // ---------------------------------------------------------------------------
 
 export function OnboardingWizard() {
-  const { completed, complete } = useOnboarding();
-  const [step, setStep] = useState<WizardStep>("welcome");
+  const { completed, complete, lastStep, saveStep } = useOnboarding();
+
+  // Resume from last saved step or start at "welcome"
+  const initialStep: WizardStep =
+    lastStep && (["welcome", "connector", "sync", "briefing"] as string[]).includes(lastStep)
+      ? (lastStep as WizardStep)
+      : "welcome";
+  const [step, setStep] = useState<WizardStep>(initialStep);
+
+  const goTo = (next: WizardStep) => {
+    saveStep(next);
+    setStep(next);
+  };
 
   const handleComplete = () => {
     trackEvent("signup");
@@ -458,18 +469,18 @@ export function OnboardingWizard() {
 
         {/* Step Content */}
         {step === "welcome" && (
-          <StepWelcome onNext={() => setStep("connector")} />
+          <StepWelcome onNext={() => goTo("connector")} />
         )}
         {step === "connector" && (
           <StepConnector
-            onNext={() => setStep("sync")}
-            onBack={() => setStep("welcome")}
+            onNext={() => goTo("sync")}
+            onBack={() => goTo("welcome")}
           />
         )}
         {step === "sync" && (
           <StepSync
-            onNext={() => setStep("briefing")}
-            onBack={() => setStep("connector")}
+            onNext={() => goTo("briefing")}
+            onBack={() => goTo("connector")}
           />
         )}
         {step === "briefing" && (
