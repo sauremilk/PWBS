@@ -1,10 +1,13 @@
 ﻿"""Processing pipeline orchestration (TASK-122).
 
 Orchestrates the processing chain via Celery signatures:
-  Ingestion -> Chunking+Embedding -> NER/Entity Extraction
+  Ingestion -> Chunking+Embedding -> NER/Entity Extraction -> (Initial Briefing)
 
 Each step is a separate Celery task dispatched to its dedicated queue.
 The chain ensures ordering while allowing independent scaling per step.
+
+After the processing chain is dispatched, a separate initial-briefing task
+is enqueued for users who have no briefings yet (first-sync experience).
 """
 
 from __future__ import annotations
@@ -36,8 +39,9 @@ def process_documents(
       1. generate_embeddings (processing.embed queue)
       2. extract_entities (processing.extract queue)
 
-    Uses Celery chain to ensure sequential execution while allowing
-    each step to run on its dedicated worker pool.
+    After dispatching the chain, enqueues an initial-briefing check.
+    The briefing task is independent (not chained) so processing
+    failure does not block it and vice versa.
     """
     logger.info(
         "Dispatching processing pipeline: docs=%d owner_id=%s",
@@ -54,9 +58,18 @@ def process_documents(
     # Dispatch asynchronously
     processing_chain.apply_async()
 
+    # Enqueue initial briefing check (idempotent: no-op if briefings exist)
+    from pwbs.queue.tasks.briefing import generate_initial_briefing
+
+    generate_initial_briefing.delay(owner_id)
+    logger.info(
+        "Enqueued initial briefing check for owner_id=%s",
+        owner_id,
+    )
+
     return {
         "dispatched": len(document_ids),
-        "pipeline_steps": ["embedding", "extraction"],
+        "pipeline_steps": ["embedding", "extraction", "initial_briefing_check"],
         "status": "dispatched",
     }
 

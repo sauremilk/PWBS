@@ -26,6 +26,114 @@ def _run_async(coro):  # type: ignore[no-untyped-def]
 
 
 @app.task(
+    name="pwbs.queue.tasks.briefing.generate_initial_briefing",
+    bind=True,
+    max_retries=2,
+    default_retry_delay=30,
+    soft_time_limit=120,
+    queue="briefing.generate",
+    acks_late=True,
+)
+def generate_initial_briefing(self: object, owner_id: str) -> dict[str, object]:
+    """Generate a briefing for a user after their first successful sync.
+
+    Called by the processing pipeline after document ingestion.
+    Idempotent: skips generation if the user already has any briefings.
+    This ensures new users see an immediate result after connecting
+    their first data source, rather than waiting for the next morning
+    schedule.
+    """
+    start = time.monotonic()
+    try:
+        result = _run_async(_generate_initial_briefing_async(owner_id))
+        duration_ms = (time.monotonic() - start) * 1000
+        logger.info(
+            "generate_initial_briefing: owner_id=%s generated=%s duration=%.0fms",
+            owner_id,
+            result["generated"],
+            duration_ms,
+        )
+        return result
+    except Exception as exc:
+        logger.error("generate_initial_briefing failed: owner_id=%s error=%s", owner_id, exc)
+        raise self.retry(exc=exc)  # type: ignore[attr-defined]
+
+
+async def _generate_initial_briefing_async(owner_id: str) -> dict[str, object]:
+    """Check if user has any briefings; if not, generate a morning briefing.
+
+    Idempotent: if called multiple times (e.g. multiple rapid syncs), only
+    the first invocation will actually generate a briefing.
+    """
+    from uuid import UUID
+
+    from sqlalchemy import func, select
+
+    from pwbs.briefing.generator import BriefingGenerator
+    from pwbs.briefing.generator import BriefingType as GenBriefingType
+    from pwbs.briefing.persistence import BriefingPersistenceService
+    from pwbs.core.llm_gateway import LLMGateway
+    from pwbs.db.postgres import get_session_factory
+    from pwbs.models.briefing import Briefing as BriefingORM
+    from pwbs.models.user import User
+    from pwbs.prompts.registry import PromptRegistry
+    from pwbs.schemas.enums import BriefingType
+
+    owner_uuid = UUID(owner_id)
+    factory = get_session_factory()
+
+    async with factory() as db:
+        # Idempotent check: skip if user already has any briefings
+        count_result = await db.execute(
+            select(func.count())
+            .select_from(BriefingORM)
+            .where(BriefingORM.user_id == owner_uuid)
+        )
+        existing_count = count_result.scalar_one()
+
+        if existing_count > 0:
+            logger.info(
+                "User %s already has %d briefings – skipping initial generation",
+                owner_id,
+                existing_count,
+            )
+            return {"generated": False, "reason": "briefings_exist", "owner_id": owner_id}
+
+        # Verify user exists (owner_id isolation)
+        user_result = await db.execute(select(User).where(User.id == owner_uuid))
+        user = user_result.scalar_one_or_none()
+        if user is None:
+            logger.warning("generate_initial_briefing: user %s not found", owner_id)
+            return {"generated": False, "reason": "user_not_found", "owner_id": owner_id}
+
+        # Generate a morning-type briefing
+        llm = LLMGateway()
+        registry = PromptRegistry()
+        generator = BriefingGenerator(llm, registry)
+
+        llm_result = await generator.generate(
+            briefing_type=GenBriefingType.MORNING,
+            context={},
+            user_id=user.id,
+        )
+
+        # Persist with trigger context marking this as initial
+        persistence = BriefingPersistenceService(db)
+        await persistence.save(
+            user_id=user.id,
+            briefing_type=BriefingType.MORNING,
+            title="Dein erstes Briefing",
+            content=llm_result.content,
+            source_chunks=[],
+            trigger_context={"initial_sync": True, "type": "morning"},
+        )
+        await db.commit()
+
+    logger.info("Initial briefing generated for user %s", owner_id)
+    return {"generated": True, "owner_id": owner_id}
+
+
+@app.task(
     name="pwbs.queue.tasks.briefing.generate_morning_briefings",
     bind=True,
     max_retries=3,
