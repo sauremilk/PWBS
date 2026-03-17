@@ -212,6 +212,7 @@ async def login(
 )
 async def logout(
     body: LogoutRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ) -> LogoutResponse:
@@ -220,6 +221,17 @@ async def logout(
     except AuthenticationError:
         # Token already revoked or invalid -- still return success
         pass
+
+    await log_event(
+        db,
+        action=AuditAction.USER_LOGOUT,
+        user_id=current_user.id,
+        resource_type="user",
+        resource_id=current_user.id,
+        ip_address=get_client_ip(request),
+    )
+    await db.commit()
+
     return LogoutResponse()
 
 

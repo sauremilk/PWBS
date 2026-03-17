@@ -1,4 +1,4 @@
-# LAUNCH_TASKS.md � Konsolidierte Launch-Aufgaben: Closed Beta
+﻿# LAUNCH_TASKS.md � Konsolidierte Launch-Aufgaben: Closed Beta
 
 ---
 
@@ -81,7 +81,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Datenschutzerkl�rung ist unter `/datenschutz` im Frontend erreichbar und deckt alle 8 Datenverarbeitungskategorien aus LEGAL_COMPLIANCE �3 ab |
 | **Abh�ngigkeit**        | �                                                                                                                                             |
 | **Gesch�tzter Aufwand** | M                                                                                                                                             |
-| **Status**              | Fertig   |
+| **Status**              | Fertig                                                                                                                                        |
 
 **Beschreibung:** DSGVO Art. 13/14-konforme Datenschutzerkl�rung erstellen. Muss abdecken: alle 8 Datenverarbeitungskategorien (Authentifizierung, Kalender, Notion, Zoom, Obsidian, Embeddings, Briefings, KI-Verarbeitung), Drittanbieter-Datenfl�sse (Anthropic, OpenAI, AWS, Vercel), Speicherdauern, Betroffenenrechte und Beschwerderecht bei Aufsichtsbeh�rde. Empfehlung: Mit Datenschutzanwalt erstellen, Basis: Matrix aus LEGAL_COMPLIANCE �3.
 
@@ -97,7 +97,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Vollst�ndige Anbieterkennzeichnung nach DDG � 5 ist unter `/impressum` erreichbar |
 | **Abh�ngigkeit**        | �                                                                                 |
 | **Gesch�tzter Aufwand** | S                                                                                 |
-| **Status**              | Fertig   |
+| **Status**              | Fertig                                                                            |
 
 **Beschreibung:** Impressum gem�� DDG � 5 erstellen und im Frontend unter `/impressum` bereitstellen. Enth�lt: Name, Anschrift, Kontaktdaten, Registernummer (falls zutreffend), USt-IdNr., inhaltlich Verantwortlicher.
 
@@ -113,7 +113,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | AGB sind unter `/agb` erreichbar und enthalten Beta-Haftungsausschluss |
 | **Abh�ngigkeit**        | �                                                                      |
 | **Gesch�tzter Aufwand** | M                                                                      |
-| **Status**              | Fertig   |
+| **Status**              | Fertig                                                                 |
 
 **Beschreibung:** Beta-AGB erstellen mit: Leistungsbeschreibung (Closed-Beta-Umfang), Haftungsausschluss f�r Beta-Phase, Nutzungsrechte an generierten Inhalten, K�ndigungsregelung, anwendbares Recht (deutsches Recht). Empfehlung: Mit IT-Rechtsanwalt erstellen.
 
@@ -121,14 +121,14 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 
 #### LAUNCH-LEG-004: AVVs formalisieren und unterzeichnen
 
-| Feld                    | Wert                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------- |
-| **Quelle**              | LEGAL_COMPLIANCE �5+�9 Blocker B-4, RELEASE_READINESS LEG-04                    |
-| **Priorit�t**           | P0                                                                              |
-| **Kategorie**           | LEG                                                                             |
-| **Akzeptanzkriterium**  | AVVs mit AWS, Anthropic, OpenAI und Vercel sind formal abgeschlossen/akzeptiert |
-| **Abh�ngigkeit**        | �                                                                               |
-| **Gesch�tzter Aufwand** | S                                                                               |
+| Feld                    | Wert                                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Quelle**              | LEGAL_COMPLIANCE �5+�9 Blocker B-4, RELEASE_READINESS LEG-04                                              |
+| **Priorit�t**           | P0                                                                                                        |
+| **Kategorie**           | LEG                                                                                                       |
+| **Akzeptanzkriterium**  | AVVs mit AWS, Anthropic, OpenAI und Vercel sind formal abgeschlossen/akzeptiert                           |
+| **Abh�ngigkeit**        | �                                                                                                         |
+| **Gesch�tzter Aufwand** | S                                                                                                         |
 | **Status**              | Blockiert: Formale Akzeptanz der Online-DPAs bei AWS, Anthropic, OpenAI, Vercel erfordert manuelle Aktion |
 
 **Beschreibung:** AVV-Entw�rfe finalisieren: AWS-DPA online akzeptieren, Anthropic-DPA und OpenAI-DPA unterzeichnen, Vercel-DPA akzeptieren. Provider-Prozesse k�nnen bis zu 2 Wochen dauern.
@@ -145,7 +145,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Datenschutzrelevante Aktionen (Consent, Datenexport, Account-L�schung, Konnektor-Anbindung/-Trennung) werden unver�nderlich in `audit_log` protokolliert |
 | **Abh�ngigkeit**        | �                                                                                                                                                        |
 | **Gesch�tzter Aufwand** | M                                                                                                                                                        |
-| **Status**              | Offen                                                                                                                                                    |
+| **Status**              | Fertig                                                                                                                                                    |
 
 **Beschreibung:** Audit-Log-Service implementieren, der Art. 5 Abs. 2 DSGVO (Rechenschaftspflicht) erf�llt. Protokolliert: Consent-Erteilung/-Widerruf, Datenexport, Account-L�schung, Konnektor-Anbindung/-Trennung, Login/Logout. Append-only, kein UPDATE/DELETE auf `audit_log`-Tabelle. Schlie�t das hohe OWASP-Finding A09-F01 aus dem Security-Audit.
 
@@ -181,7 +181,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `pip-audit` und `npm audit` laufen in CI bei jedem PR und blockieren bei hohen CVEs  |
 | **Abh�ngigkeit**        | Referenz: TASK-013 (CI/CD-Pipeline)                                                  |
 | **Gesch�tzter Aufwand** | S                                                                                    |
-| **Status**              | Fertig |
+| **Status**              | Fertig                                                                               |
 
 **Beschreibung:** `pip-audit` (Backend) und `npm audit` (Frontend) als CI-Schritt integrieren. Hohe und kritische CVEs blockieren den Merge. Schlie�t die hohen OWASP-Findings A05-F01 und A06-F01 aus dem Security-Audit. Erg�nzend Dependabot/Renovate aktivieren (siehe LAUNCH-OPS-005).
 
@@ -197,7 +197,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Bei `PWBS_ENV=production` ohne g�ltige RSA-Keys startet die Anwendung nicht   |
 | **Abh�ngigkeit**        | �                                                                             |
 | **Gesch�tzter Aufwand** | S                                                                             |
-| **Status**              | Fertig                                                                         |
+| **Status**              | Fertig                                                                        |
 
 **Beschreibung:** Startup-Check in der FastAPI-App implementieren, der bei `PWBS_ENV=production` pr�ft, ob RSA-Keys vorhanden und g�ltig sind. Ohne Keys: Start verweigern mit klarer Fehlermeldung, um HS256-Fallback in Produktion zu verhindern (Finding A02-F01).
 
@@ -429,7 +429,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Sentry DSN ist konfiguriert, Exceptions werden mit Correlation-ID erfasst |
 | **Abh�ngigkeit**        | �                                                                         |
 | **Gesch�tzter Aufwand** | S                                                                         |
-| **Status**              | Fertig                                                                     |
+| **Status**              | Fertig                                                                    |
 
 **Beschreibung:** Sentry-Account einrichten (EU-Datenregion w�hlen), DSN in ENV-Variablen konfigurieren, Sentry-SDK in FastAPI integrieren. PII-Scrubbing aktivieren (keine E-Mails/Passw�rter in Error-Reports). Discord-Integration f�r Echtzeit-Alerts. Falls Sentry aktiviert: Sentry-AVV abschlie�en (LEGAL_COMPLIANCE W-9).
 
@@ -529,7 +529,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | PostHog ist als Docker-Compose-Service erreichbar mit EU-Datenresidenz |
 | **Abh�ngigkeit**        | �                                                                      |
 | **Gesch�tzter Aufwand** | M                                                                      |
-| **Status**              | Fertig                                                                  |
+| **Status**              | Fertig                                                                 |
 
 **Beschreibung:** PostHog Self-Hosted als Docker-Compose-Service aufsetzen (posthog + clickhouse). IP-Anonymisierung aktivieren (`anonymize_ips: true`). `posthog-python` SDK als Backend-Dependency installieren und im FastAPI-Lifespan initialisieren. Voraussetzung f�r alle Analytics-Events.
 
@@ -885,7 +885,7 @@ Alle anderen Tasks haben keine Abh�ngigkeiten und k�nnen parallel bearbeitet
 
 ## 5. Parking Lot (Open Beta / GA)
 
-Die folgenden Aufgaben sind **nicht Teil der Closed Beta** und werden erst bei �bergang zu Open Beta oder General Availability relevant. Quelle: RELEASE_READINESS �3+�4, LEGAL_COMPLIANCE �9 (W-_ und G-_), UX_ONBOARDING_SPEC �9 Minor, TRACKING_PLAN �9 Phase 3�4, SUPPORT_OPS �10 niedrigere Priorit�ten.
+Die folgenden Aufgaben sind **nicht Teil der Closed Beta** und werden erst bei �bergang zu Open Beta oder General Availability relevant. Quelle: RELEASE*READINESS �3+�4, LEGAL_COMPLIANCE �9 (W-* und G-\_), UX_ONBOARDING_SPEC �9 Minor, TRACKING_PLAN �9 Phase 3�4, SUPPORT_OPS �10 niedrigere Priorit�ten.
 
 ### Open Beta
 
