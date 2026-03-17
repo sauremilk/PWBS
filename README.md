@@ -6,6 +6,21 @@ A cognitive infrastructure that continuously ingests data from heterogeneous per
 
 ---
 
+## For Hiring Managers
+
+This codebase is a working demonstration of senior-level full-stack engineering and systems thinking. Three things to look at:
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — Full system design: multi-database architecture (PostgreSQL + Weaviate + Neo4j), multi-agent orchestration, GDPR-by-design data model, and phased service decomposition strategy.
+- **[backend/pwbs/](backend/pwbs/)** — Production-grade Python backend: async FastAPI with 7 middleware layers, JWT + OAuth2, per-user encryption, idempotent ingestion pipeline, hybrid search (RRF), and an LLM gateway abstracting Anthropic / OpenAI / Ollama.
+- **[AGENTS.md](AGENTS.md)** — Agentic system design: six specialized agents (Ingestion, Processing, Briefing, Search, Graph, Scheduler) with explicit contracts, failure modes, and graceful degradation patterns.
+
+**Scope at a glance:**
+- Multi-agent orchestration built on Celery + Redis — autonomous, safe-by-design, stateless workers
+- End-to-end platform: Python backend · Next.js frontend · Tauri desktop · React Native mobile · Chrome extension · Obsidian plugin
+- Production practices throughout: pre-commit hooks, Docker Compose + Helm, Terraform IaC, Alembic migrations, ~140-file pytest suite, Prometheus + Grafana observability
+
+---
+
 ## Features
 
 - **Universal data ingestion** — connects to Google Calendar, Notion, Obsidian, and Zoom transcripts via OAuth2 or local file watchers; cursor-based incremental sync prevents data loss or duplication (Slack, Gmail, Outlook, Google Docs: Phase 3)
