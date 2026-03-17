@@ -1,0 +1,246 @@
+# Grafana Alert Rules – P0/P1 Monitoring (LAUNCH-OPS-002).
+#
+# Metriken aus backend/pwbs/core/metrics.py:
+#   - pwbs_http_errors_total (Counter, labels: status_class, endpoint_group)
+#   - pwbs_db_pool_checked_out / pwbs_db_pool_size (Gauge)
+#   - http_request_duration_seconds (von prometheus-fastapi-instrumentator)
+#   - up{job="pwbs-api"}
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: pwbs-p0-alerts
+    folder: PWBS
+    interval: 1m
+    rules:
+      # ── P0: API Down ──────────────────────────────────────────────
+      - uid: pwbs-api-down
+        title: "P0 – API Health-Check fehlgeschlagen"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: up{job="pwbs-api"}
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: lt
+                    params: [1]
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PWBS API ist nicht erreichbar (Prometheus Target down)"
+          description: "up{job='pwbs-api'} = 0 seit >2 min. ECS-Task oder Container prüfen."
+        noDataState: Alerting
+        execErrState: Alerting
+
+      # ── P0: Error Rate > 5 % ──────────────────────────────────────
+      - uid: pwbs-error-rate-high
+        title: "P0 – HTTP Error Rate > 5 %"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: |
+                sum(rate(pwbs_http_errors_total[5m]))
+                / sum(rate(http_request_duration_seconds_count[5m]))
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.05]
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP Error Rate liegt über 5 %"
+          description: "Fehlerrate {{ $value | printf \"%.1f\" }}% in den letzten 5 min. Logs und Sentry prüfen."
+        noDataState: OK
+        execErrState: Alerting
+
+  - orgId: 1
+    name: pwbs-p1-alerts
+    folder: PWBS
+    interval: 1m
+    rules:
+      # ── P1: DB Connection Pool > 80 % ─────────────────────────────
+      - uid: pwbs-db-pool-high
+        title: "P1 – DB Connection Pool > 80 %"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: |
+                pwbs_db_pool_checked_out
+                / pwbs_db_pool_size
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.8]
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DB Connection Pool Auslastung > 80 %"
+          description: "Pool-Auslastung: {{ $value | printf \"%.0f\" }}%. Mögliche Connection-Leaks oder zu viele gleichzeitige Anfragen."
+        noDataState: OK
+        execErrState: Alerting
+
+      # ── P1: P95 Latenz > 2 s ──────────────────────────────────────
+      - uid: pwbs-latency-p95-high
+        title: "P1 – P95 Latenz > 2 s"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: |
+                histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [2]
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 API-Latenz liegt über 2 Sekunden"
+          description: "P95 = {{ $value | printf \"%.2f\" }}s. Slow Queries oder LLM-Timeout prüfen."
+        noDataState: OK
+        execErrState: Alerting
+
+      # ── P1: Disk > 85 % ───────────────────────────────────────────
+      - uid: pwbs-disk-usage-high
+        title: "P1 – Disk Usage > 85 %"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: |
+                (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"})
+                / node_filesystem_size_bytes{mountpoint="/"}
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.85]
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk-Nutzung über 85 %"
+          description: "Mountpoint / ist zu {{ $value | printf \"%.0f\" }}% belegt. Log-Rotation oder Volume-Erweiterung nötig."
+        noDataState: OK
+        execErrState: Alerting

@@ -1,0 +1,12 @@
+# Grafana Notification Policies – Route all P0/P1 alerts to Discord (LAUNCH-OPS-002).
+apiVersion: 1
+
+policies:
+  - orgId: 1
+    receiver: discord-alerts
+    group_by:
+      - alertname
+      - severity
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
