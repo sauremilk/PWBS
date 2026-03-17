@@ -229,3 +229,37 @@ jobs:
 
       - name: Run integration tests
         run: pytest tests/integration/ -v --tb=short --timeout=300 -m integration
+
+  # ── Security Audit (LAUNCH-REL-001) ──────────────────────────────────
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies + pip-audit
+        working-directory: backend
+        run: pip install -e ".[dev]" pip-audit
+
+      - name: pip-audit (backend)
+        working-directory: backend
+        run: pip-audit --strict --desc on
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: npm audit (frontend)
+        working-directory: frontend
+        run: npm audit --audit-level=high
