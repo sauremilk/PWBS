@@ -1,6 +1,10 @@
 # Personal Knowledge Operating System (PWBS)
 
 [![CI](https://github.com/sauremilk/PWBS/actions/workflows/ci.yml/badge.svg)](https://github.com/sauremilk/PWBS/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/sauremilk/PWBS/graph/badge.svg)](https://codecov.io/gh/sauremilk/PWBS)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-3776ab.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js)](https://nextjs.org)
 
 A cognitive infrastructure that continuously ingests data from heterogeneous personal sources, builds a semantic knowledge model, and delivers context-aware briefings at the right moment — so knowledge workers spend less time remembering and more time deciding.
 
@@ -21,6 +25,13 @@ This codebase is a working demonstration of senior-level full-stack engineering 
 - Multi-agent orchestration built on Celery + Redis — autonomous, safe-by-design, stateless workers
 - End-to-end platform: Python backend · Next.js frontend · Tauri desktop · React Native mobile · Chrome extension · Obsidian plugin
 - Production practices throughout: pre-commit hooks, Docker Compose + Helm, Terraform IaC, Alembic migrations, ~140-file pytest suite, Prometheus + Grafana observability
+
+| | |
+|---|---|
+| **6** agent roles (Ingestion · Processing · Briefing · Search · Graph · Scheduler) | **18** API endpoint groups |
+| **4** active OAuth2 connectors | **33** SQLAlchemy ORM models |
+| **3** databases (PostgreSQL · Weaviate · Neo4j) | **140+** pytest test files |
+| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …) | **6** platform targets |
 
 ---
 
@@ -291,12 +302,50 @@ All endpoints require a valid JWT Bearer token. The `user_id` claim is always ex
 
 PWBS follows a **modular monolith** pattern in the current MVP (Phase 2). All backend logic runs in a single FastAPI process; modules communicate via typed Python interfaces, not HTTP. This enables rapid iteration while keeping the service boundary clear enough for a future service split in Phase 3.
 
-```
-Data Sources → Ingestion Layer → Processing Pipeline → Knowledge Store
-                                                              ↓
-                                               API Layer (FastAPI)
-                                                              ↓
-                                               Next.js Web Frontend
+```mermaid
+flowchart TD
+    subgraph Sources["Data Sources"]
+        GCal[Google Calendar]
+        Notion[Notion]
+        Zoom[Zoom Transcripts]
+        Obs[Obsidian Vault]
+    end
+
+    subgraph Ingestion["Ingestion Layer (IngestionAgent)"]
+        Sync[Cursor-based Sync] --> UDF[Unified Document Format]
+    end
+
+    subgraph Processing["Processing Pipeline (ProcessingAgent)"]
+        Chunk[Semantic Chunking] --> Embed[Embedding Generation]
+        Embed --> NER[Named Entity Recognition]
+    end
+
+    subgraph Store["Knowledge Store"]
+        PG[(PostgreSQL)]
+        WV[(Weaviate)]
+        N4J[(Neo4j Graph)]
+    end
+
+    subgraph Retrieval["Retrieval (SearchAgent + GraphAgent)"]
+        Hybrid[Hybrid Search RRF]
+        Graph[Graph Traversal]
+    end
+
+    subgraph Output["Output (BriefingAgent)"]
+        LLM[LLM Gateway\nClaude / GPT-4 / Ollama]
+        Brief[Briefing + SourceRefs]
+    end
+
+    Sources --> Sync
+    UDF --> Processing
+    NER --> PG
+    NER --> N4J
+    Embed --> WV
+    Store --> Retrieval
+    Retrieval --> LLM
+    LLM --> Brief
+    Brief --> API[FastAPI]
+    API --> FE[Next.js Frontend]
 ```
 
 The processing pipeline runs in three stages:
