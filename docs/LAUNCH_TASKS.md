@@ -181,7 +181,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | `pip-audit` und `npm audit` laufen in CI bei jedem PR und blockieren bei hohen CVEs  |
 | **Abhängigkeit**        | Referenz: TASK-013 (CI/CD-Pipeline)                                                  |
 | **Geschätzter Aufwand** | S                                                                                    |
-| **Status**              | Offen                                                                                |
+| **Status**              | In Arbeit |
 
 **Beschreibung:** `pip-audit` (Backend) und `npm audit` (Frontend) als CI-Schritt integrieren. Hohe und kritische CVEs blockieren den Merge. Schließt die hohen OWASP-Findings A05-F01 und A06-F01 aus dem Security-Audit. Ergänzend Dependabot/Renovate aktivieren (siehe LAUNCH-OPS-005).
 
