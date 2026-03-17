@@ -97,7 +97,7 @@ TASK-001 bis TASK-008 sind laut CHANGELOG.md (v0.1.0) abgeschlossen und werden n
 | **Akzeptanzkriterium**  | Vollständige Anbieterkennzeichnung nach DDG § 5 ist unter `/impressum` erreichbar |
 | **Abhängigkeit**        | –                                                                                 |
 | **Geschätzter Aufwand** | S                                                                                 |
-| **Status**              | In Arbeit |
+| **Status**              | Fertig   |
 
 **Beschreibung:** Impressum gemäß DDG § 5 erstellen und im Frontend unter `/impressum` bereitstellen. Enthält: Name, Anschrift, Kontaktdaten, Registernummer (falls zutreffend), USt-IdNr., inhaltlich Verantwortlicher.
 
