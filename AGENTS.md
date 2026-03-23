@@ -1,5 +1,7 @@
 # AGENTS.md – KI-Agenten-Orchestrierung im PWBS
 
+> Detailreferenz für Agenten-Rollen, Kommunikation und Workflows. Actionable Regeln: `copilot-instructions.md`.
+
 Dieses Dokument definiert die Agenten-Architektur des PWBS und gibt KI-Assistenten (GitHub Copilot, Claude, GPT-4) klare Anweisungen, wie sie beim Entwickeln an diesem System denken und arbeiten sollen.
 
 ---
@@ -17,24 +19,6 @@ Wenn du als KI-Assistent an diesem Projekt arbeitest, halte folgende Prinzipien 
 7. **Vollständigkeit.** Keine Platzhalter-Implementierungen – Methoden sind vollständig oder mit `raise NotImplementedError("...")` explizit markiert.
 8. **MVP-Scope einhalten.** Nur aktive Module und Kern-4-Konnektoren bearbeiten. Deaktivierte Module in `_deferred/` NICHT importieren, referenzieren oder weiterentwickeln. Siehe `copilot-instructions.md` → "MVP-Fokussierung (ADR-016)".
 9. **Neo4j ist optional.** `get_neo4j_driver()` kann `None` zurückgeben. Jeder Code der Neo4j nutzt, MUSS mit `driver is None` umgehen können. `NullGraphService`-Fallbacks verwenden.
-
-### Opus 4.6 Verhaltensregeln (Anthropic Best Practices)
-
-Die folgenden Regeln sind spezifisch für Claude Opus 4.6 optimiert:
-
-10. **Implementieren statt Vorschlagen.** Bei unklarer Absicht die wahrscheinlichste nützliche Aktion ableiten und ausführen. Tools nutzen um fehlende Details zu ermitteln, nicht raten.
-
-11. **Neutrale Tool-Sprache.** Aggressive Formulierungen ("CRITICAL", "MUST", "ALWAYS") vermeiden – sie führen bei Opus 4.6 zu Overtriggering. Einfach: "Use this tool when..." genügt.
-
-12. **Parallele Tool-Calls.** Unabhängige Tool-Aufrufe parallel ausführen (z.B. 3 Dateien gleichzeitig lesen). Bei Abhängigkeiten: sequentiell, niemals mit geratenen Parametern.
-
-13. **Sichere Autonomie.** Lokale, reversible Aktionen (Edits, Tests, Commits) ohne Rückfrage. Destruktive/externe Aktionen (push --force, delete, PR-Comments) nur nach Bestätigung.
-
-14. **Halluzinations-Prävention.** Dateien LESEN bevor über ihren Inhalt gesprochen wird. Keine Spekulation über nicht-geöffneten Code.
-
-15. **Overengineering verhindern.** Nur angeforderte Änderungen. Keine zusätzlichen Features, unnötigen Abstraktionen oder "Future-Proofing". Minimale Komplexität für die aktuelle Aufgabe.
-
-Vollständige Dokumentation: `.github/instructions/opus-4.6-behavior.instructions.md`
 
 ---
 
@@ -227,18 +211,6 @@ Zeitgesteuerte Aufgabe hinzufügen?  → SchedulerAgent
 | `.github/prompts/audit-workspace.prompt.md`    | Meta-Orchestrator: Ganzheitliche Workspace-Analyse mit Roadmap                                                                             |
 | `.github/prompts/audit-domain.prompt.md`       | Domain-Audit: security, architecture, code-quality, testing, documentation, infrastructure, performance, dependencies, monitoring, prompts |
 | `.github/prompts/audit-architecture.prompt.md` | Modul-Grenzen, Datenfluss, Skalierbarkeit, Anti-Patterns                                                                                   |
-
----
-
-## Instruction-Files (Automatisch angewendete Kontextregeln)
-
-| Datei                                           | Gilt für                                          |
-| ----------------------------------------------- | ------------------------------------------------- |
-| `.github/instructions/backend.instructions.md`  | `**/*.py`                                         |
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.{ts,tsx}`                          |
-| `.github/instructions/security.instructions.md` | `**/*.{py,ts,tsx}`                                |
-| `.github/instructions/agents.instructions.md`   | `backend/pwbs/{connectors,ingestion,...}/**/*.py` |
-| `.github/instructions/audit.instructions.md`    | Audit-Workflows (gemeinsame Konventionen)         |
 
 ---
 

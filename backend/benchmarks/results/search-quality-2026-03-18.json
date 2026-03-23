@@ -1,0 +1,136 @@
+{
+  "timestamp": "2026-03-18T08:05:48.804266+00:00",
+  "dataset": "pwbs-search-v1",
+  "num_queries": 31,
+  "mode": "dry-run (mock search)",
+  "reports": {
+    "mock-low (20% hit rate)": {
+      "config_name": "mock-low (20% hit rate)",
+      "top_k": 10,
+      "num_queries": 31,
+      "metrics": {
+        "nDCG@10": {
+          "mean": 0.1836,
+          "median": 0.1202,
+          "std": 0.1954
+        },
+        "MRR": {
+          "mean": 0.2741,
+          "median": 0.2,
+          "std": 0.2315
+        },
+        "Precision@10": {
+          "mean": 0.0968,
+          "median": 0.1,
+          "std": 0.018
+        },
+        "Recall@10": {
+          "mean": 0.3871,
+          "median": 0.3333,
+          "std": 0.1646
+        },
+        "MAP": {
+          "mean": 0.1249,
+          "median": 0.0714,
+          "std": 0.1856
+        }
+      }
+    },
+    "mock-medium (40% hit rate)": {
+      "config_name": "mock-medium (40% hit rate)",
+      "top_k": 10,
+      "num_queries": 31,
+      "metrics": {
+        "nDCG@10": {
+          "mean": 0.1836,
+          "median": 0.1202,
+          "std": 0.1954
+        },
+        "MRR": {
+          "mean": 0.2741,
+          "median": 0.2,
+          "std": 0.2315
+        },
+        "Precision@10": {
+          "mean": 0.0968,
+          "median": 0.1,
+          "std": 0.018
+        },
+        "Recall@10": {
+          "mean": 0.3871,
+          "median": 0.3333,
+          "std": 0.1646
+        },
+        "MAP": {
+          "mean": 0.1249,
+          "median": 0.0714,
+          "std": 0.1856
+        }
+      }
+    },
+    "mock-high (80% hit rate)": {
+      "config_name": "mock-high (80% hit rate)",
+      "top_k": 10,
+      "num_queries": 31,
+      "metrics": {
+        "nDCG@10": {
+          "mean": 0.3316,
+          "median": 0.3517,
+          "std": 0.2204
+        },
+        "MRR": {
+          "mean": 0.3637,
+          "median": 0.3333,
+          "std": 0.287
+        },
+        "Precision@10": {
+          "mean": 0.1742,
+          "median": 0.2,
+          "std": 0.0815
+        },
+        "Recall@10": {
+          "mean": 0.6129,
+          "median": 0.6667,
+          "std": 0.1646
+        },
+        "MAP": {
+          "mean": 0.2291,
+          "median": 0.1944,
+          "std": 0.1961
+        }
+      }
+    },
+    "mock-perfect (100% hit rate)": {
+      "config_name": "mock-perfect (100% hit rate)",
+      "top_k": 10,
+      "num_queries": 31,
+      "metrics": {
+        "nDCG@10": {
+          "mean": 0.5188,
+          "median": 0.5004,
+          "std": 0.1813
+        },
+        "MRR": {
+          "mean": 0.5128,
+          "median": 0.5,
+          "std": 0.3422
+        },
+        "Precision@10": {
+          "mean": 0.2677,
+          "median": 0.3,
+          "std": 0.0945
+        },
+        "Recall@10": {
+          "mean": 0.9677,
+          "median": 1.0,
+          "std": 0.1796
+        },
+        "MAP": {
+          "mean": 0.4205,
+          "median": 0.3917,
+          "std": 0.1979
+        }
+      }
+    }
+  }
+}

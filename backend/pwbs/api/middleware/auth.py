@@ -42,8 +42,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             try:
                 payload = validate_access_token(token)
                 user_id = payload.user_id
-            except (AuthenticationError, Exception):
-                pass
+            except AuthenticationError as exc:
+                logger.debug("JWT rejected: %s", exc)
+            except Exception:
+                logger.warning("Unexpected error validating JWT", exc_info=True)
 
         request.state.user_id = user_id
         if user_id is not None:

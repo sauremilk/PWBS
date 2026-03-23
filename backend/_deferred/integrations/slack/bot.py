@@ -356,4 +356,3 @@ async def dispatch_command(
             response_type="ephemeral",
             text="Unbekannter Befehl. Verfuegbare Befehle:\n- `/pwbs search <query>` - Semantische Suche\n- `/pwbs briefing` - Aktuelles Morgenbriefing",
         )
-

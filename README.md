@@ -6,46 +6,58 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js)](https://nextjs.org)
 
-A cognitive infrastructure that continuously ingests data from heterogeneous personal sources, builds a semantic knowledge model, and delivers context-aware briefings at the right moment — so knowledge workers spend less time remembering and more time deciding.
+A cognitive infrastructure that continuously ingests data from heterogeneous personal sources, builds a semantic knowledge model, and delivers context-aware briefings at the right moment — so knowledge workers spend less time searching and more time deciding.
 
-> **Status:** Phase 2 (MVP) — Closed Beta preparation. Core features (4 connectors, hybrid search, briefing generation, GDPR-compliant pipeline) are functional. See [ROADMAP.md](ROADMAP.md) for the full phase plan.
+> **Status:** Phase 2 (MVP) — Closed Beta. Core pipeline (4 connectors → chunking → hybrid search → briefing generation) is functional end-to-end.
 
 ---
 
-## For Hiring Managers
+## What I Built and Why It's Interesting
 
-This codebase is a working demonstration of senior-level full-stack engineering and systems thinking. Three things to look at:
+This is a solo-built RAG system with four non-trivial engineering decisions that go beyond standard library glue:
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** — Full system design: multi-database architecture (PostgreSQL + Weaviate + Neo4j), multi-agent orchestration, GDPR-by-design data model, and phased service decomposition strategy.
-- **[backend/pwbs/](backend/pwbs/)** — Production-grade Python backend: async FastAPI with 7 middleware layers, JWT + OAuth2, per-user encryption, idempotent ingestion pipeline, hybrid search (RRF), and an LLM gateway abstracting Anthropic / OpenAI / Ollama.
-- **[AGENTS.md](AGENTS.md)** — Agentic system design: six specialized agents (Ingestion, Processing, Briefing, Search, Graph, Scheduler) with explicit contracts, failure modes, and graceful degradation patterns.
+### 1. Semantic Coherence Chunking ([ADR-021](docs/adr/021-semantic-coherence-chunking.md))
 
-**Scope at a glance:**
+Standard chunkers split at punctuation or fixed token counts. My `SemanticCoherenceChunker` places chunk boundaries at **actual topic shifts** by computing a cosine-similarity curve over consecutive sentence embeddings and detecting local minima below an adaptive threshold (μ − σ·stddev). This makes every chunk cover one coherent topic, which measurably improves retrieval precision.
 
-- Multi-agent orchestration built on Celery + Redis — autonomous, safe-by-design, stateless workers
-- Python backend + Next.js frontend + Obsidian plugin
-- Production practices throughout: Docker Compose + Helm, Terraform IaC, Alembic migrations, ~150-file pytest suite, Prometheus + Grafana observability
+→ [`backend/pwbs/processing/semantic_chunker.py`](backend/pwbs/processing/semantic_chunker.py) — 580 LOC, no NumPy dependency, provider-agnostic embedding callback
 
-|                                                                                    |                              |
-| ---------------------------------------------------------------------------------- | ---------------------------- |
-| **6** agent roles (Ingestion · Processing · Briefing · Search · Graph · Scheduler) | **18** API endpoint groups   |
-| **4** active connectors (Calendar · Notion · Zoom · Obsidian)                      | **33** SQLAlchemy ORM models |
-| **3** databases (PostgreSQL · Weaviate · Neo4j)                                    | **150+** pytest test files   |
-| **7** middleware layers (Auth · RateLimit · CORS · SecurityHeaders · …)            |                              |
+### 2. Hybrid Search with RRF + Sigmoid Reranker ([ADR-010](docs/adr/010-hybrid-suche.md))
+
+Vector search fails on exact proper names; keyword search can't handle synonyms. The system combines both via Reciprocal Rank Fusion (Cormack et al., SIGIR 2009), then reranks with a composite score: cosine similarity (0.6) + normalized RRF (0.3) + sigmoid-based recency decay (0.1). The recency sigmoid ensures recent documents get a boost that decays smoothly rather than cliff-dropping.
+
+→ [`backend/pwbs/search/hybrid.py`](backend/pwbs/search/hybrid.py) + [`reranker.py`](backend/pwbs/search/reranker.py) — includes an [IR evaluation framework](backend/pwbs/search/evaluation.py) (nDCG@k, MRR, MAP, Precision/Recall@k)
+
+### 3. LLM Gateway with Fallback Cascade and Circuit Breaker
+
+Three LLM providers (Claude → GPT-4 → Ollama) with automatic failover. Each provider call wraps retry with exponential backoff (factor 5), transient error classification, and per-request cost tracking. External API calls are protected by a three-state circuit breaker (CLOSED → OPEN → HALF_OPEN) to prevent cascade failures.
+
+→ [`backend/pwbs/core/llm_gateway.py`](backend/pwbs/core/llm_gateway.py) (520 LOC) + [`backend/pwbs/connectors/resilience.py`](backend/pwbs/connectors/resilience.py)
+
+### 4. Envelope Encryption with Per-User Key Derivation ([ADR-009](docs/adr/009-envelope-encryption.md))
+
+GDPR requires that deleting a user's account makes their data cryptographically unreadable — without re-encrypting everything. I implemented HKDF-based per-user key derivation (owner_id as salt), Fernet DEK/KEK envelope encryption, and Argon2id password hashing (64 MB memory cost). Deleting the wrapped DEK = effective data erasure.
+
+→ [`backend/pwbs/connectors/oauth.py`](backend/pwbs/connectors/oauth.py) + [`backend/pwbs/services/user.py`](backend/pwbs/services/user.py)
+
+---
+
+## How It Was Built
+
+This project was built solo over several months with the help of AI coding assistants (GitHub Copilot / Claude) for boilerplate generation and test scaffolding. All architectural decisions, algorithm designs, and trade-off evaluations are my own. The ADRs in [`docs/adr/`](docs/adr/) document my reasoning for each significant technical choice.
 
 ---
 
 ## Features
 
-- **Universal data ingestion** — connects to Google Calendar, Notion, Obsidian, and Zoom transcripts via OAuth2 or local file watchers; cursor-based incremental sync prevents data loss or duplication (Slack, Gmail, Outlook, Google Docs: Phase 3)
-- **Unified Document Format (UDF)** — all sources are normalized into a single canonical data model before any downstream processing
-- **Semantic processing pipeline** — chunks documents, generates embeddings, extracts named entities (people, projects, decisions, open questions), and writes to a multi-database knowledge store
-- **Hybrid search** — combines vector similarity (Weaviate) with full-text BM25 using Reciprocal Rank Fusion; owner-isolated by design
-- **Knowledge graph** — Neo4j graph connecting persons, projects, topics, decisions, and meetings with weighted, time-decaying edges
-- **Context briefings** — LLM-generated briefings (morning briefing, meeting prep, project summary, weekly review) backed exclusively by retrieved context, never raw LLM world knowledge
-- **Full explainability** — every briefing carries `sources: list[SourceRef]`; the knowledge graph is the audit layer between raw data and generated output
-- **GDPR by design** — per-user encryption keys, `expires_at` on every document, `DELETE CASCADE` on all user-owned data, no LLM training on user data
-- **Idempotent pipeline** — every ingestion and processing step is safe to re-run; watermarks are persisted after each successful batch
+- **Data ingestion** — 4 connectors (Google Calendar, Notion, Obsidian, Zoom) via OAuth2 or local file watchers; cursor-based incremental sync
+- **Processing pipeline** — semantic chunking → batch embedding → two-stage NER (rule-based + LLM) → idempotent graph writes
+- **Hybrid search** — Weaviate vector similarity + PostgreSQL BM25, fused via RRF, reranked with cosine + recency
+- **Context briefings** — LLM-generated briefings (morning, meeting-prep, project, weekly) backed exclusively by retrieved context with full source attribution
+- **Knowledge graph** — Neo4j with weighted, time-decaying edges and pattern recognition (recurring themes, unresolved questions)
+- **Graceful degradation** — Neo4j optional (3 NullService implementations), Weaviate optional, LLM cascade with cache fallback
+- **GDPR by design** — per-user encryption keys, `expires_at` on every document, `DELETE CASCADE`, no LLM training on user data
+- **Idempotent pipeline** — every step is safe to re-run; cursor watermarks persisted after each batch
 
 ---
 
@@ -183,117 +195,33 @@ class MyConnector(BaseConnector):
 ## Project Structure
 
 ```
-PWBS/
-├── backend/
-│   ├── pwbs/                   # Python package (import: pwbs.*)
-│   │   ├── api/                # FastAPI routers, middleware, dependency injection
-│   │   │   ├── v1/             # Versioned API endpoints
-│   │   │   └── middleware/     # Auth, rate limiting, request ID, audit
-│   │   ├── connectors/         # BaseConnector + source-specific implementations
-│   │   ├── ingestion/          # Ingestion pipeline, UDF normalization
-│   │   ├── processing/         # Chunking, embedding generation, NER
-│   │   ├── services/           # Business logic (briefing, search, LLM, encryption)
-│   │   ├── models/             # SQLAlchemy ORM models
-│   │   ├── schemas/            # Pydantic request/response schemas
-│   │   ├── storage/            # Repository layer: PostgreSQL, Weaviate, Neo4j
-│   │   ├── briefing/           # Briefing generation, prompt templates
-│   │   ├── search/             # Semantic, keyword, and hybrid search
-│   │   ├── graph/              # Knowledge graph operations (Neo4j)
-│   │   ├── scheduler/          # Scheduled jobs (ingestion cycles, briefings)
-│   │   ├── prompts/            # Versioned LLM prompt files
-│   │   ├── scripts/            # DB init scripts (Weaviate, Neo4j)
-│   │   └── core/               # Shared config, exceptions, base classes
-│   ├── migrations/             # Alembic database migrations
-│   ├── tests/                  # pytest test suites
-│   └── pyproject.toml          # Python 3.12+ project configuration
-├── frontend/
-│   ├── src/
-│   │   ├── app/                # Next.js App Router pages
-│   │   ├── components/         # React components (briefing, search, layout, ...)
-│   │   ├── lib/api/            # Typed API client (never raw fetch in components)
-│   │   ├── hooks/              # Custom React hooks
-│   │   ├── stores/             # Client state (Zustand)
-│   │   └── types/              # TypeScript types from OpenAPI schema
-│   ├── package.json            # Next.js, React, TypeScript, Tailwind CSS
-│   └── tsconfig.json           # Strict TypeScript configuration
-├── obsidian-plugin/            # Obsidian community plugin for vault sync
-├── infra/
-│   ├── terraform/              # Infrastructure as Code (AWS)
-│   └── docker/                 # Production Docker Compose
-├── docs/
-│   ├── adr/                    # Architecture Decision Records (21 ADRs)
-│   └── orchestration/          # Multi-agent task coordination
-├── .github/
-│   ├── copilot-instructions.md
-│   ├── instructions/           # Scoped coding instructions (backend, frontend, security)
-│   ├── prompts/                # Reusable development workflow prompts
-│   └── workflows/              # GitHub Actions CI/CD
-├── .env.example                # Environment variable template (never commit .env)
-├── ARCHITECTURE.md             # Full architecture documentation
-├── AGENTS.md                   # AI agent roles and orchestration design
-├── ROADMAP.md                  # Phase-by-phase product roadmap
-└── docker-compose.yml          # Local development services
+backend/pwbs/           # Python 3.12 package
+  api/                  # FastAPI app, v1 routes, middleware (auth, rate limit, audit)
+  connectors/           # BaseConnector + 4 source implementations
+  processing/           # Semantic chunking, embedding, NER, entity dedup
+  search/               # Hybrid search (vector + keyword + RRF), reranker, evaluation
+  briefing/             # Briefing generation with context modules
+  graph/                # Neo4j knowledge graph (optional)
+  core/                 # Config, exceptions, LLM gateway, encryption
+  models/               # SQLAlchemy ORM (33 models)
+  queue/tasks/          # Celery workers (ingestion, processing, briefing)
+frontend/src/           # Next.js 15 App Router, TypeScript strict mode
+docs/adr/               # Architecture Decision Records
 ```
 
 ---
 
 ## Configuration
 
-All secrets and environment-specific settings are loaded from `.env`. Commit `.env.example` with placeholder values; never commit `.env`.
+All secrets and settings are loaded from environment variables. Copy `.env.example` to `.env` and fill in values — never commit `.env`.
 
-| Variable               | Required | Description                                                    |
-| ---------------------- | -------- | -------------------------------------------------------------- |
-| `PWBS_ENV`             | Yes      | `development` or `production` (disables `/docs` in production) |
-| `DATABASE_URL`         | Yes      | PostgreSQL connection string                                   |
-| `WEAVIATE_URL`         | Yes      | Weaviate instance URL                                          |
-| `NEO4J_URI`            | No       | Neo4j bolt URI (optional – activate with `--profile graph`)    |
-| `NEO4J_USER`           | No       | Neo4j username                                                 |
-| `NEO4J_PASSWORD`       | No       | Neo4j password                                                 |
-| `ANTHROPIC_API_KEY`    | Yes\*    | Claude API key (\*required unless using Ollama only)           |
-| `OPENAI_API_KEY`       | No       | OpenAI API key (embeddings + GPT-4 fallback)                   |
-| `JWT_PRIVATE_KEY`      | Yes      | RS256 private key for signing access tokens                    |
-| `JWT_PUBLIC_KEY`       | Yes      | Corresponding RS256 public key                                 |
-| `ENCRYPTION_KEK`       | Yes      | Key-encryption key for wrapping per-user data encryption keys  |
-| `GOOGLE_CLIENT_ID`     | No       | OAuth2 client ID for Google connectors                         |
-| `GOOGLE_CLIENT_SECRET` | No       | OAuth2 client secret for Google connectors                     |
-| `NOTION_CLIENT_ID`     | No       | OAuth2 client ID for Notion connector                          |
-| `NOTION_CLIENT_SECRET` | No       | OAuth2 client secret for Notion connector                      |
-| `ZOOM_CLIENT_ID`       | No       | OAuth2 client ID for Zoom connector                            |
-| `ZOOM_CLIENT_SECRET`   | No       | OAuth2 client secret for Zoom connector                        |
-| `REDIS_URL`            | Yes      | Redis connection string (required for Celery task queues)      |
-
-Security defaults enforced in production (`PWBS_ENV=production`):
-
-- `/docs` and `/redoc` endpoints disabled
-- CORS restricted to explicit allowlist
-- TLS 1.3 required; HTTP connections rejected
-- Security headers (`HSTS`, `X-Content-Type-Options`, `X-Frame-Options`) active
+Required: `DATABASE_URL`, `WEAVIATE_URL`, `REDIS_URL`, `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`, `ENCRYPTION_KEK`, and at least one LLM API key (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`). Neo4j is optional (activate with `--profile graph`). See `.env.example` for the full variable list.
 
 ---
 
 ## API Documentation
 
-The FastAPI application exposes interactive API documentation at `http://localhost:8000/docs` (development only).
-
-### Endpoint groups
-
-| Prefix                                     | Description                            |
-| ------------------------------------------ | -------------------------------------- |
-| `POST /api/v1/auth/register`               | User registration                      |
-| `POST /api/v1/auth/token`                  | JWT token issuance                     |
-| `POST /api/v1/auth/refresh`                | Access token refresh                   |
-| `GET /api/v1/connectors`                   | List configured connectors             |
-| `GET /api/v1/connectors/{source}/auth-url` | Initiate OAuth2 flow                   |
-| `POST /api/v1/connectors/{id}/sync`        | Trigger manual sync                    |
-| `GET /api/v1/search`                       | Semantic / keyword / hybrid search     |
-| `GET /api/v1/briefings`                    | List generated briefings               |
-| `POST /api/v1/briefings/generate`          | Generate a new briefing on demand      |
-| `GET /api/v1/knowledge/entities`           | Query extracted entities               |
-| `GET /api/v1/knowledge/graph`              | Explore knowledge graph context        |
-| `GET /api/v1/documents`                    | List ingested documents                |
-| `DELETE /api/v1/documents/{id}`            | Delete a document and all derived data |
-
-All endpoints require a valid JWT Bearer token. The `user_id` claim is always extracted from the token — never from the request body. Every query against user data includes `WHERE owner_id = :user_id`.
+Interactive API docs (Swagger UI) are available at `http://localhost:8000/docs` in development mode. All endpoints require a JWT Bearer token; user identity is always extracted from the token, never from request bodies. Every database query filters by `owner_id`.
 
 ---
 

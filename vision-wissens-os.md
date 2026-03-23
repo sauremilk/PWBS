@@ -150,14 +150,14 @@ Das Wissens-OS ist ein intelligentes System, das:
 ### Architektur
 
 1. **Datenquellen:** Integration über APIs (Gmail, Slack, Notion), Webhooks, lokale Dateisysteme oder Browser-Extensions.
-2. **Verarbeitung:** 
+2. **Verarbeitung:**
    - Embedding-basierte semantische Suche (OpenAI, Cohere, lokal mit Sentence Transformers).
    - Graph-Datenbank (Neo4j, TigerGraph) für Entitäten und Beziehungen.
    - LLM-basierte Kontextgenerierung (Claude, GPT-4, lokale Modelle via Ollama).
-3. **Speicherung:** 
+3. **Speicherung:**
    - Verschlüsselte Cloud-Lösung (AWS, GCP mit End-to-End-Encryption).
    - On-Premise-Option für datenschutzsensible Nutzer.
-4. **Interface:** 
+4. **Interface:**
    - Web-App und Desktop-App (Electron oder Tauri).
    - Integrationen in Tools (z. B. Notion-Sidebar, Slack-Bot, Browser-Extension).
 

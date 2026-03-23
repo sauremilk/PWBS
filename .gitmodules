@@ -1,3 +1,6 @@
 [submodule "drift"]
 	path = drift
 	url = https://github.com/sauremilk/drift.git
+[submodule "contract-graph"]
+	path = contract-graph
+	url = https://github.com/sauremilk/contract-graph.git

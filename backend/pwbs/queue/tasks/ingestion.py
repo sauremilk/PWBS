@@ -11,7 +11,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -64,93 +63,29 @@ def run_connector(self: object, connection_id: str, owner_id: str) -> dict[str, 
 
 async def _run_connector_async(connection_id: str, owner_id: str) -> dict[str, object]:
     """Async implementation of single-connector sync."""
-    from pwbs.connectors.base import ConnectorConfig
-    from pwbs.connectors.registry import create_connector
     from pwbs.db.postgres import get_session_factory
-    from pwbs.models.connection import Connection
-    from pwbs.models.document import Document
-    from pwbs.schemas.enums import SourceType
+    from pwbs.ingestion.pipeline import IngestionPipeline
 
     conn_uuid = UUID(connection_id)
     owner_uuid = UUID(owner_id)
     factory = get_session_factory()
 
     async with factory() as db:
-        # Load connection with owner_id filter
-        stmt = select(Connection).where(
-            Connection.id == conn_uuid,
-            Connection.user_id == owner_uuid,
-        )
-        row = await db.execute(stmt)
-        connection = row.scalar_one_or_none()
-
-        if connection is None:
-            return {"fetched": 0, "errors": 0, "status": "connection_not_found"}
-
-        source_type = SourceType(connection.source_type)
-        config = ConnectorConfig(
-            source_type=source_type,
-            extra=connection.config or {},
-        )
-        connector = create_connector(
-            source_type=source_type,
-            owner_id=owner_uuid,
-            connection_id=conn_uuid,
-            config=config,
-        )
-
-        # Run sync (idempotent, cursor-based)
-        cursor_str = connection.watermark.isoformat() if connection.watermark else None
-        sync_result = await connector.run(cursor=cursor_str)
-
-        # Persist documents (upsert by source_id + user_id)
-        doc_ids: list[str] = []
-        for doc in sync_result.documents:
-            existing = await db.execute(
-                select(Document).where(
-                    Document.user_id == owner_uuid,
-                    Document.source_type == source_type.value,
-                    Document.source_id == doc.source_id,
-                )
-            )
-            existing_doc = existing.scalar_one_or_none()
-            if existing_doc is not None:
-                # Upsert: update content hash and processing status
-                existing_doc.content_hash = doc.raw_hash
-                existing_doc.processing_status = "pending"
-                doc_ids.append(str(existing_doc.id))
-            else:
-                new_doc = Document(
-                    user_id=owner_uuid,
-                    source_type=source_type.value,
-                    source_id=doc.source_id,
-                    title=doc.title,
-                    content_hash=doc.raw_hash,
-                    language=doc.language or "de",
-                    processing_status="pending",
-                )
-                db.add(new_doc)
-                await db.flush()
-                doc_ids.append(str(new_doc.id))
-
-        # Update watermark
-        if sync_result.new_cursor is not None:
-            connection.watermark = datetime.now(UTC)
-
-        await db.commit()
+        pipeline = IngestionPipeline(db)
+        result = await pipeline.run(conn_uuid, owner_uuid)
 
     # Dispatch processing pipeline for new/updated documents
-    if doc_ids:
+    if result.document_ids:
         from pwbs.queue.tasks.pipeline import process_documents
 
-        process_documents.delay(doc_ids, owner_id)
+        process_documents.delay(result.document_ids, owner_id)
 
     return {
-        "fetched": sync_result.success_count,
-        "errors": sync_result.error_count,
-        "has_more": sync_result.has_more,
-        "document_ids": doc_ids,
-        "status": "completed",
+        "fetched": result.fetched,
+        "errors": result.errors,
+        "has_more": result.has_more,
+        "document_ids": result.document_ids,
+        "status": result.status,
     }
 
 

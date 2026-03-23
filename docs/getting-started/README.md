@@ -38,16 +38,16 @@ Willkommen beim **Persönlichen Wissens-Betriebssystem (PWBS)**! Dieses Handbuch
 
 `
 
-           PWBS Registrierung        
-                                     
-  E-Mail:    [________________]      
-  Passwort:  [________________]      
-                                     
-      
-      Account erstellen            
-      
-                                     
-  Bereits registriert?  Anmelden    
+           PWBS Registrierung  
+
+  E-Mail:    [________________]  
+  Passwort:  [________________]  
+
+
+      Account erstellen  
+
+
+  Bereits registriert?  Anmelden  
 
 `
 
@@ -71,17 +71,17 @@ Nach dem Login siehst du das Dashboard:
 
 `
 
-  PWBS                          [Suche ]   []    
+  PWBS                          [Suche ]   []  
 
-                                                     
- Dashboard    Morgenbriefing                       
- Briefings                          
- Suche       Dein tägliches Briefing erscheint       
- Quellen     hier, sobald du eine Datenquelle        
- Profil      verbunden hast.                         
-                                                     
-              Jetzt Datenquelle verbinden           
-                                                     
+
+ Dashboard    Morgenbriefing  
+ Briefings  
+ Suche       Dein tägliches Briefing erscheint  
+ Quellen     hier, sobald du eine Datenquelle  
+ Profil      verbunden hast.  
+
+              Jetzt Datenquelle verbinden  
+
 
 `
 
@@ -107,19 +107,19 @@ PWBS bezieht sein Wissen aus deinen persönlichen Datenquellen. Im MVP stehen vi
 
 `
 
-  Datenquellen                                        
-                                                      
-  Verfügbare Quellen                                  
-              
-    Google            Notion                  
-      Calendar                                    
-   [Verbinden]         [Verbinden]                
-              
-              
-    Zoom              Obsidian                
-                                                  
-   [Verbinden]         [Konfigurieren]            
-              
+  Datenquellen  
+
+  Verfügbare Quellen  
+
+    Google            Notion  
+      Calendar  
+   [Verbinden]         [Verbinden]  
+
+
+    Zoom              Obsidian  
+
+   [Verbinden]         [Konfigurieren]  
+
 
 `
 
@@ -140,8 +140,8 @@ PWBS bezieht sein Wissen aus deinen persönlichen Datenquellen. Im MVP stehen vi
 `
 Ablauf:
   [Verbinden]  Einwilligung  Google OAuth  Callback  Initialer Sync
-                                                            
-                                                            
+
+
   Karte klicken   DSGVO-Info    Google Login   Token wird   Events werden
                   bestätigen    + Consent      gespeichert  importiert
 `
@@ -178,14 +178,14 @@ Obsidian nutzt keinen OAuth-Flow  stattdessen gibst du den lokalen Pfad zu deine
 
 `
 
-  Obsidian Vault verbinden           
-                                     
-  Vault-Pfad:                        
-  [/home/max/Documents/MeinVault ]   
-                                     
-      
-         Verbinden                 
-      
+  Obsidian Vault verbinden  
+
+  Vault-Pfad:  
+  [/home/max/Documents/MeinVault ]  
+
+
+         Verbinden  
+
 
 `
 
@@ -231,23 +231,23 @@ Nach dem Verbinden deiner ersten Datenquelle wird automatisch ein Morgenbriefing
 
 `
 
-   Morgenbriefing  15. März 2026                   
-                  
-                                                      
-   Termine heute                                    
-   09:00  Sprint Planning (Teams: Anna, Max, Lisa) 
-   14:00  1:1 mit Dr. Mueller                      
-                                                      
-   Offene Themen                                    
-   Projektbericht Q1  Deadline morgen               
-   Review-Feedback von Lisa steht aus                
-                                                      
-   Kontext                                          
-  Im letzten 1:1 mit Dr. Mueller wurde die            
-  Budget-Freigabe für Q2 besprochen. [Quelle: Zoom   
-  Transkript 08.03.2026]                              
-                                                      
-                
+   Morgenbriefing  15. März 2026  
+
+
+   Termine heute  
+   09:00  Sprint Planning (Teams: Anna, Max, Lisa)
+   14:00  1:1 mit Dr. Mueller  
+
+   Offene Themen  
+   Projektbericht Q1  Deadline morgen  
+   Review-Feedback von Lisa steht aus  
+
+   Kontext  
+  Im letzten 1:1 mit Dr. Mueller wurde die  
+  Budget-Freigabe für Q2 besprochen. [Quelle: Zoom  
+  Transkript 08.03.2026]  
+
+
   Quellen: Google Calendar (3), Notion (2), Zoom (1)  
 
 `
@@ -305,21 +305,21 @@ Die PWBS-Suche versteht die *Bedeutung* deiner Frage  nicht nur einzelne Stichw�
 `
 
    [Was hat Lisa zum Budget gesagt?        ] [Suche]
-                                                      
-  3 Ergebnisse (0.2s)                                 
-                                                      
-   Sprint Planning  Zoom Transkript                
-     08.03.2026  Relevanz: 94%                       
-     "Lisa: Das Budget für Q2 sollte um 15%           
-     erhöht werden, da wir zwei neue Tools..."        
-                                                      
-   Projektplanung Q2  Notion                       
-     10.03.2026  Relevanz: 87%                       
-     "Budget-Übersicht: Lisa hat vorgeschlagen..."    
-                                                      
-   1:1 Lisa/Max  Google Calendar                   
-     12.03.2026  Relevanz: 72%                       
-     "Agenda: Budget-Review Q2, Team-Erweiterung"     
+
+  3 Ergebnisse (0.2s)  
+
+   Sprint Planning  Zoom Transkript  
+     08.03.2026  Relevanz: 94%  
+     "Lisa: Das Budget für Q2 sollte um 15%  
+     erhöht werden, da wir zwei neue Tools..."  
+
+   Projektplanung Q2  Notion  
+     10.03.2026  Relevanz: 87%  
+     "Budget-Übersicht: Lisa hat vorgeschlagen..."  
+
+   1:1 Lisa/Max  Google Calendar  
+     12.03.2026  Relevanz: 72%  
+     "Agenda: Budget-Review Q2, Team-Erweiterung"  
 
 `
 

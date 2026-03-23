@@ -87,6 +87,9 @@ backend/openapi_current.json
 backend/_openapi_spec.json
 docs/internal/
 
+# Drift-Cache (generiert, nicht committen)
+backend/.drift-cache/
+
 # Phase-3+ Clients (lokal behalten, nicht im Repo)
 browser-extension/
 desktop-app/

@@ -1,10 +1,5 @@
----
-applyTo: "**/*"
----
-
-# Opus 4.6 Verhaltenssteuerung
-
-Diese Instruktionen implementieren Anthropic Prompting Best Practices für Claude Opus 4.6 und gelten workspace-weit.
+<!-- MOVED: Verhaltensregeln konsolidiert in .github/copilot-instructions.md (Abschnitt "Opus 4.6 Verhaltenssteuerung").
+     applyTo entfernt um Token-Last bei jeder Interaktion zu vermeiden. -->
 
 ---
 

@@ -31,18 +31,16 @@ Dieser Workspace ist für **Claude Opus 4.6** konfiguriert und optimiert. Das Mo
 
 ### Opus 4.6 Verhaltenssteuerung (Anthropic Best Practices)
 
-Diese Regeln basieren auf der offiziellen Anthropic-Dokumentation für Claude Opus 4.6 und sind in `.github/instructions/opus-4.6-behavior.instructions.md` vollständig dokumentiert.
-
-| Regel | Aktivierung |
-|-------|-------------|
-| **Implementieren statt Vorschlagen** | Standard – bei unklarer Absicht nützlichste Aktion ableiten |
-| **Neutrale Tool-Sprache** | Standard – aggressive Formulierungen ("MUST", "CRITICAL") vermeiden |
-| **Parallele Tool-Execution** | Standard – unabhängige Calls parallel, abhängige sequentiell |
-| **Sichere Autonomie** | Standard – Bestätigung bei destruktiven/externen Aktionen |
-| **Halluzinations-Prävention** | Standard – Dateien lesen bevor über sie gesprochen wird |
-| **Overengineering verhindern** | Standard – nur angeforderte Änderungen, minimale Komplexität |
-| **Subagent-Steuerung** | Bei Bedarf – Opus spawnt proaktiv, bei Overuse einschränken |
-| **Context-Window-Awareness** | Standard – nicht vorzeitig stoppen, Memory nutzen |
+| Regel                                | Aktivierung                                                         |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| **Implementieren statt Vorschlagen** | Standard – bei unklarer Absicht nützlichste Aktion ableiten         |
+| **Neutrale Tool-Sprache**            | Standard – aggressive Formulierungen ("MUST", "CRITICAL") vermeiden |
+| **Parallele Tool-Execution**         | Standard – unabhängige Calls parallel, abhängige sequentiell        |
+| **Sichere Autonomie**                | Standard – Bestätigung bei destruktiven/externen Aktionen           |
+| **Halluzinations-Prävention**        | Standard – Dateien lesen bevor über sie gesprochen wird             |
+| **Overengineering verhindern**       | Standard – nur angeforderte Änderungen, minimale Komplexität        |
+| **Subagent-Steuerung**               | Bei Bedarf – Opus spawnt proaktiv, bei Overuse einschränken         |
+| **Context-Window-Awareness**         | Standard – nicht vorzeitig stoppen, Memory nutzen                   |
 
 ---
 
@@ -75,12 +73,12 @@ Folgende Module sind **nicht Teil des MVP** und liegen in `backend/_deferred/`. 
 
 ### Aktive Konnektoren (nur Kern-4)
 
-| Aktiv (MVP)        | Deaktiviert (Phase 3)           |
-| ------------------ | ------------------------------- |
-| Google Calendar    | Gmail (TASK-123/124)            |
-| Notion             | Slack (TASK-125/126)            |
-| Zoom               | Outlook Mail (TASK-128)         |
-| Obsidian           | Google Docs (TASK-127)          |
+| Aktiv (MVP)     | Deaktiviert (Phase 3)   |
+| --------------- | ----------------------- |
+| Google Calendar | Gmail (TASK-123/124)    |
+| Notion          | Slack (TASK-125/126)    |
+| Zoom            | Outlook Mail (TASK-128) |
+| Obsidian        | Google Docs (TASK-127)  |
 
 Phase-3-Konnektoren liegen in `backend/_deferred/connectors/`. Einträge in `connectors.py` Route sind kommentiert.
 **Neue Konnektoren:** Nur implementieren wenn sie in der Kern-4-Liste stehen oder explizit beauftragt werden.
@@ -107,15 +105,11 @@ Phase-3-Konnektoren liegen in `backend/_deferred/connectors/`. Einträge in `con
 
 ## Tech-Stack
 
-| Schicht       | Technologie                                                              |
-| ------------- | ------------------------------------------------------------------------ |
-| Backend       | Python 3.12+, FastAPI, Pydantic v2                                       |
-| Datenbanken   | PostgreSQL (relational), Weaviate (Vektorsuche), Neo4j (Knowledge Graph) |
-| LLM           | Claude API (primär), GPT-4 (Fallback), Ollama (lokal/offline)            |
-| Embeddings    | Sentence Transformers (lokal), OpenAI Ada (Cloud)                        |
-| Frontend      | Next.js (App Router), React, TypeScript, Tailwind CSS                    |
-| Infrastruktur | Docker Compose (lokal), Vercel (Frontend), AWS (Backend+DBs)             |
-| Aufgabenqueue | Celery + Redis (aktiv im MVP für Ingestion, Processing, Briefings)     |
+| Schicht   | Technologie                                                                          |
+| --------- | ------------------------------------------------------------------------------------ |
+| Backend   | Python 3.12+, FastAPI, Pydantic v2 • PostgreSQL, Weaviate, Neo4j (opt.), Redis       |
+| Frontend  | Next.js (App Router), React, TypeScript, Tailwind CSS                                |
+| LLM/Queue | Claude API (primär), GPT-4 (Fallback), Ollama • Celery + Redis                       |
 
 ---
 
@@ -160,24 +154,9 @@ Phase-3-Konnektoren liegen in `backend/_deferred/connectors/`. Einträge in `con
 
 ---
 
-## Datenmodell (Unified Document Format – UDF)
+## Datenmodell (UDF)
 
-Jedes ingested Dokument wird ins UDF normalisiert:
-
-```python
-class UnifiedDocument(BaseModel):
-    id: UUID
-    owner_id: UUID
-    source: SourceType          # z.B. "google_calendar", "notion", "zoom_transcript"
-    source_id: str              # Original-ID in der Quell-App
-    content: str                # Normalisierter Textinhalt
-    metadata: dict[str, Any]    # Source-spezifische Metadaten
-    created_at: datetime
-    updated_at: datetime
-    expires_at: datetime | None  # DSGVO: Ablaufdatum
-    embedding: list[float] | None
-    entities: list[Entity] | None
-```
+Pflichtfelder: `id`, `owner_id`, `source`, `source_id`, `content`, `expires_at`. Vollständiges Schema: `pwbs/processing/models.py`.
 
 ---
 
@@ -198,8 +177,9 @@ Folgende KI-Agenten-Rollen existieren im PWBS. Beim Entwickeln neuer Features pr
 
 ## Entwicklungs-Workflow
 
-1. **Neue Konnektoren:** Basisklasse `BaseConnector` implementieren. Cursor-basierte Pagination zwingend.
-2. **Neue Briefing-Typen:** `BriefingTemplate` ableiten. Immer mit Quellenreferenzen ausstatten.
-3. **Schema-Änderungen:** Alembic-Migration erstellen. Niemals Schema direkt mutieren.
-4. **LLM-Prompts:** In `pwbs/prompts/` als separate Dateien versionieren. Prompt-Engineering mit Structured Output (JSON-Schema).
-5. **ADR:** Architekturentscheidungen in `docs/adr/` dokumentieren (Vorlage: `docs/adr/000-template.md`).
+→ Welcher Agent zuständig ist: `AGENTS.md` → Entscheidungsbaum
+→ Design-Checkliste, Testing Pyramid, Observability, Code-Review-Standards: Skill `portfolio-standards` aktivieren
+
+- **Konnektoren:** `BaseConnector` + Cursor-Pagination. **Briefings:** `BriefingTemplate` + `sources: list[SourceRef]`.
+- **Schema:** Alembic-Migration (`docs/adr/` Template), nie direkt mutieren.
+- **LLM-Prompts:** `pwbs/prompts/`, Structured Output (JSON-Schema). **ADR:** `docs/adr/000-template.md`.
